@@ -1,6 +1,8 @@
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 
 from .core import db
+from .team import Team
+from .user import User
 
 class ExpectedUserEfficiency(db.Model):
     __tablename__ = 'expected_user_efficiency'

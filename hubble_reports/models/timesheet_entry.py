@@ -2,6 +2,11 @@ from sqlalchemy import text
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 
 from .core import db
+from .user import User
+from .module import Module
+from .project import Project
+from .task import Task
+from .team import Team
 
 class TimesheetEntry(db.Model):
     __tablename__ = 'timesheet_entries'

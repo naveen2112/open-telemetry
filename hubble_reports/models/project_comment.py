@@ -1,6 +1,8 @@
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 
 from .core import db
+from .user import User
+from .project import Project
 
 class ProjectComment(db.Model):
     __tablename__ = 'project_comments'

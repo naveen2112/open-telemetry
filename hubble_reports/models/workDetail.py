@@ -1,6 +1,7 @@
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 
 from .core import db
+from .user import User
 
 class WorkDetail(db.Model):
     __tablename__ = 'work_details'

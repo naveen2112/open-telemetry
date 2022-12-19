@@ -1,6 +1,8 @@
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 
 from .core import db
+from .user import User
+from .team import Team
 
 class TeamHistory(db.Model):
     __tablename__ = 'team_histories'

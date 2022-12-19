@@ -1,4 +1,5 @@
 from .core import db
+from .role import Role
 
 class RoleUser(db.Model):
     __tablename__ = 'role_user'

@@ -1,6 +1,9 @@
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 
 from .core import db
+from .user import User
+from .client import Client
+from .currency import Currency
 
 class Project(db.Model):
     __tablename__ = 'projects'

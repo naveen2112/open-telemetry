@@ -1,6 +1,8 @@
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 
 from .core import db
+from .role import Role
+from .permission_role import PermissionRole
 
 class Permissions(db.Model):
     __tablename__ = 'permissions'

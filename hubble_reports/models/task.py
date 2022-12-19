@@ -1,6 +1,8 @@
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 
 from .core import db
+from .user import User
+from .module import Module
 
 class Task(db.Model):
     __tablename__ = 'tasks'

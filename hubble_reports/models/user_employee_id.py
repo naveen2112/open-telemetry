@@ -1,6 +1,7 @@
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 
 from .core import db
+from .user import User
 
 class UserEmployeeId(db.Model):
     __tablename__ = 'user_employee_ids'

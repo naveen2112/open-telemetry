@@ -1,6 +1,7 @@
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 
 from .core import db
+from .currency import Currency
 
 class Client(db.Model):
     __tablename__ = 'clients'

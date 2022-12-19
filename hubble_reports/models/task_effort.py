@@ -2,6 +2,9 @@ from sqlalchemy import text
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 
 from .core import db
+from .module import Module
+from .task import Task
+from .team import Team
 
 class TaskEffort(db.Model):
     __tablename__ = 'task_efforts'

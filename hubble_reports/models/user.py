@@ -1,6 +1,9 @@
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 
 from .core import db
+from .branch import Branch
+from .designation import Designation
+from .team import Team
 
 class User(db.Model):
     __tablename__ = 'users'
