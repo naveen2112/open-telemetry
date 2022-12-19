@@ -22,8 +22,6 @@ from .permission_user import PermissionUser
 from .role_user import RoleUser
 from .user import User
 from .casual_leave import CasualLeave
-from .expected_user_efficiencies import ExpectedUserEfficiencies
-from .expected_user_efficiency import ExpectedUserEfficiency
 from .family_detail import FamilyDetail
 from .holiday import Holiday
 from .leave import Leave
