@@ -1,19 +1,14 @@
-# coding: utf-8
-from sqlalchemy import BigInteger, Column, Date, String, text
 from sqlalchemy.dialects.postgresql import TIMESTAMP
-from sqlalchemy.ext.declarative import declarative_base
 
-Base = declarative_base()
-metadata = Base.metadata
+from .core import db
 
-
-class Team(Base):
+class Team(db.Model):
     __tablename__ = 'teams'
 
-    id = Column(BigInteger, primary_key=True, server_default=text("nextval('teams_id_seq'::regclass)"))
-    name = Column(String(255), nullable=False)
-    type = Column(String(255))
-    started_at = Column(Date)
-    created_at = Column(TIMESTAMP(precision=0))
-    updated_at = Column(TIMESTAMP(precision=0))
-    deleted_at = Column(TIMESTAMP(precision=0))
+    id = db.Column(db.BigInteger, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    type = db.Column(db.String(255))
+    started_at = db.Column(db.Date)
+    created_at = db.Column(TIMESTAMP(precision=0))
+    updated_at = db.Column(TIMESTAMP(precision=0))
+    deleted_at = db.Column(TIMESTAMP(precision=0))
