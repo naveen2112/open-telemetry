@@ -1,7 +1,7 @@
 {% block sidebar %}
 <div class="flex h-screen">
     <div class="bg-primary-dark nav-animation"><div class="py-5 flex items-start  justify-between flex-col h-full nav-content" >
-<div class='px-2.5'><a><img src="/static/images/png/logo.png" alt="logo" class='mb-8 w-full h-auto mx-auto'/></a></div>
+<div class='px-2.5'><a><img src="{{ url_for('static', filename='images/png/logo.png')}}" alt="logo" class='mb-8 w-full h-auto mx-auto'/></a></div>
 <div class='text-white text-sm grow overflow-auto font-medium text-center w-full' id="sidebar">
     <div class="py-3  flex-wrap rounded-bl-lg flex w-full justify-start " >
        <a href='https://hubble.mallow-tech.com/timesheet' tabindex="-1" class='flex px-2.5 justify-start items-center w-full'>
@@ -30,7 +30,7 @@
     <div class="py-3  flex-wrap rounded-bl-lg flex w-full justify-start sub-category hidden" >
        <a href='javascript:void(0)' tabindex="-1" class='flex px-2.5 justify-start items-center w-full' data-bs-toggle="collapse" data-bs-target='#efficiency' aria-expanded="false" >
           <div class="flex justify-center mr-4">
-             <img src="/static/images/svgs/productivity.svg" alt="Efficiency"/>
+             <img src="{{ url_for('static', filename='images/svgs/productivity.svg')}}" alt="Efficiency"/>
           </div>
           <div>Efficiency</div>
        </a>
@@ -42,7 +42,7 @@
     <div class="py-3  flex-wrap rounded-bl-lg flex w-full justify-start sub-category hidden" >
        <a href='javascript:void(0)' tabindex="-1" class='flex px-2.5 justify-start items-center w-full' data-bs-toggle="collapse" data-bs-target='#leaves' aria-expanded="false" >
           <div class="flex justify-center mr-4">
-             <img src="/static/images/svgs/productivity.svg" alt="Leaves"/>
+             <img src="{{ url_for('static', filename='images/svgs/productivity.svg')}}" alt="Leaves"/>
           </div>
           <div>Leaves</div>
        </a>
@@ -55,7 +55,7 @@
     <div class="py-3  flex-wrap rounded-bl-lg flex w-full justify-start sub-category hidden" >
        <a href='javascript:void(0)' tabindex="-1" class='flex px-2.5 justify-start items-center w-full' data-bs-toggle="collapse" data-bs-target='#master' aria-expanded="false">
           <div class="flex justify-center mr-4">
-             <img src="/static/images/svgs/settings.svg" alt="Master"/>
+             <img src="{{ url_for('static', filename='images/svgs/settings.svg')}}" alt="Master"/>
           </div>
           <div>Master</div>
        </a>
@@ -94,7 +94,7 @@
  </div>
  <div class='mt-2 px-3'>
     <a href="https://hubble.mallow-tech.com/profile" tabindex="-1">
-    <img src='/static/images/svgs/user-profile.svg' class='w-8 h-8 rounded-full' alt=""/>
+    <img src="{{ url_for('static', filename='images/svgs/user-profile.svg')}}" class='w-8 h-8 rounded-full' alt=""/>
     </a>
  </div>
 </div>
