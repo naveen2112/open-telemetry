@@ -51,3 +51,17 @@ class BaseConfig(object):
     SQLALCHEMY_DATABASE_URI = get_env("SQLALCHEMY_DATABASE_URI", error=True)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = get_env("SECRET_KEY")
+
+    #Azure Credentials
+    # CLIENT_ID = "Enter_the_Application_Id_here"
+    # CLIENT_SECRET = "Enter_the_Client_Secret_Here"
+    REDIRECT_PATH = "/getAToken"
+    MICROSOFT_AUTHORIZE_URL="https://login.microsoftonline.com/0bb778d4-8a1e-4eb6-a165-f8029c8a5e13/oauth2/v2.0/authorize?"
+    MICROSOFT_AUTH_TENANT=""
+    MICROSOFT_CALLBACK_URL="https://hubble.mallow-tech.com/callback"
+    MICROSOFT_CLIENT_ID="6f7d8df3-b3e3-40c5-9f85-eecc23e457c7"
+    MICROSOFT_CLIENT_SECRET="2Ts8Q~HCRV1gYghvcgbLB1Yapl-Riu0keOSyedA7"
+    MICROSOFT_GRAPH_USER_SCOPES="User.Read"
+    MICROSOFT_HOST_URL="https://login.microsoftonline.com"
+    MICROSOFT_TENANT_ID="0bb778d4-8a1e-4eb6-a165-f8029c8a5e13"
+    MICROSOFT_TOKEN_URL="https://login.microsoftonline.com/0bb778d4-8a1e-4eb6-a165-f8029c8a5e13/oauth2/v2.0/token"
