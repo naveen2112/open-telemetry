@@ -10,7 +10,7 @@ class TaskEffort(db.Model):
     __tablename__ = 'task_efforts'
 
     id = db.Column(db.BigInteger, primary_key=True)
-    efforts = db.Column(db.Float(53), nullable=False, server_default=text("'0'::double precision"))
+    efforts = db.Column(db.Float(53), nullable=False)
     learning = db.Column(db.Float(53))
     assumption = db.Column(db.Text)
     task_id = db.Column(db.ForeignKey('tasks.id', ondelete='SET NULL', onupdate='CASCADE'))
