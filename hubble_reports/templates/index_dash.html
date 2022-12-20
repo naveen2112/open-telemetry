@@ -1,0 +1,16 @@
+{% extends "layouts/base.html" %}
+
+{% block graph_plot_area %}
+
+{{ "{%app_entry%}" }}
+<div id="react-entry-point">
+    <div class="_dash-loading">
+        Loading...
+    </div>
+</div>
+
+{{ "{%config%}" }}
+{{ "{%scripts%}" }}
+{{ "{%renderer%}" }}
+
+{% endblock %}
