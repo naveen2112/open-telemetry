@@ -4,7 +4,7 @@ from .core import db
 from .role import Role
 from .permission_role import PermissionRole
 
-class Permissions(db.Model):
+class Permission(db.Model):
     __tablename__ = 'permissions'
 
     id = db.Column(db.BigInteger, primary_key=True)

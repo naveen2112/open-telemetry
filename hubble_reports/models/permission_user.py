@@ -1,5 +1,5 @@
 from .core import db
-from .permissions import Permissions
+from .permission import Permissions
 
 class PermissionUser(db.Model):
     __tablename__ = 'permission_user'

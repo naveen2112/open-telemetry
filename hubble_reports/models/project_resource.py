@@ -4,7 +4,7 @@ from .core import db
 from .user import User
 from .project import Project
 
-class ProjectResources(db.Model):
+class ProjectResource(db.Model):
     __tablename__ = 'project_resources'
 
     id = db.Column(db.BigInteger, primary_key=True)

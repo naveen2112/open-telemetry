@@ -2,7 +2,7 @@ from sqlalchemy.dialects.postgresql import TIMESTAMP
 
 from .core import db
 
-class PasswordResets(db.Model):
+class PasswordReset(db.Model):
     __tablename__ = 'password_resets'
 
     email = db.Column(db.String(255), nullable=False, index=True, primary_key=True)

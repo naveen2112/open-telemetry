@@ -8,8 +8,8 @@ from .designation import Designation
 from .failed_job import FailedJob
 from .job import Job
 from .migration import Migration
-from .password_resets import PasswordResets
-from .permissions import Permissions
+from .password_reset import PasswordReset
+from .permission import Permission
 from .permission_role import PermissionRole
 from .personal_access_token import PersonalAccessToken
 from .role import Role
@@ -31,11 +31,11 @@ from .user_contact_detail import UserContactDetail
 from .user_detail import UserDetail
 from .user_employee_id import UserEmployeeId
 from .user_reporting_person import UserReportingPerson
-from .workDetail import WorkDetail
+from .work_detail import WorkDetail
 from .module import Module
 from .project_comment import ProjectComment
-from .project_resource import ProjectResources
-from .project_users import ProjectUsers
+from .project_resource import ProjectResource
+from .project_user import ProjectUser
 from .task import Task
 from .task_effort import TaskEffort
 from .timesheet_entry import TimesheetEntry
