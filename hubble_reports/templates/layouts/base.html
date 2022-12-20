@@ -106,14 +106,6 @@
         }
  
         $(function () {
-            if ($('table.dataTable').length > 0) {
-                $(this).on('init.dt', hideLoader)
-                    .on('preXhr.dt', showLoader)
-                    .on('xhr.dt', hideLoader)
-            } else {
-                hideLoader()
-            }
-
             hideLoader()
             $('.sub-category .sidebar-active').closest('.sub-category').addClass('sidebar-active')
         })
