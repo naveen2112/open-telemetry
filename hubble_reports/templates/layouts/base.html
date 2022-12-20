@@ -104,15 +104,6 @@
                 statusFilter: false
             };
         }
-
-        if (!location.pathname.includes('timesheet')) {
-            localStorage.removeItem('timesheetFilterUser');
-            localStorage.removeItem('timesheetFilterProject');
-            localStorage.removeItem('timesheetView');
-            localStorage.removeItem('timesheetStartDate');
-            localStorage.removeItem('timesheetEndDate');
-        }
-
  
         $(function () {
             if ($('table.dataTable').length > 0) {
