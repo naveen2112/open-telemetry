@@ -104,42 +104,6 @@
                 statusFilter: false
             };
         }
-        function descriptionUrlChanges() {
-            $(".description-data").each(function () {
-                let $words = $(this).text().split(' ');
-                for (let i in $words) {
-                    if (($words[i].toLowerCase().indexOf('http://') === 0) || (($words[i].toLowerCase().indexOf('https://') === 0))) {
-                        $words[i] = '<a class="text-blue-500 underline" tabindex="-1" href="' + $words[i] + '" target="_blank" >' + $words[i] + '</a>';
-                    }
-                    else if (($words[i].includes('http://') || $words[i].includes('https://')) && ($words[i].includes('\n'))) {
-                        let $subwords = $words[i].split('\n');
-                        console.log($subwords)
-                        for (let j in $subwords) {
-                            if (($subwords[j].indexOf('http://') === 0) || (($subwords[j].indexOf('https://') === 0))) {
-                                $subwords[j] = '\n<a class="text-blue-500 underline" tabindex="-1" href="' + $subwords[j] + '" target="_blank" >' + $subwords[j] + '</a>';
-                            }
-                            else {
-                                if (j != 0) {
-                                    $subwords[j] = '\n' + $subwords[j];
-                                }
-                            }
-                        }
-                        $words[i] = $subwords.join(' ')
-                    }
-                    else {
-
-                    }
-                }
-                $(this).html($words.join(' '));
-            });
-        }
-
-        $(document).ready(function () {
-            descriptionUrlChanges();
-        });
-        $(document).on('load', function () {
-            descriptionUrlChanges();
-        });
 
         if (!location.pathname.includes('timesheet')) {
             localStorage.removeItem('timesheetFilterUser');
