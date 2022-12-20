@@ -17,8 +17,8 @@ class WorkDetail(db.Model):
     thursday = db.Column(db.Boolean, nullable=False, server_default="false")
     friday = db.Column(db.Boolean, nullable=False, server_default="false")
     saturday = db.Column(db.Boolean, nullable=False, server_default="false")
-    deleted_at = db.Column(TIMESTAMP(precision=0))
-    created_at = db.Column(TIMESTAMP(precision=0))
-    updated_at = db.Column(TIMESTAMP(precision=0))
+    deleted_at = db.Column(TIMESTAMP())
+    created_at = db.Column(TIMESTAMP())
+    updated_at = db.Column(TIMESTAMP())
 
     user = db.relationship('User')

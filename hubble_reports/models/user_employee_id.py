@@ -10,7 +10,7 @@ class UserEmployeeId(db.Model):
     unique_id = db.Column(db.String(255), nullable=False)
     user_id = db.Column(db.ForeignKey('users.id', ondelete='CASCADE', onupdate='CASCADE'))
     type = db.Column(db.String(255), nullable=False)
-    created_at = db.Column(TIMESTAMP(precision=0))
-    updated_at = db.Column(TIMESTAMP(precision=0))
+    created_at = db.Column(TIMESTAMP())
+    updated_at = db.Column(TIMESTAMP())
 
     user = db.relationship('User')

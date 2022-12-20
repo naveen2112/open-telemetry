@@ -14,9 +14,9 @@ class Leave(db.Model):
     days = db.Column(db.Numeric(8, 2), nullable=False)
     month_year = db.Column(db.String(255), nullable=False)
     updated_by = db.Column(db.ForeignKey('users.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
-    created_at = db.Column(TIMESTAMP(precision=0))
-    updated_at = db.Column(TIMESTAMP(precision=0))
-    deleted_at = db.Column(TIMESTAMP(precision=0))
+    created_at = db.Column(TIMESTAMP())
+    updated_at = db.Column(TIMESTAMP())
+    deleted_at = db.Column(TIMESTAMP())
 
     user = db.relationship('User', primaryjoin='Leave.updated_by == User.id')
     user1 = db.relationship('User', primaryjoin='Leave.user_id == User.id')

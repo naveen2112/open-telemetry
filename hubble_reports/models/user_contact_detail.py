@@ -23,9 +23,9 @@ class UserContactDetail(db.Model):
     contact_person = db.Column(db.String(255))
     contact_person_phone = db.Column(db.String(255))
     contact_person_alternate_phone = db.Column(db.String(255))
-    created_at = db.Column(TIMESTAMP(precision=0))
-    updated_at = db.Column(TIMESTAMP(precision=0))
-    deleted_at = db.Column(TIMESTAMP(precision=0))
+    created_at = db.Column(TIMESTAMP())
+    updated_at = db.Column(TIMESTAMP())
+    deleted_at = db.Column(TIMESTAMP())
     contact_person_name = db.Column(db.String(255))
 
     user = db.relationship('User', uselist=False)

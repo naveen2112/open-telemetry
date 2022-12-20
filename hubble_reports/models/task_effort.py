@@ -17,9 +17,9 @@ class TaskEffort(db.Model):
     module_id = db.Column(db.ForeignKey('modules.id', ondelete='SET NULL', onupdate='CASCADE'))
     team_id = db.Column(db.ForeignKey('teams.id', ondelete='SET NULL', onupdate='CASCADE'))
     created_by = db.Column(db.BigInteger)
-    created_at = db.Column(TIMESTAMP(precision=0))
-    updated_at = db.Column(TIMESTAMP(precision=0))
-    deleted_at = db.Column(TIMESTAMP(precision=0))
+    created_at = db.Column(TIMESTAMP())
+    updated_at = db.Column(TIMESTAMP())
+    deleted_at = db.Column(TIMESTAMP())
 
     module = db.relationship('Module')
     task = db.relationship('Task')

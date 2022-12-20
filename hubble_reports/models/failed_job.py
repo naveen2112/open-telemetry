@@ -11,4 +11,4 @@ class FailedJob(db.Model):
     queue = db.Column(db.Text, nullable=False)
     payload = db.Column(db.Text, nullable=False)
     exception = db.Column(db.Text, nullable=False)
-    failed_at = db.Column(TIMESTAMP(precision=0), nullable=False, server_default="CURRENT_TIMESTAMP")
+    failed_at = db.Column(TIMESTAMP(), nullable=False, server_default="CURRENT_TIMESTAMP")

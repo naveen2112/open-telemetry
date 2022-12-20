@@ -12,8 +12,8 @@ class FamilyDetail(db.Model):
     anniversary_date = db.Column(db.Date)
     spouse_name = db.Column(db.String(255))
     kids = db.Column(db.JSON)
-    deleted_at = db.Column(TIMESTAMP(precision=0))
-    created_at = db.Column(TIMESTAMP(precision=0))
-    updated_at = db.Column(TIMESTAMP(precision=0))
+    deleted_at = db.Column(TIMESTAMP())
+    created_at = db.Column(TIMESTAMP())
+    updated_at = db.Column(TIMESTAMP())
 
     user = db.relationship('User')
