@@ -28,6 +28,7 @@
 
 <body class="min-h-screen bg-gray-50">
 
+    <div class="flex h-screen">
     {% include '/layouts/sidebar.html' %}
 
 
@@ -43,7 +44,6 @@
                 </div>
 
             </div>
-
         </div>
         <div class="overflow-auto grow bg-light-violet content-page">
             <div class="px-5 h-full">
@@ -56,11 +56,8 @@
                 {% endblock %}
             </div>
         </div>
-
-
     </div>
 
-    </div>
 
     <!-- Loader -->
     <div class="page-loader">
@@ -83,8 +80,6 @@
     <!-- Date range picker -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-    <!-- DataTables -->
-    <script src="https://cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js"></script>
     <!-- jQuery Mask Plugins -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.js"></script>
     <script type="text/javascript"
@@ -118,8 +113,6 @@
 
 
     <script>
-
-
         function descriptionUrlChanges() {
             $(".description-data").each(function () {
                 let $words = $(this).text().split(' ');
@@ -177,6 +170,8 @@
             $('.sub-category .sidebar-active').closest('.sub-category').addClass('sidebar-active')
         })
     </script>
+</div>
+
 </body>
 
 </html>
