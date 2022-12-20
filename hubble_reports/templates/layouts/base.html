@@ -93,26 +93,17 @@
         let hideLoader = () => {
             $('.page-loader').hide();
         }
-    </script>
-
-
-
-    <script>
+ 
         $(function () {
             $(".sub-category a").accordion();
             document.querySelector('.nav-animation').addEventListener('mouseleave', (event) => { $(".sub-category a").accordion('hide'); });
         })
-    </script>
-    <script>
+ 
         function userHeaderDetails() {
             return {
                 statusFilter: false
             };
         }
-    </script>
-
-
-    <script>
         function descriptionUrlChanges() {
             $(".description-data").each(function () {
                 let $words = $(this).text().split(' ');
@@ -158,6 +149,7 @@
             localStorage.removeItem('timesheetEndDate');
         }
 
+ 
         $(function () {
             if ($('table.dataTable').length > 0) {
                 $(this).on('init.dt', hideLoader)
@@ -167,6 +159,7 @@
                 hideLoader()
             }
 
+            hideLoader()
             $('.sub-category .sidebar-active').closest('.sub-category').addClass('sidebar-active')
         })
     </script>
