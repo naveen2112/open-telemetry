@@ -1,1 +1,1 @@
-from ..views import auth, home
+from ..views import auth, home, login
