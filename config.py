@@ -55,13 +55,25 @@ class BaseConfig(object):
     #Azure Credentials
     # CLIENT_ID = "Enter_the_Application_Id_here"
     # CLIENT_SECRET = "Enter_the_Client_Secret_Here"
-    REDIRECT_PATH = "/getAToken"
+    REDIRECT_PATH = "/hubble-sso-callback"
     MICROSOFT_AUTHORIZE_URL="https://login.microsoftonline.com/0bb778d4-8a1e-4eb6-a165-f8029c8a5e13/oauth2/v2.0/authorize?"
     MICROSOFT_AUTH_TENANT=""
     MICROSOFT_CALLBACK_URL="https://hubble.mallow-tech.com/callback"
     MICROSOFT_CLIENT_ID="6f7d8df3-b3e3-40c5-9f85-eecc23e457c7"
     MICROSOFT_CLIENT_SECRET="2Ts8Q~HCRV1gYghvcgbLB1Yapl-Riu0keOSyedA7"
-    MICROSOFT_GRAPH_USER_SCOPES="User.Read"
+    MICROSOFT_GRAPH_USER_SCOPES=""
     MICROSOFT_HOST_URL="https://login.microsoftonline.com"
     MICROSOFT_TENANT_ID="0bb778d4-8a1e-4eb6-a165-f8029c8a5e13"
     MICROSOFT_TOKEN_URL="https://login.microsoftonline.com/0bb778d4-8a1e-4eb6-a165-f8029c8a5e13/oauth2/v2.0/token"
+
+    AUTHORITY_SIGN_ON_SIGN_OUT = "https://login.microsoftonline.com/e98990b4-d1b9-40ab-80e9-3e80ad5b9145"
+    CLIENT_ID = "c8633ae4-31a3-40cf-9f13-7f8b911d3ea4"
+    CLIENT_SECRET = "0b55d5ad-a0cd-49b6-b731-8511b13ec29d"
+    # b2c_tenant = "Tenant name here"
+    # signupsignin_user_flow = "B2C_1_signupsignin1"
+    # editprofile_user_flow = "B2C_1_profileediting1"
+
+    # authority_template = "https://{tenant}.b2clogin.com/{tenant}.onmicrosoft.com/{user_flow}"
+
+    # AUTHORITY = authority_template.format(
+    # tenant=b2c_tenant, user_flow=signupsignin_user_flow)
