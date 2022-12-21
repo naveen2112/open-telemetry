@@ -23,6 +23,6 @@ class ProjectResource(db.Model):
     deleted_at = db.Column(TIMESTAMP())
 
     project = db.relationship('Project')
-    reporting_person = db.relationship('User', primaryjoin='ProjectResources.reporting_person_id == User.id')
-    user = db.relationship('User', primaryjoin='ProjectResources.user_id == User.id')
+    reporting_person = db.relationship('User', primaryjoin='ProjectResource.reporting_person_id == User.id')
+    user = db.relationship('User', primaryjoin='ProjectResource.user_id == User.id')
 

@@ -1,5 +1,5 @@
 from .core import db
-from .permission import Permissions
+from .permission import Permission
 
 class PermissionUser(db.Model):
     __tablename__ = 'permission_user'
@@ -8,4 +8,4 @@ class PermissionUser(db.Model):
     user_id = db.Column(db.BigInteger, primary_key=True, nullable=False)
     user_type = db.Column(db.String(255), primary_key=True, nullable=False)
 
-    permission = db.relationship('Permissions')
+    permission = db.relationship('Permission')
