@@ -15,84 +15,8 @@
                <div class="flex justify-center mr-4">
                   <img src="https://hubble.mallow-tech.com/assets/svgs/time-sheet.svg" alt="timesheet" />
                </div>
-               <div>Timesheet</div>
+               <div>Report</div>
             </a>
-         </div>
-         <div class="py-3  flex-wrap rounded-bl-lg flex w-full justify-start sidebar-active">
-            <a href='https://hubble.mallow-tech.com/projects' tabindex="-1"
-               class='flex px-2.5 justify-start items-center w-full'>
-               <div class="flex justify-center mr-4">
-                  <img src="https://hubble.mallow-tech.com/assets/svgs/project.svg" alt="Projects" />
-               </div>
-               <div>Projects</div>
-            </a>
-         </div>
-         <div class="py-3  flex-wrap rounded-bl-lg flex w-full justify-start  hidden">
-            <a href='https://hubble.mallow-tech.com/users' tabindex="-1"
-               class='flex px-2.5 justify-start items-center w-full '>
-               <div class="flex justify-center mr-4">
-                  <img src="https://hubble.mallow-tech.com/assets/svgs/user-management.svg" alt="Users" />
-               </div>
-               <div>Users</div>
-            </a>
-         </div>
-         <div class="py-3  flex-wrap rounded-bl-lg flex w-full justify-start sub-category hidden">
-            <a href='javascript:void(0)' tabindex="-1" class='flex px-2.5 justify-start items-center w-full'
-               data-bs-toggle="collapse" data-bs-target='#efficiency' aria-expanded="false">
-               <div class="flex justify-center mr-4">
-                  <img src="{{ url_for('static', filename='images/svgs/productivity.svg')}}" alt="Efficiency" />
-               </div>
-               <div>Efficiency</div>
-            </a>
-            <ul class='text-left mt-3' id='efficiency'>
-               <li class='py-3  hidden'><a href='https://hubble.mallow-tech.com/efficiency/list'>Employees</a></li>
-               <li class='py-3  hidden'><a href='https://hubble.mallow-tech.com/efficiency/report'>Report</a></li>
-            </ul>
-         </div>
-         <div class="py-3  flex-wrap rounded-bl-lg flex w-full justify-start sub-category hidden">
-            <a href='javascript:void(0)' tabindex="-1" class='flex px-2.5 justify-start items-center w-full'
-               data-bs-toggle="collapse" data-bs-target='#leaves' aria-expanded="false">
-               <div class="flex justify-center mr-4">
-                  <img src="{{ url_for('static', filename='images/svgs/productivity.svg')}}" alt="Leaves" />
-               </div>
-               <div>Leaves</div>
-            </a>
-            <ul class='text-left mt-3' id='leaves'>
-               <li class='py-3  hidden'><a href='https://hubble.mallow-tech.com/leaves'>Leaves</a></li>
-               <li class='py-3 '><a href='https://hubble.mallow-tech.com/casual_leaves'>Casual Leaves</a></li>
-               <li class='py-3 '><a href='https://hubble.mallow-tech.com/holidays'>Holidays</a></li>
-            </ul>
-         </div>
-         <div class="py-3  flex-wrap rounded-bl-lg flex w-full justify-start sub-category hidden">
-            <a href='javascript:void(0)' tabindex="-1" class='flex px-2.5 justify-start items-center w-full'
-               data-bs-toggle="collapse" data-bs-target='#master' aria-expanded="false">
-               <div class="flex justify-center mr-4">
-                  <img src="{{ url_for('static', filename='images/svgs/settings.svg')}}" alt="Master" />
-               </div>
-               <div>Master</div>
-            </a>
-            <ul class='text-left mt-3' id='master'>
-               <li class='py-3   hidden'><a href='https://hubble.mallow-tech.com/teams'>Teams</a></li>
-               <li class='py-3  hidden'><a href='https://hubble.mallow-tech.com/designations'>Designations</a></li>
-               <li class='py-3  hidden'><a href='https://hubble.mallow-tech.com/clients'>Clients</a></li>
-               <li class='py-3  hidden'><a href='https://hubble.mallow-tech.com/currencies'>Currencies</a></li>
-               <li class='py-3  hidden'><a href='https://hubble.mallow-tech.com/branches'>Branches</a></li>
-               <li class='py-3  hidden'><a href='https://hubble.mallow-tech.com/roles'>Roles</a></li>
-            </ul>
-         </div>
-         <div class="py-3  flex-wrap rounded-bl-lg flex w-full justify-start sub-category hidden">
-            <a href='javascript:void(0)' tabindex="-1" class='flex px-2.5 justify-start items-center w-full'
-               data-bs-toggle="collapse" data-bs-target='#developer' aria-expanded="false">
-               <div class="flex justify-center mr-4">
-                  <img src="https://hubble.mallow-tech.com/assets/svgs/user-management.svg" alt="Leaves" />
-               </div>
-               <div>Developer</div>
-            </a>
-            <ul class='text-left mt-3' id='developer'>
-               <li class='py-3  hidden'><a href='https://hubble.mallow-tech.com/activity'>Activity</a></li>
-               <li class='py-3   hidden'><a href='https://hubble.mallow-tech.com/login-history'>Login History</a>
-               </li>
-            </ul>
          </div>
          <div class="py-3 px-2.5 rounded-bl-lg flex justify-start">
             <form action="https://hubble.mallow-tech.com/logout" method="post"
@@ -111,10 +35,12 @@
          </div>
       </div>
       <div class='mt-2 px-3'>
+         <h1 style="color: lightgreen;">{{ user.name }}</h1>
          <a href="https://hubble.mallow-tech.com/profile" tabindex="-1">
-            <img src='{{ url_for(' static', filename='images/svgs/user-profile.svg' )}}' class='w-8 h-8 rounded-full'
+            <img src="{{ url_for('static', filename='images/svgs/user-profile.svg' )}}" class='w-8 h-8 rounded-full'
                alt="" />
          </a>
+
       </div>
    </div>
 </div>
