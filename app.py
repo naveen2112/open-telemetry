@@ -3,10 +3,12 @@ from dotenv import load_dotenv
 from config import BaseConfig
 from hubble_reports.models import db
 from hubble_reports.hubble_reports import reports
+from flask_session import Session
 
 app = Flask(__name__)
 load_dotenv()
 app.config.from_object(BaseConfig)
+Session(app)
 db.init_app(app)
 
 
