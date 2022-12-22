@@ -16,4 +16,4 @@ def logout():
         logger.info(f"\n\n\n=============>>>Session Cleared\n\n")
     return redirect(  # Also logout from your tenant's web session
         BaseConfig.AUTHORITY_SIGN_ON_SIGN_OUT + "/oauth2/v2.0/logout" +
-        "?post_logout_redirect_uri=" + url_for("index", _external=True))
+        "?post_logout_redirect_uri=" + url_for("reports.index", _external=True, _scheme='https'))
