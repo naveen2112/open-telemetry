@@ -68,7 +68,7 @@ class BaseConfig(object):
 
     AUTHORITY_SIGN_ON_SIGN_OUT = "https://login.microsoftonline.com/e98990b4-d1b9-40ab-80e9-3e80ad5b9145"
     CLIENT_ID = "c8633ae4-31a3-40cf-9f13-7f8b911d3ea4"
-    CLIENT_SECRET = "0b55d5ad-a0cd-49b6-b731-8511b13ec29d"
+    CLIENT_SECRET = "9ZS8Q~GKsyRpN.P3IJuT4xjvLuZAFvUtejSOPbRE"
     # b2c_tenant = "Tenant name here"
     # signupsignin_user_flow = "B2C_1_signupsignin1"
     # editprofile_user_flow = "B2C_1_profileediting1"
