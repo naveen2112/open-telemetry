@@ -8,7 +8,7 @@
     <!-- CSRF Token -->
     {{ "{% csrf_token %}" }}
 
-    <title>Project List | Hubble</title>
+    <title>{{ "report_title" }}</title>
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
@@ -29,88 +29,86 @@
 <body class="min-h-screen bg-gray-50">
 
     <div class="flex h-screen">
-    {% include '/layouts/sidebar.html' %}
+        {% include '/layouts/sidebar.html' %}
 
 
-    <div class="overflow-hidden max-h-screen flex main-screen grow flex-col">
-        <div class="header bg-white">
-            <div class="px-5 pt-9 bg-mild-violet pb-7" x-data="userHeaderDetails()">
-                <div class="flex justify-between mb-7 items-center">
-                    <div>
-                        <div class="text-dark-black text-lg mb-1 leading-none">Project List</div>
-                        <h1>Header</h1>
-                        <div class="text-dark-black-50 text-sm">List of Projects</div>
+        <div class="overflow-hidden max-h-screen flex main-screen grow flex-col">
+            <div class="header bg-white">
+                <div class="px-5 pt-9 bg-mild-violet pb-7" x-data="userHeaderDetails()">
+                    <div class="flex justify-between mb-7 items-center">
+                        <div>
+                            <div class="text-dark-black text-lg mb-1 leading-none">{{ "header" }}</div>
+                            <div class="text-dark-black-50 text-sm">{{ "sub_head" }}</div>
+                        </div>
                     </div>
+
                 </div>
+            </div>
+            <div class="overflow-auto grow bg-light-violet content-page">
+                <div class="px-5 h-full">
+                    <span
+                        class="text-dark-red bg-dark-red-10 text-dark-blue bg-dark-blue-10 text-mild-green bg-mild-green-10 text-dark-black bg-dark-black-10 rounded-xl px-1.5 py-0.5 w-14 h-14"
+                        style="display: none;"></span>
+                    {% block body %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
 
+
+        <!-- Loader -->
+        <div class="page-loader">
+            <div class="gooey">
+                <span class="dot"></span>
+                <div class="dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
             </div>
         </div>
-        <div class="overflow-auto grow bg-light-violet content-page">
-            <div class="px-5 h-full">
-                <span
-                    class="text-dark-red bg-dark-red-10 text-dark-blue bg-dark-blue-10 text-mild-green bg-mild-green-10 text-dark-black bg-dark-black-10 rounded-xl px-1.5 py-0.5 w-14 h-14"
-                    style="display: none;"></span>
-                <h1>This is the location of commands in page</h1>
-                <h1>This is the location of graph plot</h1>
-                {% block body %}
-                {% endblock %}
-            </div>
-        </div>
+
+
+        <!-- Scripts -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+        <!-- jQuery Modal -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+        <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+        <!-- Date range picker -->
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+        <script type="text/javascript"
+            src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+        <!-- jQuery Mask Plugins -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.js"></script>
+        <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap-collapse.js"></script>
+
+
+        <script>
+            let showLoader = () => {
+                $('.page-loader').show();
+            }
+            let hideLoader = () => {
+                $('.page-loader').hide();
+            }
+
+            $(function () {
+                $(".sub-category a").accordion();
+                document.querySelector('.nav-animation').addEventListener('mouseleave', (event) => { $(".sub-category a").accordion('hide'); });
+            })
+
+            function userHeaderDetails() {
+                return {
+                    statusFilter: false
+                };
+            }
+
+            $(function () {
+                hideLoader()
+                $('.sub-category .sidebar-active').closest('.sub-category').addClass('sidebar-active')
+            })
+        </script>
     </div>
-
-
-    <!-- Loader -->
-    <div class="page-loader">
-        <div class="gooey">
-            <span class="dot"></span>
-            <div class="dots">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
-    <!-- jQuery Modal -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
-    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <!-- Date range picker -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-    <!-- jQuery Mask Plugins -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.js"></script>
-    <script type="text/javascript"
-        src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap-collapse.js"></script>
-
-
-    <script>
-        let showLoader = () => {
-            $('.page-loader').show();
-        }
-        let hideLoader = () => {
-            $('.page-loader').hide();
-        }
- 
-        $(function () {
-            $(".sub-category a").accordion();
-            document.querySelector('.nav-animation').addEventListener('mouseleave', (event) => { $(".sub-category a").accordion('hide'); });
-        })
- 
-        function userHeaderDetails() {
-            return {
-                statusFilter: false
-            };
-        }
- 
-        $(function () {
-            hideLoader()
-            $('.sub-category .sidebar-active').closest('.sub-category').addClass('sidebar-active')
-        })
-    </script>
-</div>
 
 </body>
 
