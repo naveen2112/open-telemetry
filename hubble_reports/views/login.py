@@ -44,7 +44,7 @@ def _save_cache(cache):
 def _build_auth_code_flow(authority=None, scopes=None):
     return _build_msal_app(authority=authority).initiate_auth_code_flow(
         scopes or [],
-        redirect_uri=url_for("reports.authorized", _external=True))
+        redirect_uri=url_for("reports.authorized", _external=True,  _scheme='https'))
 
 def _build_msal_app(cache=None, authority=None):
     return msal.ConfidentialClientApplication(
