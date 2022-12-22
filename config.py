@@ -66,6 +66,8 @@ class BaseConfig(object):
     MICROSOFT_TENANT_ID="0bb778d4-8a1e-4eb6-a165-f8029c8a5e13"
     MICROSOFT_TOKEN_URL="https://login.microsoftonline.com/0bb778d4-8a1e-4eb6-a165-f8029c8a5e13/oauth2/v2.0/token"
 
+    SESSION_TYPE='filesystem'
+
     AUTHORITY_SIGN_ON_SIGN_OUT = "https://login.microsoftonline.com/e98990b4-d1b9-40ab-80e9-3e80ad5b9145"
     CLIENT_ID = "c8633ae4-31a3-40cf-9f13-7f8b911d3ea4"
     CLIENT_SECRET = "9ZS8Q~GKsyRpN.P3IJuT4xjvLuZAFvUtejSOPbRE"
