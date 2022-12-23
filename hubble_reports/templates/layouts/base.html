@@ -8,7 +8,8 @@
     <!-- CSRF Token -->
     {{ "{% csrf_token %}" }}
 
-    <title>{{ title }}</title>
+    {% block title %}
+    {% endblock %}
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
@@ -37,8 +38,14 @@
                 <div class="px-5 pt-9 bg-mild-violet pb-7" x-data="userHeaderDetails()">
                     <div class="flex justify-between mb-7 items-center">
                         <div>
-                            <div class="text-dark-black text-lg mb-1 leading-none">{{ "header" }}</div>
-                            <div class="text-dark-black-50 text-sm">{{ "sub_head" }}</div>
+                            <div class="text-dark-black text-lg mb-1 leading-none">
+                                {% block header %}
+                                {% endblock %}
+                            </div>
+                            <div class="text-dark-black-50 text-sm">
+                                {% block sub_header %}
+                                {% endblock %}
+                            </div>
                         </div>
                     </div>
 
