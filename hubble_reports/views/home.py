@@ -7,4 +7,4 @@ from hubble_reports.hubble_reports import reports
 def index() -> render_template:
     if not session.get("user"):
         return redirect(url_for("reports.login"))
-    return render_template('index.html', user=session["user"])
+    return render_template('index_login.html', user=session["user"])

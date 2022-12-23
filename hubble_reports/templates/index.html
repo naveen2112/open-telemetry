@@ -1,17 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-</head>
-<body>
-    <h1>Microsoft Identity Python Web App</h1>
-    <h2>Welcome {{ user.get("name") }}!</h2>
+{% extends "layouts/base.html" %}
 
-    
+{% block title %}
+Dashboard
+{% endblock %}
 
-    <li><a href="{{ url_for('reports.logout') }}">Logout</a></li>
-    <hr>
-    <footer style="text-align: right">Powered by MSAL Python  version </footer>
-</body>
-</html>
+{% block header %}
+{% endblock %}
 
+{% block sub_header %}
+{% endblock %}
+
+{% block body %}
+
+{{ "{%app_entry%}" }}
+<div id="react-entry-point">
+    <div class="_dash-loading">
+        Loading...
+    </div>
+</div>
+
+{{ "{%config%}" }}
+{{ "{%scripts%}" }}
+{{ "{%renderer%}" }}
+
+{% endblock %}
