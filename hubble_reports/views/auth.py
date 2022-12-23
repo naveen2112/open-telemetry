@@ -1,6 +1,6 @@
 from hubble_reports.models.core import db
 from hubble_reports.hubble_reports import reports
-from ..models import User
+from hubble_reports.models import User
 import logging
 from hubble_reports.utils import get_logger
 
