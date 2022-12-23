@@ -13,9 +13,9 @@ class TeamHistory(db.Model):
     from_date = db.Column(db.Date)
     to_date = db.Column(db.Date)
     status = db.Column(db.String(255))
-    deleted_at = db.Column(TIMESTAMP(precision=0))
-    created_at = db.Column(TIMESTAMP(precision=0))
-    updated_at = db.Column(TIMESTAMP(precision=0))
+    deleted_at = db.Column(TIMESTAMP())
+    created_at = db.Column(TIMESTAMP())
+    updated_at = db.Column(TIMESTAMP())
 
     team = db.relationship('Team')
     user = db.relationship('User')

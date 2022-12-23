@@ -24,8 +24,8 @@ class TimesheetEntry(db.Model):
     billed_hours = db.Column(db.Float(53), nullable=False)
     team_id = db.Column(db.ForeignKey('teams.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
     admin_comments = db.Column(db.Text)
-    created_at = db.Column(TIMESTAMP(precision=0))
-    updated_at = db.Column(TIMESTAMP(precision=0))
+    created_at = db.Column(TIMESTAMP())
+    updated_at = db.Column(TIMESTAMP())
 
     module = db.relationship('Module')
     project = db.relationship('Project')

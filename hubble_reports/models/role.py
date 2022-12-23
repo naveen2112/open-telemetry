@@ -9,5 +9,5 @@ class Role(db.Model):
     name = db.Column(db.String(255), nullable=False, unique=True)
     display_name = db.Column(db.String(255))
     description = db.Column(db.String(255))
-    created_at = db.Column(TIMESTAMP(precision=0))
-    updated_at = db.Column(TIMESTAMP(precision=0))
+    created_at = db.Column(TIMESTAMP())
+    updated_at = db.Column(TIMESTAMP())

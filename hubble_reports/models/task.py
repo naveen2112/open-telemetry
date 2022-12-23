@@ -12,9 +12,9 @@ class Task(db.Model):
     module_id = db.Column(db.ForeignKey('modules.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
     description = db.Column(db.Text)
     created_by = db.Column(db.ForeignKey('users.id', ondelete='CASCADE', onupdate='CASCADE'))
-    created_at = db.Column(TIMESTAMP(precision=0))
-    updated_at = db.Column(TIMESTAMP(precision=0))
-    deleted_at = db.Column(TIMESTAMP(precision=0))
+    created_at = db.Column(TIMESTAMP())
+    updated_at = db.Column(TIMESTAMP())
+    deleted_at = db.Column(TIMESTAMP())
 
     user = db.relationship('User')
     module = db.relationship('Module')

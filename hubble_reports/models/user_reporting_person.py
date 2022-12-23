@@ -9,9 +9,9 @@ class UserReportingPerson(db.Model):
     id = db.Column(db.BigInteger, primary_key=True)
     user_id = db.Column(db.ForeignKey('users.id', ondelete='CASCADE', onupdate='CASCADE'))
     reporting_person_id = db.Column(db.ForeignKey('users.id', ondelete='CASCADE', onupdate='CASCADE'))
-    created_at = db.Column(TIMESTAMP(precision=0))
-    updated_at = db.Column(TIMESTAMP(precision=0))
-    deleted_at = db.Column(TIMESTAMP(precision=0))
+    created_at = db.Column(TIMESTAMP())
+    updated_at = db.Column(TIMESTAMP())
+    deleted_at = db.Column(TIMESTAMP())
 
     reporting_person = db.relationship('User', primaryjoin='UserReportingPerson.reporting_person_id == User.id')
     user = db.relationship('User', primaryjoin='UserReportingPerson.user_id == User.id')

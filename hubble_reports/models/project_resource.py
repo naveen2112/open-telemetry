@@ -4,7 +4,7 @@ from .core import db
 from .user import User
 from .project import Project
 
-class ProjectResources(db.Model):
+class ProjectResource(db.Model):
     __tablename__ = 'project_resources'
 
     id = db.Column(db.BigInteger, primary_key=True)
@@ -18,11 +18,11 @@ class ProjectResources(db.Model):
     primary_project = db.Column(db.Boolean, server_default="false")
     allotted_from = db.Column(db.Date)
     removed_on = db.Column(db.Date)
-    created_at = db.Column(TIMESTAMP(precision=0))
-    updated_at = db.Column(TIMESTAMP(precision=0))
-    deleted_at = db.Column(TIMESTAMP(precision=0))
+    created_at = db.Column(TIMESTAMP())
+    updated_at = db.Column(TIMESTAMP())
+    deleted_at = db.Column(TIMESTAMP())
 
     project = db.relationship('Project')
-    reporting_person = db.relationship('User', primaryjoin='ProjectResources.reporting_person_id == User.id')
-    user = db.relationship('User', primaryjoin='ProjectResources.user_id == User.id')
+    reporting_person = db.relationship('User', primaryjoin='ProjectResource.reporting_person_id == User.id')
+    user = db.relationship('User', primaryjoin='ProjectResource.user_id == User.id')
 

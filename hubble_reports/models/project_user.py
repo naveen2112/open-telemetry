@@ -1,6 +1,6 @@
 from .core import db
 
-class ProjectUsers(db.Model):
+class ProjectUser(db.Model):
     __tablename__ = 'project_users'
     
     user_id = db.Column('user_id', db.ForeignKey('users.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, primary_key=True)
