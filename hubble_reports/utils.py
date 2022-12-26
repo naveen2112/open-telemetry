@@ -2,7 +2,7 @@ import logging
 
 from typing import Union
 from functools import wraps
-from flask import Blueprint, session, redirect
+from flask import session, redirect
 
 def get_logger(name: str, level: int = logging.INFO) -> logging.Logger:
 
@@ -16,10 +16,10 @@ def get_logger(name: str, level: int = logging.INFO) -> logging.Logger:
     return logger
 
 
-def login_required(func) -> function:
+def login_required(func:callable) -> callable:
  
     @wraps(func)
-    def inner(*args, **kwargs) -> Union(function, redirect):
+    def inner(*args, **kwargs) -> Union[callable, redirect]:
         if session.get('user'):
             return func(*args, **kwargs)
         else:
