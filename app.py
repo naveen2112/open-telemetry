@@ -17,11 +17,12 @@ app.register_blueprint(reports)
 @app.errorhandler(404)
 def page_not_found(e):
     context = {
+        'status_title': 'Not Found',
         'status_code': 404,
         'status_message': 'Page not found',
     }
     return render_template('custom_error_page.html', context=context), 404
-    
+
 
 if __name__ == "__main__":
     app.run()
