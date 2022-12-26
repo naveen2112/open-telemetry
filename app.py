@@ -14,6 +14,15 @@ db.init_app(app)
 
 app.register_blueprint(reports)
 
+@app.errorhandler(403)
+def page_not_found(e):
+    context = {
+        'status_title': 'Forbidden',
+        'status_code': 403,
+        'status_message': 'Permission required to use this route',
+    }
+    return render_template('custom_error_page.html', context=context), 403
+
 @app.errorhandler(404)
 def page_not_found(e):
     context = {

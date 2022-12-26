@@ -21,4 +21,4 @@ def protected() -> str:
 
 @reports.route("/server-error")
 def server_error() -> str:
-    abort(500)
+    abort(403)
