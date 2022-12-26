@@ -14,11 +14,6 @@ def auth() -> str:
     user = db.get_or_404(User, 64)
     return str(user.email)
 
-@reports.route("/protected", methods=['POST'])
-def protected() -> str:
-    page_info = 'Protected access'
-    return page_info
-
-@reports.route("/server-error")
+@reports.route("/error")
 def server_error() -> str:
-    abort(403)
+    abort(405)
