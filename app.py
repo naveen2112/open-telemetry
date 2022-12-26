@@ -23,6 +23,23 @@ def page_not_found(e):
     }
     return render_template('custom_error_page.html', context=context), 404
 
+@app.errorhandler(405)
+def page_not_found(e):
+    context = {
+        'status_title': 'Method Not Allowed',
+        'status_code': 405,
+        'status_message': 'Route does not support this method',
+    }
+    return render_template('custom_error_page.html', context=context), 405
+
+@app.errorhandler(500)
+def page_not_found(e):
+    context = {
+        'status_title': 'Internal Server Error',
+        'status_code': 500,
+        'status_message': 'Something wrong in sever',
+    }
+    return render_template('custom_error_page.html', context=context), 500
 
 if __name__ == "__main__":
     app.run()
