@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from dotenv import load_dotenv
 from config import BaseConfig
 from hubble_reports.models import db
@@ -13,6 +13,15 @@ db.init_app(app)
 
 
 app.register_blueprint(reports)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    context = {
+        'status_code': 404,
+        'status_message': 'Page not found',
+    }
+    return render_template('custom_error_page.html', context=context), 404
+    
 
 if __name__ == "__main__":
     app.run()
