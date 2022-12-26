@@ -2,11 +2,12 @@ from flask import session, url_for, redirect
 import logging
 from hubble_reports.hubble_reports import reports
 from config import BaseConfig
-from hubble_reports.utils import get_logger
+from hubble_reports.utils import get_logger, login_required
 
 logger = get_logger(__name__,level=logging.DEBUG)
 
 @reports.route("/logout")
+@login_required
 def logout() -> redirect:
     logger.info(f"\n\n\n\n========LogOut=======\n")
     session.clear()  # Wipe out user and its token cache from session
