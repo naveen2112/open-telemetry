@@ -1,5 +1,5 @@
 import logging
-from flask import Flask, render_template
+from flask import render_template
 from hubble_reports.utils import get_logger
 
 logger = get_logger(__name__,level=logging.DEBUG)
