@@ -29,3 +29,17 @@ class User(db.Model):
     branch = db.relationship('Branch')
     designation = db.relationship('Designation')
     team = db.relationship('Team')
+
+    def is_active(self):
+        return True
+    
+    def get_id(self):
+        user = User.query.filter(User.email=='sharan@mallow-tech.com').first()
+        return user.email
+
+    def is_authenticated(self):
+        condtion = User.query.filter(User.email=='sharan@mallow-tech.com').first() is not None
+        return True
+
+    def is_anonymous(self):
+        return False
