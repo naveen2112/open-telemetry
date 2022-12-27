@@ -34,8 +34,8 @@ class User(db.Model):
         return True
     
     def get_id(self):
-        user = User.query.filter(User.email=='sharan@mallow-tech.com').first()
-        return user.email
+        # user = User.query.filter(User.email==self.email).first()
+        return self.id
 
     def is_authenticated(self):
         condtion = User.query.filter(User.email=='sharan@mallow-tech.com').first() is not None

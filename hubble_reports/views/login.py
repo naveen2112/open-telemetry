@@ -14,7 +14,7 @@ def user_loader(user_id):
     logger.info(f"\n\n\n\n========Login manager: UserLoader========\n")
     user_email = session['user']['preferred_username']
     logger.debug(f"\n\n\n=============>>>User id\n{user_email}\n")
-    return User.query.filter(User.email==session['user']['preferred_username']).first().email
+    return User.query.filter(User.email==session['user']['preferred_username']).first()
 
 @login_manager.unauthorized_handler
 def handle_needs_login():
