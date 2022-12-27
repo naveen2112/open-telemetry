@@ -16,6 +16,10 @@ def user_loader(user_id):
     logger.debug(f"\n\n\n=============>>>User id\n{user_email}\n")
     return User.query.filter(User.email=='sharan@mallow-tech.com').first()
 
+@login_manager.unauthorized_handler
+def handle_needs_login():
+    return redirect(url_for('reports.login'))
+
 @reports.route("/login")
 def login() -> render_template:
     logger.info(f"\n\n\n\n========Login=======\n")
