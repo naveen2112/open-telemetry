@@ -14,14 +14,3 @@ def get_logger(name: str, level: int = logging.INFO) -> logging.Logger:
     logger.addHandler(console)
 
     return logger
-
-
-def login_required(func:callable) -> callable:
- 
-    @wraps(func)
-    def inner(*args, **kwargs) -> Union[callable, redirect]:
-        if session.get('user'):
-            return func(*args, **kwargs)
-        else:
-            return redirect('login')
-    return inner
