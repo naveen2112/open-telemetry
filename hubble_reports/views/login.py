@@ -4,9 +4,17 @@ from hubble_reports.hubble_reports import reports
 from config import BaseConfig
 import logging
 from hubble_reports.utils import get_logger
+from app import login_manager
+from hubble_reports.models import User
 
 logger = get_logger(__name__,level=logging.DEBUG)
 
+@login_manager.user_loader
+def user_loader(user_id):
+    logger.info(f"\n\n\n\n========Login manager: UserLoader========\n")
+    user_email = session['user']['preferred_username']
+    logger.debug(f"\n\n\n=============>>>User id\n{user_email}\n")
+    return User.query.filter(User.email=='sharan@mallow-tech.com').first()
 
 @reports.route("/login")
 def login() -> render_template:

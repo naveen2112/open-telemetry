@@ -2,15 +2,18 @@ from flask import Flask, render_template
 from dotenv import load_dotenv
 from config import BaseConfig
 from hubble_reports.models import db
-from hubble_reports.hubble_reports import reports
 from flask_session import Session
+from flask_login import LoginManager
 
 app = Flask(__name__, static_folder='hubble_reports/static')
 load_dotenv()
 app.config.from_object(BaseConfig)
 Session(app)
 db.init_app(app)
+login_manager = LoginManager()
+login_manager.init_app(app)
 
+from hubble_reports.hubble_reports import reports
 
 app.register_blueprint(reports)
 
