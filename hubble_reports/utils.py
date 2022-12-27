@@ -1,9 +1,5 @@
 import logging
 
-from typing import Union
-from functools import wraps
-from flask import session, redirect
-
 def get_logger(name: str, level: int = logging.INFO) -> logging.Logger:
 
     logger = logging.getLogger(name)
