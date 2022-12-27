@@ -17,4 +17,4 @@ def auth() -> str:
 
 @reports.route("/error")
 def server_error() -> str:
-    abort(405)
+    abort(404)

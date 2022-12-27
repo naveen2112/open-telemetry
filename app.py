@@ -14,44 +14,24 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 from hubble_reports.hubble_reports import reports
+from hubble_reports.views.error import error_page
 
 app.register_blueprint(reports)
 
-@app.errorhandler(403)
-def page_not_found(e):
-    context = {
-        'status_title': 'Forbidden',
-        'status_code': 403,
-        'status_message': 'Permission required to use this route',
-    }
-    return render_template('custom_error_page.html', context=context), 403
+# error_code_list = [
+#     403,
+#     404,
+#     405,
+#     500, 
+#     ]
+# for error_code in error_code_list:
+#     app.register_error_handler(error_code, error_page)
 
-@app.errorhandler(404)
-def page_not_found(e):
-    context = {
-        'status_title': 'Not Found',
-        'status_code': 404,
-        'status_message': 'Page not found',
-    }
-    return render_template('custom_error_page.html', context=context), 404
+app.register_error_handler(403, error_page)
+app.register_error_handler(404, error_page)
+app.register_error_handler(405, error_page)
+app.register_error_handler(500, error_page)
 
-@app.errorhandler(405)
-def page_not_found(e):
-    context = {
-        'status_title': 'Method Not Allowed',
-        'status_code': 405,
-        'status_message': 'Route does not support this method',
-    }
-    return render_template('custom_error_page.html', context=context), 405
-
-@app.errorhandler(500)
-def page_not_found(e):
-    context = {
-        'status_title': 'Internal Server Error',
-        'status_code': 500,
-        'status_message': 'Something wrong in sever',
-    }
-    return render_template('custom_error_page.html', context=context), 500
 
 if __name__ == "__main__":
     app.run()
