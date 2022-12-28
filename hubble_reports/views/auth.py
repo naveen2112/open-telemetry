@@ -5,6 +5,7 @@ import logging
 from hubble_reports.utils import get_logger
 from flask_login import login_required
 from flask import abort
+from hubble_reports.utils import verify_permission
 
 logger = get_logger(__name__,level=logging.DEBUG)
 
@@ -16,5 +17,6 @@ def auth() -> str:
     return str(user.email)
 
 @reports.route("/error")
+@verify_permission('timesheet.view_user')
 def server_error() -> str:
-    abort(404)
+    abort(500)
