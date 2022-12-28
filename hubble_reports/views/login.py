@@ -6,6 +6,7 @@ import logging
 from hubble_reports.utils import get_logger
 from app import login_manager
 from hubble_reports.models import User
+from flask_login import login_user
 
 logger = get_logger(__name__,level=logging.DEBUG)
 
@@ -43,6 +44,8 @@ def authorized() -> render_template:
         _save_cache(cache)
     except ValueError:  # Usually caused by CSRF
         pass  # Simply ignore them
+    mailId = session['user']['preferred_username']
+    login_user(User.query.filter(User.email==mailId).first())
     return redirect(url_for("reports.index"))
 
 
