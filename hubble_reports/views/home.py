@@ -8,6 +8,6 @@ from hubble_reports.models import User
 def index() -> render_template:
     if not session.get("user"):
         return redirect(url_for("reports.login"))
-    condition = session['user']['preferred_username']
-    login_user(User.query.filter(User.email=='sharan@mallow-tech.com').first())
+    mailid = session['user']['preferred_username']
+    login_user(User.query.filter(User.email==mailid).first())
     return render_template('index_login.html', user=session["user"])
