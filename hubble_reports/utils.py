@@ -1,6 +1,6 @@
 import logging
 from functools import wraps
-from flask import abort, session, g
+from flask import abort, g
 from hubble_reports.models import db, PermissionRole, Permission
 
 
