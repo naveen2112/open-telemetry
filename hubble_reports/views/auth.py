@@ -35,7 +35,7 @@ def login() -> render_template:
     # here we choose to also collect end user consent upfront
     session["flow"] = _build_auth_code_flow(authority=BaseConfig.AUTHORITY_SIGN_ON_SIGN_OUT)   
     logger.debug(f"\n\n\n=============>>>Session\n{session['flow']}\n")
-    return render_template("MT_login.html", auth_url=session["flow"]["auth_uri"])
+    return render_template("login.html", auth_url=session["flow"]["auth_uri"])
 
 @reports.route(BaseConfig.REDIRECT_PATH)  # Its absolute URL must match your app's redirect_uri set in AAD
 def authorized() -> render_template:
