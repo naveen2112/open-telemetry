@@ -12,6 +12,7 @@ Session(app)
 db.init_app(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
+login_manager.login_view = 'reports.login'
 
 from hubble_reports.hubble_reports import reports
 

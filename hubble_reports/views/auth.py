@@ -1,7 +1,7 @@
 import logging
 import msal
 
-from flask_login import login_required, logout_user
+from flask_login import login_required, logout_user, login_user
 from flask import session, url_for, render_template, redirect, request
 
 from app import login_manager
@@ -51,6 +51,8 @@ def authorized() -> render_template:
         _save_cache(cache)
     except ValueError:  # Usually caused by CSRF
         pass  # Simply ignore them
+    mailid = session['user']['preferred_username']
+    login_user(User.query.filter(User.email==mailid).first())
     return redirect(url_for("reports.index"))
 
 
