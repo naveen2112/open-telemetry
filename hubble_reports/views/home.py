@@ -15,13 +15,5 @@ def index() -> render_template:
     mailId = session['user']['preferred_username']
     logger.info(f"\n\n\n\n\n============>MailId:\n\n{mailId}\n\n")
     login_user(User.query.filter(User.email==mailId).first())
-    user_permission = db.session.query(Permission.name)\
-        .join(PermissionRole, PermissionRole.permission_id == Permission.id)\
-            .join(RoleUser, RoleUser.role_id == PermissionRole.role_id)\
-                .join(User, User.id == RoleUser.user_id)\
-                    .filter(User.email==mailId)\
-                        .all()
-    user_permission = set(chain.from_iterable(user_permission))
-    session['user']['user_permission'] = user_permission
-    logger.info(f"\n\n\n\n\n============>Permissions:\n\n{user_permission}\n\n")
+
     return render_template('index_login.html', user=session["user"])
