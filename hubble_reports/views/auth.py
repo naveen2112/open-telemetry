@@ -45,7 +45,7 @@ def authorized() -> render_template:
             session.get("flow", {}), request.args)
         logger.debug(f"\n\n\n=============>>>Result\n{result}\n")
         if "error" in result:
-            return render_template("auth_error.html", result=result)
+            return render_template("auth/error.html", result=result)
 
         session["user"] = result.get("id_token_claims")
         _save_cache(cache)
