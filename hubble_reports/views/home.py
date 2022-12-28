@@ -4,6 +4,7 @@ from hubble_reports.hubble_reports import reports
 import logging
 from hubble_reports.utils import get_logger
 
+
 @reports.route("/")
 @login_required
 def index() -> render_template:
