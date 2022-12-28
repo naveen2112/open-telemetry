@@ -17,6 +17,6 @@ def auth() -> str:
     return str(user.email)
 
 @reports.route("/error")
-@verify_permission('timesheet.view_user')
+@verify_permission('timesheet.view_user', 'timesheet.up')
 def server_error() -> str:
     abort(500)
