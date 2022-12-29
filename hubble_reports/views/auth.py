@@ -11,7 +11,6 @@ from hubble_reports.utils import get_logger
 
 from config import BaseConfig
 
-
 from hubble_reports.utils import verify_permission
 
 
