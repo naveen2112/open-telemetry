@@ -6,4 +6,4 @@ from hubble_reports.hubble_reports import reports
 @reports.route("/")
 @login_required
 def index() -> render_template:
-    return render_template("index_login.html", user=session["user"])
+    return render_template("dashboard.html", user=session["user"])
