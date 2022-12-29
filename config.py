@@ -52,11 +52,11 @@ class BaseConfig(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = get_env("SECRET_KEY")
 
-    #Azure Credentials
+    # Azure Credentials
     REDIRECT_PATH = "/hubble-sso-callback"
     
     SESSION_TYPE = get_env("SESSION_TYPE")
-
+    
     AUTHORITY_SIGN_ON_SIGN_OUT = get_env("AUTHORITY_SIGN_ON_SIGN_OUT")
     CLIENT_ID = get_env("CLIENT_ID")
     CLIENT_SECRET = get_env("CLIENT_SECRET")
