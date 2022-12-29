@@ -1,127 +1,71 @@
 import pandas as pd
-import json
 import plotly.express as px
+import numpy as np
 
 import pathlib
-
-from dash.dependencies import Input, Output
-from flask import Flask, render_template_string, render_template
+from hubble_reports.hubble_reports import reports
+from flask import render_template_string, current_app, url_for
+from sqlalchemy import create_engine
 from flask.helpers import get_root_path
 from dash import Dash
 from dash import Dash, dcc, html
+from config import BaseConfig
+from app import app
 
+from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
+from hubble_reports.utils import get_logger
+import logging
 
-server = Flask(__name__,)
+logger = get_logger(__name__,level=logging.DEBUG)
 
-
-app = Dash(
+app_dash = Dash(
     __name__,
-    server=server,
+    server=app,
     url_base_pathname='/dash/',
 )
 
 
-dashapp = Dash()
-
 # FYI, you need both an app context and a request context to use url_for() in the Jinja2 templates
-with server.app_context(), server.test_request_context():
-    layout_dash = pathlib.Path(get_root_path(__name__)).joinpath("templates").joinpath("index.html")
-    print('\n\n\n\nLayout_dash:\n',layout_dash,'\n\n\n')
-    # html_body = render_template('index.html')
+with app.app_context(), app.test_request_context():
+    layout_dash = pathlib.Path(get_root_path(__name__)).parent.joinpath("templates").joinpath("dashboard.html")
+    logger.info(f"\n\n\n\n=========>>>layout_dash:\n{layout_dash}\n\n")
+    # logger.info(f"\n\n\n\n=========>>>template url_for:\n{url_for('templates', filename='layouts/base.html')}\n\n")
     with open(layout_dash, "r") as f:
-        
         html_body = render_template_string(f.read())
         print('\n\n\n', html_body, '\n\n\n')
-       
-
-    app.index_string = (html_body)
-
-
-# def visual():
-df = pd.DataFrame({
-    "Fruit": ["Apples", "Oranges", "Bananas",],
-    "Amount": [4, 1, 2,],
-})
-
-fig = px.bar(df, x="Fruit", y="Amount", color="Fruit", width=650)
-# fig.update_layout(
-#         legend=dict(
-#     orientation="h",
-#     yanchor="bottom",
-#     y=1.02,
-#     xanchor="right",
-#     x=1,
-#     ))
-
-sub_values = {
-    'Day':[1, 2, 3, 4, 5],
-    'Apples':[6, 7, 2, 4, 5],
-    'Oranges':[8, 7, 6, 5, 4],
-    'Bananas':[3, 9, 5, 11, 12],
-    }
-
-df_sub = pd.DataFrame(sub_values)
-
-app.layout = html.Div([
-    html.H1('Hello Dash'),
-    html.Table([
-        html.Tr(
-            [
-                html.Td(
-                    [
-                        dcc.Graph(
-                        id='example-graph',
-                        figure=fig,
-                        )
-                    ]
-                ), 
-
-                html.Td(
-                    [
-                        dcc.Graph(
-                        id='subplot-graph',
-                        animate=True,
-                        ),
-                    ]
-                ), 
-            ]
-            ),
-        ]),
-
-    html.Pre(id='click-data'),
-])
-
-@app.callback(
-    Output('click-data', 'children'),
-    Output('subplot-graph', 'figure'),
-    Input('example-graph', 'clickData'))
-def display_click_data(clickdata):
-
-    if not clickdata:
-        clickdata = {'points':[{'x':'Apples'}]}
-
-    print(f'\n\n{clickdata = }\n\n{type(clickdata) = }\n\n')
-    input_data = clickdata['points'][0]
-    column = input_data['x']
-    
-    filtered_df_sub = df_sub[['Day', column]]
-   
-    sub_fig = px.scatter(
-        filtered_df_sub, 
-        x="Day", 
-        y=column,
-        size=column,
-        color=column, 
         
-        # range_y=[0, df_sub.max()+1],
-        # animation_group=column,
-        
-        ).update_traces(mode='lines+markers')
-    
+        app_dash.index_string = (html_body)
 
-    return json.dumps(clickdata, indent=2), sub_fig
+    db_conn = create_engine(BaseConfig.SQLALCHEMY_DATABASE_URI)
+
+    df_or = pd.read_sql_query(db.session.query(
+        TimesheetEntry.authorized_hours, 
+        Team.name, 
+        ExpectedUserEfficiency.expected_efficiency)
+        .join(TimesheetEntry, 
+            TimesheetEntry.user_id == ExpectedUserEfficiency.user_id)
+            .join(Team, Team.id == TimesheetEntry.team_id).statement, 
+            db_conn)
+
+    df = df_or.copy()
 
 
-@server.route("/dash/")
-def my_dash_app():
-    return app.index()#render_template('templates/index.html',dash_app=app)
+    df.loc[:, ('percentage')] = 0
+    df.loc[:, 'percentage'] = 100 * df['authorized_hours']/df['expected_efficiency']
+    df['percent_processed'] = 0
+    df['percent_processed'] = df['percentage'].fillna(0)
+    df.replace(np.inf, 100.0, inplace=True)
+    logger.info(f"\n\n\n\n========Info=======\n{df}\n")
+    df = df.groupby('name').mean(numeric_only=True)['percent_processed'].reset_index()
+    fig_q1 = px.bar(df, x='name', y='percent_processed', color='name', text='percent_processed').update_traces(texttemplate='%{text:.2f}')
+    app_dash.layout = html.Div(children=[
+        html.H2(children='Productivity vs Efficiency for Team'),
+        dcc.Graph(
+            figure=fig_q1
+        ),
+    ])
+
+
+# @reports.route("/dash")
+# def dash_app():
+#     return app_dash.index()
