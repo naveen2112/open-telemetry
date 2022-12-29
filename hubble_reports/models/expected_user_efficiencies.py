@@ -4,7 +4,7 @@ from .core import db
 from .user import User
 
 
-class ExpectedUserEfficiencies(db.Model):
+class ExpectedUserEfficiency(db.Model):
     __tablename__ = "expected_user_efficiencies"
 
     id = db.Column(db.BigInteger, primary_key=True)
@@ -24,8 +24,8 @@ class ExpectedUserEfficiencies(db.Model):
     deleted_at = db.Column(TIMESTAMP(precision=0))
 
     user = db.relationship(
-        "User", primaryjoin="ExpectedUserEfficiencies.updated_by == User.id"
+        "User", primaryjoin="ExpectedUserEfficiency.updated_by == User.id"
     )
     user1 = db.relationship(
-        "User", primaryjoin="ExpectedUserEfficiencies.user_id == User.id"
+        "User", primaryjoin="ExpectedUserEfficiency.user_id == User.id"
     )

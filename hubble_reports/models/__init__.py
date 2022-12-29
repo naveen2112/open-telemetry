@@ -5,6 +5,7 @@ from .branch import Branch
 from .ctc_detail import CtcDetail
 from .currency import Currency
 from .designation import Designation
+from .expected_user_efficiencies import ExpectedUserEfficiency
 from .failed_job import FailedJob
 from .job import Job
 from .migration import Migration
