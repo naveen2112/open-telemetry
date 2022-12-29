@@ -17,12 +17,14 @@ def user_loader(user_id):
     user_email = session['user']['preferred_username']
     return User.query.filter(User.email==user_email).first()
 
+
 @reports.route("/login")
 def login() -> render_template:
     # Technically we could use empty list [] as scopes to do just sign in,
     # here we choose to also collect end user consent upfront
     session["flow"] = _build_auth_code_flow(authority=BaseConfig.AUTHORITY_SIGN_ON_SIGN_OUT)   
     return render_template("login.html", auth_url=session["flow"]["auth_uri"])
+
 
 @reports.route(BaseConfig.REDIRECT_PATH)  # Its absolute URL must match your app's redirect_uri set in AAD
 def authorized() -> render_template:
@@ -39,6 +41,7 @@ def authorized() -> render_template:
     mailid = session['user']['preferred_username']
     login_user(User.query.filter(User.email==mailid).first())
     return redirect(url_for("reports.index"))
+
 
 def _load_cache() -> object:
     cache = msal.SerializableTokenCache()
@@ -59,6 +62,7 @@ def _build_msal_app(cache=None, authority=None):
     return msal.ConfidentialClientApplication(
         BaseConfig.CLIENT_ID, authority=authority or BaseConfig.AUTHORITY_SIGN_ON_SIGN_OUT,
         client_credential=BaseConfig.CLIENT_SECRET, token_cache=cache)
+
 
 @reports.route("/logout")
 @login_required
