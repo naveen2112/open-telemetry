@@ -60,18 +60,15 @@ def _load_cache() -> object:
         cache.deserialize(session["token_cache"])
     return cache
 
-
 def _save_cache(cache) -> None:
     if cache.has_state_changed:
         session["token_cache"] = cache.serialize()
-
 
 def _build_auth_code_flow(authority=None, scopes=None) -> dict:
     return _build_msal_app(authority=authority).initiate_auth_code_flow(
         scopes or [],
         redirect_uri=url_for("reports.authorized", _external=True, _scheme="https"),
     )
-
 
 def _build_msal_app(cache=None, authority=None):
     return msal.ConfidentialClientApplication(
