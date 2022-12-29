@@ -55,7 +55,7 @@ class BaseConfig(object):
     #Azure Credentials
     REDIRECT_PATH = "/hubble-sso-callback"
     
-    SESSION_TYPE='filesystem'
+    SESSION_TYPE = get_env("SESSION_TYPE")
 
     AUTHORITY_SIGN_ON_SIGN_OUT = get_env("AUTHORITY_SIGN_ON_SIGN_OUT")
     CLIENT_ID = get_env("CLIENT_ID")
