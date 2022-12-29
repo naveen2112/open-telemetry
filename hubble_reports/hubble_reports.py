@@ -4,7 +4,7 @@ from hubble_reports.models import db, User, RoleUser
 import logging
 from hubble_reports.utils import get_logger
 
-reports = Blueprint("reports", __name__, template_folder="templates")
+reports = Blueprint("reports", __name__, template_folder="templates", static_folder="static")
 
 from hubble_reports import views
 
