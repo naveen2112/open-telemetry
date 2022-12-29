@@ -1,17 +1,13 @@
-import logging
 import msal
 
 from flask_login import login_required, logout_user, login_user
-from flask import session, url_for, render_template, redirect, request, abort
+from flask import session, url_for, render_template, redirect, request
 
 from app import login_manager
 from hubble_reports.hubble_reports import reports
-from hubble_reports.models import db, User
-from hubble_reports.utils import get_logger
+from hubble_reports.models import User
 
 from config import BaseConfig
-
-from hubble_reports.utils import verify_permission
 
 
 @login_manager.user_loader
@@ -32,9 +28,7 @@ def login() -> render_template:
     return render_template("login.html", auth_url=session["flow"]["auth_uri"])
 
 
-@reports.route(
-    BaseConfig.REDIRECT_PATH
-)  # Its absolute URL must match your app's redirect_uri set in AAD
+@reports.route(BaseConfig.REDIRECT_PATH)  # Its absolute URL must match your app's redirect_uri set in AAD
 def authorized() -> render_template:
     try:
         cache = _load_cache()
@@ -43,7 +37,6 @@ def authorized() -> render_template:
         )
         if "error" in result:
             return render_template("auth/error.html", result=result)
-
         session["user"] = result.get("id_token_claims")
         _save_cache(cache)
     except ValueError:  # Usually caused by CSRF
@@ -89,9 +82,3 @@ def logout() -> redirect:
         + "?post_logout_redirect_uri="
         + url_for("reports.index", _external=True, _scheme="https")
     )
-
-
-@reports.route("/error")
-@verify_permission('timesheet.view_user', 'timesheet.up')
-def server_error() -> str:
-    abort(403)

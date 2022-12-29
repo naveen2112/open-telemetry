@@ -1,7 +1,4 @@
-import logging
 from flask import render_template
-from hubble_reports.utils import get_logger
-
 
 
 def error_page(e):
