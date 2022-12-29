@@ -32,9 +32,7 @@ def login() -> render_template:
     return render_template("login.html", auth_url=session["flow"]["auth_uri"])
 
 
-@reports.route(
-    BaseConfig.REDIRECT_PATH
-)  # Its absolute URL must match your app's redirect_uri set in AAD
+@reports.route(BaseConfig.REDIRECT_PATH)  # Its absolute URL must match your app's redirect_uri set in AAD
 def authorized() -> render_template:
     try:
         cache = _load_cache()
@@ -43,7 +41,6 @@ def authorized() -> render_template:
         )
         if "error" in result:
             return render_template("auth/error.html", result=result)
-
         session["user"] = result.get("id_token_claims")
         _save_cache(cache)
     except ValueError:  # Usually caused by CSRF
