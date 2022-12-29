@@ -86,9 +86,3 @@ def logout() -> redirect:
         + "?post_logout_redirect_uri="
         + url_for("reports.index", _external=True, _scheme="https")
     )
-
-
-@reports.route("/error")
-@verify_permission('timesheet.view_user', 'timesheet.up')
-def server_error() -> str:
-    abort(403)
