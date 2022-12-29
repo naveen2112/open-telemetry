@@ -2,11 +2,9 @@ import logging
 from flask import render_template
 from hubble_reports.utils import get_logger
 
-logger = get_logger(__name__, level=logging.DEBUG)
 
 
 def error_page(e):
-    logger.info(f"\n\n\nError code is {e}\n")
     context = {
         403: {
             "status_title": "Forbidden",

@@ -12,37 +12,24 @@ from hubble_reports.utils import get_logger
 from config import BaseConfig
 
 
-logger = get_logger(__name__, level=logging.DEBUG)
 from hubble_reports.utils import verify_permission
-
-
-@reports.route("/auth")
-@login_required
-def auth() -> str:
-    logger.info(f"\n\n\n\n========Auth=======\n")
-    user = db.get_or_404(User, 64)
-    return str(user.email)
 
 
 @login_manager.user_loader
 def user_loader(user_id):
-    logger.info(f"\n\n\n\n========Login manager: UserLoader========\n")
     user_email = session["user"]["preferred_username"]
-    logger.debug(f"\n\n\n=============>>>User id\n{user_email}\n")
     return User.query.filter(
-        User.email == session["user"]["preferred_username"]
+        User.email == user_email
     ).first()
 
 
 @reports.route("/login")
 def login() -> render_template:
-    logger.info(f"\n\n\n\n========Login=======\n")
     # Technically we could use empty list [] as scopes to do just sign in,
     # here we choose to also collect end user consent upfront
     session["flow"] = _build_auth_code_flow(
         authority=BaseConfig.AUTHORITY_SIGN_ON_SIGN_OUT
     )
-    logger.debug(f"\n\n\n=============>>>Session\n{session['flow']}\n")
     return render_template("login.html", auth_url=session["flow"]["auth_uri"])
 
 
@@ -55,7 +42,6 @@ def authorized() -> render_template:
         result = _build_msal_app(cache=cache).acquire_token_by_auth_code_flow(
             session.get("flow", {}), request.args
         )
-        logger.debug(f"\n\n\n=============>>>Result\n{result}\n")
         if "error" in result:
             return render_template("auth/error.html", result=result)
 
@@ -72,14 +58,12 @@ def _load_cache() -> object:
     cache = msal.SerializableTokenCache()
     if session.get("token_cache"):
         cache.deserialize(session["token_cache"])
-    logger.debug(f"\n\n\n=============>>>Cache Deserialized\n{type(cache)}\n")
     return cache
 
 
 def _save_cache(cache) -> None:
     if cache.has_state_changed:
         session["token_cache"] = cache.serialize()
-        logger.debug(f"\n\n\n=============>>>Token_cache\n{session}\n")
 
 
 def _build_auth_code_flow(authority=None, scopes=None) -> dict:
@@ -101,7 +85,6 @@ def _build_msal_app(cache=None, authority=None):
 @reports.route("/logout")
 @login_required
 def logout() -> redirect:
-    logger.info(f"\n\n\n\n========LogOut=======\n")
     session.clear()  # Wipe out user and its token cache from session
     logout_user()
     return redirect(  # Also logout from your tenant's web session
@@ -115,4 +98,4 @@ def logout() -> redirect:
 @reports.route("/error")
 @verify_permission('timesheet.view_user', 'timesheet.up')
 def server_error() -> str:
-    abort(500)
+    abort(403)

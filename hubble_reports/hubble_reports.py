@@ -9,7 +9,6 @@ reports = Blueprint("reports", __name__, template_folder="templates", static_fol
 from hubble_reports import views
 
 global user_role_id
-logger = get_logger(__name__, level=logging.DEBUG)
 
 
 @reports.before_request
@@ -22,7 +21,6 @@ def user_permission():
             .filter(User.email == mailid).first()
         )
         g.user_role_id = g.user_role_id[0]
-        logger.info(f"\n\n\n==========>>>User Role Id:\n{g.user_role_id}\n\n")
         if g.user_role_id is None:
             abort(403)
     
