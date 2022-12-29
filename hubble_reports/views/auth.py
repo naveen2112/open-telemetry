@@ -1,17 +1,14 @@
-import logging
 import msal
 
 from flask_login import login_required, logout_user, login_user
-from flask import session, url_for, render_template, redirect, request, abort
+from flask import session, url_for, render_template, redirect, request
 
 from app import login_manager
 from hubble_reports.hubble_reports import reports
-from hubble_reports.models import db, User
-from hubble_reports.utils import get_logger
+from hubble_reports.models import User
 
 from config import BaseConfig
 
-from hubble_reports.utils import verify_permission
 
 
 @login_manager.user_loader

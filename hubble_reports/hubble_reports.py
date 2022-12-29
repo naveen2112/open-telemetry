@@ -1,12 +1,8 @@
-from itertools import chain
 from flask import Blueprint, session, g, abort
 from hubble_reports.models import db, User, RoleUser
-import logging
-from hubble_reports.utils import get_logger
 
 reports = Blueprint("reports", __name__, template_folder="templates")
 
-from hubble_reports import views
 
 global user_role_id
 
