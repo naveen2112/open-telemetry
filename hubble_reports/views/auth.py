@@ -10,7 +10,6 @@ from hubble_reports.models import User
 from config import BaseConfig
 
 
-
 @login_manager.user_loader
 def user_loader(user_id):
     user_email = session["user"]["preferred_username"]
