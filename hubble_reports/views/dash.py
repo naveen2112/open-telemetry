@@ -9,7 +9,9 @@ from flask_login import login_required, logout_user
 from sqlalchemy import create_engine
 from flask.helpers import get_root_path
 from dash.dependencies import Input, Output
+
 from dash import Dash, dash_table
+
 from dash import Dash, dcc, html
 from config import BaseConfig
 from app import app
@@ -77,7 +79,7 @@ with app.app_context(), app.test_request_context():
     df['ratings'] = ['Excellent' if val>121 else 'Good' if val>120 else 'Needs Improvement' for val in df['capacity']]
     df['trends'] = df['capacity'].apply(lambda a: "↑" if a>121 else "↔︎" if a>120 else "↓")
     # min_year, max_year, till_date = (df['date'].min().year, df['date'].max().year, df['date'].format("%B %Y"))
-    
+    df['capacity'] = df['capacity']/100
     dash_app.layout = html.Div(children=[
         html.H1(id="dash_header"),
         html.H2(children=f'Teams Efficiency bandwidth- Fiscal Year {min_year} - {max_year} (Till, {till_date})'),
@@ -87,9 +89,20 @@ with app.app_context(), app.test_request_context():
         ),
         dash_table.DataTable(
             data=df.to_dict('records'), 
-            columns=[{"name": i, "id": i} for i in df.columns],
-            style_cell={'textAlign': 'left'},
-            # style_header={'textBold':True},
+            # columns=[{"name": i, "id": i} for i in df.columns],
+            columns=[
+                {'name': ['Teams Ratings & Trend','Team'], 'id': 'team', 'type': 'text'},
+                {'name': ['Teams Ratings & Trend','Capacity'], 'id': 'capacity', 'type': 'numeric', 'format':dash_table.FormatTemplate.percentage(0)},
+                {'name': ['Teams Ratings & Trend','Ratings'], 'id': 'ratings', 'type': 'text'},
+                {'name': ['Teams Ratings & Trend','Trends'], 'id': 'trends', 'type': 'text'},
+            ],
+            merge_duplicate_headers=True,
+            style_cell={'textAlign': 'left', 'fontSize':'20px'},
+            style_header={
+                'backgroundColor': 'orange',
+                'fontWeight': 'bold',
+                'textAlign':'center',
+            },
             )
 
     ])
