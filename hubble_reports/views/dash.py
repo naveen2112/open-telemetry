@@ -4,13 +4,14 @@ import numpy as np
 
 import pathlib
 from hubble_reports.hubble_reports import reports
-from flask import render_template_string, current_app, url_for, redirect, session
+from flask import render_template_string, current_app, url_for, redirect, session, g
 from flask_login import login_required, logout_user
 from sqlalchemy import create_engine
 from flask.helpers import get_root_path
 from dash.dependencies import Input, Output
 
-from dash import Dash, dash_table
+from dash import Dash, dash_table, callback, dcc
+import dash
 
 from dash import Dash, dcc, html
 from config import BaseConfig
@@ -26,8 +27,11 @@ dash_app = Dash(
     __name__,
     server=app,
     url_base_pathname='/dash/',
+    suppress_callback_exceptions=True,
 )
 
+# dash.register_page("overall_eff", layout=html.Div('overall_eff'), path='/capacity')
+# dash.register_page("home", layout=html.Div('home'), path='/')
 # session['dash'].header = f"Welcome, {session['user'].name}!!!"
 # FYI, you need both an app context and a request context to use url_for() in the Jinja2 templates
 with app.app_context(), app.test_request_context():
@@ -80,8 +84,22 @@ with app.app_context(), app.test_request_context():
     df['trends'] = df['capacity'].apply(lambda a: "↑" if a>121 else "↔︎" if a>120 else "↓")
     # min_year, max_year, till_date = (df['date'].min().year, df['date'].max().year, df['date'].format("%B %Y"))
     df['capacity'] = df['capacity']/100
-    dash_app.layout = html.Div(children=[
-        html.H1(id="dash_header"),
+    
+    dash_app.layout = html.Div([
+    dcc.Location(id='url', refresh=False),
+    html.Div(id='page-content')
+    ])
+
+
+    index_page = html.Div([
+        dcc.Link('Teams Capacity', href='/dash/capacity'),
+        # html.Br(),
+        # dcc.Link('Go to Page 2', href='/page-2'),
+    ])
+
+    layout = html.Div(id='overall_eff',children=[
+        html.H1(id="dash_header",children=f'Overall Team wise Efficiency Percentage', style={"font-size":"25px", "font-align":"center"}),
+        html.Br(),
         html.H2(children=f'Teams Efficiency bandwidth- Fiscal Year {min_year} - {max_year} (Till, {till_date})'),
         dcc.Graph(
             figure=fig_q1,
@@ -107,13 +125,24 @@ with app.app_context(), app.test_request_context():
 
     ])
 
+@dash_app.callback(Output('page-content', 'children'),
+              [Input('url', 'pathname')])
+def display_page(pathname):
+    if pathname == '/dash/capacity':
+        return layout
+    else:
+        return index_page
+
+# @dash_app.callback(
+#     Input('overall_eff_graph', 'clickData')
+# )
 @dash_app.callback(
     Output("dash_header", 'children'),
     Input("overall_efficiency", 'clickData'),
     )
 def dash_into():
     # session['dash'].header = f"Welcome, {session['user'].name}!!!"
-    return f"Welcome, {session['user'].name}!!!"
+    return f"Welcome, {g.user_role_id}!!!"
 
 
 @reports.route("/dash")
