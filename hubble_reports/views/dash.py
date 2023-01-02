@@ -102,12 +102,24 @@ df["date"] = pd.to_datetime(df["date"], format=r"%Y-%m-%d")
 logger.info(f"\n\n\n\n========Info=======\n{df}\n")
 min_year = df["date"].min().year
 max_year = df["date"].max().year
-df1 = df.groupby([df['date'].dt.strftime(r'%Y %b'),'team']).sum(numeric_only=True)[['actual_efficiency','expected_efficiency']].reset_index()
+df1 = (
+    df.groupby([df["date"].dt.strftime(r"%Y %b"), "team"])
+    .sum(numeric_only=True)[["actual_efficiency", "expected_efficiency"]]
+    .reset_index()
+)
 till_date = df["date"].max().strftime("%B %Y")
 df = df.groupby("team").mean(numeric_only=True)["capacity"].reset_index()
 # df1 = (df1.reset_index(level='team')
 #     .reset_index(level='date'))
-df1 = pd.DataFrame(pd.melt(df1, id_vars=['date', 'team'], value_vars=['actual_efficiency', 'expected_efficiency'], var_name='efficiency', value_name='efficiency_value'))
+df1 = pd.DataFrame(
+    pd.melt(
+        df1,
+        id_vars=["date", "team"],
+        value_vars=["actual_efficiency", "expected_efficiency"],
+        var_name="efficiency",
+        value_name="efficiency_value",
+    )
+)
 
 # def teams_overall_efficiency(df: pd.DataFrame) -> html:
 #     fig_bar = (
@@ -138,11 +150,11 @@ df["trends"] = df["capacity"].apply(
 
 dash_app.layout = html.Div(
     [
-        dcc.Location(id="url", refresh=False), 
+        dcc.Location(id="url", refresh=False),
         html.Div(id="page-content"),
-        dcc.Store(id='session', storage_type='session'),
+        dcc.Store(id="session", storage_type="session"),
         dash.page_container,
-        ]
+    ]
 )
 
 fig_bar = (
@@ -193,11 +205,12 @@ layout = html.Div(
         ),
         dcc.Link(
             dcc.Graph(
-            id="overall_efficiency",
-            figure=fig_bar,
-            animate=True,
-        ), 
-        href="/dash/detail-report"),
+                id="overall_efficiency",
+                figure=fig_bar,
+                animate=True,
+            ),
+            href="/dash/detail-report",
+        ),
         dash_table.DataTable(
             data=df.to_dict("records"),
             # columns=[{"name": i, "id": i} for i in df.columns],
@@ -228,12 +241,10 @@ layout = html.Div(
             ],
             merge_duplicate_headers=True,
             style_cell={
-                "textAlign": "left", 
+                "textAlign": "left",
                 "fontSize": "20px",
-                
-                    "if":'',
-                
-                },
+                "if": "",
+            },
             style_header={
                 "backgroundColor": "orange",
                 "fontWeight": "bold",
@@ -275,11 +286,9 @@ layout_logout = html.Div(
 )
 
 
-
 # @dash_app.callback(Output("url_out", "pathname"), Input("dash-logout", "clickData"))
 # def dash_loggingout(click):
 #     return redirect("reports.logout")
-
 
 
 @dash_app.callback(Output("page-content", "children"), [Input("url", "pathname")])
@@ -295,61 +304,58 @@ def display_page(pathname):
         return index_page
 
 
-    
-
 @dash.callback(
     # Output('click-data', 'children'),
-    Output('session', 'data'),
-    Input('overall_efficiency', 'clickData'),
-    )
+    Output("session", "data"),
+    Input("overall_efficiency", "clickData"),
+)
 def display_click_data(clickdata):
 
     if not clickdata:
         raise PreventUpdate
-    print("\n\n\nCallback_context:\n",clickdata['points'][0]['x'], '\n\n\n')
+    print("\n\n\nCallback_context:\n", clickdata["points"][0]["x"], "\n\n\n")
 
-    column = clickdata['points'][0]['x']
-    
+    column = clickdata["points"][0]["x"]
+
     return column
 
 
 layout_expected = html.Div(
     id="detailed_eff",
     children=[
-        html.H1(id='detail-title',children=['Detail-report']),
-        dcc.Graph(id='detailed_efficiency'),
-        
-    ]
+        html.H1(id="detail-title", children=["Detail-report"]),
+        dcc.Graph(id="detailed_efficiency"),
+    ],
 )
+
 
 @dash_app.callback(
     Output("detailed_efficiency", "figure"),
-    Input('session', "data"),
-    prevent_initial_callbacks=True,  
+    Input("session", "data"),
+    prevent_initial_callbacks=True,
 )
 def detailed_eff(data):
     logger.info(f"\n\n\nTeam Data clicked=====\n{data}\n\n")
 
     if not data:
         raise PreventUpdate
-   
+
     column = data
     fig_bar_detail = (
         px.bar(
-            df1[df1['team']==column],
+            df1[df1["team"] == column],
             x="date",
             y="efficiency_value",
             color="efficiency",
             text="efficiency_value",
             title=f"{column.capitalize()} Detailed Capacity - Efficiency",
             labels={"date": "Time", "efficiency_value": "Efficiency"},
-            barmode='group'
+            barmode="group",
         )
         .update_traces(texttemplate="%{text:0.0f}%")
         .update_layout(title_x=0.5)
     )
     return fig_bar_detail
-
 
 
 @reports.route("/dash")
