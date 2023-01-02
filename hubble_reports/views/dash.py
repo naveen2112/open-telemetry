@@ -103,7 +103,7 @@ logger.info(f"\n\n\n\n========Info=======\n{df}\n")
 min_year = df["date"].min().year
 max_year = df["date"].max().year
 df1 = (
-    df.groupby([df["date"].dt.strftime(r"%Y %b"), "team"])
+    df.groupby([df["date"], "team"],)
     .sum(numeric_only=True)[["actual_efficiency", "expected_efficiency"]]
     .reset_index()
 )
@@ -120,6 +120,7 @@ df1 = pd.DataFrame(
         value_name="efficiency_value",
     )
 )
+df1 = df1.sort_values('date')
 
 # def teams_overall_efficiency(df: pd.DataFrame) -> html:
 #     fig_bar = (
@@ -318,13 +319,21 @@ def display_click_data(clickdata):
     column = clickdata["points"][0]["x"]
 
     return column
-
-
+# df1.loc[]
+_config = {'autosizable': True}
 layout_expected = html.Div(
     id="detailed_eff",
     children=[
         html.H1(id="detail-title", children=["Detail-report"]),
-        dcc.Graph(id="detailed_efficiency"),
+        dcc.Graph(id="detailed_efficiency", animate=True, config=_config),
+        html.H2('Slider'),
+        html.Br(),
+        dcc.RangeSlider(0, len(df1.groupby(df1['date'].dt.strftime(r"%Y %b"), sort=False)),
+            marks={d: f'{d}' for d in range(len(df1.groupby(df1['date'].dt.strftime(r"%Y %b"), sort=False)))},
+            value=[0, len(df1.groupby(df1['date'].dt.strftime(r"%Y %b"), sort=False))],
+            id='date_range'
+        ),
+        html.Div(id='date_range_picked')
     ],
 )
 
@@ -332,18 +341,23 @@ layout_expected = html.Div(
 @dash_app.callback(
     Output("detailed_efficiency", "figure"),
     Input("session", "data"),
+    Input('date_range', 'value'),
     prevent_initial_callbacks=True,
 )
-def detailed_eff(data):
-    logger.info(f"\n\n\nTeam Data clicked=====\n{data}\n\n")
-
+def detailed_eff(data, val):
+    
     if not data:
         raise PreventUpdate
-
+    logger.info(f"\n\n\nTeam Data clicked=====\n{data}\n\n")
+    print(f"\n\nDetailed:\n{val}\n\n{data}\n\n")
     column = data
+    df_range =  df1.groupby(df1['date'].dt.strftime(r"%Y %b"), sort=False).sum(numeric_only=True).iloc[val[0]:val[-1]].reset_index()
+    # df_range = df1.groupby(['date','efficiency','team']).loc[val[0]:val[-1]].sum(numeric_only=True).reset_index()
+    print(f"\n\nMin range:\n{df_range['date'].min()}\n\nMax range:\n{df_range['date'].max()}\n\n")
     fig_bar_detail = (
         px.bar(
-            df1[df1["team"] == column],
+            data_frame=df1[(df1['team']==column) & ((df1['date'].dt.strftime(r"%Y %b")>=df_range['date'].min()) & (df1['date'].dt.strftime(r"%Y %b")<=df_range['date'].max()))].groupby([df1['date'].dt.strftime("%Y %b"), 'efficiency'], sort=False).sum(numeric_only=True).reset_index(),
+            # data_frame=df1[(df1['team']==column)],
             x="date",
             y="efficiency_value",
             color="efficiency",
@@ -351,12 +365,121 @@ def detailed_eff(data):
             title=f"{column.capitalize()} Detailed Capacity - Efficiency",
             labels={"date": "Time", "efficiency_value": "Efficiency"},
             barmode="group",
+            
+            # layout_xaxis_range=[df_range['date'].min(), df_range['date'].max()]
         )
-        .update_traces(texttemplate="%{text:0.0f}%")
-        .update_layout(title_x=0.5)
+        .update_traces(texttemplate="%{text:0}")
+        .update_layout(
+            title_x=0.5,
+            # uirevision='range',
+            # bargap=0.1,
+            # bargroupgap=0.05, 
+            xaxis_range=[df_range['date'].min(), df_range['date'].max()],
+            # autorange=True,
+            # xaxis=dict(
+            #     range=[df_range['date'].min(), df_range['date'].max()],
+            #     # rangeslider_visible=True,
+            #     # side='top',
+            # #   tickmode='array',
+            # #   tickformat='Q%q %Y \n',
+            # #   ticklabelmode='period',
+            # #   ticks='outside'
+            #     ),
+    ))
+    fig_bar_detail.update_layout(
+    xaxis=dict(
+        # autorange=True,
+        fixedrange=False,
+        
+        # boundmode='soft',
+        # bounds=[df_range['date'].min(), df_range['date'].max()],
+        # constrain='range',
+#         rangeselector=dict(
+#             buttons=list([
+#                 dict(count=6,
+#                      label="6m",
+#                      step="month",
+#                      stepmode="backward"),
+#                 dict(count=1,
+#                      label="YTD",
+#                      step="year",
+#                      stepmode="todate"),
+#                 dict(count=1,
+#                      label="1y",
+#                      step="year",
+#                      stepmode="backward"),
+#                 dict(step="all")
+            # ])
+        # ),
+#         rangeslider=dict(
+#             visible=True
+        ),
+        yaxis=dict(
+        autorange=True,
+        fixedrange=False,
+        ),
+#         type="date"
     )
+# )
+    # fig_bar_detail['layout']['xaxis'].update(autorange=True, rangemode = 'normal')
+    # fig_bar_detail.update_layout(transition_duration=500)
+    # fig_bar_detail.update_xaxes(autorange=True)
+    # fig_bar_detail.update_yaxes(autorange=True)
     return fig_bar_detail
 
+
+
+@dash_app.callback(
+    # [
+        Output('date_range_picked', 'children'),
+        # Output("detailed_efficiency", "figure"),
+    # ],
+    Input('date_range', 'value'),
+    Input("session", "data"),
+)
+def date_range_slider(val, data):
+    logger.debug(f"\n\nDate rage value in {__name__}:\n{val}\n\n")
+    print(f"\n\nDate rage value in {__name__}:\n{type(val[0])}\n{data}\n")
+    # print(f"\n\nDate range value=\n{val}\n\nClicked Data:\n{data}\n\n")
+    # if val[0]==0:
+    #     return PreventUpdate
+    print(f"\n\n\nInside range:\n\n")
+    column = data
+
+    return f"You have selected {val}"
+
+# @dash_app.callback(
+#     # [
+#         # Output('date_range_picked', 'children'),
+#     Output("detailed_efficiency", "figure"),
+#     # ],
+#     Input('date_range', 'value'),
+#     Input("session", "data"),
+# )
+# def date_range_slider_graph(val, data):
+#     # logger.debug(f"\n\nDate rage in graph value in {__name__}:\n{val}\n\n")
+#     print(f"\n\nDate rage in graph value in {__name__}:\n{type(val[0])}\n{data}\n")
+#     # print(f"\n\nDate range value=\n{val}\n\nClicked Data:\n{data}\n\n")
+#     if val[0]==0:
+#         return PreventUpdate
+#     print(f"\n\n\nInside range:\n\n")
+#     column = data
+#     fig_bar_detail = (
+#         px.bar(
+#             df1[df1["team"] == column].loc[val[0]:val[1]],
+#             x="date",
+#             y="efficiency_value",
+#             color="efficiency",
+#             text="efficiency_value",
+#             title=f"{column.capitalize()} Detailed Capacity - Efficiency",
+#             labels={"date": "Time", "efficiency_value": "Efficiency"},
+#             barmode="group",
+#         )
+#         .update_traces(texttemplate="%{text:0.0f}%")
+#         .update_layout(title_x=0.5)
+#     )
+
+#     return fig_bar_detail
 
 @reports.route("/dash")
 # @login_required
