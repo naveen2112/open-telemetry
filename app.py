@@ -7,7 +7,8 @@ from flask_login import LoginManager
 from hubble_reports.models import db
 
 
-app = Flask(__name__, static_folder='hubble_reports/static', template_folder="hubble_reports/templates")
+app = Flask(__name__, template_folder="hubble_reports/templates", static_folder='hubble_reports/static')
+app.app_context().push()
 load_dotenv()
 app.config.from_object(BaseConfig)
 Session(app)
