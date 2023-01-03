@@ -39,10 +39,8 @@ dash.register_page(
     layout=html.Div(children=redirect("reports.logout")),
     path="/dash/logout",
 )
-# dash.register_page("home", layout=html.Div('home'), path='/')
-# session['dash'].header = f"Welcome, {session['user'].name}!!!"
+
 # FYI, you need both an app context and a request context to use url_for() in the Jinja2 templates
-# def dash_call():
 with app.app_context(), app.test_request_context():
     layout_dash = (
         pathlib.Path(get_root_path(__name__))
@@ -50,11 +48,10 @@ with app.app_context(), app.test_request_context():
         .joinpath("dashboard.html")
     )
     logger.info(f"\n\n\n\n=========>>>layout_dash:\n{layout_dash}\n\n")
-    # logger.info(f"\n\n\n\n=========>>>template url_for:\n{url_for('templates', filename='layouts/base.html')}\n\n")
+    
     with open(layout_dash, "r") as f:
         html_body = render_template_string(f.read())
         html_body = html_body.replace("HEADER", "Welcome User!!!")
-        # print("\n\n\n", html_body, "\n\n\n")
 
 dash_app.index_string = html_body
 
