@@ -242,15 +242,15 @@ layout = html.Div(
         ),
     ],
 )
-layout_logout = html.Div(
-    id="dash_logout",
-    children=[
-        dcc.Location(id="url_out"),
-        html.H2(children="Are you sure to logout?"),
-        html.Br(),
-        html.Button("Yes", id="dash-logout", n_clicks=0),
-    ],
-)
+# layout_logout = html.Div(
+#     id="dash_logout",
+#     children=[
+#         dcc.Location(id="url_out"),
+#         html.H2(children="Are you sure to logout?"),
+#         html.Br(),
+#         html.Button("Yes", id="dash-logout", n_clicks=0),
+#     ],
+# )
 
 @dash_app.callback(Output("page-content", "children"), [Input("url", "pathname")])
 def display_page(pathname):
@@ -259,8 +259,8 @@ def display_page(pathname):
     elif pathname == "/dash/detail-report":
         logger.info(f"layout_expected")
         return layout_expected
-    elif pathname == "/dash/logout":
-        return layout_logout
+    # elif pathname == "/dash/logout":
+    #     return layout_logout
     else:
         return index_page
 
@@ -362,10 +362,12 @@ def date_range_slider(val, data):
     logger.debug(f"\n\nDate rage value in {__name__}:\n{val}\n\n")
     print(f"\n\nDate rage value in {__name__}:\n{type(val[0])}\n{data}\n")
     print(f"\n\n\nInside range:\n\n")
+    if not val:
+        return PreventUpdate
     column = data
     val1 = [
         df1_slide.min().iloc[val[0], 0].strftime(r"%Y %b"), 
-        df1_slide.min().iloc[val[-1], 0].strftime(r"%Y %b")
+        df1_slide.max().iloc[val[1]-1, 0].strftime(r"%Y %b")
         ]
 
     return f"You have selected {val1}"
