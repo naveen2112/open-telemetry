@@ -1,27 +1,16 @@
-import pandas as pd
-import plotly.express as px
-import numpy as np
-
-import pathlib
-from hubble_reports.hubble_reports import reports
-from flask import render_template_string, current_app, url_for, redirect, session, g
-from flask_login import login_required, logout_user
-from sqlalchemy import create_engine
-from flask.helpers import get_root_path
-from dash.dependencies import Input, Output
-
-from dash import Dash, dash_table, callback, dcc
-from dash.dash_table.Format import Format, Symbol, Scheme
-from dash.exceptions import PreventUpdate
 import dash
+import logging
+import pathlib
 
 from dash import Dash, dcc, html
-from config import BaseConfig
-from app import app
+from flask import render_template_string
+from flask_login import login_required
+from flask.helpers import get_root_path
 
-from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
+from app import app
+from hubble_reports.hubble_reports import reports
 from hubble_reports.utils import get_logger
-import logging
+
 
 logger = get_logger(__name__, level=logging.DEBUG)
 
@@ -31,7 +20,6 @@ dash_app = Dash(
     url_base_pathname="/dash/",
     use_pages=True,
 )
-
 
 # FYI, you need both an app context and a request context to use url_for() in the Jinja2 templates
 with app.app_context(), app.test_request_context():
@@ -57,6 +45,7 @@ dash_app.layout = html.Div(
     dash.page_container,
 ]
 )
+
 
 @reports.route("/dash")
 # @login_required

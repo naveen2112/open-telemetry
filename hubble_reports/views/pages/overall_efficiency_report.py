@@ -1,25 +1,16 @@
+import dash
+import logging
+import numpy as np
 import pandas as pd
 import plotly.express as px
-import numpy as np
-import logging
 
-import pathlib
-from hubble_reports.hubble_reports import reports
-from flask import render_template_string, current_app, url_for, redirect, session, g
-from flask_login import login_required, logout_user
+from dash import dash_table, callback, dcc, html
 from sqlalchemy import create_engine
-from flask.helpers import get_root_path
-from dash.dependencies import Input, Output
-
-from dash import Dash, dash_table, callback, dcc
 from dash.dash_table.Format import Format, Symbol, Scheme
+from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
-import dash
 
-from dash import Dash, dcc, html
 from config import BaseConfig
-from app import app
-
 from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
 from hubble_reports.utils import get_logger
 
@@ -56,26 +47,29 @@ df.rename(
     },
     inplace=True,
 )
-df.loc[:, "capacity"] = 100 * df["actual_efficiency"] / df["expected_efficiency"]
-df["capacity"] = df["capacity"].fillna(0)
-df.replace(np.inf, 100.0, inplace=True)
-df["date"] = pd.to_datetime(df["date"], format=r"%Y-%m-%d")
+df_overall_eff = df.copy()
+df_overall_eff.loc[:, "capacity"] = 100 * df_overall_eff["actual_efficiency"] / df_overall_eff["expected_efficiency"]
+df_overall_eff["capacity"] = df_overall_eff["capacity"].fillna(0)
+df_overall_eff.replace(np.inf, 100.0, inplace=True)
+df_overall_eff["date"] = pd.to_datetime(df_overall_eff["date"], format=r"%Y-%m-%d")
 
 logger.info(f"\n\n\n\n========Info=======\n{df}\n")
-min_year = df["date"].min().year
-max_year = df["date"].max().year
-till_date = df["date"].max().strftime("%B %Y")
-df = df.groupby("team").mean(numeric_only=True)["capacity"].reset_index()
-df["ratings"] = df["capacity"].apply(
+
+min_year = df_overall_eff["date"].min().year
+max_year = df_overall_eff["date"].max().year
+till_date = df_overall_eff["date"].max().strftime("%B %Y")
+
+df_overall_eff = df_overall_eff.groupby("team").mean(numeric_only=True)["capacity"].reset_index()
+df_overall_eff["ratings"] = df_overall_eff["capacity"].apply(
     lambda a: "Excellent" if a > 121 else "Good" if a > 120 else "Needs Improvement"
 )
-df["trends"] = df["capacity"].apply(
+df_overall_eff["trends"] = df_overall_eff["capacity"].apply(
     lambda a: "↑" if a > 121 else "↔︎" if a > 120 else "↓"
 )
 
 fig_bar = (
     px.bar(
-        df,
+        df_overall_eff,
         x="team",
         y="capacity",
         color="team",
@@ -119,7 +113,7 @@ layout = html.Div(
             href="/dash/detail-report",
         ),
         dash_table.DataTable(
-            data=df.to_dict("records"),
+            data=df_overall_eff.to_dict("records"),
             # columns=[{"name": i, "id": i} for i in df.columns],
             columns=[
                 {
@@ -183,13 +177,13 @@ layout = html.Div(
     ],
 )
 
+
 @callback(
     Output("session", "data"),
     Input("overall_efficiency", "clickData"),
 )
 def display_click_data(clickdata):
     logger.info(f"\n\n\n\n========ClickData=======\n{clickdata}\n")
-    print("\n\n\nCallback_context:\n", clickdata["points"][0]["x"], "\n\n\n")
 
     if not clickdata:
         raise PreventUpdate
