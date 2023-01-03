@@ -72,14 +72,6 @@ df_or = pd.read_sql_query(
 
 df = df_or.copy()
 
-
-def team_efficiency_dataframe(df_t: pd.DataFrame, range_slide=None):
-    df_t.sort_values(
-        "date",
-    )
-    logger.info(f"\n\n\n\n\nSorting DataFrame:\n{df_t}\n\n")
-
-
 df.rename(
     columns={
         "authorized_hours": "actual_efficiency",
@@ -93,9 +85,8 @@ df.rename(
 df.loc[:, "capacity"] = 100 * df["actual_efficiency"] / df["expected_efficiency"]
 df["capacity"] = df["capacity"].fillna(0)
 df.replace(np.inf, 100.0, inplace=True)
-# data['date']=pd.to_datetime(data['date'],format='%Y-%m-%d')
 df["date"] = pd.to_datetime(df["date"], format=r"%Y-%m-%d")
-# team_efficiency_dataframe(df)
+
 logger.info(f"\n\n\n\n========Info=======\n{df}\n")
 min_year = df["date"].min().year
 max_year = df["date"].max().year
@@ -106,8 +97,6 @@ df1 = (
 )
 till_date = df["date"].max().strftime("%B %Y")
 df = df.groupby("team").mean(numeric_only=True)["capacity"].reset_index()
-# df1 = (df1.reset_index(level='team')
-#     .reset_index(level='date'))
 df1 = pd.DataFrame(
     pd.melt(
         df1,
