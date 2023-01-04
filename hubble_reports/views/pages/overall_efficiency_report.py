@@ -1,6 +1,5 @@
 import dash
 import logging
-import numpy as np
 import pandas as pd
 import plotly.express as px
 
@@ -23,58 +22,58 @@ dash.register_page(
 )
 
 db_conn = create_engine(BaseConfig.SQLALCHEMY_DATABASE_URI)
-
-df_or = pd.read_sql_query(
+df = pd.read_sql_query(
     db.session.query(
-        TimesheetEntry.authorized_hours,
-        TimesheetEntry.entry_date,
-        Team.name,
-        ExpectedUserEfficiency.expected_efficiency,
+        db.func.avg(
+            100
+            * (
+                TimesheetEntry.authorized_hours
+                / ExpectedUserEfficiency.expected_efficiency
+            )
+        ).label("capacity"),
+        Team.name.label("team"),
     )
-    .join(TimesheetEntry, TimesheetEntry.user_id == ExpectedUserEfficiency.user_id)
-    .join(Team, Team.id == TimesheetEntry.team_id)
+    .join(
+        ExpectedUserEfficiency, TimesheetEntry.user_id == ExpectedUserEfficiency.user_id
+    )
+    .join(Team, TimesheetEntry.team_id == Team.id)
+    .group_by(Team.name)
     .statement,
     db_conn,
 )
 
-df = df_or.copy()
-
-df.rename(
-    columns={
-        "authorized_hours": "actual_efficiency",
-        "name": "team",
-        "entry_date": "date",
-    },
-    inplace=True,
+df_date = pd.read_sql_query(
+    db.session.query(
+        db.func.min(TimesheetEntry.entry_date).label("min_date"),
+        db.func.max(TimesheetEntry.entry_date).label("max_date"),
+    )
+    .join(
+        ExpectedUserEfficiency, TimesheetEntry.user_id == ExpectedUserEfficiency.user_id
+    )
+    .statement,
+    parse_dates=["min_date", "max_date"],
+    con=db_conn,
 )
-df_overall_eff = df.copy()
-df_overall_eff.loc[:, "capacity"] = 100 * df_overall_eff["actual_efficiency"] / df_overall_eff["expected_efficiency"]
-df_overall_eff["capacity"] = df_overall_eff["capacity"].fillna(0)
-df_overall_eff.replace(np.inf, 100.0, inplace=True)
-df_overall_eff["date"] = pd.to_datetime(df_overall_eff["date"], format=r"%Y-%m-%d")
 
-logger.info(f"\n\n\n\n========Info=======\n{df}\n")
+min_year = df_date["min_date"].dt.year[0]
+max_year = df_date["max_date"].dt.year[0]
+till_date = df_date["max_date"].dt.strftime("%B %Y")[0]
 
-min_year = df_overall_eff["date"].min().year
-max_year = df_overall_eff["date"].max().year
-till_date = df_overall_eff["date"].max().strftime("%B %Y")
-
-df_overall_eff = df_overall_eff.groupby("team").mean(numeric_only=True)["capacity"].reset_index()
-df_overall_eff["ratings"] = df_overall_eff["capacity"].apply(
+df["ratings"] = df["capacity"].apply(
     lambda a: "Excellent" if a > 121 else "Good" if a > 120 else "Needs Improvement"
 )
-df_overall_eff["trends"] = df_overall_eff["capacity"].apply(
+df["trends"] = df["capacity"].apply(
     lambda a: "↑" if a > 121 else "↔︎" if a > 120 else "↓"
 )
 
 fig_bar = (
-    px.histogram(
-        df_overall_eff,
+    px.bar(
+        df,
         x="team",
         y="capacity",
         color="team",
         text_auto=True,
-        # text="capacity",
+        text="capacity",
         title="Teams Capacity - Efficiency %",
         labels={"team": "Teams", "capacity": "Capacity"},
     )
@@ -109,13 +108,12 @@ layout = html.Div(
             dcc.Graph(
                 id="overall_efficiency",
                 figure=fig_bar,
-                # animate=True,
             ),
             href="/report/detail-report",
         ),
         dash_table.DataTable(
-            data=df_overall_eff.to_dict("records"),
-            # columns=[{"name": i, "id": i} for i in df.columns],
+            data=df.to_dict("records"),
+            # columns=[{"name": i, "id": i} for i in df.columns],   #To give overall columns in a single statement
             columns=[
                 {
                     "name": ["Teams Ratings & Trend", "Team"],
@@ -184,12 +182,7 @@ layout = html.Div(
     Input("overall_efficiency", "clickData"),
 )
 def display_click_data(clickdata):
-    logger.info(f"\n\n\n\n========ClickData=======\n{clickdata}\n")
-
     if not clickdata:
         raise PreventUpdate
-    print("\n\n\nCallback_context:\n", clickdata["points"][0]["x"], "\n\n\n")
-
     column = clickdata["points"][0]["x"]
-
     return column
