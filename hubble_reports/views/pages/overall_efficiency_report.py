@@ -68,16 +68,17 @@ df_overall_eff["trends"] = df_overall_eff["capacity"].apply(
 )
 
 fig_bar = (
-    px.bar(
+    px.histogram(
         df_overall_eff,
         x="team",
         y="capacity",
         color="team",
-        text="capacity",
+        text_auto=True,
+        # text="capacity",
         title="Teams Capacity - Efficiency %",
         labels={"team": "Teams", "capacity": "Capacity"},
     )
-    .update_traces(texttemplate="%{text:0.0f}%")
+    .update_traces(texttemplate="%{y:0.0f}%")
     .update_layout(title_x=0.5)
 )
 
