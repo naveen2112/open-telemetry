@@ -60,7 +60,7 @@ max_year = df_date["max_date"].dt.year[0]
 till_date = df_date["max_date"].dt.strftime("%B %Y")[0]
 
 df["ratings"] = df["capacity"].apply(
-    lambda a: "Excellent" if a > 121 else "Good" if a > 120 else "Needs Improvement"
+    lambda a: "Excellent" if a > 121 else "<h1>Good</h1>" if a > 120 else "Needs Improvement"
 )
 df["trends"] = df["capacity"].apply(
     lambda a: "↑" if a > 121 else "↔︎" if a > 120 else "↓"
@@ -178,7 +178,7 @@ layout = html.Div(
 
 
 @callback(
-    Output("session", "data"),
+    Output("team_selected", "data"),
     Input("overall_efficiency", "clickData"),
 )
 def display_click_data(clickdata):

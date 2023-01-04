@@ -41,7 +41,7 @@ dash_app.layout = html.Div(
     dcc.Location(id="url", refresh=False),
     html.H1('First'),
     html.Div(id="page-content"),
-    dcc.Store(id="session", storage_type="session"),
+    dcc.Store(id="team_selected", storage_type="session"),
     dash.page_container,
 ]
 )

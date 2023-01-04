@@ -102,7 +102,7 @@ layout = html.Div(
 
 @callback(
     Output("detailed_efficiency", "figure"),
-    Input("session", "data"),
+    Input("team_selected", "data"),
     Input('date_range', 'value'),
     prevent_initial_callbacks=False,
 )
