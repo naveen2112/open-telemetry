@@ -17,7 +17,7 @@ logger = get_logger(__name__, level=logging.DEBUG)
 dash_app = Dash(
     __name__,
     server=app,
-    url_base_pathname="/dash/",
+    url_base_pathname="/report/",
     use_pages=True,
 )
 
@@ -47,7 +47,7 @@ dash_app.layout = html.Div(
 )
 
 
-@reports.route("/dash")
+@reports.route("/report")
 # @login_required
 def dash_entry():
     return dash_app.index()

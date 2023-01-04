@@ -19,7 +19,7 @@ logger = get_logger(__name__, level=logging.DEBUG)
 
 dash.register_page(
     __name__,
-    path="/report",
+    path="/overall-efficiency",
 )
 
 db_conn = create_engine(BaseConfig.SQLALCHEMY_DATABASE_URI)
