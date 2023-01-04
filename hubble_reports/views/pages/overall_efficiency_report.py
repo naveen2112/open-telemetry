@@ -97,7 +97,7 @@ layout = html.Div(
             ],
         ),
         html.Br(),
-        dcc.Link("Back", href="/dash"),
+        dcc.Link("Back", href="/report"),
         html.Br(),
         dcc.Link("logout", href="/logout", refresh=True),
         html.Br(),
@@ -111,7 +111,7 @@ layout = html.Div(
                 figure=fig_bar,
                 # animate=True,
             ),
-            href="/dash/detail-report",
+            href="/report/detail-report",
         ),
         dash_table.DataTable(
             data=df_overall_eff.to_dict("records"),
