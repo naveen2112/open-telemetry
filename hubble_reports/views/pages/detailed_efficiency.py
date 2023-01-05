@@ -5,8 +5,9 @@ import plotly.express as px
 
 from dash import callback, dcc, html
 from sqlalchemy import create_engine
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
+from datetime import date, datetime
 
 from config import BaseConfig
 from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
@@ -22,137 +23,130 @@ dash.register_page(
 
 db_conn = create_engine(BaseConfig.SQLALCHEMY_DATABASE_URI)
 
-df_or = pd.read_sql_query(
-    db.session.query(
-        TimesheetEntry.authorized_hours,
-        TimesheetEntry.entry_date,
-        Team.name,
-        ExpectedUserEfficiency.expected_efficiency,
-    )
-    .join(TimesheetEntry, TimesheetEntry.user_id == ExpectedUserEfficiency.user_id)
-    .join(Team, Team.id == TimesheetEntry.team_id)
-    .statement,
-    db_conn,
-)
-
-df = df_or.copy()
-
-df.rename(
-    columns={
-        "authorized_hours": "actual_efficiency",
-        "name": "team",
-        "entry_date": "date",
-    },
-    inplace=True,
-)
-
-df["date"] = pd.to_datetime(df["date"], format=r"%Y-%m-%d")
-
-df_detail_report = (
-    df.groupby([df["date"], "team"],)
-    .sum(numeric_only=True)[["actual_efficiency", "expected_efficiency"]]
-    .reset_index()
-)
-
-df_detail_report = pd.DataFrame(
-    pd.melt(
-        df_detail_report,
-        id_vars=["date", "team"],
-        value_vars=["actual_efficiency", "expected_efficiency"],
-        var_name="efficiency",
-        value_name="efficiency_value",
-    )
-)
-df_detail_report = df_detail_report.sort_values('date')
-
-
-df_detail_report_slide = df_detail_report.groupby(df_detail_report['date'].dt.strftime(r"%Y %b"), sort=False) 
-range_df_detail_report = df_detail_report_slide.sum(numeric_only=True).reset_index()
 
 layout = html.Div(
     id="detailed_eff",
     children=[
         html.H1(id="detail-title", children=["Detail-report"]),
-
-
-        html.Div(
-            [
-                dcc.DatePickerRange(
-                    id="date-range-picker",
-                    style={"width": 330},
-                ),
-            ]
-        ),
-
-
+        # html.H4("<h1>Good</h1>"),
         dcc.Graph(
             id="detailed_efficiency",
-         
-            ),
-        html.H2('Slider'),
-        html.Br(),
-        dcc.RangeSlider(0, len(df_detail_report.groupby(df_detail_report['date'].dt.strftime(r"%Y %b"), sort=False)),
-            marks={d: f"{range_df_detail_report.loc[d,'date']}" for d in range(len(df_detail_report_slide))},
-            value=[0, len(df_detail_report_slide)],
-            id='date_range'
         ),
-        html.Div(id='date_range_picked')
+        html.H2("Slider"),
+        html.Br(),
+        html.Div(id="date_range_picked"),
     ],
 )
+
+# @callback(
+#     Output()
+# )
 
 @callback(
     Output("detailed_efficiency", "figure"),
     Input("team_selected", "data"),
-    Input('date_range', 'value'),
+    Input("min_date_range", "data"),
+    Input("max_date_range", "data"),
     prevent_initial_callbacks=False,
 )
-def detailed_eff(data, val):
+def detailed_eff(column, min_date_sess, max_date_sess):
+
+    val1 = datetime.strptime(min_date_sess, r'%Y-%m-%d')
+    val2 = datetime.strptime(max_date_sess, r'%Y-%m-%d')
+    min_date_sess = min(val1, val2).strftime(r'%Y-%m-%d')
+    max_date_sess = max(val1, val2).strftime(r'%Y-%m-%d')
     
-    # if not data:
-    #     raise PreventUpdate
-    logger.info(f"\n\n\nTeam Data clicked=====\n{data}\n\n")
-    print(f"\n\nDetailed:\n{val}\n\n{data}\n\n")
-    column = data
-    df_range =  df_detail_report.groupby(df_detail_report['date'].dt.strftime(r"%Y %b"), sort=False).sum(numeric_only=True).iloc[val[0]:val[-1]].reset_index()
-    print(f"\n\nMin range:\n{df_range['date'].min()}\n\nMax range:\n{df_range['date'].max()}\n\n")
+    logger.info(f"\n\n\nTeam Data clicked=====\n{column}\n\n")
+    logger.debug(f"\n\nDetailed:\n\n\n{column = }\n\n{min_date_sess = }\n\n{max_date_sess = }")
+    df = pd.read_sql_query(
+        db.session.query(
+            db.func.date_trunc("month", TimesheetEntry.entry_date).label(
+                "display_date"
+            ),
+            db.func.sum(TimesheetEntry.authorized_hours).label('actual_hours'),
+            db.func.sum(
+                ExpectedUserEfficiency.expected_efficiency
+            ).label("expected_hours"),
+        )
+        .join(TimesheetEntry, TimesheetEntry.user_id == ExpectedUserEfficiency.user_id)
+        .join(Team, Team.id == TimesheetEntry.team_id)
+        .filter(
+            db.and_(
+                Team.name == column,
+                db.and_(
+                (min_date_sess <= TimesheetEntry.entry_date),
+                (TimesheetEntry.entry_date <= max_date_sess)),
+            )
+        )
+        .group_by(db.func.date_trunc("month", TimesheetEntry.entry_date))
+        .order_by(db.func.date_trunc("month", TimesheetEntry.entry_date))
+        .statement,
+        con=db_conn,
+        parse_dates=['display_date']
+    )
+    logger.debug(f'\n\n\nBefore Melted dataframe:\n{df}')
+    df = pd.DataFrame(
+    pd.melt(
+            df,
+            id_vars=["display_date"],
+            value_vars=["actual_hours", "expected_hours"],
+            var_name="efficiency",
+            value_name="efficiency_value",
+        )
+    ) 
+    logger.debug(f'\n\n\nMelted dataframe:\n{df}')
+
     fig_bar_detail = (
         px.bar(
-            data_frame=df_detail_report[(df_detail_report['team']==column) & ((df_detail_report['date'].dt.strftime(r"%Y %b")>=df_range['date'].min()) & (df_detail_report['date'].dt.strftime(r"%Y %b")<=df_range['date'].max()))].groupby([df_detail_report['date'].dt.strftime("%Y %b"), 'efficiency'], sort=False).sum(numeric_only=True).reset_index(),
-            x="date",
+            data_frame=df,
+            x="display_date",
             y="efficiency_value",
             color="efficiency",
             text="efficiency_value",
             title=f"{column.capitalize()} Detailed Capacity - Efficiency",
-            labels={"date": "Time", "efficiency_value": "Efficiency"},
+            labels={"display_date": "Time", "efficiency_value": "Efficiency"},
             barmode="group",
         )
         .update_traces(texttemplate="%{text:0}")
         .update_layout(
             title_x=0.5,
-            xaxis_range=[df_range['date'].min(), df_range['date'].max()],
-            xaxis=dict(
-                range=[df_range['date'].min(), df_range['date'].max()],
-                ),
-    ))
+            # xaxis_range=[min_date_sess, max_date_sess],
+            
+        )
+    )
+    fig_bar_detail.update_xaxes(tickmode = 'array')
     return fig_bar_detail
 
+# @callback(
+#     Output("min_date_range", "data"),
+#     Output("max_date_range", "data"),
+#     Input("date-range-picker", "start_date"),
+#     Input("date-range-picker", "end_date"),
+#     )
+# def update_date_range(st_date, end_date):
+#     if (not st_date) and (not end_date):
+#         raise PreventUpdate
 
+#     logger.info(f"\n\n\n\n\nUPdate Date range\nStart Date:\n{st_date}\t{type(st_date)}\n\nEnd Date:\n{end_date}\t{type(end_date)}\n\n")
+    
+#     return st_date, end_date
 
 @callback(
-    Output('date_range_picked', 'children'),
-    Input('date_range', 'value'),
-    Input("session", "data"),
+    Output("date_range_picked", "children"),
+    Input("min_date_range", "data"),
+    Input("max_date_range", "data"),
+    Input("team_selected", "data"),
 )
-def date_range_slider(val, data):
-    logger.debug(f"\n\nDate rage value in {__name__}:\n{val}\n\n")
-    print(f"\n\nDate rage value in {__name__}:\n{type(val[0])}\n{data}\n")
-    print(f"\n\n\nInside range:\n\n")
-    if not val:
+def date_range_slider(min_date, max_date, team):
+    logger.debug(f"\n\nDate rage value in {__name__}:\n{min_date}\t{max_date}\n\n")
+    # logger.info(f"\n\nDate rage value in {__name__}:\n{type(val[0])}\n{team}\n")
+    logger.info(f"\n\n\nInside range:\n\n")
+    if not min_date and not max_date:
         return PreventUpdate
-    column = data
-    val1 = [
-        df_detail_report_slide.min().iloc[val[0], 0].strftime(r"%Y %b"), 
-        df_detail_report_slide.max().iloc[val[1]-1, 0].strftime(r"%Y %b")
-        ]
+    column = team
+    # val1 = [
+    #     df_detail_report_slide.min().iloc[val[0], 0].strftime(r"%Y %b"),
+    #     df_detail_report_slide.max().iloc[val[1] - 1, 0].strftime(r"%Y %b"),
+    # ]
 
-    return f"You have selected {val1}" 
+    return f"You have selected between {max_date}, {min_date}"
