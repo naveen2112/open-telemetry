@@ -121,7 +121,6 @@ layout = html.Div(
         ),
         dash_table.DataTable(
             data=df.to_dict("records"),
-            # columns=[{"name": i, "id": i} for i in df.columns],   #To give overall columns in a single statement
             columns=[
                 {
                     "name": ["Teams Ratings & Trend", "Team"],
