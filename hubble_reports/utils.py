@@ -2,6 +2,7 @@ import logging
 from functools import wraps
 from flask import abort, g
 from hubble_reports.models import db, PermissionRole, Permission
+from datetime import datetime
 
 
 def get_logger(name: str, level: int = logging.INFO) -> logging.Logger:
@@ -39,3 +40,6 @@ def verify_permission(*permissions_allowed: tuple[str]):
         return inner
 
     return outer
+
+def for_str_date_to_new_str_date(date:str, existing_format:str, new_format:str) -> str:
+    return datetime.strptime(date, existing_format).strftime(new_format)

@@ -2,6 +2,7 @@ import dash
 import logging
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 
 from dash import dash_table, callback, dcc, html
 from sqlalchemy import create_engine
@@ -14,6 +15,7 @@ from dateutil import relativedelta
 from config import BaseConfig
 from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
 from hubble_reports.utils import get_logger
+from hubble_reports.utils import for_str_date_to_new_str_date
 
 
 logger = get_logger(__name__, level=logging.DEBUG)
@@ -66,7 +68,7 @@ max_year = df_date["max_date"].dt.year[0]
 till_date = df_date["max_date"].dt.strftime("%B %Y")[0]
 
 df["ratings"] = df["capacity"].apply(
-    lambda a: "Excellent"
+    lambda a: "<h1>Excellent<\h1>"
     if a > 121
     else "Good"
     if a > 120
@@ -111,7 +113,7 @@ layout = html.Div(
         html.Br(),
         html.H2(
             id="overall_efficiency_title",
-            children=f"Teams Efficiency bandwidth- Fiscal Year {min_year} - {max_year} (Till, {till_date})",
+            # children=f"Teams Efficiency bandwidth- Fiscal Year {min_year} - {max_year} (Till, {till_date})",
         ),
         dcc.Link(
             dcc.Graph(
@@ -120,8 +122,10 @@ layout = html.Div(
             ),
             href="/report/detail-report",
         ),
+        # dcc.Graph(id='trail_table'),
         dash_table.DataTable(
-            data=df.to_dict("records"),
+            id="overall_efficiency_table",
+            # data=df.to_dict("records"),
             columns=[
                 {
                     "name": ["Teams Ratings & Trend", "Team"],
@@ -186,7 +190,10 @@ layout = html.Div(
 
 
 @callback(
+    Output("overall_efficiency_title", "children"),
     Output("overall_efficiency", "figure"),
+    Output("overall_efficiency_table", "data"),
+    # Output("trail_table", "figure"),
     Input("min_date_range", "data"),
     Input("max_date_range", "data"),
 )
@@ -240,12 +247,12 @@ def update_figure(st_date, end_date):
         con=db_conn,
     )
 
-    min_year = df_date["min_date"].dt.year[0]
-    max_year = df_date["max_date"].dt.year[0]
-    till_date = df_date["max_date"].dt.strftime("%B %Y")[0]
-
+    # min_year = st_date
+    # max_year = end_date
+    till_date = for_str_date_to_new_str_date(end_date, r"%Y-%m-%d", r"%B %Y") #datetime.strftime(datetime.strptime(end_date, r"%Y-%m-%d"), r"%B %Y")#end_date.strftime("%B %Y")
+    logger.debug(f"\n\n\nTill date:\t{till_date = }\n\n")
     df["ratings"] = df["capacity"].apply(
-        lambda a: "Excellent"
+        lambda a: "<h1>Excellent<\h1>"
         if a > 121
         else "<h1>Good</h1>"
         if a > 120
@@ -269,7 +276,23 @@ def update_figure(st_date, end_date):
         .update_traces(texttemplate="%{y:0.0f}%")
         .update_layout(title_x=0.5)
     )
-    return fig_bar
+    title = f"Teams Efficiency bandwidth- Fiscal Year {for_str_date_to_new_str_date(st_date, r'%Y-%m-%d', r'%B-%Y')} - {for_str_date_to_new_str_date(end_date, r'%Y-%m-%d', r'%B-%Y')} (Till, {for_str_date_to_new_str_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",
+    logger.debug(f"\n\n\nUpdated Title:\t{title = }\n\n\n")
+
+
+    """
+    # Need to check
+
+    
+    # fig = go.Figure(data=[go.Table(
+    #     header=dict(values=list(df.columns),
+    #                 # fill_color='paleturquoise',
+    #                 align='left'),
+    #     cells=dict(values=[df.capacity, df.team, df.ratings, df.trends],
+    #             # fill_color='lavender',
+    #             align='left'))
+    # ])"""
+    return title, fig_bar, df.to_dict("records")#, fig
 
 
 @callback(
