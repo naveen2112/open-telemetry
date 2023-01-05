@@ -190,11 +190,11 @@ layout = html.Div(
     Output("max_date_range", "data"),
     Input("overall_efficiency", "clickData"),
 )
-def display_click_data(clickdata):
+def store_data(clickdata):
     if not clickdata:
         raise PreventUpdate
     column = clickdata["points"][0]["x"]
     max_date = date.today()
-    min_date = max_date - relativedelta.relativedelta(months=+6)
+    min_date = max_date - relativedelta.relativedelta(months=+6, days=+max_date.day-1)
     logger.debug(f'\n\n\nDefault dates:\nCurrent date:\n{str(max_date.strftime(r"%Y-%m-%d"))}\nLast 6 months:\n{str(min_date.strftime(r"%Y-%m-%d"))}')
     return column, str(min_date.strftime(r"%Y-%m-%d")), str(max_date.strftime(r"%Y-%m-%d"))
