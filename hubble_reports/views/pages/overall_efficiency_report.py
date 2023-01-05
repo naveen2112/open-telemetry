@@ -8,6 +8,8 @@ from sqlalchemy import create_engine
 from dash.dash_table.Format import Format, Symbol, Scheme
 from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
+from datetime import date
+from dateutil import relativedelta
 
 from config import BaseConfig
 from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
@@ -41,6 +43,14 @@ df = pd.read_sql_query(
     .statement,
     db_conn,
 )
+
+
+
+
+pd.read_sql_query(db.session.query(db.func.avg(100 * (TimesheetEntry.authorized_hours/ExpectedUserEfficiency.expected_efficiency)).label("capacity"), Team.name.label("team")).join(ExpectedUserEfficiency, TimesheetEntry.user_id == ExpectedUserEfficiency.user_id).join(Team, TimesheetEntry.team_id == Team.id).group_by(Team.name).statement, db_conn,)
+
+
+
 
 df_date = pd.read_sql_query(
     db.session.query(
@@ -179,10 +189,16 @@ layout = html.Div(
 
 @callback(
     Output("team_selected", "data"),
+    Output("min_date_range", "data"),
+    Output("max_date_range", "data"),
     Input("overall_efficiency", "clickData"),
 )
 def display_click_data(clickdata):
     if not clickdata:
         raise PreventUpdate
     column = clickdata["points"][0]["x"]
-    return column
+    # return column, df_date["min_date"][0], df_date["max_date"][0]
+    max_date = date.today()
+    min_date = max_date - relativedelta(months=6)
+    logger.debug(f'\n\n\nDefault dates:\nCurrent date:\n{max_date}\nLast 6 months:\n{min_date}')
+    return column, min_date.strftime(r"%Y-%m-%d"), max_date.strftime(r"%Y-%m-%d")
