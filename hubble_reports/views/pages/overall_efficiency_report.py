@@ -95,8 +95,6 @@ layout = html.Div(
     id="overall_eff",
     children=[
         html.Div(
-            id="hello",
-            title="Hover to see me",
             children=[
                 html.H1(
                     id="dash_header",
