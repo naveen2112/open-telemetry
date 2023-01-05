@@ -29,7 +29,7 @@ with app.app_context(), app.test_request_context():
         .joinpath("dashboard.html")
     )
     logger.info(f"\n\n\n\n=========>>>layout_dash:\n{layout_dash}\n\n")
-    
+
     with open(layout_dash, "r") as f:
         html_body = render_template_string(f.read())
         html_body = html_body.replace("HEADER", "Welcome User!!!")
@@ -38,18 +38,17 @@ dash_app.index_string = html_body
 
 dash_app.layout = html.Div(
     [
-    dcc.Location(id="url", refresh=False),
-    html.H1('First'),
-    html.Div(id="page-content"),
-    dcc.Store(id="team_selected", storage_type="session"),
-    dcc.Store(id="min_date_range", storage_type="session"),
-    dcc.Store(id="max_date_range", storage_type="session"),
-    dash.page_container,
-]
+        dcc.Location(id="url", refresh=False),
+        html.H1("First"),
+        html.Div(id="page-content"),
+        dcc.Store(id="team_selected", storage_type="session"),
+        dcc.Store(id="min_date_range", storage_type="session"),
+        dcc.Store(id="max_date_range", storage_type="session"),
+        dash.page_container,
+    ]
 )
 
 
 @reports.route("/report")
-# @login_required
 def dash_entry():
     return dash_app.index()
