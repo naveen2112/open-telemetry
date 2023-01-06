@@ -43,7 +43,7 @@ dash_app.index_string = html_body
 dash_app.layout = html.Div(
     [
         dcc.Location(id="url", refresh=False),
-        html.H1(id="topic-name", children="First"),
+        # html.H1(id="topic-name", children="First"),
         html.Div(
             [
                 html.Div('Enter in "MM/DD/YYYY" format'),
@@ -87,7 +87,6 @@ dash_app.layout = html.Div(
                         ),
                     ]
                 )
-                # html.Div(id="container-button-timestamp"),
             ]
         ),
         html.Div(id="page-content"),
@@ -102,13 +101,15 @@ dash_app.layout = html.Div(
 @callback(
     Output("min_date_range", "data"),
     Output("max_date_range", "data"),
+    Output("date-range-picker", "start_date"),
+    Output("date-range-picker", "end_date"),
     Input("date-range-picker", "start_date"),
     Input("date-range-picker", "end_date"),
     Input("one_month_button", "n_clicks"),
     Input("six_month_button", "n_clicks"),
     Input("one_year_button", "n_clicks"),
 )
-def update_date_range(st_date, end_date, btn1, btn2, btn3):
+def update_date_range(end_date, st_date, btn1, btn2, btn3):
 
     if (not st_date) and (not end_date):
         st_date = date.today()
@@ -135,7 +136,19 @@ def update_date_range(st_date, end_date, btn1, btn2, btn3):
     logger.info(
         f"\n\n\n\n\nUPdate Date range\nStart Date:\n{st_date}\t{type(st_date)}\n\nEnd Date:\n{end_date}\t{type(end_date)}\n\n"
     )
-    return st_date, end_date
+    return st_date, end_date, end_date, st_date
+
+# @callback(
+#     Output('url', 'pathname'),
+#     Input('url', 'pathname')
+# )
+# def display_page(pathname):
+#     logger.debug(f"\n\n\n\nPath url {pathname = }\n\n\n")
+#     if pathname == '/report':
+#         return '/report/overall-efficiency'
+#     else:
+#         raise PreventUpdate
+#     # return pathname
 
 
 @reports.route("/report")
