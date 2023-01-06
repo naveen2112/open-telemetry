@@ -43,7 +43,7 @@ def authorized() -> render_template:
         pass  # Simply ignore them
     mailid = session["user"]["preferred_username"]
     login_user(User.query.filter(User.email == mailid).first())
-    return redirect(url_for("/report"))
+    return redirect(url_for("reports.dash_entry"))
 
 
 def _load_cache() -> object:
