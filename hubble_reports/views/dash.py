@@ -55,13 +55,36 @@ dash_app.layout = html.Div(
             ]
         ),
         html.Table(
-            id='button_postions',
             children=[
                 html.Tr(
                     [
-                    html.Td(html.Button("1 month", id="one_month_button", n_clicks=0)),
-                    html.Td(html.Button("6 months", id="six_month_button", n_clicks=0)),
-                    html.Td(html.Button("1 year", id="one_year_button", n_clicks=0)),
+                        html.Td(
+                            html.Div(
+                                [
+                                    html.Button(
+                                        "1 month", id="one_month_button", n_clicks=0
+                                    )
+                                ]
+                            )
+                        ),
+                        html.Td(
+                            html.Div(
+                                [
+                                    html.Button(
+                                        "6 months", id="six_month_button", n_clicks=0
+                                    )
+                                ]
+                            )
+                        ),
+                        html.Td(
+                            html.Div(
+                                [
+                                    html.Button(
+                                        "1 year", id="one_year_button", n_clicks=0
+                                    )
+                                ]
+                            )
+                        ),
                     ]
                 )
                 # html.Div(id="container-button-timestamp"),
@@ -81,9 +104,9 @@ dash_app.layout = html.Div(
     Output("max_date_range", "data"),
     Input("date-range-picker", "start_date"),
     Input("date-range-picker", "end_date"),
-    Input('one_month_button', 'n_clicks'),
-    Input('six_month_button', 'n_clicks'),
-    Input('one_year_button', 'n_clicks'),
+    Input("one_month_button", "n_clicks"),
+    Input("six_month_button", "n_clicks"),
+    Input("one_year_button", "n_clicks"),
 )
 def update_date_range(st_date, end_date, btn1, btn2, btn3):
 
@@ -92,7 +115,7 @@ def update_date_range(st_date, end_date, btn1, btn2, btn3):
         end_date = st_date - relativedelta.relativedelta(
             months=+6, days=+st_date.day - 1
         )
-    logger.debug(f'\n\n\nButton clicked:\n{btn1 = }\t{btn2 = }\t{btn3 = }\n\n\n')
+    logger.debug(f"\n\n\nButton clicked:\n{btn1 = }\t{btn2 = }\t{btn3 = }\n\n\n")
     if "one_month_button" == ctx.triggered_id:
         st_date = date.today()
         end_date = st_date - relativedelta.relativedelta(
@@ -113,6 +136,7 @@ def update_date_range(st_date, end_date, btn1, btn2, btn3):
         f"\n\n\n\n\nUPdate Date range\nStart Date:\n{st_date}\t{type(st_date)}\n\nEnd Date:\n{end_date}\t{type(end_date)}\n\n"
     )
     return st_date, end_date
+
 
 @reports.route("/report")
 def dash_entry():
