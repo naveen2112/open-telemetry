@@ -47,14 +47,12 @@ layout = html.Div(
         dcc.Link(
             dcc.Graph(
                 id="overall_efficiency",
-                # figure=fig_bar,
             ),
             href="/report/detail-report",
         ),
         # dcc.Graph(id='trail_table'),
         dash_table.DataTable(
             id="overall_efficiency_table",
-            # data=df.to_dict("records"),
             columns=[
                 {
                     "name": ["Teams Ratings & Trend", "Team"],
