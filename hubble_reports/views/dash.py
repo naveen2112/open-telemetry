@@ -62,7 +62,7 @@ dash_app.layout = html.Div(
                             html.Div(
                                 [
                                     html.Button(
-                                        "1 month", id="one_month_button", n_clicks=0
+                                        "1 month", id="one_month_button", n_clicks=0, className="bg-dark-blue text-white text-sm flex items-center justify-center w-24 cursor-default grow"
                                     )
                                 ]
                             )
@@ -71,7 +71,7 @@ dash_app.layout = html.Div(
                             html.Div(
                                 [
                                     html.Button(
-                                        "6 months", id="six_month_button", n_clicks=0
+                                        "6 months", id="six_month_button", n_clicks=0, className="bg-dark-blue text-white text-sm flex items-center justify-center w-24 cursor-default grow",
                                     )
                                 ]
                             )
@@ -80,7 +80,7 @@ dash_app.layout = html.Div(
                             html.Div(
                                 [
                                     html.Button(
-                                        "1 year", id="one_year_button", n_clicks=0
+                                        "1 year", id="one_year_button", n_clicks=0, className="bg-dark-blue text-white text-sm flex items-center justify-center w-24 cursor-default grow",
                                     )
                                 ]
                             )
@@ -139,5 +139,6 @@ def update_date_range(st_date, end_date, btn1, btn2, btn3):
 
 
 @reports.route("/report")
+# @login_required
 def dash_entry():
     return dash_app.index()
