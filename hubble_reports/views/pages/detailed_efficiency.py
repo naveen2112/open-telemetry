@@ -35,6 +35,7 @@ layout = html.Div(
                 ),
         dcc.Graph(
             id="detailed_efficiency",
+            # animate=True,
         ),
     ],
 )
@@ -116,6 +117,7 @@ def detailed_eff(column, min_date_sess, max_date_sess):
         )
     )
     fig_bar_detail.update_xaxes(tickmode = 'array')
+    fig_bar_detail.update_layout(transition = {'duration': 500})
     return f"Detailed Report for {column} in total hours", fig_bar_detail
 
 # @callback(

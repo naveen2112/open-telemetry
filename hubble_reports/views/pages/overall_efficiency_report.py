@@ -50,6 +50,7 @@ layout = html.Div(
         dcc.Link(
             dcc.Graph(
                 id="overall_efficiency",
+                animate=True,
             ),
             href="/report/detail-report",
         ),
@@ -206,6 +207,7 @@ def update_figure(st_date, end_date):
         .update_traces(texttemplate="%{y:0.0f}%")
         .update_layout(title_x=0.5)
     )
+    fig_bar.update_layout(transition = {'duration': 1000})
     title = (
         f"Teams Efficiency bandwidth- Fiscal Year {for_str_date_to_new_str_date(st_date, r'%Y-%m-%d', r'%B-%Y')} - {for_str_date_to_new_str_date(end_date, r'%Y-%m-%d', r'%B-%Y')} (Till, {for_str_date_to_new_str_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",
     )
