@@ -93,25 +93,24 @@ def detailed_eff(column, min_date_sess, max_date_sess):
             var_name="efficiency",
             value_name="efficiency_value",
         )
-    ) 
+    )
+    df['formated_date'] = df.display_date.dt.strftime('%B %Y')
     logger.debug(f'\n\n\nMelted dataframe:\n{df}')
 
     fig_bar_detail = (
         px.bar(
             data_frame=df,
-            x="display_date",
+            x="formated_date",
             y="efficiency_value",
             color="efficiency",
             text="efficiency_value",
             title=f"{column.capitalize()} Detailed Capacity - Efficiency",
-            labels={"display_date": "Time", "efficiency_value": "Efficiency"},
+            labels={"formated_date": "Time", "efficiency_value": "Efficiency"},
             barmode="group",
         )
         .update_traces(texttemplate="%{text:0}")
         .update_layout(
             title_x=0.5,
-            # xaxis_range=[min_date_sess, max_date_sess],
-            
         )
     )
     fig_bar_detail.update_xaxes(tickmode = 'array')
