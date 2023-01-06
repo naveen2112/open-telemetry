@@ -41,9 +41,6 @@ layout = html.Div(
         html.Br(),
         dcc.Link("Back", href="/report"),
         html.Br(),
-        dcc.Link("logout", href="/logout", refresh=True),
-        html.Div('<h1>Good Value</h1>'),
-        html.Br(),
         html.H2(
             id="overall_efficiency_title",
         ),
@@ -116,6 +113,11 @@ layout = html.Div(
                     "color": "red",
                 },
             ],
+            style_table={
+                "margin-left": "auto",
+                "margin-right": "auto",
+                "padding-bottom": "1.25rem",
+            },
         ),
     ],
 )
@@ -130,12 +132,11 @@ layout = html.Div(
     Input("max_date_range", "data"),
 )
 def update_figure(st_date, end_date):
-    logger.debug(
-        f'\n\n\nUPADATING THE FIGURE:\n\n')
-    val1 = datetime.strptime(st_date, r'%Y-%m-%d')
-    val2 = datetime.strptime(end_date, r'%Y-%m-%d')
-    st_date = min(val1, val2).strftime(r'%Y-%m-%d')
-    end_date = max(val1, val2).strftime(r'%Y-%m-%d')
+    logger.debug(f"\n\n\nUPADATING THE FIGURE:\n\n")
+    val1 = datetime.strptime(st_date, r"%Y-%m-%d")
+    val2 = datetime.strptime(end_date, r"%Y-%m-%d")
+    st_date = min(val1, val2).strftime(r"%Y-%m-%d")
+    end_date = max(val1, val2).strftime(r"%Y-%m-%d")
     df = pd.read_sql_query(
         db.session.query(
             db.func.avg(
@@ -204,9 +205,10 @@ def update_figure(st_date, end_date):
         .update_traces(texttemplate="%{y:0.0f}%")
         .update_layout(title_x=0.5)
     )
-    title = f"Teams Efficiency bandwidth- Fiscal Year {for_str_date_to_new_str_date(st_date, r'%Y-%m-%d', r'%B-%Y')} - {for_str_date_to_new_str_date(end_date, r'%Y-%m-%d', r'%B-%Y')} (Till, {for_str_date_to_new_str_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",
+    title = (
+        f"Teams Efficiency bandwidth- Fiscal Year {for_str_date_to_new_str_date(st_date, r'%Y-%m-%d', r'%B-%Y')} - {for_str_date_to_new_str_date(end_date, r'%Y-%m-%d', r'%B-%Y')} (Till, {for_str_date_to_new_str_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",
+    )
     logger.debug(f"\n\n\nUpdated Title:\t{title = }\n\n\n")
-
 
     """
     # Need to check
@@ -220,7 +222,7 @@ def update_figure(st_date, end_date):
     #             # fill_color='lavender',
     #             align='left'))
     # ])"""
-    return title, fig_bar, df.to_dict("records")#, fig
+    return title, fig_bar, df.to_dict("records")  # , fig
 
 
 @callback(
@@ -231,4 +233,4 @@ def store_data(clickdata):
     if not clickdata:
         raise PreventUpdate
     column = clickdata["points"][0]["x"]
-    return column 
+    return column
