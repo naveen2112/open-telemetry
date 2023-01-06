@@ -27,14 +27,15 @@ db_conn = create_engine(BaseConfig.SQLALCHEMY_DATABASE_URI)
 layout = html.Div(
     id="detailed_eff",
     children=[
-        html.H1(id="detail-title", children=["Detail-report"]),
-        # html.H4("<h1>Good</h1>"),
+        html.Div(children=[dcc.Link("<< Back to Index page", href="/report", className="flex items-center text-sm text-dark-blue"),
+        dcc.Link("< Back to Overall Efficiency Graph", href="/report/overall-efficiency", className="flex items-center text-sm text-dark-blue"),]),
+        html.H1(
+                    id="detailed_efficiency_title",
+                    style={"font-size": "25px", "font-align": "center"},
+                ),
         dcc.Graph(
             id="detailed_efficiency",
         ),
-        html.H2("Slider"),
-        html.Br(),
-        html.Div(id="date_range_picked"),
     ],
 )
 
@@ -43,6 +44,7 @@ layout = html.Div(
 # )
 
 @callback(
+    Output("detailed_efficiency_title", "children"),
     Output("detailed_efficiency", "figure"),
     Input("team_selected", "data"),
     Input("min_date_range", "data"),
@@ -94,7 +96,7 @@ def detailed_eff(column, min_date_sess, max_date_sess):
             value_name="efficiency_value",
         )
     )
-    df['formated_date'] = df.display_date.dt.strftime('%B %Y')
+    df['formated_date'] = df.display_date.dt.strftime(r'%b %Y')
     logger.debug(f'\n\n\nMelted dataframe:\n{df}')
 
     fig_bar_detail = (
@@ -114,7 +116,7 @@ def detailed_eff(column, min_date_sess, max_date_sess):
         )
     )
     fig_bar_detail.update_xaxes(tickmode = 'array')
-    return fig_bar_detail
+    return f"Detailed Report for {column} in total hours", fig_bar_detail
 
 # @callback(
 #     Output("min_date_range", "data"),
@@ -130,22 +132,4 @@ def detailed_eff(column, min_date_sess, max_date_sess):
     
 #     return st_date, end_date
 
-@callback(
-    Output("date_range_picked", "children"),
-    Input("min_date_range", "data"),
-    Input("max_date_range", "data"),
-    Input("team_selected", "data"),
-)
-def date_range_slider(min_date, max_date, team):
-    logger.debug(f"\n\nDate rage value in {__name__}:\n{min_date}\t{max_date}\n\n")
-    # logger.info(f"\n\nDate rage value in {__name__}:\n{type(val[0])}\n{team}\n")
-    logger.info(f"\n\n\nInside range:\n\n")
-    if not min_date and not max_date:
-        return PreventUpdate
-    column = team
-    # val1 = [
-    #     df_detail_report_slide.min().iloc[val[0], 0].strftime(r"%Y %b"),
-    #     df_detail_report_slide.max().iloc[val[1] - 1, 0].strftime(r"%Y %b"),
-    # ]
 
-    return f"You have selected between {max_date}, {min_date}"

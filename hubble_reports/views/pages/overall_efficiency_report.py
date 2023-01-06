@@ -31,15 +31,18 @@ layout = html.Div(
     children=[
         html.Div(
             children=[
+                dcc.Link(
+                    "< Back to Index page",
+                    href="/report",
+                    className="flex items-center text-sm text-dark-blue",
+                ),
                 html.H1(
                     id="dash_header",
                     children=f"Overall Team wise Efficiency Percentage",
                     style={"font-size": "25px", "font-align": "center"},
-                )
+                ),
             ],
         ),
-        html.Br(),
-        dcc.Link("Back", href="/report"),
         html.Br(),
         html.H2(
             id="overall_efficiency_title",
