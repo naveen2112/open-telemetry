@@ -41,29 +41,62 @@ with app.app_context(), app.test_request_context():
 dash_app.index_string = html_body
 
 dash_app.layout = html.Div(
-    [
-        dcc.Location(id="url", refresh=False),
-        # html.H1(id="topic-name", children="First"),
+    className="overflow-hidden max-h-screen flex main-screen grow flex-col",
+    children=[
         html.Div(
-            [
-                html.Div('Enter in "MM/DD/YYYY" format'),
+            className="header bg-white",
+            children=html.Div(
+                className="px-10 pt-5",
+                children=[
+                    dcc.Link(
+                        id="nav-ref",
+                        href="",
+                    ),
+                    html.Div(
+                        className="flex justify-between mb-7 items-center",
+                        children=[
+                            html.Div(
+                                className="text-dark-black text-lg mb-1 leading-none",
+                                children=[
+                                    html.H1(
+                                        id="report-main-header",
+                                        children=["HEADER FOR THE FILE"],
+                                    ),
+                                    html.Div(
+                                        id="report-sub-header",
+                                        className="text-dark-black-50 text-sm",
+                                        children=[
+                                            html.H2("SUBHEADER FOR THE FILE"),
+                                        ],
+                                    ),
+                                ],
+                            ),
+                            html.Div(
+                                title='Enter in "MM/DD/YYYY" format',
+                                children=[
+                                    html.Table(
+                                        style={"width": 300},
+                                        children=[
+                                            html.Tr(
+                                                html.Td(
                 dcc.DatePickerRange(
                     id="date-range-picker",
-                    style={"width": 330},
                     max_date_allowed=date.today(),
                 ),
-            ]
+                                                    colSpan=3,
         ),
-        html.Table(
-            children=[
+                                            ),
                 html.Tr(
                     [
                         html.Td(
                             html.Div(
                                 [
                                     html.Button(
-                                        "1 month", id="one_month_button", n_clicks=0, className="bg-dark-blue text-white text-sm flex items-center justify-center w-24 cursor-default grow"
-                                    )
+                                                                    "1 month",
+                                                                    id="one_month_button",
+                                                                    n_clicks=0,
+                                                                    className="bg-dark-blue text-white text-sm flex items-center justify-center w-20 cursor-default grow filter-button",
+                                                                ),
                                 ]
                             )
                         ),
@@ -71,8 +104,11 @@ dash_app.layout = html.Div(
                             html.Div(
                                 [
                                     html.Button(
-                                        "6 months", id="six_month_button", n_clicks=0, className="bg-dark-blue text-white text-sm flex items-center justify-center w-24 cursor-default grow",
-                                    )
+                                                                    "6 months",
+                                                                    id="six_month_button",
+                                                                    n_clicks=0,
+                                                                    className="bg-dark-blue text-white text-sm flex items-center justify-center w-20 cursor-default grow filter-button",
+                                                                ),
                                 ]
                             )
                         ),
@@ -80,21 +116,39 @@ dash_app.layout = html.Div(
                             html.Div(
                                 [
                                     html.Button(
-                                        "1 year", id="one_year_button", n_clicks=0, className="bg-dark-blue text-white text-sm flex items-center justify-center w-24 cursor-default grow",
-                                    )
+                                                                    "1 year",
+                                                                    id="one_year_button",
+                                                                    n_clicks=0,
+                                                                    className="bg-dark-blue text-white text-sm flex items-center justify-center w-20 cursor-default grow filter-button",
+                                                                ),
                                 ]
-                            )
+                                                        ),
                         ),
                     ]
-                )
-            ]
+                                            ),
+                                        ],
+                                    ),
+                                ],
+                            ),
+                        ],
+                    ),
+                ],
+            ),
         ),
-        html.Div(id="page-content"),
+        dcc.Location(id="url", refresh=False),
+        html.Div(
+            className="overflow-auto grow bg-light-violet content-page",
+            children=html.Div(
+                className="px-5 h-full",
+                children=[
+                    dash.page_container,
+                ],
+            ),
+        ),
         dcc.Store(id="team_selected", storage_type="session"),
         dcc.Store(id="min_date_range", storage_type="session"),
         dcc.Store(id="max_date_range", storage_type="session"),
-        dash.page_container,
-    ]
+    ],
 )
 
 
