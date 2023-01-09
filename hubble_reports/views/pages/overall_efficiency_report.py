@@ -1,24 +1,18 @@
 import dash
-import logging
 import pandas as pd
 import plotly.express as px
-import plotly.graph_objects as go
 
 from dash import dash_table, callback, dcc, html
 from sqlalchemy import create_engine
 from dash.dash_table.Format import Format, Symbol, Scheme
 from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
-from datetime import date, datetime
-from dateutil import relativedelta
+from datetime import datetime
 
 from config import BaseConfig
 from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
-from hubble_reports.utils import get_logger
 from hubble_reports.utils import for_str_date_to_new_str_date
 
-
-logger = get_logger(__name__, level=logging.DEBUG)
 
 dash.register_page(
     __name__,
@@ -29,24 +23,6 @@ db_conn = create_engine(BaseConfig.SQLALCHEMY_DATABASE_URI)
 layout = html.Div(
     id="overall_eff",
     children=[
-        html.Div(
-            children=[
-                dcc.Link(
-                    "< Back to Index page",
-                    href="/report",
-                    className="flex items-center text-sm text-dark-blue",
-                ),
-                html.H1(
-                    id="dash_header",
-                    children=f"Overall Team wise Efficiency Percentage",
-                    style={"font-size": "25px", "font-align": "center"},
-                ),
-            ],
-        ),
-        html.Br(),
-        html.H2(
-            id="overall_efficiency_title",
-        ),
         dcc.Link(
             dcc.Graph(
                 id="overall_efficiency",
@@ -54,7 +30,6 @@ layout = html.Div(
             ),
             href="/report/detail-report",
         ),
-        # dcc.Graph(id='trail_table'),
         dash_table.DataTable(
             id="overall_efficiency_table",
             columns=[
@@ -126,19 +101,21 @@ layout = html.Div(
 
 
 @callback(
-    Output("overall_efficiency_title", "children"),
+    Output("nav-ref", "children"),
+    Output("report-main-header", "children"),
+    Output("report-sub-header", "children"),
     Output("overall_efficiency", "figure"),
     Output("overall_efficiency_table", "data"),
-    # Output("trail_table", "figure"),
     Input("min_date_range", "data"),
     Input("max_date_range", "data"),
 )
 def update_figure(st_date, end_date):
-    logger.debug(f"\n\n\nUPADATING THE FIGURE:\n\n")
+    # Below st_date and end_date received are not exactly min date & max date, so it is corrected
     val1 = datetime.strptime(st_date, r"%Y-%m-%d")
     val2 = datetime.strptime(end_date, r"%Y-%m-%d")
     st_date = min(val1, val2).strftime(r"%Y-%m-%d")
     end_date = max(val1, val2).strftime(r"%Y-%m-%d")
+
     df = pd.read_sql_query(
         db.session.query(
             db.func.avg(
@@ -165,29 +142,8 @@ def update_figure(st_date, end_date):
         .statement,
         db_conn,
     )
-
-    # pd.read_sql_query(db.session.query(db.func.avg(100 * (TimesheetEntry.authorized_hours/ExpectedUserEfficiency.expected_efficiency)).label("capacity"), Team.name.label("team")).join(ExpectedUserEfficiency, TimesheetEntry.user_id == ExpectedUserEfficiency.user_id).join(Team, TimesheetEntry.team_id == Team.id).group_by(Team.name).statement, db_conn,)
-
-    df_date = pd.read_sql_query(
-        db.session.query(
-            db.func.min(TimesheetEntry.entry_date).label("min_date"),
-            db.func.max(TimesheetEntry.entry_date).label("max_date"),
-        )
-        .join(
-            ExpectedUserEfficiency,
-            TimesheetEntry.user_id == ExpectedUserEfficiency.user_id,
-        )
-        .statement,
-        parse_dates=["min_date", "max_date"],
-        con=db_conn,
-    )
-
     df["ratings"] = df["capacity"].apply(
-        lambda a: "<h1>Excellent<\h1>"
-        if a > 121
-        else "<h1>Good</h1>"
-        if a > 120
-        else "Needs Improvement"
+        lambda a: "Excellent" if a > 121 else "Good" if a > 120 else "Needs Improvement"
     )
     df["trends"] = df["capacity"].apply(
         lambda a: "↑" if a > 121 else "↔︎" if a > 120 else "↓"
@@ -201,31 +157,26 @@ def update_figure(st_date, end_date):
             color="team",
             text_auto=True,
             text="capacity",
-            title="Teams Capacity - Efficiency %",
+            height=360,
             labels={"team": "Teams", "capacity": "Capacity"},
         )
         .update_traces(texttemplate="%{y:0.0f}%")
         .update_layout(title_x=0.5)
     )
-    fig_bar.update_layout(transition = {'duration': 1000})
+    fig_bar.update_layout(transition={"duration": 1000}, plot_bgcolor="white")
+    fig_bar.add_hline(y=100, line_dash="dash", line_color="magenta")
     title = (
         f"Teams Efficiency bandwidth- Fiscal Year {for_str_date_to_new_str_date(st_date, r'%Y-%m-%d', r'%B-%Y')} - {for_str_date_to_new_str_date(end_date, r'%Y-%m-%d', r'%B-%Y')} (Till, {for_str_date_to_new_str_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",
     )
-    logger.debug(f"\n\n\nUpdated Title:\t{title = }\n\n\n")
-
-    """
-    # Need to check
-
-    
-    # fig = go.Figure(data=[go.Table(
-    #     header=dict(values=list(df.columns),
-    #                 # fill_color='paleturquoise',
-    #                 align='left'),
-    #     cells=dict(values=[df.capacity, df.team, df.ratings, df.trends],
-    #             # fill_color='lavender',
-    #             align='left'))
-    # ])"""
-    return title, fig_bar, df.to_dict("records")  # , fig
+    sub_title = "Overall team efficiency"
+    nav_item = (
+        dcc.Link(
+            "< Back to Index page",
+            href="/report",
+            className="flex items-center text-sm text-dark-blue",
+        ),
+    )
+    return nav_item, title, sub_title, fig_bar, df.to_dict("records")
 
 
 @callback(
