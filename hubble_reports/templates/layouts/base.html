@@ -25,39 +25,11 @@
 
 <body class="min-h-screen bg-gray-50">
 
-    <div class="flex h-screen">
+   
         {% include '/layouts/sidebar.html' %}
 
-
-        <div class="overflow-hidden max-h-screen flex main-screen grow flex-col">
-            <div class="header bg-white">
-                <div class="px-5 pt-9 bg-mild-violet pb-7" x-data="userHeaderDetails()">
-                    <div class="flex justify-between mb-7 items-center">
-                        <div>
-                            <div class="text-dark-black text-lg mb-1 leading-none">
-                                {% block header %}
-                                {% endblock %}
-                            </div>
-                            <div class="text-dark-black-50 text-sm">
-                                {% block sub_header %}
-                                {% endblock %}
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-            <div class="overflow-auto grow bg-light-violet content-page">
-                <div class="px-5 h-full" style="padding-bottom: 1.25rem">
-                    <span
-                        class="text-dark-red bg-dark-red-10 text-dark-blue bg-dark-blue-10 text-mild-green bg-mild-green-10 text-dark-black bg-dark-black-10 rounded-xl px-1.5 py-0.5 w-14 h-14 py-3 p-3"
-                        style="display: none; padding-bottom: 1.25rem;"></span>
-                    {% block body %}
-                    {% endblock %}
-                </div>
-            </div>
-        </div>
-
+        {% block page %}
+        {% endblock %}
 
         <!-- Loader -->
         <div class="page-loader">
@@ -100,18 +72,11 @@
                 document.querySelector('.nav-animation').addEventListener('mouseleave', (event) => { $(".sub-category a").accordion('hide'); });
             })
 
-            function userHeaderDetails() {
-                return {
-                    statusFilter: false
-                };
-            }
-
             $(function () {
                 hideLoader()
                 $('.sub-category .sidebar-active').closest('.sub-category').addClass('sidebar-active')
             })
         </script>
-    </div>
 
 </body>
 
