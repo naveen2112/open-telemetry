@@ -1,4 +1,5 @@
 import dash
+import logging
 import pandas as pd
 import plotly.express as px
 
@@ -9,6 +10,9 @@ from datetime import datetime
 
 from config import BaseConfig
 from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
+from hubble_reports.utils import get_logger
+
+logger = get_logger(__name__, level=logging.DEBUG)
 
 
 dash.register_page(
@@ -22,19 +26,17 @@ db_conn = create_engine(BaseConfig.SQLALCHEMY_DATABASE_URI)
 layout = html.Div(
     id="detailed_eff",
     children=[
-        html.H1(
-            id="detailed_efficiency_title",
-            style={"font-size": "25px", "font-align": "center"},
-        ),
-        dcc.Graph(
+        dcc.Loading(
+            type='default',
+            children=dcc.Graph(
             id="detailed_efficiency",
+        ),
         ),
     ],
 )
 
 
 @callback(
-    Output("detailed_efficiency_title", "children"),
     Output("detailed_efficiency", "figure"),
     Input("team_selected", "data"),
     Input("min_date_range", "data"),
@@ -105,5 +107,4 @@ def detailed_eff(column, min_date_sess, max_date_sess):
     )
     fig_bar_detail.update_xaxes(tickmode="array")
     fig_bar_detail.update_layout(transition={"duration": 1000})
-    title = f"Detailed Report for {column} in total hours"
-    return title, fig_bar_detail
+    return fig_bar_detail
