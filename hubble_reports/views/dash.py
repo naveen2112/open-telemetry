@@ -1,8 +1,10 @@
 import dash
 import pathlib
+import logging
 
 from dash import Dash, dcc, html, callback, ctx
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
+from dash.exceptions import PreventUpdate 
 from datetime import date
 from dateutil import relativedelta
 from flask import render_template_string
@@ -11,6 +13,9 @@ from flask.helpers import get_root_path
 
 from app import app
 from hubble_reports.hubble_reports import reports
+from hubble_reports.utils import for_str_date_to_new_str_date, get_logger
+
+logger = get_logger(__name__, logging.DEBUG)
 
 
 style_dash = (
@@ -32,7 +37,6 @@ with app.app_context(), app.test_request_context():
         .parent.joinpath("templates")
         .joinpath("dashboard.html")
     )
-    logger.info(f"\n\n\n\n=========>>>layout_dash:\n{layout_dash}\n\n")
 
     with open(layout_dash, "r") as f:
         html_body = render_template_string(f.read())
@@ -186,6 +190,28 @@ def update_date_range(end_date, st_date, btn1, btn2, btn3):
         )
     return st_date, end_date, end_date, st_date
 
+@callback(
+    Output("report-main-header", "children"),
+    Output("report-sub-header", "children"),
+    Input("url","pathname"),
+    Input("max_date_range", "data"),
+    Input("min_date_range", "data"),
+    State("team_selected", "data"),
+    )
+def header_update(pathname, st_date, end_date, team):
+    title = dash.no_update
+    sub_title = dash.no_update
+    logger.debug(f"\n\n\n\n========>\nPath name:\n{pathname}")
+    logger.debug(f"\n\n=====>\nStartDate:\n{st_date}\nEndDate:\n{end_date}\n\n")
+    if pathname == '/report/overall-efficiency':
+        title = f"Teams Efficiency bandwidth- Fiscal Year {for_str_date_to_new_str_date(st_date, r'%Y-%m-%d', r'%B-%Y')} - {for_str_date_to_new_str_date(end_date, r'%Y-%m-%d', r'%B-%Y')} (Till, {for_str_date_to_new_str_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",
+        sub_title = f"Overall Efficiency"
+    elif pathname == '/report/detail-report':
+        title = f"Detailed Report for {team} in total hours"
+        sub_title = f"Team wise Efficiency"
+    else:
+        ...
+    return title, sub_title
 
 @reports.route("/report")
 @login_required
