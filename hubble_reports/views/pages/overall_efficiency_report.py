@@ -24,13 +24,18 @@ layout = html.Div(
     id="overall_eff",
     children=[
         dcc.Link(
-            dcc.Graph(
+            dcc.Loading(
+                type='default',
+                children=dcc.Graph(
                 id="overall_efficiency",
                 animate=True,
             ),
+            ),
             href="/report/detail-report",
         ),
-        dash_table.DataTable(
+        dcc.Loading(
+            type='default',
+            children=dash_table.DataTable(
             id="overall_efficiency_table",
             columns=[
                 {
@@ -96,14 +101,15 @@ layout = html.Div(
                 "padding-bottom": "1.25rem",
             },
         ),
+        ),
     ],
 )
 
 
 @callback(
     Output("nav-ref", "children"),
-    Output("report-main-header", "children"),
-    Output("report-sub-header", "children"),
+    # Output("report-main-header", "children"),
+    # Output("report-sub-header", "children"),
     Output("overall_efficiency", "figure"),
     Output("overall_efficiency_table", "data"),
     Input("min_date_range", "data"),
@@ -176,7 +182,8 @@ def update_figure(st_date, end_date):
             className="flex items-center text-sm text-dark-blue",
         ),
     )
-    return nav_item, title, sub_title, fig_bar, df.to_dict("records")
+    return nav_item, fig_bar, df.to_dict("records")
+
 
 
 @callback(
