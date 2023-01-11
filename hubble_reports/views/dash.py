@@ -17,7 +17,7 @@ from sqlalchemy import create_engine
 from app import app
 from hubble_reports.hubble_reports import reports
 from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
-from hubble_reports.utils import for_str_date_to_new_str_date, get_logger
+from hubble_reports.utils import str_dat_to_nstr_date, get_logger
 from config import BaseConfig
 
 logger = get_logger(__name__, logging.DEBUG)
@@ -234,7 +234,10 @@ def header_update(pathname, st_date, end_date, team):
     logger.debug(f"\n\n=====>\nStartDate:\n{st_date}\nEndDate:\n{end_date}\n\n")
     if pathname == "/report/overall-efficiency":
         title = (
-            f"Teams Efficiency bandwidth- Fiscal Year {for_str_date_to_new_str_date(st_date, r'%Y-%m-%d', r'%B-%Y')} - {for_str_date_to_new_str_date(end_date, r'%Y-%m-%d', r'%B-%Y')} (Till, {for_str_date_to_new_str_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",
+            f"Teams Efficiency bandwidth- Fiscal Year "+
+            f"{str_dat_to_nstr_date(st_date, r'%Y-%m-%d', r'%B-%Y')}"+
+            f" - {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B-%Y')} "+
+            f"(Till, {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",
         )
         sub_title = f"Overall Efficiency"
     elif pathname == "/report/detail-report":

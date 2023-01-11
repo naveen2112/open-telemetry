@@ -12,7 +12,7 @@ from datetime import datetime
 
 from config import BaseConfig
 from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
-from hubble_reports.utils import for_str_date_to_new_str_date
+from hubble_reports.utils import str_dat_to_nstr_date
 
 
 dash.register_page(
@@ -131,7 +131,7 @@ def update_figure_1(st_date, end_date):
               fillcolor="red", opacity=0.2, line_width=0)
     return fig_bar
 
-    
+
 @callback(
     Output("team_selected", "data"),
     Input("overall_efficiency_1", "clickData"),

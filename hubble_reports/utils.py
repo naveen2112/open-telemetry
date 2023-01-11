@@ -41,5 +41,10 @@ def verify_permission(*permissions_allowed: tuple[str]):
 
     return outer
 
-def for_str_date_to_new_str_date(date:str, existing_format:str, new_format:str) -> str:
+def str_dat_to_nstr_date(date:str, existing_format:str, new_format:str) -> str:
+    """
+    Updating date string to new specified date string format
+    Eg:
+    '2023-01-01' to 'Jan 01, 2023'
+    """
     return datetime.strptime(date, existing_format).strftime(new_format)
