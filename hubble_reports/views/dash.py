@@ -234,10 +234,10 @@ def header_update(pathname, st_date, end_date, team):
     logger.debug(f"\n\n=====>\nStartDate:\n{st_date}\nEndDate:\n{end_date}\n\n")
     if pathname == "/report/overall-efficiency":
         title = (
-            f"Teams Efficiency bandwidth- Fiscal Year "+
-            f"{str_dat_to_nstr_date(st_date, r'%Y-%m-%d', r'%B-%Y')}"+
-            f" - {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B-%Y')} "+
-            f"(Till, {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",
+            f"Teams Efficiency bandwidth- Fiscal Year "
+            + f"{str_dat_to_nstr_date(st_date, r'%Y-%m-%d', r'%B-%Y')}"
+            + f" - {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B-%Y')} "
+            + f"(Till, {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",
         )
         sub_title = f"Overall Efficiency"
     elif pathname == "/report/detail-report":
@@ -428,7 +428,9 @@ def detailed_eff(column, min_date_sess, max_date_sess):
         )
     )
     fig_bar_detail.update_xaxes(tickmode="array")
-    fig_bar_detail.update_layout(transition={"duration": 1000})
+    fig_bar_detail.update_layout(
+        plot_bgcolor="white",
+    )
     detail_layout = dcc.Loading(
         type="default",
         children=dcc.Graph(
