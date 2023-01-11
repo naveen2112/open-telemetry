@@ -108,8 +108,6 @@ layout = html.Div(
 
 @callback(
     Output("nav-ref", "children"),
-    # Output("report-main-header", "children"),
-    # Output("report-sub-header", "children"),
     Output("overall_efficiency", "figure"),
     Output("overall_efficiency_table", "data"),
     Input("min_date_range", "data"),
