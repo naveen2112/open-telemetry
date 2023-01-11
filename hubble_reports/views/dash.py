@@ -388,9 +388,9 @@ def update_figure_1(st_date, end_date):
     Input("max_date_range", "data"),
     prevent_initial_callbacks=False,
 )
-def detailed_eff(column, min_date_sess, max_date_sess):
+def detailed_eff(team, min_date_sess, max_date_sess):
     # Below st_date and end_date received are not exactly min date & max date, so it is corrected
-    if not column:
+    if not team:
         return PreventUpdate
     val1 = datetime.strptime(min_date_sess, r"%Y-%m-%d")
     val2 = datetime.strptime(max_date_sess, r"%Y-%m-%d")
@@ -411,7 +411,7 @@ def detailed_eff(column, min_date_sess, max_date_sess):
         .join(Team, Team.id == TimesheetEntry.team_id)
         .filter(
             db.and_(
-                Team.name == column,
+                Team.name == team,
                 db.and_(
                     (min_date_sess <= TimesheetEntry.entry_date),
                     (TimesheetEntry.entry_date <= max_date_sess),
@@ -443,7 +443,7 @@ def detailed_eff(column, min_date_sess, max_date_sess):
             y="efficiency_value",
             color="efficiency",
             text="efficiency_value",
-            title=f"{column} Team Efficiency",
+            title=f"{team} Team Efficiency",
             labels={"formated_date": "Time", "efficiency_value": "Efficiency"},
             barmode="group",
         )
@@ -488,8 +488,8 @@ def detailed_eff(column, min_date_sess, max_date_sess):
 def store_data(clickdata):
     if not clickdata:
         raise PreventUpdate
-    column = clickdata["points"][0]["x"]
-    return column
+    team = clickdata["points"][0]["x"]
+    return team
 
 
 @reports.route("/report")
