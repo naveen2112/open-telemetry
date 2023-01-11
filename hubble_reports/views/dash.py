@@ -224,10 +224,6 @@ def update_date_range(end_date, st_date, btn1, btn2, btn3):
     elif "one_year_button" == ctx.triggered_id:
         st_date =date.today()
         st_date = st_date - timedelta(days=st_date.weekday() + 3)
-        # end_date = st_date - relativedelta.relativedelta(
-        #     years=+1, days=+st_date.day - 1
-        # )
-        
         end_date = date(year=st_date.year-(1 if st_date.month < 4 else 0), month=4, day=1)
         logger.info(f"\n\nMonth:\t{end_date}\n")
     return st_date, end_date, end_date, st_date
@@ -261,7 +257,7 @@ def header_update(pathname, st_date, end_date, team):
         ...
     return title, sub_title
 
-
+# For Overall efficiency report
 @callback(
     Output("overall_efficiency", "figure"),
     Input("min_date_range", "data"),
@@ -380,7 +376,7 @@ def update_figure_1(st_date, end_date):
     )
     return fig_bar
 
-
+#For Detailed Efficiency report
 @callback(
     Output("detail_efficiency", "children"),
     Input("team_selected", "data"),
@@ -461,7 +457,18 @@ def detailed_eff(column, min_date_sess, max_date_sess):
         },
         title_x=0.5,
         title_y=0.97,
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=0.97,
+            xanchor="right",
+            x=1,
+            title='Approved Hours:',
+            
+        )
     )
+    labels={'actual_hours': 'Actual Hours', 'expected_hours': 'Expected Hours'}
+    fig_bar_detail.for_each_trace(lambda t: t.update(name = labels[t.name]))
     detail_layout =dcc.Graph(
             id="detailed_efficiency_chart",
             figure=fig_bar_detail,
