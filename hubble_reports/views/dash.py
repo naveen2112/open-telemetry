@@ -162,6 +162,7 @@ dash_app.layout = html.Div(
                                         children=[
                                             dcc.Graph(
                                                 id="overall_efficiency",
+                                                config= {'displaylogo': False}
                                                 # animate=True,
                                             ),
                                         ],
@@ -455,6 +456,7 @@ def detailed_eff(column, min_date_sess, max_date_sess):
     detail_layout =dcc.Graph(
             id="detailed_efficiency_chart",
             figure=fig_bar_detail,
+            config= {'displaylogo': False}
         ),
     return detail_layout
 
