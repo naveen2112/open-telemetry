@@ -202,10 +202,13 @@ dash_app.layout = html.Div(
 def update_date_range(end_date, st_date, btn1, btn2, btn3):
 
     if (not st_date) and (not end_date):
-        st_date = date.today()
-        end_date = st_date - relativedelta.relativedelta(
-            months=+6, days=+st_date.day - 1
-        )
+        st_date =date.today()
+        st_date = st_date - timedelta(days=st_date.weekday() + 3)
+        end_date = date(year=st_date.year-(1 if st_date.month < 4 else 0), month=4, day=1)
+        # st_date = date.today()
+        # end_date = st_date - relativedelta.relativedelta(
+        #     months=+6, days=+st_date.day - 1
+        # )
     if "one_month_button" == ctx.triggered_id:
         st_date = date.today()
         end_date = st_date - relativedelta.relativedelta(
@@ -242,7 +245,7 @@ def header_update(pathname, st_date, end_date, team):
     sub_title = dash.no_update
     logger.debug(f"\n\n\n\n========>\nPath name:\n{pathname}")
     logger.debug(f"\n\n=====>\nStartDate:\n{st_date}\nEndDate:\n{end_date}\n\n")
-    if pathname == "/report/":
+    if pathname == "/report":
         title = (
             f"Efficiency bandwidth- Fiscal Year "
             + f"{str_dat_to_nstr_date(st_date, r'%Y-%m-%d', r'%B-%Y')}"
