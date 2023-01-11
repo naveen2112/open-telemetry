@@ -352,6 +352,7 @@ def update_figure_1(st_date, end_date):
     )
     return fig_bar
 
+
 @callback(
     Output("detail_efficiency", "children"),
     Input("team_selected", "data"),
@@ -425,13 +426,13 @@ def detailed_eff(column, min_date_sess, max_date_sess):
     )
     fig_bar_detail.update_xaxes(tickmode="array")
     fig_bar_detail.update_layout(transition={"duration": 1000})
-    detail_layout =dcc.Loading(
-            type='default',
-            children=dcc.Graph(
+    detail_layout = dcc.Loading(
+        type="default",
+        children=dcc.Graph(
             id="detailed_efficiency_chart",
             figure=fig_bar_detail,
         ),
-        )
+    )
     return detail_layout
 
 
