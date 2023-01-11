@@ -202,13 +202,11 @@ dash_app.layout = html.Div(
 def update_date_range(end_date, st_date, btn1, btn2, btn3):
 
     if (not st_date) and (not end_date):
+        #Default date range on login is fiscal year April till last working friday
         st_date =date.today()
         st_date = st_date - timedelta(days=st_date.weekday() + 3)
         end_date = date(year=st_date.year-(1 if st_date.month < 4 else 0), month=4, day=1)
-        # st_date = date.today()
-        # end_date = st_date - relativedelta.relativedelta(
-        #     months=+6, days=+st_date.day - 1
-        # )
+        
     if "one_month_button" == ctx.triggered_id:
         st_date = date.today()
         end_date = st_date - relativedelta.relativedelta(
