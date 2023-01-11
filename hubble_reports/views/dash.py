@@ -7,7 +7,7 @@ import logging
 from dash import Dash, dcc, html, callback, ctx
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from dateutil import relativedelta
 from flask import render_template_string
 from flask_login import login_required
@@ -126,7 +126,7 @@ dash_app.layout = html.Div(
                                                         html.Div(
                                                             [
                                                                 html.Button(
-                                                                    "1 year",
+                                                                    "Fiscal year",
                                                                     id="one_year_button",
                                                                     n_clicks=0,
                                                                     className="bg-dark-blue text-white text-sm flex items-center justify-center w-20 cursor-default grow filter-button",
@@ -187,7 +187,7 @@ dash_app.layout = html.Div(
     ],
 )
 
-
+#For storing in session and updating the date range picker
 @callback(
     Output("min_date_range", "data"),
     Output("max_date_range", "data"),
@@ -211,25 +211,34 @@ def update_date_range(end_date, st_date, btn1, btn2, btn3):
         end_date = st_date - relativedelta.relativedelta(
             months=+1, days=+st_date.day - 1
         )
+        st_date = st_date - timedelta(days=st_date.day)
+        
     elif "six_month_button" == ctx.triggered_id:
         st_date = date.today()
         end_date = st_date - relativedelta.relativedelta(
             months=+6, days=+st_date.day - 1
         )
+        st_date = st_date - timedelta(days=st_date.day)
+        logger.info(f'\n\n=====>\nMonth{st_date}\n\t{st_date - timedelta(days=st_date.day)}')
+        
     elif "one_year_button" == ctx.triggered_id:
-        st_date = date.today()
-        end_date = st_date - relativedelta.relativedelta(
-            years=+1, days=+st_date.day - 1
-        )
+        st_date =date.today()
+        st_date = st_date - timedelta(days=st_date.weekday() + 3)
+        # end_date = st_date - relativedelta.relativedelta(
+        #     years=+1, days=+st_date.day - 1
+        # )
+        
+        end_date = date(year=st_date.year-(1 if st_date.month < 4 else 0), month=4, day=1)
+        logger.info(f"\n\nMonth:\t{end_date}\n")
     return st_date, end_date, end_date, st_date
 
-
+#For modifying headers
 @callback(
     Output("report-main-header", "children"),
     Output("report-sub-header", "children"),
     Input("url", "pathname"),
-    State("max_date_range", "data"),
-    State("min_date_range", "data"),
+    Input("max_date_range", "data"),
+    Input("min_date_range", "data"),
     State("team_selected", "data"),
 )
 def header_update(pathname, st_date, end_date, team):
@@ -237,14 +246,14 @@ def header_update(pathname, st_date, end_date, team):
     sub_title = dash.no_update
     logger.debug(f"\n\n\n\n========>\nPath name:\n{pathname}")
     logger.debug(f"\n\n=====>\nStartDate:\n{st_date}\nEndDate:\n{end_date}\n\n")
-    if pathname == "/report/overall-efficiency":
+    if pathname == "/report/":
         title = (
-            f"Teams Efficiency bandwidth- Fiscal Year "
+            f"Efficiency bandwidth- Fiscal Year "
             + f"{str_dat_to_nstr_date(st_date, r'%Y-%m-%d', r'%B-%Y')}"
             + f" - {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B-%Y')} "
             + f"(Till, {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",
         )
-        sub_title = f"Overall Efficiency"
+        sub_title = f"Overall Efficiency & Detailed Report"
     elif pathname == "/report/detail-report":
         title = f"Detailed Report for {team} in total hours"
         sub_title = f"Team wise Efficiency"
