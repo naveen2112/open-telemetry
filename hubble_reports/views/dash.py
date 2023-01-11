@@ -206,7 +206,7 @@ def update_date_range(end_date, st_date, btn1, btn2, btn3):
         st_date =date.today()
         st_date = st_date - timedelta(days=st_date.weekday() + 3)
         end_date = date(year=st_date.year-(1 if st_date.month < 4 else 0), month=4, day=1)
-        
+
     if "one_month_button" == ctx.triggered_id:
         st_date = date.today()
         end_date = st_date - relativedelta.relativedelta(
@@ -347,7 +347,10 @@ def update_figure_1(st_date, end_date):
 
     low_y = df["capacity"].min() - 10
     high_y = df["capacity"].max() + 20
-    fig_bar.update_yaxes(range=[low_y, high_y])
+    fig_bar.update_yaxes(
+        title='Capacity, (%)',
+        range=[low_y, high_y]
+        )
     fig_bar.add_hrect(
         y0=high_y,
         y1=100,
@@ -440,7 +443,7 @@ def detailed_eff(column, min_date_sess, max_date_sess):
             y="efficiency_value",
             color="efficiency",
             text="efficiency_value",
-            title=f"{column.capitalize()} Detailed Capacity - Efficiency",
+            title=f"{column} Team Efficiency",
             labels={"formated_date": "Time", "efficiency_value": "Efficiency"},
             barmode="group",
         )
@@ -465,8 +468,8 @@ def detailed_eff(column, min_date_sess, max_date_sess):
             xanchor="right",
             x=1,
             title='Approved Hours:',
-            
-        )
+        ),
+        yaxis_title='Efficiency, (hrs)',
     )
     labels={'actual_hours': 'Actual Hours', 'expected_hours': 'Expected Hours'}
     fig_bar_detail.for_each_trace(lambda t: t.update(name = labels[t.name]))
