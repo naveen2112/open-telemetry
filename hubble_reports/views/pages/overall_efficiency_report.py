@@ -1,6 +1,7 @@
 import dash
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 
 from dash import dash_table, callback, dcc, html
 from sqlalchemy import create_engine
@@ -16,104 +17,36 @@ from hubble_reports.utils import for_str_date_to_new_str_date
 
 dash.register_page(
     __name__,
-    path="/overall-efficiency",
+    path="/overall-report",
 )
 
 db_conn = create_engine(BaseConfig.SQLALCHEMY_DATABASE_URI)
 layout = html.Div(
-    id="overall_eff",
+    id="overall_eff_1",
     children=[
-        dcc.Link(
+        
             dcc.Loading(
-                type='default',
-                children=dcc.Graph(
-                id="overall_efficiency",
+                 type='default',
+                children=dcc.Link(
+                children=[
+                    dcc.Graph(
+                    id="overall_efficiency_1",
                 animate=True,
-            ),
-            ),
+            ),],
             href="/report/detail-report",
-        ),
-        dcc.Loading(
-            type='default',
-            children=dash_table.DataTable(
-            id="overall_efficiency_table",
-            columns=[
-                {
-                    "name": ["Teams Ratings & Trend", "Team"],
-                    "id": "team",
-                    "type": "text",
-                },
-                {
-                    "name": ["Teams Ratings & Trend", "Capacity"],
-                    "id": "capacity",
-                    "type": "numeric",
-                    "format": Format(precision=2, scheme=Scheme.fixed)
-                    .symbol(Symbol.yes)
-                    .symbol_suffix("%"),
-                },
-                {
-                    "name": ["Teams Ratings & Trend", "Ratings"],
-                    "id": "ratings",
-                    "type": "text",
-                },
-                {
-                    "name": ["Teams Ratings & Trend", "Trends"],
-                    "id": "trends",
-                    "type": "text",
-                },
-            ],
-            merge_duplicate_headers=True,
-            style_cell={
-                "textAlign": "left",
-                "fontSize": "20px",
-                "if": "",
-            },
-            style_header={
-                "backgroundColor": "orange",
-                "fontWeight": "bold",
-                "textAlign": "center",
-            },
-            style_data_conditional=[
-                {
-                    "if": {
-                        "column_id": ["trends", "ratings"],
-                    },
-                    "color": "green",
-                },
-                {
-                    "if": {
-                        "column_id": ["trends", "ratings"],
-                        "filter_query": "{capacity} <= 121 && {capacity} > 120",
-                    },
-                    "color": "orange",
-                },
-                {
-                    "if": {
-                        "column_id": ["trends", "ratings"],
-                        "filter_query": "{capacity} <= 120",
-                    },
-                    "color": "red",
-                },
-            ],
-            style_table={
-                "margin-left": "auto",
-                "margin-right": "auto",
-                "padding-bottom": "1.25rem",
-            },
-        ),
+            ),
+            
         ),
     ],
 )
 
 
 @callback(
-    Output("nav-ref", "children"),
-    Output("overall_efficiency", "figure"),
-    Output("overall_efficiency_table", "data"),
+    Output("overall_efficiency_1", "figure"),
     Input("min_date_range", "data"),
     Input("max_date_range", "data"),
 )
-def update_figure(st_date, end_date):
+def update_figure_1(st_date, end_date):
     # Below st_date and end_date received are not exactly min date & max date, so it is corrected
     val1 = datetime.strptime(st_date, r"%Y-%m-%d")
     val2 = datetime.strptime(end_date, r"%Y-%m-%d")
@@ -125,8 +58,8 @@ def update_figure(st_date, end_date):
             db.func.avg(
                 100
                 * (
-                    TimesheetEntry.authorized_hours
-                    / ExpectedUserEfficiency.expected_efficiency
+                    (TimesheetEntry.authorized_hours
+                    / ExpectedUserEfficiency.expected_efficiency)
                 )
             ).label("capacity"),
             Team.name.label("team"),
@@ -147,46 +80,61 @@ def update_figure(st_date, end_date):
         db_conn,
     )
     df["ratings"] = df["capacity"].apply(
-        lambda a: "Excellent" if a > 121 else "Good" if a > 120 else "Needs Improvement"
+        lambda a: "Excellent" if a > 100 else "Good" if a >= 90 else "Needs Improvement"
     )
     df["trends"] = df["capacity"].apply(
-        lambda a: "↑" if a > 121 else "↔︎" if a > 120 else "↓"
+        lambda a: "↑" if a > 100 else "↔︎" if a > 90 else "↓"
     )
+    df['customdata']='/report/detail-report'
 
     fig_bar = (
-        px.bar(
+        px.line(
             df,
             x="team",
             y="capacity",
-            color="team",
-            text_auto=True,
             text="capacity",
-            height=360,
+            height=450,
             labels={"team": "Teams", "capacity": "Capacity"},
+            hover_data={
+                'capacity':':.1f',
+                'ratings':True,
+                },
         )
-        .update_traces(texttemplate="%{y:0.0f}%")
-        .update_layout(title_x=0.5)
+        .update_traces(
+            texttemplate="<b>%{y:0.01f}%</b>", 
+            textposition="top left", 
+            marker=dict(size=15, color='rgb(34,72,195)'),
+            line_color="rgb(34,72,195)",
+            )
     )
-    fig_bar.update_layout(transition={"duration": 1000}, plot_bgcolor="white")
-    fig_bar.add_hline(y=100, line_dash="dash", line_color="magenta")
-    title = (
-        f"Teams Efficiency bandwidth- Fiscal Year {for_str_date_to_new_str_date(st_date, r'%Y-%m-%d', r'%B-%Y')} - {for_str_date_to_new_str_date(end_date, r'%Y-%m-%d', r'%B-%Y')} (Till, {for_str_date_to_new_str_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",
-    )
-    sub_title = "Overall team efficiency"
-    nav_item = (
-        dcc.Link(
-            "< Back to Index page",
-            href="/report",
-            className="flex items-center text-sm text-dark-blue",
-        ),
-    )
-    return nav_item, fig_bar, df.to_dict("records")
+    fig_bar.update_layout(
+        plot_bgcolor="white", 
+        hovermode='x', 
+        modebar_activecolor='orange',
+        modebar={
+                "bgcolor": "rgba(0,0,0,0)",
+                "color":"rgba(0,0,0,0.1)",
+                },
+                )
+    
+    low_y = df["capacity"].min() - 10
+    high_y = df["capacity"].max() + 20
+    fig_bar.update_yaxes(range=[low_y, high_y])
+    fig_bar.add_hrect(y0=high_y, y1=100, 
+              annotation_text="<b>Excellent</b>", annotation_position="top right",
+              fillcolor="green", opacity=0.2, line_width=0)
+    fig_bar.add_hrect(y0=90, y1=100, 
+              annotation_text="<b>Good</b>", annotation_position="right",
+              fillcolor="blue", opacity=0.1, line_width=0)
+    fig_bar.add_hrect(y0=low_y, y1=90, 
+              annotation_text="<b>Need Improvement</b>", annotation_position="bottom right",
+              fillcolor="red", opacity=0.2, line_width=0)
+    return fig_bar
 
-
-
+    
 @callback(
     Output("team_selected", "data"),
-    Input("overall_efficiency", "clickData"),
+    Input("overall_efficiency_1", "clickData"),
 )
 def store_data(clickdata):
     if not clickdata:
