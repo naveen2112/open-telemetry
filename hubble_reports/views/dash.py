@@ -15,10 +15,10 @@ from flask.helpers import get_root_path
 from sqlalchemy import create_engine
 
 from app import app
+from config import BaseConfig
 from hubble_reports.hubble_reports import reports
 from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
 from hubble_reports.utils import str_dat_to_nstr_date, get_logger
-from config import BaseConfig
 
 logger = get_logger(__name__, logging.DEBUG)
 
@@ -162,15 +162,19 @@ dash_app.layout = html.Div(
                                         children=[
                                             dcc.Graph(
                                                 id="overall_efficiency",
-                                                animate=True,
+                                                # animate=True,
                                             ),
                                         ],
                                     ),
                                 ],
                             ),
-                            html.Div(
+                            dcc.Loading(
+                            type="default",
+                            children=html.Div(
                                 id="detail_efficiency",
                             ),
+                            ),
+
                         ],
                     ),
                 ],
@@ -307,6 +311,7 @@ def update_figure_1(st_date, end_date):
             "capacity": ":.1f",
             "ratings": True,
         },
+        title='Overall Efficiency'
     ).update_traces(
         texttemplate="<b>%{y:0.01f}%</b>",
         textposition="top left",
@@ -314,6 +319,7 @@ def update_figure_1(st_date, end_date):
         line_color="rgb(34,72,195)",
     )
     fig_bar.update_layout(
+        xaxis_title=None,
         plot_bgcolor="white",
         hovermode="x",
         modebar_activecolor="orange",
@@ -321,6 +327,15 @@ def update_figure_1(st_date, end_date):
             "bgcolor": "rgba(0,0,0,0)",
             "color": "rgba(0,0,0,0.1)",
         },
+        height=350,
+        margin={
+            'l':0,
+            'r':30,
+            't':25,
+            'b':30,
+        },
+        title_x=0.5,
+        title_y=0.98,
     )
 
     low_y = df["capacity"].min() - 10
@@ -336,8 +351,8 @@ def update_figure_1(st_date, end_date):
         line_width=0,
     )
     fig_bar.add_hrect(
-        y0=90,
-        y1=100,
+        y0=100,
+        y1=90,
         annotation_text="<b>Good</b>",
         annotation_position="right",
         fillcolor="blue",
@@ -345,8 +360,8 @@ def update_figure_1(st_date, end_date):
         line_width=0,
     )
     fig_bar.add_hrect(
-        y0=low_y,
-        y1=90,
+        y0=90,
+        y1=low_y,
         annotation_text="<b>Need Improvement</b>",
         annotation_position="bottom right",
         fillcolor="red",
@@ -359,8 +374,8 @@ def update_figure_1(st_date, end_date):
 @callback(
     Output("detail_efficiency", "children"),
     Input("team_selected", "data"),
-    State("min_date_range", "data"),
-    State("max_date_range", "data"),
+    Input("min_date_range", "data"),
+    Input("max_date_range", "data"),
     prevent_initial_callbacks=False,
 )
 def detailed_eff(column, min_date_sess, max_date_sess):
@@ -423,21 +438,24 @@ def detailed_eff(column, min_date_sess, max_date_sess):
             barmode="group",
         )
         .update_traces(texttemplate="%{text:0}")
-        .update_layout(
-            title_x=0.5,
-        )
     )
-    fig_bar_detail.update_xaxes(tickmode="array")
+    fig_bar_detail.update_xaxes(tickmode="array", title=None)
     fig_bar_detail.update_layout(
         plot_bgcolor="white",
+        height=325,
+        margin={
+            'l':0,
+            'r':30,
+            't':15,
+            'b':25,
+        },
+        title_x=0.5,
+        title_y=0.97,
     )
-    detail_layout = dcc.Loading(
-        type="default",
-        children=dcc.Graph(
+    detail_layout =dcc.Graph(
             id="detailed_efficiency_chart",
             figure=fig_bar_detail,
         ),
-    )
     return detail_layout
 
 
