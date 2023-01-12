@@ -20,8 +20,6 @@ from hubble_reports.hubble_reports import reports
 from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
 from hubble_reports.utils import str_dat_to_nstr_date, get_logger
 
-logger = get_logger(__name__, logging.DEBUG)
-
 
 style_dash = (
     pathlib.Path(get_root_path(__name__)).parent.joinpath("static").joinpath("style")
@@ -183,6 +181,7 @@ dash_app.layout = html.Div(
     ],
 )
 
+
 # For storing in session and updating the date range picker
 @callback(
     Output("min_date_range", "data"),
@@ -218,9 +217,6 @@ def update_date_range(end_date, st_date, btn1, btn2, btn3):
             months=+6, days=+st_date.day - 1
         )
         st_date = st_date - timedelta(days=st_date.day)
-        logger.info(
-            f"\n\n=====>\nMonth{st_date}\n\t{st_date - timedelta(days=st_date.day)}"
-        )
 
     elif "one_year_button" == ctx.triggered_id:
         st_date = date.today()
@@ -228,9 +224,7 @@ def update_date_range(end_date, st_date, btn1, btn2, btn3):
         end_date = date(
             year=st_date.year - (1 if st_date.month < 4 else 0), month=4, day=1
         )
-        logger.info(f"\n\nMonth:\t{end_date}\n")
     return st_date, end_date, end_date, st_date
-
 
 # For modifying headers
 @callback(
@@ -244,8 +238,6 @@ def update_date_range(end_date, st_date, btn1, btn2, btn3):
 def header_update(pathname, st_date, end_date, team):
     title = dash.no_update
     sub_title = dash.no_update
-    logger.debug(f"\n\n\n\n========>\nPath name:\n{pathname}")
-    logger.debug(f"\n\n=====>\nStartDate:\n{st_date}\nEndDate:\n{end_date}\n\n")
     if pathname == "/report":
         title = (
             f"Efficiency bandwidth- Fiscal Year "
@@ -376,7 +368,6 @@ def update_figure_1(st_date, end_date):
     )
     return fig_bar
 
-
 # For Detailed Efficiency report
 @callback(
     Output("detail_efficiency", "children"),
@@ -475,7 +466,6 @@ def detailed_eff(team, min_date_sess, max_date_sess):
         ),
     )
     return detail_layout
-
 
 @callback(
     Output("team_selected", "data"),
