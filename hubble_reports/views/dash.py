@@ -157,20 +157,21 @@ dash_app.layout = html.Div(
                                         children=[
                                             dcc.Graph(
                                                 id="overall_efficiency",
-                                                config= {'displaylogo': False}
+                                                config={"displaylogo": False},
                                             ),
                                         ],
                                     ),
                                 ],
                             ),
                             dcc.Loading(
-                            type="default",
-                            children=html.Div(
-                                id="detail_efficiency",
-                                children=html.H3('Note: Click on the graph to display corresponding teams detail report')
+                                type="default",
+                                children=html.Div(
+                                    id="detail_efficiency",
+                                    children=html.H3(
+                                        "Note: Click on the graph to display corresponding teams detail report"
+                                    ),
+                                ),
                             ),
-                            ),
-
                         ],
                     ),
                 ],
@@ -182,7 +183,7 @@ dash_app.layout = html.Div(
     ],
 )
 
-#For storing in session and updating the date range picker
+# For storing in session and updating the date range picker
 @callback(
     Output("min_date_range", "data"),
     Output("max_date_range", "data"),
@@ -197,10 +198,12 @@ dash_app.layout = html.Div(
 def update_date_range(end_date, st_date, btn1, btn2, btn3):
 
     if (not st_date) and (not end_date):
-        #Default date range on login is fiscal year April till last working friday
-        st_date =date.today()
+        # Default date range on login is fiscal year April till last working friday
+        st_date = date.today()
         st_date = st_date - timedelta(days=st_date.weekday() + 3)
-        end_date = date(year=st_date.year-(1 if st_date.month < 4 else 0), month=4, day=1)
+        end_date = date(
+            year=st_date.year - (1 if st_date.month < 4 else 0), month=4, day=1
+        )
 
     if "one_month_button" == ctx.triggered_id:
         st_date = date.today()
@@ -208,23 +211,28 @@ def update_date_range(end_date, st_date, btn1, btn2, btn3):
             months=+1, days=+st_date.day - 1
         )
         st_date = st_date - timedelta(days=st_date.day)
-        
+
     elif "six_month_button" == ctx.triggered_id:
         st_date = date.today()
         end_date = st_date - relativedelta.relativedelta(
             months=+6, days=+st_date.day - 1
         )
         st_date = st_date - timedelta(days=st_date.day)
-        logger.info(f'\n\n=====>\nMonth{st_date}\n\t{st_date - timedelta(days=st_date.day)}')
-        
+        logger.info(
+            f"\n\n=====>\nMonth{st_date}\n\t{st_date - timedelta(days=st_date.day)}"
+        )
+
     elif "one_year_button" == ctx.triggered_id:
-        st_date =date.today()
+        st_date = date.today()
         st_date = st_date - timedelta(days=st_date.weekday() + 3)
-        end_date = date(year=st_date.year-(1 if st_date.month < 4 else 0), month=4, day=1)
+        end_date = date(
+            year=st_date.year - (1 if st_date.month < 4 else 0), month=4, day=1
+        )
         logger.info(f"\n\nMonth:\t{end_date}\n")
     return st_date, end_date, end_date, st_date
 
-#For modifying headers
+
+# For modifying headers
 @callback(
     Output("report-main-header", "children"),
     Output("report-sub-header", "children"),
@@ -252,6 +260,7 @@ def header_update(pathname, st_date, end_date, team):
     else:
         ...
     return title, sub_title
+
 
 # For Overall efficiency report
 @callback(
@@ -313,7 +322,7 @@ def update_figure_1(st_date, end_date):
             "capacity": ":.1f",
             "ratings": True,
         },
-        title='Overall Efficiency'
+        title="Overall Efficiency",
     ).update_traces(
         texttemplate="<b>%{y:0.01f}%</b>",
         textposition="top left",
@@ -326,10 +335,10 @@ def update_figure_1(st_date, end_date):
         hovermode="x",
         height=350,
         margin={
-            'l':0,
-            'r':30,
-            't':25,
-            'b':30,
+            "l": 0,
+            "r": 30,
+            "t": 25,
+            "b": 30,
         },
         title_x=0.5,
         title_y=0.98,
@@ -337,10 +346,7 @@ def update_figure_1(st_date, end_date):
 
     low_y = df["capacity"].min() - 10
     high_y = df["capacity"].max() + 20
-    fig_bar.update_yaxes(
-        title='Capacity, (%)',
-        range=[low_y, high_y]
-        )
+    fig_bar.update_yaxes(title="Capacity, (%)", range=[low_y, high_y])
     fig_bar.add_hrect(
         y0=high_y,
         y1=100,
@@ -370,7 +376,8 @@ def update_figure_1(st_date, end_date):
     )
     return fig_bar
 
-#For Detailed Efficiency report
+
+# For Detailed Efficiency report
 @callback(
     Output("detail_efficiency", "children"),
     Input("team_selected", "data"),
@@ -426,28 +433,25 @@ def detailed_eff(team, min_date_sess, max_date_sess):
     )
     df["formated_date"] = df.display_date.dt.strftime(r"%b %Y")
 
-    fig_bar_detail = (
-        px.bar(
-            data_frame=df,
-            x="formated_date",
-            y="efficiency_value",
-            color="efficiency",
-            text="efficiency_value",
-            title=f"{team} Team Efficiency",
-            labels={"formated_date": "Time", "efficiency_value": "Efficiency"},
-            barmode="group",
-        )
-        .update_traces(texttemplate="%{text:0}")
-    )
+    fig_bar_detail = px.bar(
+        data_frame=df,
+        x="formated_date",
+        y="efficiency_value",
+        color="efficiency",
+        text="efficiency_value",
+        title=f"{team} Team Efficiency",
+        labels={"formated_date": "Time", "efficiency_value": "Efficiency"},
+        barmode="group",
+    ).update_traces(texttemplate="%{text:0}")
     fig_bar_detail.update_xaxes(tickmode="array", title=None)
     fig_bar_detail.update_layout(
         plot_bgcolor="white",
         height=325,
         margin={
-            'l':0,
-            'r':30,
-            't':15,
-            'b':25,
+            "l": 0,
+            "r": 30,
+            "t": 15,
+            "b": 25,
         },
         title_x=0.5,
         title_y=0.97,
@@ -457,17 +461,19 @@ def detailed_eff(team, min_date_sess, max_date_sess):
             y=0.97,
             xanchor="right",
             x=1,
-            title='Approved Hours:',
+            title="Approved Hours:",
         ),
-        yaxis_title='Efficiency, (hrs)',
+        yaxis_title="Efficiency, (hrs)",
     )
-    labels={'actual_hours': 'Actual Hours', 'expected_hours': 'Expected Hours'}
-    fig_bar_detail.for_each_trace(lambda t: t.update(name = labels[t.name]))
-    detail_layout =dcc.Graph(
+    labels = {"actual_hours": "Actual Hours", "expected_hours": "Expected Hours"}
+    fig_bar_detail.for_each_trace(lambda t: t.update(name=labels[t.name]))
+    detail_layout = (
+        dcc.Graph(
             id="detailed_efficiency_chart",
             figure=fig_bar_detail,
-            config= {'displaylogo': False}
+            config={"displaylogo": False},
         ),
+    )
     return detail_layout
 
 
