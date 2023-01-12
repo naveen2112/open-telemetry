@@ -580,6 +580,7 @@ video {
     overflow: hidden;
     z-index: 1;
 }
+
 .filter-button:after {
       content: '';
       position: absolute;
@@ -591,6 +592,7 @@ video {
       border-radius: 10rem;
       z-index: -2;
     }
+
 .filter-button:before {
       content: '';
       position: absolute;
@@ -603,9 +605,11 @@ video {
       border-radius: 10rem;
       z-index: -1;
     }
+
 .filter-button:hover {
       color: #fff;
 }
+
 .filter-button:before {
         width: 100%;
     }
