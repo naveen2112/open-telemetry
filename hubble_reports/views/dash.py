@@ -44,7 +44,6 @@ with app.app_context(), app.test_request_context():
 
     with open(layout_dash, "r") as f:
         html_body = render_template_string(f.read())
-        html_body = html_body.replace("HEADER", "Welcome User!!!")
 dash_app.index_string = html_body
 
 dash_app.layout = html.Div(
