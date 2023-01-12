@@ -147,9 +147,9 @@ dash_app.layout = html.Div(
         ),
         dcc.Location(id="url", refresh=False),
         html.Div(
-            className="overflow-auto grow bg-light-violet content-page",
+            className="overflow-auto grow content-page bg-white",
             children=html.Div(
-                className="px-5 h-full",
+                className="px-5 h-full bg-white",
                 children=[
                     html.Div(
                         id="page-content",
@@ -173,6 +173,7 @@ dash_app.layout = html.Div(
                             type="default",
                             children=html.Div(
                                 id="detail_efficiency",
+                                children=html.H3('Note: Click on the graph to display corresponding teams detail report')
                             ),
                             ),
 
