@@ -31,7 +31,6 @@ dash_app = Dash(
     __name__,
     server=app,
     url_base_pathname="/report/",
-    # use_pages=True,
     assets_folder=style_dash,  # For setting css style
 )
 
@@ -58,10 +57,6 @@ dash_app.layout = html.Div(
             children=html.Div(
                 className="px-10 pt-5",
                 children=[
-                    dcc.Link(
-                        id="nav-ref",
-                        href="",
-                    ),
                     html.Div(
                         className="flex justify-between mb-7 items-center",
                         children=[
@@ -163,7 +158,6 @@ dash_app.layout = html.Div(
                                             dcc.Graph(
                                                 id="overall_efficiency",
                                                 config= {'displaylogo': False}
-                                                # animate=True,
                                             ),
                                         ],
                                     ),
@@ -330,11 +324,6 @@ def update_figure_1(st_date, end_date):
         xaxis_title=None,
         plot_bgcolor="white",
         hovermode="x",
-        modebar_activecolor="orange",
-        modebar={
-            "bgcolor": "rgba(0,0,0,0)",
-            "color": "rgba(0,0,0,0.1)",
-        },
         height=350,
         margin={
             'l':0,
