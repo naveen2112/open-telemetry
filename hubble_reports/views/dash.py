@@ -226,6 +226,7 @@ def update_date_range(end_date, st_date, btn1, btn2, btn3):
         )
     return st_date, end_date, end_date, st_date
 
+
 # For modifying headers
 @callback(
     Output("report-main-header", "children"),
@@ -368,6 +369,7 @@ def update_figure_1(st_date, end_date):
     )
     return fig_bar
 
+
 # For Detailed Efficiency report
 @callback(
     Output("detail_efficiency", "children"),
@@ -466,6 +468,7 @@ def detailed_eff(team, min_date_sess, max_date_sess):
         ),
     )
     return detail_layout
+
 
 @callback(
     Output("team_selected", "data"),
