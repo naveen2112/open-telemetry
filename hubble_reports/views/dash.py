@@ -32,7 +32,7 @@ dash_app = Dash(
     assets_folder=style_dash,  # For setting css style
 )
 
-db_conn = create_engine(BaseConfig.SQLALCHEMY_DATABASE_URI)
+db_connection = create_engine(BaseConfig.SQLALCHEMY_DATABASE_URI)
 
 # FYI, you need both an app context and a request context to use url_for() in the Jinja2 templates
 with app.app_context(), app.test_request_context():
@@ -294,7 +294,7 @@ def update_figure_1(st_date, end_date):
         )
         .group_by(Team.name)
         .statement,
-        db_conn,
+        db_connection,
     )
     df["ratings"] = df["capacity"].apply(
         lambda a: "Excellent" if a > 100 else "Good" if a >= 90 else "Needs Improvement"
@@ -411,7 +411,7 @@ def detailed_eff(team, min_date_sess, max_date_sess):
         .group_by(db.func.date_trunc("month", TimesheetEntry.entry_date))
         .order_by(db.func.date_trunc("month", TimesheetEntry.entry_date))
         .statement,
-        con=db_conn,
+        con=db_connection,
         parse_dates=["display_date"],
     )
 
