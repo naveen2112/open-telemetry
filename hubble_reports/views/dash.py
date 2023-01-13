@@ -84,6 +84,9 @@ dash_app.layout = html.Div(
                                                     dcc.DatePickerRange(
                                                         id="date-range-picker",
                                                         max_date_allowed=date.today(),
+                                                        display_format="DD-MM-YYYY",
+                                                        stay_open_on_select=True,
+                                                        updatemode='bothdates',
                                                     ),
                                                     colSpan=3,
                                                 ),
@@ -193,35 +196,35 @@ dash_app.layout = html.Div(
     Input("six-month-button", "n_clicks"),
     Input("one-year-button", "n_clicks"),
 )
-def update_date_range(end_date, st_date, btn1, btn2, btn3):
+def update_date_range(st_date, end_date, btn1, btn2, btn3):
 
     if (not st_date) and (not end_date):
         # Default date range on login is fiscal year April till last working friday
-        st_date = date.today()
-        st_date = st_date - timedelta(days=st_date.weekday() + 3)
-        end_date = date(
-            year=st_date.year - (1 if st_date.month < 4 else 0), month=4, day=1
+        end_date = date.today()
+        end_date = end_date - timedelta(days=end_date.weekday() + 3)
+        st_date = date(
+            year=end_date.year - (1 if end_date.month < 4 else 0), month=4, day=1
         )
 
     if "one-month-button" == ctx.triggered_id:
-        st_date = date.today()
-        end_date = st_date - relativedelta.relativedelta(
-            months=+1, days=+st_date.day - 1
+        end_date = date.today()
+        st_date = end_date - relativedelta.relativedelta(
+            months=+1, days=+end_date.day - 1
         )
-        st_date = st_date - timedelta(days=st_date.day)
+        end_date = end_date - timedelta(days=end_date.day)
 
     elif "six-month-button" == ctx.triggered_id:
-        st_date = date.today()
-        end_date = st_date - relativedelta.relativedelta(
-            months=+6, days=+st_date.day - 1
+        end_date = date.today()
+        st_date = end_date - relativedelta.relativedelta(
+            months=+6, days=+end_date.day - 1
         )
-        st_date = st_date - timedelta(days=st_date.day)
+        end_date = end_date - timedelta(days=end_date.day)
 
     elif "one-year-button" == ctx.triggered_id:
-        st_date = date.today()
-        st_date = st_date - timedelta(days=st_date.weekday() + 3)
-        end_date = date(
-            year=st_date.year - (1 if st_date.month < 4 else 0), month=4, day=1
+        end_date = date.today()
+        end_date = end_date - timedelta(days=end_date.weekday() + 3)
+        st_date = date(
+            year=end_date.year - (1 if end_date.month < 4 else 0), month=4, day=1
         )
     return st_date, end_date, end_date, st_date
 
@@ -231,8 +234,8 @@ def update_date_range(end_date, st_date, btn1, btn2, btn3):
     Output("report-main-header", "children"),
     Output("report-sub-header", "children"),
     Input("url", "pathname"),
-    Input("max-date-range", "data"),
     Input("min-date-range", "data"),
+    Input("max-date-range", "data"),
     State("team-selected", "data"),
 )
 def header_update(pathname, st_date, end_date, team):
@@ -261,11 +264,6 @@ def header_update(pathname, st_date, end_date, team):
     Input("max-date-range", "data"),
 )
 def overall_efficiency_report(st_date, end_date):
-    # Below st_date and end_date received are not exactly min date & max date, so it is corrected
-    val1 = datetime.strptime(st_date, r"%Y-%m-%d")
-    val2 = datetime.strptime(end_date, r"%Y-%m-%d")
-    st_date = min(val1, val2).strftime(r"%Y-%m-%d")
-    end_date = max(val1, val2).strftime(r"%Y-%m-%d")
 
     df = pd.read_sql_query(
         db.session.query(
@@ -377,13 +375,9 @@ def overall_efficiency_report(st_date, end_date):
     prevent_initial_callbacks=False,
 )
 def detailed_efficiency_report(team, min_date_sess, max_date_sess):
-    # Below st_date and end_date received are not exactly min date & max date, so it is corrected
+
     if not team:
         return PreventUpdate
-    val1 = datetime.strptime(min_date_sess, r"%Y-%m-%d")
-    val2 = datetime.strptime(max_date_sess, r"%Y-%m-%d")
-    min_date_sess = min(val1, val2).strftime(r"%Y-%m-%d")
-    max_date_sess = max(val1, val2).strftime(r"%Y-%m-%d")
 
     df = pd.read_sql_query(
         db.session.query(
