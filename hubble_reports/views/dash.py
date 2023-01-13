@@ -301,7 +301,6 @@ def update_figure_1(st_date, end_date):
     df["trends"] = df["capacity"].apply(
         lambda a: "↑" if a > 100 else "↔︎" if a > 90 else "↓"
     )
-    df["customdata"] = "/report/detail-report"
 
     fig_bar = px.line(
         df,
@@ -377,7 +376,7 @@ def update_figure_1(st_date, end_date):
     Input("max_date_range", "data"),
     prevent_initial_callbacks=False,
 )
-def detailed_eff(team, min_date_sess, max_date_sess):
+def detailed_efficiency_report(team, min_date_sess, max_date_sess):
     # Below st_date and end_date received are not exactly min date & max date, so it is corrected
     if not team:
         return PreventUpdate
@@ -482,5 +481,5 @@ def store_data(clickdata):
 
 @reports.route("/report")
 @login_required
-def dash_entry():
+def report_index():
     return dash_app.index()
