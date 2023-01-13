@@ -300,7 +300,7 @@ def overall_efficiency_report(st_date, end_date):
         lambda a: "↑" if a > 100 else "↔︎" if a > 90 else "↓"
     )
 
-    fig_bar = px.line(
+    overall_line_chart = px.line(
         df,
         x="team",
         y="capacity",
@@ -318,7 +318,7 @@ def overall_efficiency_report(st_date, end_date):
         marker=dict(size=15, color="rgb(34,72,195)"),
         line_color="rgb(34,72,195)",
     )
-    fig_bar.update_layout(
+    overall_line_chart.update_layout(
         xaxis_title=None,
         plot_bgcolor="white",
         hovermode="x",
@@ -335,8 +335,8 @@ def overall_efficiency_report(st_date, end_date):
 
     y_range_min = df["capacity"].min() - 10
     y_range_max = df["capacity"].max() + 20
-    fig_bar.update_yaxes(title="Capacity, (%)", range=[y_range_min, y_range_max])
-    fig_bar.add_hrect(
+    overall_line_chart.update_yaxes(title="Capacity, (%)", range=[y_range_min, y_range_max])
+    overall_line_chart.add_hrect(
         y0=y_range_max,
         y1=100,
         annotation_text="<b>Excellent</b>",
@@ -345,7 +345,7 @@ def overall_efficiency_report(st_date, end_date):
         opacity=0.2,
         line_width=0,
     )
-    fig_bar.add_hrect(
+    overall_line_chart.add_hrect(
         y0=100,
         y1=90,
         annotation_text="<b>Good</b>",
@@ -354,7 +354,7 @@ def overall_efficiency_report(st_date, end_date):
         opacity=0.1,
         line_width=0,
     )
-    fig_bar.add_hrect(
+    overall_line_chart.add_hrect(
         y0=90,
         y1=y_range_min,
         annotation_text="<b>Need Improvement</b>",
@@ -363,7 +363,7 @@ def overall_efficiency_report(st_date, end_date):
         opacity=0.2,
         line_width=0,
     )
-    return fig_bar
+    return overall_line_chart
 
 
 # For Detailed Efficiency report
@@ -418,7 +418,7 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
     )
     df["formated_date"] = df.display_date.dt.strftime(r"%b %Y")
 
-    fig_bar_detail = px.bar(
+    detail_bar_chart = px.bar(
         data_frame=df,
         x="formated_date",
         y="efficiency_value",
@@ -428,8 +428,8 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
         labels={"formated_date": "Time", "efficiency_value": "Efficiency"},
         barmode="group",
     ).update_traces(texttemplate="%{text:0}")
-    fig_bar_detail.update_xaxes(tickmode="array", title=None)
-    fig_bar_detail.update_layout(
+    detail_bar_chart.update_xaxes(tickmode="array", title=None)
+    detail_bar_chart.update_layout(
         plot_bgcolor="white",
         height=325,
         margin={
@@ -451,11 +451,11 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
         yaxis_title="Efficiency, (hrs)",
     )
     labels = {"actual_hours": "Actual Hours", "expected_hours": "Expected Hours"}
-    fig_bar_detail.for_each_trace(lambda t: t.update(name=labels[t.name]))
+    detail_bar_chart.for_each_trace(lambda t: t.update(name=labels[t.name]))
     detail_layout = (
         dcc.Graph(
             id="detailed_efficiency_chart",
-            figure=fig_bar_detail,
+            figure=detail_bar_chart,
             config={"displaylogo": False},
         ),
     )
