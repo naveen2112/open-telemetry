@@ -95,7 +95,7 @@ dash_app.layout = html.Div(
                                                             [
                                                                 html.Button(
                                                                     "1 month",
-                                                                    id="one_month_button",
+                                                                    id="one-month-button",
                                                                     n_clicks=0,
                                                                     className="bg-dark-blue text-white text-sm flex items-center justify-center w-20 cursor-default grow filter-button",
                                                                 ),
@@ -107,7 +107,7 @@ dash_app.layout = html.Div(
                                                             [
                                                                 html.Button(
                                                                     "6 months",
-                                                                    id="six_month_button",
+                                                                    id="six-month-button",
                                                                     n_clicks=0,
                                                                     className="bg-dark-blue text-white text-sm flex items-center justify-center w-20 cursor-default grow filter-button",
                                                                 ),
@@ -119,7 +119,7 @@ dash_app.layout = html.Div(
                                                             [
                                                                 html.Button(
                                                                     "Fiscal year",
-                                                                    id="one_year_button",
+                                                                    id="one-year-button",
                                                                     n_clicks=0,
                                                                     className="bg-dark-blue text-white text-sm flex items-center justify-center w-20 cursor-default grow filter-button",
                                                                 ),
@@ -153,7 +153,7 @@ dash_app.layout = html.Div(
                                         type="default",
                                         children=[
                                             dcc.Graph(
-                                                id="overall_efficiency",
+                                                id="overall-efficiency",
                                                 config={"displaylogo": False},
                                             ),
                                         ],
@@ -163,7 +163,7 @@ dash_app.layout = html.Div(
                             dcc.Loading(
                                 type="default",
                                 children=html.Div(
-                                    id="detail_efficiency",
+                                    id="detail-efficiency",
                                     children=html.H3(
                                         "Note: Click on the graph to display corresponding teams detail report"
                                     ),
@@ -174,24 +174,24 @@ dash_app.layout = html.Div(
                 ],
             ),
         ),
-        dcc.Store(id="team_selected", storage_type="session"),
-        dcc.Store(id="min_date_range", storage_type="session"),
-        dcc.Store(id="max_date_range", storage_type="session"),
+        dcc.Store(id="team-selected", storage_type="session"),
+        dcc.Store(id="min-date-range", storage_type="session"),
+        dcc.Store(id="max-date-range", storage_type="session"),
     ],
 )
 
 
 # For storing in session and updating the date range picker
 @callback(
-    Output("min_date_range", "data"),
-    Output("max_date_range", "data"),
+    Output("min-date-range", "data"),
+    Output("max-date-range", "data"),
     Output("date-range-picker", "start_date"),
     Output("date-range-picker", "end_date"),
     Input("date-range-picker", "start_date"),
     Input("date-range-picker", "end_date"),
-    Input("one_month_button", "n_clicks"),
-    Input("six_month_button", "n_clicks"),
-    Input("one_year_button", "n_clicks"),
+    Input("one-month-button", "n_clicks"),
+    Input("six-month-button", "n_clicks"),
+    Input("one-year-button", "n_clicks"),
 )
 def update_date_range(end_date, st_date, btn1, btn2, btn3):
 
@@ -203,21 +203,21 @@ def update_date_range(end_date, st_date, btn1, btn2, btn3):
             year=st_date.year - (1 if st_date.month < 4 else 0), month=4, day=1
         )
 
-    if "one_month_button" == ctx.triggered_id:
+    if "one-month-button" == ctx.triggered_id:
         st_date = date.today()
         end_date = st_date - relativedelta.relativedelta(
             months=+1, days=+st_date.day - 1
         )
         st_date = st_date - timedelta(days=st_date.day)
 
-    elif "six_month_button" == ctx.triggered_id:
+    elif "six-month-button" == ctx.triggered_id:
         st_date = date.today()
         end_date = st_date - relativedelta.relativedelta(
             months=+6, days=+st_date.day - 1
         )
         st_date = st_date - timedelta(days=st_date.day)
 
-    elif "one_year_button" == ctx.triggered_id:
+    elif "one-year-button" == ctx.triggered_id:
         st_date = date.today()
         st_date = st_date - timedelta(days=st_date.weekday() + 3)
         end_date = date(
@@ -231,9 +231,9 @@ def update_date_range(end_date, st_date, btn1, btn2, btn3):
     Output("report-main-header", "children"),
     Output("report-sub-header", "children"),
     Input("url", "pathname"),
-    Input("max_date_range", "data"),
-    Input("min_date_range", "data"),
-    State("team_selected", "data"),
+    Input("max-date-range", "data"),
+    Input("min-date-range", "data"),
+    State("team-selected", "data"),
 )
 def header_update(pathname, st_date, end_date, team):
     title = dash.no_update
@@ -256,9 +256,9 @@ def header_update(pathname, st_date, end_date, team):
 
 # For Overall efficiency report
 @callback(
-    Output("overall_efficiency", "figure"),
-    Input("min_date_range", "data"),
-    Input("max_date_range", "data"),
+    Output("overall-efficiency", "figure"),
+    Input("min-date-range", "data"),
+    Input("max-date-range", "data"),
 )
 def update_figure_1(st_date, end_date):
     # Below st_date and end_date received are not exactly min date & max date, so it is corrected
@@ -370,10 +370,10 @@ def update_figure_1(st_date, end_date):
 
 # For Detailed Efficiency report
 @callback(
-    Output("detail_efficiency", "children"),
-    Input("team_selected", "data"),
-    Input("min_date_range", "data"),
-    Input("max_date_range", "data"),
+    Output("detail-efficiency", "children"),
+    Input("team-selected", "data"),
+    Input("min-date-range", "data"),
+    Input("max-date-range", "data"),
     prevent_initial_callbacks=False,
 )
 def detailed_efficiency_report(team, min_date_sess, max_date_sess):
@@ -469,8 +469,8 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
 
 
 @callback(
-    Output("team_selected", "data"),
-    Input("overall_efficiency", "clickData"),
+    Output("team-selected", "data"),
+    Input("overall-efficiency", "clickData"),
 )
 def store_data(clickdata):
     if not clickdata:
