@@ -260,7 +260,7 @@ def header_update(pathname, st_date, end_date, team):
     Input("min-date-range", "data"),
     Input("max-date-range", "data"),
 )
-def update_figure_1(st_date, end_date):
+def overall_efficiency_report(st_date, end_date):
     # Below st_date and end_date received are not exactly min date & max date, so it is corrected
     val1 = datetime.strptime(st_date, r"%Y-%m-%d")
     val2 = datetime.strptime(end_date, r"%Y-%m-%d")
