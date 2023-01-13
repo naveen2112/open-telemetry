@@ -226,7 +226,7 @@ def update_date_range(st_date, end_date, btn1, btn2, btn3):
         st_date = date(
             year=end_date.year - (1 if end_date.month < 4 else 0), month=4, day=1
         )
-    return st_date, end_date, end_date, st_date
+    return st_date, end_date, st_date, end_date
 
 
 # For modifying headers
@@ -333,11 +333,11 @@ def overall_efficiency_report(st_date, end_date):
         title_y=0.98,
     )
 
-    low_y = df["capacity"].min() - 10
-    high_y = df["capacity"].max() + 20
-    fig_bar.update_yaxes(title="Capacity, (%)", range=[low_y, high_y])
+    y_range_min = df["capacity"].min() - 10
+    y_range_max = df["capacity"].max() + 20
+    fig_bar.update_yaxes(title="Capacity, (%)", range=[y_range_min, y_range_max])
     fig_bar.add_hrect(
-        y0=high_y,
+        y0=y_range_max,
         y1=100,
         annotation_text="<b>Excellent</b>",
         annotation_position="top right",
@@ -356,7 +356,7 @@ def overall_efficiency_report(st_date, end_date):
     )
     fig_bar.add_hrect(
         y0=90,
-        y1=low_y,
+        y1=y_range_min,
         annotation_text="<b>Need Improvement</b>",
         annotation_position="bottom right",
         fillcolor="red",
@@ -475,5 +475,5 @@ def store_data(clickdata):
 
 @reports.route("/report")
 @login_required
-def report_index():
+def dash_index():
     return dash_app.index()
