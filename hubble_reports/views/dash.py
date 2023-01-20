@@ -277,6 +277,7 @@ def overall_efficiency_report(st_date, end_date):
                 )
             ).label("capacity"),
             Team.name.label("team"),
+            Team.id.label("team_id"),
         )
         .join(
             ExpectedUserEfficiency,
@@ -289,7 +290,10 @@ def overall_efficiency_report(st_date, end_date):
                 (TimesheetEntry.entry_date <= end_date),
             ),
         )
-        .group_by(Team.name)
+        .group_by(
+            Team.name,
+            Team.id,
+        )
         .statement,
         db_connection,
     )
@@ -310,6 +314,7 @@ def overall_efficiency_report(st_date, end_date):
         hover_data={
             "capacity": ":.1f",
             "ratings": True,
+            "team_id": False,
         },
         title="Overall Efficiency",
     ).update_traces(
@@ -335,7 +340,9 @@ def overall_efficiency_report(st_date, end_date):
 
     y_range_min = df["capacity"].min() - 10
     y_range_max = df["capacity"].max() + 20
-    overall_line_chart.update_yaxes(title="Capacity, (%)", range=[y_range_min, y_range_max])
+    overall_line_chart.update_yaxes(
+        title="Capacity, (%)", range=[y_range_min, y_range_max]
+    )
     overall_line_chart.add_hrect(
         y0=y_range_max,
         y1=100,
@@ -378,6 +385,8 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
 
     if not team:
         return PreventUpdate
+    print(f"\n\n\n\n==========>\nDetail team selected:\n{team}\t{type(team)}\n")
+    print(f"\n\n{team['id']}\t{team['name']}\n\n")
 
     df = pd.read_sql_query(
         db.session.query(
@@ -393,7 +402,7 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
         .join(Team, Team.id == TimesheetEntry.team_id)
         .filter(
             db.and_(
-                Team.name == team,
+                Team.id == team['id'],
                 db.and_(
                     (min_date_sess <= TimesheetEntry.entry_date),
                     (TimesheetEntry.entry_date <= max_date_sess),
@@ -406,7 +415,7 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
         con=db_connection,
         parse_dates=["display_date"],
     )
-
+    # df = pd.read_sql_query(db.session.query(db.func.date_trunc("month", TimesheetEntry.entry_date).label("display_date"),db.func.sum(TimesheetEntry.authorized_hours).label("actual_hours"),db.func.sum(ExpectedUserEfficiency.expected_efficiency).label("expected_hours"),).join(TimesheetEntry, TimesheetEntry.user_id == ExpectedUserEfficiency.user_id).join(Team, Team.id == TimesheetEntry.team_id).filter(db.and_(Team.name == team,db.and_(    (min_date_sess <= TimesheetEntry.entry_date),    (TimesheetEntry.entry_date <= max_date_sess),),)).group_by(db.func.date_trunc("month", TimesheetEntry.entry_date)).order_by(db.func.date_trunc("month", TimesheetEntry.entry_date)).statement,con=db_connection,parse_dates=["display_date"],);df = pd.DataFrame(pd.melt(df,id_vars=["display_date"],value_vars=["actual_hours", "expected_hours"],var_name="efficiency",value_name="efficiency_value",));df["formated_date"] = df.display_date.dt.strftime(r"%b %Y")
     df = pd.DataFrame(
         pd.melt(
             df,
@@ -424,7 +433,7 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
         y="efficiency_value",
         color="efficiency",
         text="efficiency_value",
-        title=f"{team} Team Efficiency",
+        title=f"{team['name']} Team Efficiency",
         labels={"formated_date": "Time", "efficiency_value": "Efficiency"},
         barmode="group",
     ).update_traces(texttemplate="%{text:0}")
@@ -449,6 +458,9 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
             title="Approved Hours:",
         ),
         yaxis_title="Efficiency, (hrs)",
+        transition={
+            'duration':1000,
+        },
     )
     labels = {"actual_hours": "Actual Hours", "expected_hours": "Expected Hours"}
     detail_bar_chart.for_each_trace(lambda t: t.update(name=labels[t.name]))
@@ -469,7 +481,11 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
 def store_data(clickdata):
     if not clickdata:
         raise PreventUpdate
-    team = clickdata["points"][0]["x"]
+    print(f"\n\n\n======>\n{clickdata['points']}")
+    team = {
+        'id' : clickdata["points"][0]["customdata"][1], 
+        'name' : clickdata["points"][0]["x"]
+        }
     return team
 
 
