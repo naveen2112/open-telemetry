@@ -80,5 +80,5 @@ def logout() -> redirect:
         BaseConfig.AUTHORITY_SIGN_ON_SIGN_OUT
         + "/oauth2/v2.0/logout"
         + "?post_logout_redirect_uri="
-        + url_for("reports.index", _external=True, _scheme="https")
+        + url_for("reports.login", _external=True, _scheme="https")
     )
