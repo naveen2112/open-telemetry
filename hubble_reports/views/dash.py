@@ -22,7 +22,7 @@ from hubble_reports.utils import str_dat_to_nstr_date, get_logger
 
 
 style_dash = (
-    pathlib.Path(get_root_path(__name__)).parent.joinpath("static").joinpath("style")
+    pathlib.Path(get_root_path(__name__)).parent.joinpath("static")
 )
 
 dash_app = Dash(
@@ -30,6 +30,7 @@ dash_app = Dash(
     server=app,
     url_base_pathname="/report/",
     assets_folder=style_dash,  # For setting css style
+    assets_url_path='static',
 )
 
 db_connection = create_engine(BaseConfig.SQLALCHEMY_DATABASE_URI)
@@ -137,6 +138,7 @@ dash_app.layout = html.Div(
                             ),
                         ],
                     ),
+                    html.Link(rel='stylesheet', href='/static/style/style.css'),
                 ],
             ),
         ),
