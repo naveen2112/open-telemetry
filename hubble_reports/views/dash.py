@@ -78,7 +78,7 @@ dash_app.layout = html.Div(
                                 title='Enter in "MM/DD/YYYY" format',
                                 children=[
                                     html.Table(
-                                        style={"width": 300},
+                                        style={"width": 288},
                                         children=[
                                             html.Tr(
                                                 html.Td(
@@ -91,6 +91,7 @@ dash_app.layout = html.Div(
                                                     ),
                                                     colSpan=3,
                                                 ),
+                                                style={'textAlign':'center',}
                                             ),
                                             html.Tr(
                                                 [
@@ -115,8 +116,9 @@ dash_app.layout = html.Div(
                                                                     n_clicks=0,
                                                                     className="bg-dark-blue text-white text-sm flex items-center justify-center w-20 cursor-default grow filter-button",
                                                                 ),
-                                                            ]
-                                                        )
+                                                            ],
+                                                        ),
+                                                        style={'textAlign': 'center',}
                                                     ),
                                                     html.Td(
                                                         html.Div(
@@ -129,6 +131,7 @@ dash_app.layout = html.Div(
                                                                 ),
                                                             ]
                                                         ),
+                                                        style={'textAlign': 'right',}
                                                     ),
                                                 ]
                                             ),
