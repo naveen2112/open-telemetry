@@ -28,6 +28,7 @@ dash_app = Dash(
     url_base_pathname="/",
     assets_folder=style_dash,  # For setting css style
     assets_url_path="static",
+    use_pages=True,
 )
 
 for view_func in app.view_functions:
