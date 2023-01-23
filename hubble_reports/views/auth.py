@@ -13,9 +13,7 @@ from config import BaseConfig
 @login_manager.user_loader
 def user_loader(user_id):
     user_email = session["user"]["preferred_username"]
-    return User.query.filter(
-        User.email == user_email
-    ).first()
+    return User.query.filter(User.email == user_email).first()
 
 
 @reports.route("/login")
@@ -28,7 +26,9 @@ def login() -> render_template:
     return render_template("login.html", auth_url=session["flow"]["auth_uri"])
 
 
-@reports.route(BaseConfig.REDIRECT_PATH)  # Its absolute URL must match your app's redirect_uri set in AAD
+@reports.route(
+    BaseConfig.REDIRECT_PATH
+)  # Its absolute URL must match your app's redirect_uri set in AAD
 def authorized() -> render_template:
     try:
         cache = _load_cache()
