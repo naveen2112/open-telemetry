@@ -31,6 +31,10 @@ dash_app = Dash(
     assets_url_path="static",
 )
 
+for view_func in app.view_functions:
+    if view_func.startswith(dash_app.config["routes_pathname_prefix"]):
+        app.view_functions[view_func] = login_required(app.view_functions[view_func])
+
 db_connection = create_engine(BaseConfig.SQLALCHEMY_DATABASE_URI)
 
 # FYI, you need both an app context and a request context to use url_for() in the Jinja2 templates
@@ -244,7 +248,7 @@ def update_date_range(st_date, end_date, btn1, btn2, btn3):
 def header_update(pathname, st_date, end_date, team):
     title = dash.no_update
     sub_title = dash.no_update
-    if pathname == "/report":
+    if pathname == "/":
         title = (
             f"Efficiency bandwidth- Fiscal Year "
             + f"{str_dat_to_nstr_date(st_date, r'%Y-%m-%d', r'%B-%Y')}"
@@ -492,7 +496,7 @@ def store_data(clickdata):
     return team
 
 
-@reports.route("/report")
+@reports.route("/")
 @login_required
 def dash_index():
     return dash_app.index()
