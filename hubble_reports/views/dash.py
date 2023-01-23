@@ -2,12 +2,11 @@ import dash
 import pandas as pd
 import pathlib
 import plotly.express as px
-import logging
 
 from dash import Dash, dcc, html, callback, ctx
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 from dateutil import relativedelta
 from flask import render_template_string
 from flask_login import login_required
@@ -18,7 +17,7 @@ from app import app
 from config import BaseConfig
 from hubble_reports.hubble_reports import reports
 from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
-from hubble_reports.utils import str_dat_to_nstr_date, get_logger
+from hubble_reports.utils import str_dat_to_nstr_date
 
 
 style_dash = pathlib.Path(get_root_path(__name__)).parent.joinpath("static")
@@ -89,11 +88,13 @@ dash_app.layout = html.Div(
                                                         max_date_allowed=date.today(),
                                                         display_format="DD-MM-YYYY",
                                                         stay_open_on_select=True,
-                                                        updatemode='bothdates',
+                                                        updatemode="bothdates",
                                                     ),
                                                     colSpan=3,
                                                 ),
-                                                style={'textAlign':'center',}
+                                                style={
+                                                    "textAlign": "center",
+                                                },
                                             ),
                                             html.Tr(
                                                 [
@@ -120,7 +121,9 @@ dash_app.layout = html.Div(
                                                                 ),
                                                             ],
                                                         ),
-                                                        style={'textAlign': 'center',}
+                                                        style={
+                                                            "textAlign": "center",
+                                                        },
                                                     ),
                                                     html.Td(
                                                         html.Div(
@@ -133,7 +136,9 @@ dash_app.layout = html.Div(
                                                                 ),
                                                             ]
                                                         ),
-                                                        style={'textAlign': 'right',}
+                                                        style={
+                                                            "textAlign": "right",
+                                                        },
                                                     ),
                                                 ]
                                             ),
@@ -156,19 +161,9 @@ dash_app.layout = html.Div(
                     html.Div(
                         id="page-content",
                         children=[
-                            html.Div(
-                                id="overall_eff",
-                                children=[
-                                    dcc.Loading(
-                                        type="default",
-                                        children=[
-                                            dcc.Graph(
-                                                id="overall-efficiency",
-                                                config={"displaylogo": False},
-                                            ),
-                                        ],
-                                    ),
-                                ],
+                            dcc.Graph(
+                                id="overall-efficiency",
+                                config={"displaylogo": False},
                             ),
                             dcc.Loading(
                                 type="default",
@@ -343,6 +338,9 @@ def overall_efficiency_report(st_date, end_date):
         },
         title_x=0.5,
         title_y=0.98,
+        transition={
+            "duration": 500,
+        },
     )
 
     y_range_min = df["capacity"].min() - 10
@@ -392,8 +390,6 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
 
     if not team:
         return PreventUpdate
-    print(f"\n\n\n\n==========>\nDetail team selected:\n{team}\t{type(team)}\n")
-    print(f"\n\n{team['id']}\t{team['name']}\n\n")
 
     df = pd.read_sql_query(
         db.session.query(
@@ -409,7 +405,7 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
         .join(Team, Team.id == TimesheetEntry.team_id)
         .filter(
             db.and_(
-                Team.id == team['id'],
+                Team.id == team["id"],
                 db.and_(
                     (min_date_sess <= TimesheetEntry.entry_date),
                     (TimesheetEntry.entry_date <= max_date_sess),
@@ -422,7 +418,7 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
         con=db_connection,
         parse_dates=["display_date"],
     )
-    # df = pd.read_sql_query(db.session.query(db.func.date_trunc("month", TimesheetEntry.entry_date).label("display_date"),db.func.sum(TimesheetEntry.authorized_hours).label("actual_hours"),db.func.sum(ExpectedUserEfficiency.expected_efficiency).label("expected_hours"),).join(TimesheetEntry, TimesheetEntry.user_id == ExpectedUserEfficiency.user_id).join(Team, Team.id == TimesheetEntry.team_id).filter(db.and_(Team.name == team,db.and_(    (min_date_sess <= TimesheetEntry.entry_date),    (TimesheetEntry.entry_date <= max_date_sess),),)).group_by(db.func.date_trunc("month", TimesheetEntry.entry_date)).order_by(db.func.date_trunc("month", TimesheetEntry.entry_date)).statement,con=db_connection,parse_dates=["display_date"],);df = pd.DataFrame(pd.melt(df,id_vars=["display_date"],value_vars=["actual_hours", "expected_hours"],var_name="efficiency",value_name="efficiency_value",));df["formated_date"] = df.display_date.dt.strftime(r"%b %Y")
+
     df = pd.DataFrame(
         pd.melt(
             df,
@@ -466,7 +462,7 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
         ),
         yaxis_title="Efficiency, (hrs)",
         transition={
-            'duration':1000,
+            "duration": 500,
         },
     )
     labels = {"actual_hours": "Actual Hours", "expected_hours": "Expected Hours"}
@@ -488,11 +484,10 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
 def store_data(clickdata):
     if not clickdata:
         raise PreventUpdate
-    print(f"\n\n\n======>\n{clickdata['points']}")
     team = {
-        'id' : clickdata["points"][0]["customdata"][1], 
-        'name' : clickdata["points"][0]["x"]
-        }
+        "id": clickdata["points"][0]["customdata"][1],
+        "name": clickdata["points"][0]["x"],
+    }
     return team
 
 
