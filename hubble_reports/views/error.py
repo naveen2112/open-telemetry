@@ -3,6 +3,11 @@ from flask import render_template
 
 def error_page(e):
     context = {
+        401: {
+            "status_title": "Unauthorized",
+            "status_code": 401,
+            "status_message": "This user has no permission to use this route",
+        },
         403: {
             "status_title": "Forbidden",
             "status_code": 403,

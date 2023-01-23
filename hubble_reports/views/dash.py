@@ -8,13 +8,12 @@ from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 from datetime import date, timedelta
 from dateutil import relativedelta
-from flask import render_template_string
+from flask import render_template_string, current_app
 from flask_login import login_required
 from flask.helpers import get_root_path
 from sqlalchemy import create_engine
 
 from app import app
-from config import BaseConfig
 from hubble_reports.hubble_reports import reports
 from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
 from hubble_reports.utils import str_dat_to_nstr_date
@@ -35,7 +34,7 @@ for view_func in app.view_functions:
     if view_func.startswith(dash_app.config["routes_pathname_prefix"]):
         app.view_functions[view_func] = login_required(app.view_functions[view_func])
 
-db_connection = create_engine(BaseConfig.SQLALCHEMY_DATABASE_URI)
+db_connection = create_engine(current_app.config.get("SQLALCHEMY_DATABASE_URI"))
 
 # FYI, you need both an app context and a request context to use url_for() in the Jinja2 templates
 with app.app_context(), app.test_request_context():
@@ -252,9 +251,6 @@ def header_update(pathname, st_date, end_date, team):
             + f"(Till, {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",
         )
         sub_title = f"Overall Efficiency & Detailed Report"
-    elif pathname == "/report/detail-report":
-        title = f"Detailed Report for {team} in total hours"
-        sub_title = f"Team wise Efficiency"
     else:
         ...
     return title, sub_title

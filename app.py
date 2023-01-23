@@ -23,7 +23,7 @@ from hubble_reports.views.error import error_page
 
 app.register_blueprint(reports)
 
-error_code_list = [403, 404, 405, 500]
+error_code_list = [401, 403, 404, 405, 500]
 for error_code in error_code_list:
     app.register_error_handler(error_code, error_page)
 
