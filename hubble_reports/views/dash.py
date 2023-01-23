@@ -34,7 +34,7 @@ for view_func in app.view_functions:
     if view_func.startswith(dash_app.config["routes_pathname_prefix"]):
         app.view_functions[view_func] = login_required(app.view_functions[view_func])
 
-db_connection = create_engine(current_app.config.get("SQLALCHEMY_DATABASE_URI"))
+# db_connection = create_engine(current_app.config.get("SQLALCHEMY_DATABASE_URI"))
 
 # FYI, you need both an app context and a request context to use url_for() in the Jinja2 templates
 with app.app_context(), app.test_request_context():
@@ -230,7 +230,7 @@ def update_date_range(st_date, end_date, btn1, btn2, btn3):
 def header_update(pathname, st_date, end_date, team):
     title = dash.no_update
     sub_title = dash.no_update
-    home_page = dash.no_update
+    home_page = ''
     if pathname == "/efficiency":
         title = (
             f"Efficiency bandwidth- Fiscal Year "
@@ -242,11 +242,17 @@ def header_update(pathname, st_date, end_date, team):
     elif pathname == "/":
        title = 'Dash Board for Reports'
        sub_title = ''
-       home_page = [
-        dcc.Link(f"{page['name']} - {page['path']}", href=page["relative_path"]
-        )
+       home_page =     html.Div(
+        [
+            html.Div(
+                dcc.Link(
+                    f"{page['name']} - {page['path']}", href=page["relative_path"]
+                )
+            )
             for page in dash.page_registry.values()
-            ]
+                if page['name'] != 'Not found 404'
+        ]
+    ),
     else:
         ...
     return title, sub_title, home_page

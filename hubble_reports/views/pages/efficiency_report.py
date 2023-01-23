@@ -1,27 +1,19 @@
 import dash
 import pandas as pd
-import pathlib
 import plotly.express as px
 
-from dash import Dash, dcc, html, callback, ctx
-from dash.dependencies import Input, Output, State
+from dash import dcc, html, callback
+from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
-from datetime import date, timedelta
-from dateutil import relativedelta
-from flask import render_template_string, current_app
-from flask_login import login_required
-from flask.helpers import get_root_path
+from flask import current_app
 from sqlalchemy import create_engine
 
-from app import app
-from config import BaseConfig
-from hubble_reports.hubble_reports import reports
 from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
-from hubble_reports.utils import str_dat_to_nstr_date
 
-dash.register_page(__name__, path='/efficiency')
 
 db_connection = create_engine(current_app.config.get("SQLALCHEMY_DATABASE_URI"))
+
+dash.register_page(__name__, path='/efficiency')
 
 layout = [
     dcc.Graph(
