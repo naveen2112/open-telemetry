@@ -251,9 +251,6 @@ def header_update(pathname, st_date, end_date, team):
             + f"(Till, {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",
         )
         sub_title = f"Overall Efficiency & Detailed Report"
-    elif pathname == "/report/detail-report":
-        title = f"Detailed Report for {team} in total hours"
-        sub_title = f"Team wise Efficiency"
     else:
         ...
     return title, sub_title
