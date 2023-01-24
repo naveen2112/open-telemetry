@@ -239,6 +239,16 @@ def header_update(pathname, st_date, end_date, team):
             + f"(Till, {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",
         )
         sub_title = f"Overall Efficiency & Detailed Report"
+    elif pathname == "/monetization":
+        title = (
+            f"Monetization Gap report for teams"
+            # + f"{str_dat_to_nstr_date(st_date, r'%Y-%m-%d', r'%B-%Y')}"
+            # + f" - {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B-%Y')} "
+            # + f"(Till, {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",
+        )
+        sub_title = (f"{str_dat_to_nstr_date(st_date, r'%Y-%m-%d', r'%B-%Y')}"
+            + f" - {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B-%Y')} "
+            + f"(Till, {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",)
     elif pathname == "/":
        title = 'Dash Board for Reports'
        sub_title = ''
