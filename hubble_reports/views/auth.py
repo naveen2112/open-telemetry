@@ -39,9 +39,9 @@ def authorized() -> render_template:
         _save_cache(cache)
     except ValueError:  # Usually caused by CSRF
         pass  # Simply ignore them
-    mailid = session["user"]["preferred_username"]
+    mail_id = session["user"]["preferred_username"]
     try:
-        login_user(User.query.filter(User.email == mailid).first())
+        login_user(User.query.filter(User.email == mail_id).first())
     except AttributeError:
         abort(401)
     return redirect(url_for("reports.dash_index"))
