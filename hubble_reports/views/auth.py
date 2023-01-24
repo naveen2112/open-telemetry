@@ -1,21 +1,17 @@
 import msal
 
 from flask_login import login_required, logout_user, login_user
-from flask import session, url_for, render_template, redirect, request
+from flask import session, url_for, render_template, redirect, request, current_app, abort
 
 from app import login_manager
 from hubble_reports.hubble_reports import reports
 from hubble_reports.models import User
 
-from config import BaseConfig
-
 
 @login_manager.user_loader
 def user_loader(user_id):
     user_email = session["user"]["preferred_username"]
-    return User.query.filter(
-        User.email == user_email
-    ).first()
+    return User.query.filter(User.email == user_email).first()
 
 
 @reports.route("/login")
@@ -23,12 +19,14 @@ def login() -> render_template:
     # Technically we could use empty list [] as scopes to do just sign in,
     # here we choose to also collect end user consent upfront
     session["flow"] = _build_auth_code_flow(
-        authority=BaseConfig.AUTHORITY_SIGN_ON_SIGN_OUT
+        authority=current_app.config.get("AUTHORITY_SIGN_ON_SIGN_OUT")
     )
     return render_template("login.html", auth_url=session["flow"]["auth_uri"])
 
 
-@reports.route(BaseConfig.REDIRECT_PATH)  # Its absolute URL must match your app's redirect_uri set in AAD
+@reports.route(
+    current_app.config.get("REDIRECT_PATH")
+)  # Its absolute URL must match your app's redirect_uri set in AAD
 def authorized() -> render_template:
     try:
         cache = _load_cache()
@@ -41,9 +39,12 @@ def authorized() -> render_template:
         _save_cache(cache)
     except ValueError:  # Usually caused by CSRF
         pass  # Simply ignore them
-    mailid = session["user"]["preferred_username"]
-    login_user(User.query.filter(User.email == mailid).first())
-    return redirect(url_for("reports.index"))
+    mail_id = session["user"]["preferred_username"]
+    try:
+        login_user(User.query.filter(User.email == mail_id).first())
+    except AttributeError:
+        abort(401)
+    return redirect(url_for("reports.dash_index"))
 
 
 def _load_cache() -> object:
@@ -64,9 +65,9 @@ def _build_auth_code_flow(authority=None, scopes=None) -> dict:
 
 def _build_msal_app(cache=None, authority=None):
     return msal.ConfidentialClientApplication(
-        BaseConfig.CLIENT_ID,
-        authority=authority or BaseConfig.AUTHORITY_SIGN_ON_SIGN_OUT,
-        client_credential=BaseConfig.CLIENT_SECRET,
+        current_app.config.get("CLIENT_ID"),
+        authority=authority or current_app.config.get("AUTHORITY_SIGN_ON_SIGN_OUT"),
+        client_credential=current_app.config.get("CLIENT_SECRET"),
         token_cache=cache,
     )
 
@@ -77,8 +78,8 @@ def logout() -> redirect:
     session.clear()  # Wipe out user and its token cache from session
     logout_user()
     return redirect(  # Also logout from your tenant's web session
-        BaseConfig.AUTHORITY_SIGN_ON_SIGN_OUT
+        current_app.config.get("AUTHORITY_SIGN_ON_SIGN_OUT")
         + "/oauth2/v2.0/logout"
         + "?post_logout_redirect_uri="
-        + url_for("reports.index", _external=True, _scheme="https")
+        + url_for("reports.login", _external=True, _scheme="https")
     )
