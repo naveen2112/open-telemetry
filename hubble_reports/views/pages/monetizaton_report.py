@@ -18,7 +18,7 @@ from app import app
 from config import BaseConfig
 from hubble_reports.hubble_reports import reports
 from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
-from hubble_reports.utils import str_dat_to_nstr_date
+from hubble_reports.utils import str_dat_to_nstr_date, ceiling
 
 from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
 
@@ -28,18 +28,20 @@ db_connection = create_engine(current_app.config.get("SQLALCHEMY_DATABASE_URI"))
 
 
 layout = [
-    dcc.Graph(
+    dcc.Loading(
+        type="default",
+        children=dcc.Graph(
         id="monetization-report",
         config={"displaylogo": False},
-    ),
+    ),)
 ]
 
-def create_line_chart(df, row):
+def create_line_chart(df):
         fig = px.line(
             df, 
             x='Date', 
             y='Gap',
-            
+            text='Gap',
             markers='circle', 
             hover_data={
                 'Teams':True,
@@ -49,25 +51,12 @@ def create_line_chart(df, row):
         fig.update_traces(
             marker=dict(color=df['team_color']),
             line=dict(color=df['team_color'].unique()[0]),
+            texttemplate="%{y:0.01f}%",
         )
-        fig.add_layout_image(
-            dict(
-                source=f"/static/images/png/{df['Teams'].unique()[0].lower()}.png",
-                xref="paper", 
-                yref="paper",
-                x=0.5, 
-                y=0.5,
-                sizex=0.3, 
-                sizey=0.25,
-                xanchor="right", 
-                yanchor="bottom", 
-                sizing= "contain",
-                layer="below",
-                opacity=0.5,
-            )
-        )
-        print(fig)
+        
+        
         figure_traces = []
+        print(fig)
         for trace in range(len(fig["data"])):
             figure_traces.append(fig["data"][trace])
         return figure_traces
@@ -180,49 +169,87 @@ def monetization_report(urlname, min_date_sess, max_date_sess):
     
     # return figure
 
-
-
-
-    total_team_count =6
+    no_of_teams = len(df['Teams'].unique())
     fig_subplots = make_subplots(
-    rows=total_team_count, 
+    rows=int(ceiling(no_of_teams/2,1)),#len(df['Teams'].unique()), 
     cols=2, 
-    # shared_xaxes=True,
-    vertical_spacing=0.05,
+    # shared_xaxes='columns',
+    # shared_yaxes=True,
+    vertical_spacing=0.15,
+    horizontal_spacing=0.05,
     subplot_titles=df['Teams'].unique(),
+    start_cell='bottom-left',
+    y_title='Gap, %',
+    x_title='Date',
     )
     fig_subplots.update_layout(
-        height=1200,
-        title='Subplots for different teams in different charts'
+        height=700,
+        # title='Subplots for different teams in different charts'
         # title_text="Stacked Subplots with Shared X-Axes",
         )
 
-    title = []
+
+    max_gap = ceiling(df['Gap'].max()*1.25, 5)
+    no_of_dates = len(df['Date'].unique())
+    
+
     for i, team in enumerate(df.Teams.unique()):
         unique_team_df = df[df['Teams']==team].copy()
-        figure_traces = create_line_chart(unique_team_df, i+1)
+        figure_traces = create_line_chart(unique_team_df)
         for traces in figure_traces:
-            fig_subplots.append_trace(traces, row=(i)//2 + 1, col=(i)%2 +1)
-        # fig_subplots.add_trace(create_line_chart(unique_team_df, i), row=i, col=1)
-        # i += 1
-        title.append(team)
+            fig_subplots.append_trace(traces, row= i//2 +1, col=int(i%2)+1)
 
+        data=fig_subplots['data'][i]
+        x_axis = data['xaxis']
+        y_axis = data['yaxis']
+        # fig_subplots.add_layout_image(
+        #     dict(
+        #         source=f"static/images/png/{team.lower()}.png",
+        #         xref=x_axis,
+        #         yref=y_axis,
+        #         xanchor='center',
+        #         yanchor='middle',
+        #         # x=len(df[df["Teams"] == team]['Date'].unique())/2-0.5,
+        #         x=no_of_dates/2-0.5,
+        #         y=max_gap/2,
+        #         sizex=1 if no_of_dates >1 else 0.5,
+        #         sizey=max_gap/2,
+        #         sizing="stretch",
+        #         opacity=0.5,
+        #         layer="below",
+        #     ),
+        # )
 
+    fig_subplots.add_hrect(
+        y0=-10,
+        y1=10,
+        annotation_text="<b>Good</b>",
+        annotation_position="bottom right",
+        fillcolor="green",
+        opacity=0.075,
+        line_width=0,
+    )
+    fig_subplots.add_hrect(
+        y0=max_gap,
+        y1=10,
+        annotation_text="<b>Need Improvements</b>",
+        annotation_position="top right",
+        fillcolor="red",
+        opacity=0.075,
+        line_width=0,
+    )
 
+    fig_subplots.update_yaxes(
+        range=[-10, max_gap],
+        # title='Gap, %',
+    )
 
-    
+    fig_subplots.update_traces(textposition="top center")
+
     fig_subplots.update_layout(
         hovermode='x',
         template="plotly_white",
-        # title_text=title,
         )
-    # fig_subplots.update_layout(
-    #     subplot_titles=title,
-    # )
-    # for da in fig_subplots['data']:
-    #     if da['type'] == 'scatter':
-    #         da['line']['color'] = df[df['Teams']==da['customdata'][0][0]]['team_color'].unique()[0]
-    #     elif da['type'] == 'bar':
-    #         da['marker']['color'] = df[df['Teams']==da['customdata'][0][0]]['team_color'].unique()[0]
+    print(fig_subplots)
 
     return fig_subplots
