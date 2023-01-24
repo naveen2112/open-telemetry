@@ -23,7 +23,7 @@ style_dash = pathlib.Path(get_root_path(__name__)).parent.joinpath("static")
 
 dash_app = Dash(
     __name__,
-    server=app,
+    server=current_app,
     url_base_pathname="/",
     assets_folder=style_dash,  # For setting css style
     assets_url_path="static",
