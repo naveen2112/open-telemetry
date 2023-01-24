@@ -13,7 +13,7 @@ from flask_login import login_required
 from flask.helpers import get_root_path
 from sqlalchemy import create_engine
 
-from app import app
+
 from hubble_reports.hubble_reports import reports
 from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
 from hubble_reports.utils import str_dat_to_nstr_date
@@ -29,14 +29,14 @@ dash_app = Dash(
     assets_url_path="static",
 )
 
-for view_func in app.view_functions:
+for view_func in current_app.view_functions:
     if view_func.startswith(dash_app.config["routes_pathname_prefix"]):
-        app.view_functions[view_func] = login_required(app.view_functions[view_func])
+        current_app.view_functions[view_func] = login_required(current_app.view_functions[view_func])
 
 db_connection = create_engine(current_app.config.get("SQLALCHEMY_DATABASE_URI"))
 
 # FYI, you need both an app context and a request context to use url_for() in the Jinja2 templates
-with app.app_context(), app.test_request_context():
+with current_app.app_context(), current_app.test_request_context():
     layout_dash = (
         pathlib.Path(get_root_path(__name__))
         .parent.joinpath("templates")
