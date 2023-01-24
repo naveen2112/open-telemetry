@@ -38,13 +38,35 @@ def create_line_chart(df, row):
         fig = px.line(
             df, 
             x='Date', 
-            y='Gap', 
+            y='Gap',
+            
             markers='circle', 
             hover_data={
                 'Teams':True,
                 },
             title='Teams',
         )
+        fig.update_traces(
+            marker=dict(color=df['team_color']),
+            line=dict(color=df['team_color'].unique()[0]),
+        )
+        fig.add_layout_image(
+            dict(
+                source=f"/static/images/png/{df['Teams'].unique()[0].lower()}.png",
+                xref="paper", 
+                yref="paper",
+                x=0.5, 
+                y=0.5,
+                sizex=0.3, 
+                sizey=0.25,
+                xanchor="right", 
+                yanchor="bottom", 
+                sizing= "contain",
+                layer="below",
+                opacity=0.5,
+            )
+        )
+        print(fig)
         figure_traces = []
         for trace in range(len(fig["data"])):
             figure_traces.append(fig["data"][trace])
@@ -97,7 +119,6 @@ def monetization_report(urlname, min_date_sess, max_date_sess):
     df['Date'] = df["Date"].dt.strftime(r'%b %y')
     
     for i, team in enumerate(df.Teams.unique()):
-        # print(team)
         df["team_color"].loc[df["Teams"] == team] = px.colors.qualitative.Dark24[i]
     figure = px.line(
         df,
@@ -157,50 +178,51 @@ def monetization_report(urlname, min_date_sess, max_date_sess):
         da["yref"] = "y" + str(i + 1 if i > 0 else "")
         da["x"] = 0.25 if i%2 == 0 else 0.75
     
-    return figure
+    # return figure
 
-    # total_team_count =6
-    # fig_subplots = make_subplots(
-    # rows=total_team_count, 
-    # cols=2, 
-    # # shared_xaxes=True,
-    # vertical_spacing=0.1,
-    # subplot_titles=df['Teams'].unique(),
-    # )
-    # fig_subplots.update_layout(
-    #     height=1000,
-    #     title='Subplots for different teams in different charts'
-    #     # title_text="Stacked Subplots with Shared X-Axes",
-    #     )
 
-    # title = []
-    # print('\n\n\n\n', df.Teams.unique())
-    # for i, team in enumerate(df.Teams.unique()):
-    #     unique_team_df = df[df['Teams']==team].copy()
-    #     figure_traces = create_line_chart(unique_team_df, i+1)
-    #     print(team, (i+1)//2, "\t,\t", (i)%2 +1)
-    #     for traces in figure_traces:
-    #         fig_subplots.append_trace(traces, row=(i+1)//2 + 1, col=(i+1)%2)
-    #     # fig_subplots.add_trace(create_line_chart(unique_team_df, i), row=i, col=1)
-    #     # i += 1
-    #     title.append(team)
+
+
+    total_team_count =6
+    fig_subplots = make_subplots(
+    rows=total_team_count, 
+    cols=2, 
+    # shared_xaxes=True,
+    vertical_spacing=0.05,
+    subplot_titles=df['Teams'].unique(),
+    )
+    fig_subplots.update_layout(
+        height=1200,
+        title='Subplots for different teams in different charts'
+        # title_text="Stacked Subplots with Shared X-Axes",
+        )
+
+    title = []
+    for i, team in enumerate(df.Teams.unique()):
+        unique_team_df = df[df['Teams']==team].copy()
+        figure_traces = create_line_chart(unique_team_df, i+1)
+        for traces in figure_traces:
+            fig_subplots.append_trace(traces, row=(i)//2 + 1, col=(i)%2 +1)
+        # fig_subplots.add_trace(create_line_chart(unique_team_df, i), row=i, col=1)
+        # i += 1
+        title.append(team)
 
 
 
 
     
+    fig_subplots.update_layout(
+        hovermode='x',
+        template="plotly_white",
+        # title_text=title,
+        )
     # fig_subplots.update_layout(
-    #     hovermode='x',
-    #     template="plotly_white",
-    #     # title_text=title,
-    #     )
-    # # fig_subplots.update_layout(
-    # #     subplot_titles=title,
-    # # )
-    # # for da in fig_subplots['data']:
-    # #     if da['type'] == 'scatter':
-    # #         da['line']['color'] = df[df['Teams']==da['customdata'][0][0]]['team_color'].unique()[0]
-    # #     elif da['type'] == 'bar':
-    # #         da['marker']['color'] = df[df['Teams']==da['customdata'][0][0]]['team_color'].unique()[0]
+    #     subplot_titles=title,
+    # )
+    # for da in fig_subplots['data']:
+    #     if da['type'] == 'scatter':
+    #         da['line']['color'] = df[df['Teams']==da['customdata'][0][0]]['team_color'].unique()[0]
+    #     elif da['type'] == 'bar':
+    #         da['marker']['color'] = df[df['Teams']==da['customdata'][0][0]]['team_color'].unique()[0]
 
-    # return fig_subplots
+    return fig_subplots
