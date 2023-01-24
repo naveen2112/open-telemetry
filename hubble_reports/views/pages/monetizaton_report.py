@@ -137,5 +137,5 @@ def monetization_report(urlname, min_date_sess, max_date_sess):
     for i, da in enumerate(figure["layout"]["annotations"]):
         da["text"] = da["text"].replace("Teams=", "")
         da["yref"] = "y" + str(i + 1 if i > 0 else "")
-        da["x"] = 0.25 if i%2 == 0 else 1.5
+        da["x"] = 0.25 if i%2 == 0 else 0.75
     return figure
