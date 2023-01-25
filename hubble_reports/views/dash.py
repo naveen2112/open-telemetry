@@ -161,7 +161,9 @@ dash_app.layout = html.Div(
                     html.Div(
                         id = 'home-page',
                     ),
+                    html.Div(id="hidden_div_for_redirect_callback"),
                     dash.page_container,
+                    
                 ],
             ),
         ),
@@ -222,6 +224,7 @@ def update_date_range(st_date, end_date, btn1, btn2, btn3):
     Output("report-main-header", "children"),
     Output("report-sub-header", "children"),
     Output("home-page","children"),
+    Output("hidden_div_for_redirect_callback","children"),
     Input("url", "pathname"),
     Input("min-date-range", "data"),
     Input("max-date-range", "data"),
@@ -230,42 +233,28 @@ def update_date_range(st_date, end_date, btn1, btn2, btn3):
 def header_update(pathname, st_date, end_date, team):
     title = dash.no_update
     sub_title = dash.no_update
-    home_page = ''
+    home_page = dash.no_update
+    redirect_route = dash.no_update
     if pathname == "/efficiency":
-        title = (
+        sub_title = (
             f"Efficiency bandwidth- Fiscal Year "
             + f"{str_dat_to_nstr_date(st_date, r'%Y-%m-%d', r'%B-%Y')}"
             + f" - {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B-%Y')} "
             + f"(Till, {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",
         )
-        sub_title = f"Overall Efficiency & Detailed Report"
+        title = f"Overall Efficiency & Detailed Report"
     elif pathname == "/monetization":
         title = (
             f"Monetization Gap report for teams"
-            # + f"{str_dat_to_nstr_date(st_date, r'%Y-%m-%d', r'%B-%Y')}"
-            # + f" - {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B-%Y')} "
-            # + f"(Till, {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",
         )
         sub_title = (f"{str_dat_to_nstr_date(st_date, r'%Y-%m-%d', r'%B-%Y')}"
             + f" - {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B-%Y')} "
             + f"(Till, {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",)
     elif pathname == "/":
-       title = 'Dash Board for Reports'
-       sub_title = ''
-       home_page =     html.Div(
-        [
-            html.Div(
-                dcc.Link(
-                    f"{page['name']} - {page['path']}", href=page["relative_path"]
-                )
-            )
-            for page in dash.page_registry.values()
-                if page['name'] != 'Not found 404'
-        ]
-    ),
+        redirect_route = dcc.Location(pathname="/efficiency", id="someid_doesnt_matter", refresh=True)
     else:
         ...
-    return title, sub_title, home_page
+    return title, sub_title, home_page, redirect_route
 
 
 @reports.route("/")
