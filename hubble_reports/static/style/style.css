@@ -605,3 +605,14 @@ video {
 .filter-button:hover {
       color: rgb(16, 210, 13);
 }
+
+.active:not(.daterangepicker .active) {
+    background: none;
+}
+
+.active:not(.daterangepicker .active):after {
+    content: attr(data-title);
+    width: 95px;
+    height: 27px;  
+    border-bottom: none;   
+}
