@@ -29,10 +29,6 @@ dash_app = Dash(
     assets_url_path="static",
 )
 
-for view_func in current_app.view_functions:
-    if view_func.startswith(dash_app.config["routes_pathname_prefix"]):
-        current_app.view_functions[view_func] = login_required(current_app.view_functions[view_func])
-
 db_connection = create_engine(current_app.config.get("SQLALCHEMY_DATABASE_URI"))
 
 # FYI, you need both an app context and a request context to use url_for() in the Jinja2 templates
