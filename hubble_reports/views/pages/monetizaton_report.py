@@ -75,14 +75,7 @@ def create_line_chart(df, row, column, fig_subplots):
             line=dict(color=df_team['team_color'].unique()[0]),
             texttemplate="%{y:0.01f}%",
         )
-        
-        
-       
-        print(f'{i+1} Before traces:\n',fig)
-        # for trace in range(len(fig["data"])):
-        #     figure_traces.append(fig["data"][trace])
         fig_subplots.append_trace(fig['data'][0], row= i//column +1, col=int(i%column)+1)
-        print(f'\n{i+1} After traces:\n',fig_subplots)
     return fig_subplots
 
 @callback(
@@ -139,10 +132,8 @@ def monetization_report(urlname, min_date_sess, max_date_sess):
     row = int(ceiling(no_of_teams/2,1))
     column = 2
     fig_subplots = make_subplots(
-    rows=row,#len(df['Teams'].unique()), 
-    cols=column, 
-    # shared_xaxes='columns',
-    # shared_yaxes=True,
+    rows=row,
+    cols=column,
     vertical_spacing=0.1,
     horizontal_spacing=0.03,
     subplot_titles=df['Teams'].unique(),
@@ -150,18 +141,11 @@ def monetization_report(urlname, min_date_sess, max_date_sess):
     y_title='Gap, %',
     x_title='Date',
     )
-    fig_subplots.update_layout(
-        height=700,
-        # title='Subplots for different teams in different charts'
-        # title_text="Stacked Subplots with Shared X-Axes",
-        )
-
 
     max_gap = ceiling(df['Gap'].max()*1.25, 5)
-    no_of_dates = len(df['Date'].unique())
     
     fig_subplots = create_line_chart(df, row, column, fig_subplots)
-    fig_subplots.update_yaxes(showgrid=False)
+
     fig_subplots.add_hrect(
         y0=-10,
         y1=10,
@@ -182,16 +166,18 @@ def monetization_report(urlname, min_date_sess, max_date_sess):
     )
 
     fig_subplots.update_yaxes(
+        showgrid=False,
         range=[-10, max_gap],
     )
 
     fig_subplots.update_traces(textposition="top center")
 
     fig_subplots.update_layout(
+        height=700,
         hovermode='x',
         template="plotly_white",
-        margin=dict(t=50, r=12, l=65)
+        margin=dict(t=50, r=12, l=65),
+        # texttemplate='',
         )
-    # print(fig_subplots)
 
     return fig_subplots
