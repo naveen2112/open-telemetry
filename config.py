@@ -53,7 +53,7 @@ class BaseConfig(object):
     SECRET_KEY = get_env("SECRET_KEY")
 
     # Azure Credentials
-    REDIRECT_PATH = get_env("REDIRECT_PATH")
+    REDIRECT_PATH = "/hubble-sso-callback"
 
     SESSION_TYPE = get_env("SESSION_TYPE")
 
