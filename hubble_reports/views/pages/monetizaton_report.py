@@ -115,7 +115,6 @@ def monetization_report(urlname, min_date_sess, max_date_sess):
     parse_dates=["Date"],
     )
 
-    # df = pd.DataFrame(dict_val, columns=dict_val.keys())
     df["color"] = df["Gap"].apply(lambda x: "orange" if x > 10 else "blue")
     df["text"] = df["Gap"].apply(lambda x: str(x) if x > 10 else "")
     df.sort_values(["Date", "Teams"], ascending=[True, True], inplace=True)
