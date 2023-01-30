@@ -58,14 +58,10 @@ dash_app.layout = html.Div(
                                 children=[
                                     html.H1(
                                         id="report-main-header",
-                                        children=["HEADER FOR THE FILE"],
                                     ),
                                     html.Div(
                                         id="report-sub-header",
                                         className="text-dark-black-50 text-sm",
-                                        children=[
-                                            html.H2("SUBHEADER FOR THE FILE"),
-                                        ],
                                     ),
                                 ],
                             ),

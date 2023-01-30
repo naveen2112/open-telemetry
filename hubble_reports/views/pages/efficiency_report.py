@@ -102,12 +102,10 @@ def overall_efficiency_report(st_date, end_date):
         xaxis_title=None,
         plot_bgcolor="white",
         hovermode="x",
-        height=350,
+        height=400,
         margin={
-            "l": 0,
+            "t": 30,
             "r": 30,
-            "t": 25,
-            "b": 30,
         },
         title_x=0.5,
         title_y=0.98,
@@ -119,7 +117,9 @@ def overall_efficiency_report(st_date, end_date):
     y_range_min = df["capacity"].min() - 10
     y_range_max = df["capacity"].max() + 20
     overall_line_chart.update_yaxes(
-        title="Capacity, (%)", range=[y_range_min, y_range_max]
+        title="Capacity, (%)", 
+        range=[y_range_min, y_range_max],
+        dtick=10,
     )
     overall_line_chart.add_hrect(
         y0=y_range_max,
@@ -214,14 +214,16 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
         barmode="group",
     ).update_traces(texttemplate="%{text:0}")
     detail_bar_chart.update_xaxes(tickmode="array", title=None)
+    detail_bar_chart.update_yaxes(
+        title_standoff=20, 
+        dtick=10,
+        )
     detail_bar_chart.update_layout(
         plot_bgcolor="white",
-        height=325,
+        height=400,
         margin={
-            "l": 0,
             "r": 30,
-            "t": 15,
-            "b": 25,
+            "t": 50,
         },
         title_x=0.5,
         title_y=0.97,
