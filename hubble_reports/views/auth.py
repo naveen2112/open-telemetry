@@ -18,6 +18,7 @@ def user_loader(user_id):
 def login() -> render_template:
     return render_template('login.html', auth_url=url_for('reports.get_token'))
 
+
 @reports.route("/get-token")
 def get_token():
     # Technically we could use empty list [] as scopes to do just sign in,
@@ -43,9 +44,9 @@ def authorized() -> render_template:
         _save_cache(cache)
     except ValueError:  # Usually caused by CSRF
         pass  # Simply ignore them
-    mailid = session["user"]["preferred_username"]
+    mail_id = session["user"]["preferred_username"]
     try:
-        login_user(User.query.filter(User.email == mailid).first())
+        login_user(User.query.filter(User.email == mail_id).first())
     except AttributeError:
         abort(401)
     return redirect(url_for("reports.dash_index"))

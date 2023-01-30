@@ -14,8 +14,6 @@ from flask.helpers import get_root_path
 from plotly.subplots import make_subplots
 from sqlalchemy import create_engine
 
-from app import app
-from config import BaseConfig
 from hubble_reports.hubble_reports import reports
 from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
 from hubble_reports.utils import str_dat_to_nstr_date, ceiling
