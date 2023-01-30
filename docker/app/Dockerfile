@@ -11,7 +11,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 
 # Set working directory, where the commands will be ran:
 RUN mkdir -p $FLASK_ROOT
-RUN chown -R hubble_reports ${FLASK_ROOT} && chmod -R 755 ${FLASK_ROOT}
+RUN chown -R hubble_reports $FLASK_ROOT && chmod -R 755 $FLASK_ROOT
 WORKDIR $FLASK_ROOT
 
 # Adding project files
