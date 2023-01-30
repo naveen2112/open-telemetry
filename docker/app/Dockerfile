@@ -2,20 +2,19 @@
 FROM public.ecr.aws/docker/library/python:3.10.8
 
 # Adding User
-RUN adduser --system --no-create-home hubble_reports
+RUN useradd -ms /bin/bash hubble
 
 # Declared Environment Variables
-ENV FLASK_ROOT=/app
+ENV FLASK_ROOT=/home/hubble/app
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
 # Set working directory, where the commands will be ran:
 RUN mkdir -p $FLASK_ROOT
-RUN chown -R hubble_reports $FLASK_ROOT && chmod -R 755 $FLASK_ROOT
 WORKDIR $FLASK_ROOT
 
 # Adding project files
-ADD --chown=hubble_reports . $FLASK_ROOT
+ADD --chown=hubble . .
 
 # Adding Packages
 RUN pip install poetry==1.3.1
@@ -28,6 +27,7 @@ RUN chmod +x /usr/bin/entrypoint.sh
 ENTRYPOINT ["entrypoint.sh"]
 
 EXPOSE 8000
-USER hubble_reports
+
+USER hubble
 
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app"]
