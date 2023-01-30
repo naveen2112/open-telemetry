@@ -16,12 +16,17 @@ def user_loader(user_id):
 
 @reports.route("/login")
 def login() -> render_template:
+    return render_template('login.html', auth_url=url_for('reports.get_token'))
+
+
+@reports.route("/get-token")
+def get_token():
     # Technically we could use empty list [] as scopes to do just sign in,
     # here we choose to also collect end user consent upfront
     session["flow"] = _build_auth_code_flow(
         authority=current_app.config.get("AUTHORITY_SIGN_ON_SIGN_OUT")
     )
-    return render_template("login.html", auth_url=session["flow"]["auth_uri"])
+    return redirect(session['flow']['auth_uri'])
 
 
 @reports.route(
