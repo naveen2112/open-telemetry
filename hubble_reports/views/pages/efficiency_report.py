@@ -162,7 +162,7 @@ def overall_efficiency_report(st_date, end_date):
 def detailed_efficiency_report(team, min_date_sess, max_date_sess):
 
     if not team:
-        return PreventUpdate
+        raise PreventUpdate
 
     df = pd.read_sql_query(
         db.session.query(
