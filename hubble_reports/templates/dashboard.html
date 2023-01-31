@@ -1,0 +1,15 @@
+{% extends "./layouts/base.html" %}
+
+{% block page %}
+
+{{ "{%app_entry%}" }}
+<div id="react-entry-point">
+    <div class="_dash-loading">
+    </div>
+</div>
+
+{{ "{%config%}" }}
+{{ "{%scripts%}" }}
+{{ "{%renderer%}" }}
+
+{% endblock %}
