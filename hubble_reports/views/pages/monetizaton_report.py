@@ -1,22 +1,15 @@
 import dash
 import pandas as pd
-import pathlib
 import plotly.express as px
 
-from dash import Dash, dcc, html, callback, ctx
-from dash.dependencies import Input, Output, State
-from dash.exceptions import PreventUpdate
-from datetime import date, timedelta, datetime
-from dateutil import relativedelta
-from flask import render_template_string, current_app
-from flask_login import login_required
-from flask.helpers import get_root_path
+from dash import dcc, html, callback
+from dash.dependencies import Input, Output
+from flask import current_app
 from plotly.subplots import make_subplots
 from sqlalchemy import create_engine
 
-from hubble_reports.hubble_reports import reports
 from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
-from hubble_reports.utils import str_dat_to_nstr_date, ceiling
+from hubble_reports.utils import ceiling
 
 from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
 
@@ -53,8 +46,8 @@ layout = [
     ),)
 ]
 
-def create_line_chart(df, row, column, fig_subplots):
-    figure_traces = []
+
+def create_line_chart(df:pd.DataFrame, no_of_columns:int, fig_subplots:make_subplots) -> make_subplots:
     for i, team in enumerate(df['Teams'].unique()):
         df_team = df[df['Teams']==team].copy()
         fig = px.line(
@@ -72,22 +65,22 @@ def create_line_chart(df, row, column, fig_subplots):
             marker=dict(color=df_team['team_color']),
             line=dict(color=df_team['team_color'].unique()[0]),
             texttemplate="%{y:0.01f}%",
-            hovertemplate=("<b>%{team}</b><br>" +
+            hovertemplate=("<b>%{customdata[0]}</b><br>" +
                         "Gap: %{y:0.01f}%<br>" +
                         "Date: %{x}<br>"),
         )
-        fig_subplots.append_trace(fig['data'][0], row= i//column +1, col=int(i%column)+1)
+        fig_subplots.append_trace(fig['data'][0], row= i//no_of_columns +1, col=int(i%no_of_columns)+1)
     return fig_subplots
+
 
 @callback(
     Output('monetization-report', 'figure'),
     [
-        Input("url", "pathname"),
         Input("min-date-range", "data"),
         Input("max-date-range", "data"),
     ],
 )
-def monetization_report(urlname, min_date_sess, max_date_sess):
+def monetization_report(min_date_sess, max_date_sess):
     df = pd.read_sql_query(
     db.session.query(
         db.func.date_trunc("month", TimesheetEntry.entry_date).label("Date"),
@@ -129,11 +122,11 @@ def monetization_report(urlname, min_date_sess, max_date_sess):
         df["team_color"].loc[df["Teams"] == team] = px.colors.qualitative.Dark24[i]
 
     no_of_teams = len(df['Teams'].unique())
-    row = int(ceiling(no_of_teams/2,1))
-    column = 2
+    no_of_rows = int(ceiling(no_of_teams/2,1))
+    no_of_columns = 2
     fig_subplots = make_subplots(
-    rows=row,
-    cols=column,
+    rows=no_of_rows,
+    cols=no_of_columns,
     vertical_spacing=0.1,
     horizontal_spacing=0.03,
     subplot_titles=df['Teams'].unique(),
@@ -144,7 +137,7 @@ def monetization_report(urlname, min_date_sess, max_date_sess):
 
     max_gap = ceiling(df['Gap'].max()*1.25, 5)
     
-    fig_subplots = create_line_chart(df, row, column, fig_subplots)
+    fig_subplots = create_line_chart(df, no_of_columns, fig_subplots)
 
     fig_subplots.add_hrect(
         y0=-10,
@@ -179,6 +172,9 @@ def monetization_report(urlname, min_date_sess, max_date_sess):
         hovermode='x',
         template="plotly_white",
         margin=dict(t=50, r=12, l=65),
+        hoverlabel=dict(
+            font_color='white',
+        ),
         )
 
     return fig_subplots
