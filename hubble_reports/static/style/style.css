@@ -566,6 +566,17 @@ video {
     }
 }
 
+
+/* Overwriting the nav-animation for side bar to show the reports name */
+.nav-animation a > div > div:last-child {
+        opacity: 0;
+}
+
+.nav-animation:hover a > div > div:last-child {
+        opacity: 1;
+}
+
+
 /* Below styles are custom for dash */
 .filter-button {
     display: inline-block;
