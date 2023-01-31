@@ -72,6 +72,9 @@ def create_line_chart(df, row, column, fig_subplots):
             marker=dict(color=df_team['team_color']),
             line=dict(color=df_team['team_color'].unique()[0]),
             texttemplate="%{y:0.01f}%",
+            hovertemplate=("<b>%{team}</b><br>" +
+                        "Gap: %{y:0.01f}%<br>" +
+                        "Date: %{x}<br>"),
         )
         fig_subplots.append_trace(fig['data'][0], row= i//column +1, col=int(i%column)+1)
     return fig_subplots
@@ -167,14 +170,15 @@ def monetization_report(urlname, min_date_sess, max_date_sess):
         range=[-10, max_gap],
     )
 
-    fig_subplots.update_traces(textposition="top center")
+    fig_subplots.update_traces(
+        textposition="top center",
+                        )
 
     fig_subplots.update_layout(
         height=700,
         hovermode='x',
         template="plotly_white",
         margin=dict(t=50, r=12, l=65),
-        # texttemplate='',
         )
 
     return fig_subplots
