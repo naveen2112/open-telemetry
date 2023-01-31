@@ -13,32 +13,32 @@ from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEnt
 
 db_connection = create_engine(current_app.config.get("SQLALCHEMY_DATABASE_URI"))
 
-dash.register_page(__name__, path='/efficiency')
+dash.register_page(__name__, path="/efficiency")
 
 layout = [
     html.Div(
         children=[
-        html.H2(
-            children='Overall Efficiency Report:',
-            style={
-                'fontSize':'18px',
-            }
+            html.H2(
+                children="Overall Efficiency Report:",
+                style={
+                    "fontSize": "18px",
+                },
             ),
-        html.Br(),
-        html.Div(
-            id='overall-efficiency-description',
-            children=[
-                html.Li(
-            children=r'Limits set below for ratings are >100% is Excellent, >=90% and <=100% is Good and <90% is Need Imporvement'
-        ),
-        html.Li(
-            children=r'This graph is used for analysizing the overall performance of the team of selected range'
-        ),
-        ],
-        style={
-            'paddingLeft':'25px',
-        }
-        )
+            html.Br(),
+            html.Div(
+                id="overall-efficiency-description",
+                children=[
+                    html.Li(
+                        children=r"Limits set below for ratings are >100% is Excellent, >=90% and <=100% is Good and <90% is Need Imporvement"
+                    ),
+                    html.Li(
+                        children=r"This graph is used for analysizing the overall performance of the team of selected range"
+                    ),
+                ],
+                style={
+                    "paddingLeft": "25px",
+                },
+            ),
         ]
     ),
     dcc.Graph(
@@ -100,9 +100,6 @@ def overall_efficiency_report(st_date, end_date):
     df["ratings"] = df["capacity"].apply(
         lambda a: "Excellent" if a > 100 else "Good" if a >= 90 else "Needs Improvement"
     )
-    df["trends"] = df["capacity"].apply(
-        lambda a: "↑" if a > 100 else "↔︎" if a > 90 else "↓"
-    )
 
     overall_line_chart = px.scatter(
         df,
@@ -111,21 +108,24 @@ def overall_efficiency_report(st_date, end_date):
         text="capacity",
         height=450,
         labels={"team": "Teams", "capacity": "Capacity"},
-        hover_name='team',
+        hover_name="team",
         hover_data={
             "capacity": ":.1f",
             "ratings": True,
             "team_id": False,
         },
-    ).update_traces(
+    )
+    overall_line_chart.update_traces(
         texttemplate="<b>%{y:0.01f}%</b>",
         textposition="top left",
-        mode='lines+markers+text',
+        mode="lines+markers+text",
         marker=dict(size=15, color="rgb(34,72,195)"),
         line_color="rgb(34,72,195)",
-        hovertemplate=("<b>%{x}</b><br>" +
-                        "Capacity: %{y:0.01f}%<br>" +
-                        "Ratings: %{customdata[0]}<br>"),
+        hovertemplate=(
+            "<b>%{x}</b><br>"
+            + "Capacity: %{y:0.01f}%<br>"
+            + "Ratings: %{customdata[0]}<br>"
+        ),
     )
     overall_line_chart.update_layout(
         xaxis_title=None,
@@ -141,16 +141,16 @@ def overall_efficiency_report(st_date, end_date):
         transition={
             "duration": 500,
         },
-        hoverlabel = dict(
-        bgcolor='white',
-    )
+        hoverlabel=dict(
+            bgcolor="white",
+        ),
     )
 
     y_range_min = df["capacity"].min() - 10
     y_range_max = df["capacity"].max() + 20
     overall_line_chart.update_yaxes(
         title="Capacity, (%)",
-        title_standoff =20,
+        title_standoff=20,
         range=[y_range_min, y_range_max],
     )
     overall_line_chart.add_hrect(
@@ -243,14 +243,15 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
         text="efficiency_value",
         labels={"formated_date": "Time", "efficiency_value": "Efficiency"},
         barmode="group",
-    ).update_traces(
+    )
+    detail_bar_chart.update_traces(
         texttemplate="%{text:0}",
         hovertemplate="%{x}<br>Efficiency: %{y}",
-        )
+    )
     detail_bar_chart.update_xaxes(tickmode="array", title=None)
     detail_bar_chart.update_yaxes(
         title_standoff=20,
-        )
+    )
     detail_bar_chart.update_layout(
         plot_bgcolor="white",
         height=400,
@@ -273,35 +274,34 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
             "duration": 500,
         },
         hoverlabel=dict(
-            font_color='white',
-        )
+            font_color="white",
+        ),
     )
     labels = {"actual_hours": "Actual Hours", "expected_hours": "Expected Hours"}
     detail_bar_chart.for_each_trace(lambda t: t.update(name=labels[t.name]))
     detail_layout = (
         html.H2(
-            id='detail-efficiency-title',
+            id="detail-efficiency-title",
             children=f"{team['name']} Team Efficiency :",
             style={
-                'fontSize':'18px',
-            }
-            ),
+                "fontSize": "18px",
+            },
+        ),
         html.Br(),
         html.Div(
-            id='detail-efficiency-description',
+            id="detail-efficiency-description",
             children=[
                 html.Li(
-            children=r'Based on the team clicked above in the overall efficiency report, detailed efficiency of that corresponding team is shown below'
+                    children=r"Based on the team clicked above in the overall efficiency report, detailed efficiency of that corresponding team is shown below"
+                ),
+                html.Li(
+                    children=r"This graph is useful for comparing the actual vs expected hours of each team efficiency month wise"
+                ),
+            ],
+            style={
+                "paddingLeft": "25px",
+            },
         ),
-        html.Li(
-            children=r'This graph is useful for comparing the actual vs expected hours of each team efficiency month wise'
-        ),
-        ],
-        style={
-            'paddingLeft':'25px',
-        }
-        ),
-
         dcc.Graph(
             id="detailed_efficiency_chart",
             figure=detail_bar_chart,
