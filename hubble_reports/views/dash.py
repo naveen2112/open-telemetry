@@ -78,6 +78,7 @@ dash_app.layout = html.Div(
                                                         max_date_allowed=date.today(),
                                                         display_format="DD-MM-YYYY",
                                                         stay_open_on_select=True,
+                                                        updatemode="bothdates",
                                                     ),
                                                     colSpan=3,
                                                 ),
