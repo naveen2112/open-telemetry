@@ -78,7 +78,6 @@ dash_app.layout = html.Div(
                                                         max_date_allowed=date.today(),
                                                         display_format="DD-MM-YYYY",
                                                         stay_open_on_select=True,
-                                                        updatemode="bothdates",
                                                     ),
                                                     colSpan=3,
                                                 ),
@@ -227,8 +226,7 @@ def header_update(pathname, st_date, end_date, team):
     redirect_route = dash.no_update
     if pathname == "/efficiency":
         sub_title = (
-            f"Efficiency bandwidth- Fiscal Year "
-            + f"{str_dat_to_nstr_date(st_date, r'%Y-%m-%d', r'%B-%Y')}"
+            f"{str_dat_to_nstr_date(st_date, r'%Y-%m-%d', r'%B-%Y')}"
             + f" - {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B-%Y')} "
             + f"(Till, {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",
         )
@@ -237,7 +235,8 @@ def header_update(pathname, st_date, end_date, team):
         title = (
             f"Monetization Gap report for teams"
         )
-        sub_title = (f"{str_dat_to_nstr_date(st_date, r'%Y-%m-%d', r'%B-%Y')}"
+        sub_title = (
+            f"{str_dat_to_nstr_date(st_date, r'%Y-%m-%d', r'%B-%Y')}"
             + f" - {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B-%Y')} "
             + f"(Till, {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",)
     elif pathname == "/":
