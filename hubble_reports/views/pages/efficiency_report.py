@@ -11,8 +11,6 @@ from sqlalchemy import create_engine
 from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
 
 
-db_connection = create_engine(current_app.config.get("SQLALCHEMY_DATABASE_URI"))
-
 dash.register_page(__name__, path="/efficiency")
 
 layout = [
@@ -95,7 +93,7 @@ def overall_efficiency_report(st_date, end_date):
             Team.id,
         )
         .statement,
-        db_connection,
+        db.engine,
     )
     df["ratings"] = df["capacity"].apply(
         lambda a: "Excellent" if a > 100 else "Good" if a >= 90 else "Needs Improvement"
@@ -220,7 +218,7 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
         .group_by(db.func.date_trunc("month", TimesheetEntry.entry_date))
         .order_by(db.func.date_trunc("month", TimesheetEntry.entry_date))
         .statement,
-        con=db_connection,
+        con=db.engine,
         parse_dates=["display_date"],
     )
 

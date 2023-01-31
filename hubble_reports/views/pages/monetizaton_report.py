@@ -12,8 +12,6 @@ from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEnt
 from hubble_reports.utils import ceiling
 
 
-db_connection = create_engine(current_app.config.get("SQLALCHEMY_DATABASE_URI"))
-
 dash.register_page(__name__, path="/monetization")
 
 layout = [
@@ -114,7 +112,7 @@ def monetization_report(min_date_sess, max_date_sess):
         .group_by(db.func.date_trunc("month", TimesheetEntry.entry_date), Team.name)
         .order_by(db.func.date_trunc("month", TimesheetEntry.entry_date))
         .statement,
-        con=db_connection,
+        con=db.engine,
         parse_dates=["Date"],
     )
 
