@@ -18,7 +18,13 @@ dash.register_page(__name__, path='/efficiency')
 layout = [
     html.Div(
         children=[
-        html.H2('Overall Efficiency Report'),
+        html.H2(
+            children='Overall Efficiency Report:',
+            style={
+                'fontSize':'18px',
+            }
+            ),
+        html.Br(),
         html.Div(
             id='overall-efficiency-description',
             children=[
@@ -111,7 +117,6 @@ def overall_efficiency_report(st_date, end_date):
             "ratings": True,
             "team_id": False,
         },
-        # title="Overall Efficiency",
     ).update_traces(
         texttemplate="<b>%{y:0.01f}%</b>",
         textposition="top left",
@@ -147,7 +152,6 @@ def overall_efficiency_report(st_date, end_date):
         title="Capacity, (%)",
         title_standoff =20,
         range=[y_range_min, y_range_max],
-        dtick=10,
     )
     overall_line_chart.add_hrect(
         y0=y_range_max,
@@ -237,7 +241,6 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
         y="efficiency_value",
         color="efficiency",
         text="efficiency_value",
-        # title=f"{team['name']} Team Efficiency",
         labels={"formated_date": "Time", "efficiency_value": "Efficiency"},
         barmode="group",
     ).update_traces(
@@ -246,8 +249,7 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
         )
     detail_bar_chart.update_xaxes(tickmode="array", title=None)
     detail_bar_chart.update_yaxes(
-        title_standoff=20, 
-        # dtick=10,
+        title_standoff=20,
         )
     detail_bar_chart.update_layout(
         plot_bgcolor="white",
@@ -277,14 +279,14 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
     labels = {"actual_hours": "Actual Hours", "expected_hours": "Expected Hours"}
     detail_bar_chart.for_each_trace(lambda t: t.update(name=labels[t.name]))
     detail_layout = (
-        html.H1(
+        html.H2(
             id='detail-efficiency-title',
-            children=f"{team['name']} Team Efficiency",
+            children=f"{team['name']} Team Efficiency :",
             style={
-                'textAlign' : 'center',
-                'fontWeight' : 'bold',
+                'fontSize':'18px',
             }
             ),
+        html.Br(),
         html.Div(
             id='detail-efficiency-description',
             children=[
