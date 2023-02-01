@@ -4,9 +4,7 @@ import plotly.express as px
 
 from dash import dcc, html, callback
 from dash.dependencies import Input, Output
-from flask import current_app
 from plotly.subplots import make_subplots
-from sqlalchemy import create_engine
 
 from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
 from hubble_reports.utils import ceiling
