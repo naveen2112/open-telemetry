@@ -220,14 +220,14 @@ def header_update(pathname, st_date, end_date, team):
     sub_title = dash.no_update
     home_page = dash.no_update
     redirect_route = dash.no_update
-    if pathname == "/efficiency":
+    if pathname == dash.page_registry['pages.efficiency_report']['path']:
         sub_title = (
             f"{str_dat_to_nstr_date(st_date, r'%Y-%m-%d', r'%B-%Y')}"
             + f" - {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B-%Y')} "
             + f"(Till, {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",
         )
         title = f"Overall Efficiency & Detailed Report"
-    elif pathname == "/monetization":
+    elif pathname == dash.page_registry['pages.monetization_report']['path']:
         title = (
             f"Monetization Gap report for teams"
         )
@@ -236,7 +236,7 @@ def header_update(pathname, st_date, end_date, team):
             + f" - {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B-%Y')} "
             + f"(Till, {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",)
     elif pathname == "/":
-        redirect_route = dcc.Location(pathname="/efficiency", id="someid_doesnt_matter", refresh=True)
+        redirect_route = dcc.Location(pathname=dash.page_registry['pages.efficiency_report']['path'], id="index-page-url", refresh=True)
     else:
         ...
     return title, sub_title, home_page, redirect_route
