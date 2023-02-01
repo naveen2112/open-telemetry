@@ -9,7 +9,7 @@
          </a>
       </div>
       <div class='text-white text-sm grow overflow-auto font-medium text-center w-full' id="sidebar">
-         <a href="/efficiency">
+         <a href="{{ context['efficiency_url'] }}">
             <div class="py-3 px-2.5 flex-wrap rounded-bl-lg flex w-full justify-start ">
                <div class="flex justify-center mr-4">
                   <img src="{{ url_for('static', filename='images/svgs/time-sheet.svg')}}" alt="Efficiency" />
@@ -17,7 +17,7 @@
                <div>Efficiency Report</div>
             </div>
          </a>
-         <a href="/monetization">
+         <a href="{{ context['monetization_url'] }}">
             <div class="py-3 px-2.5 no-wrap rounded-bl-lg flex w-full justify-start text-left">
                <div class="flex justify-center mr-4">
                   <img src="{{ url_for('static', filename='images/svgs/time-sheet.svg')}}" alt="Monetization" />

@@ -34,7 +34,10 @@ with current_app.app_context(), current_app.test_request_context():
     )
 
     with open(layout_dash, "r") as f:
-        html_body = render_template_string(f.read())
+        html_body = render_template_string(f.read(), context={
+            'efficiency_url':dash.page_registry['pages.efficiency_report']['path'],
+            'monetization_url':dash.page_registry['pages.monetization_report']['path']
+            })
 dash_app.index_string = html_body
 
 dash_app.layout = html.Div(
