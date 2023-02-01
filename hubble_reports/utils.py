@@ -49,4 +49,4 @@ def str_dat_to_nstr_date(date:str, existing_format:str, new_format:str) -> str:
     """
     return datetime.strptime(date, existing_format).strftime(new_format)
 
-ceiling = lambda number, round_up: int(((number//round_up)+(number%round_up > 0))*round_up)
+ceiling = lambda number, round_up: int((number//round_up + (number%round_up > 0)) * round_up)
