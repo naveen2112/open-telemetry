@@ -34,10 +34,15 @@ with current_app.app_context(), current_app.test_request_context():
     )
 
     with open(layout_dash, "r") as f:
-        html_body = render_template_string(f.read(), context={
-            'efficiency_url':dash.page_registry['pages.efficiency_report']['path'],
-            'monetization_url':dash.page_registry['pages.monetization_report']['path']
-            })
+        html_body = render_template_string(
+            f.read(),
+            context={
+                "efficiency_url": dash.page_registry["pages.efficiency_report"]["path"],
+                "monetization_url": dash.page_registry["pages.monetization_report"][
+                    "path"
+                ],
+            },
+        )
 dash_app.index_string = html_body
 
 dash_app.layout = html.Div(
@@ -147,11 +152,10 @@ dash_app.layout = html.Div(
                 className="px-5 h-full bg-white",
                 children=[
                     html.Div(
-                        id = 'home-page',
+                        id="home-page",
                     ),
                     html.Div(id="hidden_div_for_redirect_callback"),
                     dash.page_container,
-                    
                 ],
             ),
         ),
@@ -211,8 +215,8 @@ def update_date_range(st_date, end_date, btn1, btn2, btn3):
 @callback(
     Output("report-main-header", "children"),
     Output("report-sub-header", "children"),
-    Output("home-page","children"),
-    Output("hidden_div_for_redirect_callback","children"),
+    Output("home-page", "children"),
+    Output("hidden_div_for_redirect_callback", "children"),
     Input("url", "pathname"),
     Input("min-date-range", "data"),
     Input("max-date-range", "data"),
@@ -223,23 +227,26 @@ def header_update(pathname, st_date, end_date, team):
     sub_title = dash.no_update
     home_page = dash.no_update
     redirect_route = dash.no_update
-    if pathname == dash.page_registry['pages.efficiency_report']['path']:
+    if pathname == dash.page_registry["pages.efficiency_report"]["path"]:
         sub_title = (
             f"{str_dat_to_nstr_date(st_date, r'%Y-%m-%d', r'%B-%Y')}"
             + f" - {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B-%Y')} "
             + f"(Till, {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",
         )
         title = f"Overall Efficiency & Detailed Report"
-    elif pathname == dash.page_registry['pages.monetization_report']['path']:
-        title = (
-            f"Monetization Gap report for teams"
-        )
+    elif pathname == dash.page_registry["pages.monetization_report"]["path"]:
+        title = f"Monetization Gap report for teams"
         sub_title = (
             f"{str_dat_to_nstr_date(st_date, r'%Y-%m-%d', r'%B-%Y')}"
             + f" - {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B-%Y')} "
-            + f"(Till, {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",)
+            + f"(Till, {str_dat_to_nstr_date(end_date, r'%Y-%m-%d', r'%B %d, %Y')})",
+        )
     elif pathname == "/":
-        redirect_route = dcc.Location(pathname=dash.page_registry['pages.efficiency_report']['path'], id="index-page-url", refresh=True)
+        redirect_route = dcc.Location(
+            pathname=dash.page_registry["pages.efficiency_report"]["path"],
+            id="index-page-url",
+            refresh=True,
+        )
     else:
         ...
     return title, sub_title, home_page, redirect_route
