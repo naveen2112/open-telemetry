@@ -7,11 +7,7 @@ from flask_login import LoginManager, login_required
 from hubble_reports.models import db
 
 
-app = Flask(
-    __name__,
-    template_folder="hubble_reports/templates",
-    static_folder="hubble_reports/static",
-)
+app = Flask(__name__, template_folder="hubble_reports/templates", static_folder='hubble_reports/static')
 app.app_context().push()
 load_dotenv()
 app.config.from_object(BaseConfig)
@@ -30,7 +26,6 @@ app.register_blueprint(reports)
 error_code_list = [401, 403, 404, 405, 500]
 for error_code in error_code_list:
     app.register_error_handler(error_code, error_page)
-
 
 from hubble_reports.views.dash import dash_app
 
