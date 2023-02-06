@@ -566,6 +566,17 @@ video {
     }
 }
 
+
+/* Overwriting the nav-animation for side bar to show the reports name */
+.nav-animation a > div > div:last-child {
+        opacity: 0;
+}
+
+.nav-animation:hover a > div > div:last-child {
+        opacity: 1;
+}
+
+
 /* Below styles are custom for dash */
 .filter-button {
     display: inline-block;
@@ -604,4 +615,15 @@ video {
 
 .filter-button:hover {
       color: rgb(16, 210, 13);
+}
+
+.active:not(.daterangepicker .active) {
+    background: none;
+}
+
+.active:not(.daterangepicker .active):after {
+    content: attr(data-title);
+    width: 95px;
+    height: 27px;  
+    border-bottom: none;   
 }

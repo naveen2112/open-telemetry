@@ -10,11 +10,11 @@ global user_role_id
 @reports.before_request
 def user_permission():
     if "user" in session.keys():
-        mailid = session["user"]["preferred_username"]
+        mail_id = session["user"]["preferred_username"]
         g.user_role_id = (
             db.session.query(RoleUser.role_id)
             .join(User, User.id == RoleUser.user_id)
-            .filter(User.email == mailid).first()
+            .filter(User.email == mail_id).first()
         )
         g.user_role_id = g.user_role_id[0]
         if g.user_role_id is None:

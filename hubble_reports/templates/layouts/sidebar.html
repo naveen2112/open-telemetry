@@ -9,12 +9,22 @@
          </a>
       </div>
       <div class='text-white text-sm grow overflow-auto font-medium text-center w-full' id="sidebar">
-         <div class="py-3 px-2.5 flex-wrap rounded-bl-lg flex w-full justify-start ">
-            <div class="flex justify-center mr-4">
-               <img src="{{ url_for('static', filename='images/svgs/time-sheet.svg')}}" alt="timesheet" />
+         <a href="{{ context['efficiency_url'] }}">
+            <div class="py-3 px-2.5 flex-wrap rounded-bl-lg flex w-full justify-start ">
+               <div class="flex justify-center mr-4">
+                  <img src="{{ url_for('static', filename='images/svgs/time-sheet.svg')}}" alt="Efficiency" />
+               </div>
+               <div>Efficiency Report</div>
             </div>
-            <div>Efficiency Report</div>
-         </div>
+         </a>
+         <a href="{{ context['monetization_url'] }}">
+            <div class="py-3 px-2.5 no-wrap rounded-bl-lg flex w-full justify-start text-left">
+               <div class="flex justify-center mr-4">
+                  <img src="{{ url_for('static', filename='images/svgs/time-sheet.svg')}}" alt="Monetization" />
+               </div>
+               <div>Monetization Report</div>
+            </div>
+         </a>
          <div class="py-3 px-2.5 rounded-bl-lg flex justify-start">
             <span class='mr-4'>
                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="25px" height="20px">
