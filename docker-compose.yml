@@ -1,0 +1,36 @@
+version: '3.4'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    image: app
+    volumes:
+      - .:/var/app
+    container_name: app
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    networks:
+      - app-network
+  
+  webserver:
+    build:
+      context: .
+      dockerfile: docker/web/Dockerfile
+    image: web
+    container_name: webserver
+    ports:
+      - "80:80"
+    networks:
+      - app-network
+    depends_on:
+      - app
+    env_file:
+      - .env
+
+networks:
+  app-network:
+    driver: bridge
