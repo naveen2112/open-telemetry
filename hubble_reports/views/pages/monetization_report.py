@@ -104,7 +104,8 @@ def monetization_report(min_date_sess, max_date_sess):
             db.and_(
                 TimesheetEntry.team_id == Team.id,
                 db.and_(
-                    TimesheetEntry.entry_date >= min_date_sess, TimesheetEntry.entry_date <= max_date_sess,
+                    TimesheetEntry.entry_date >= min_date_sess,
+                    TimesheetEntry.entry_date <= max_date_sess,
                 ),
             ),
         )
@@ -118,13 +119,15 @@ def monetization_report(min_date_sess, max_date_sess):
         )
         .statement,
         con=db.engine,
-        parse_dates=['Date']
+        parse_dates=["Date"],
     )
-    df_pivot = df.pivot_table(index='Teams', columns='Date', values='Gap').reset_index()
+    df_pivot = df.pivot_table(index="Teams", columns="Date", values="Gap").reset_index()
     df_pivot = df_pivot.fillna(0)
     value_vars = df_pivot.columns[1:]
-    df_melted = df_pivot.melt(id_vars='Teams', value_vars=value_vars, var_name='Date', value_name='Gap')
-    df = df_melted.sort_values(by=['Teams', 'Date'])
+    df_melted = df_pivot.melt(
+        id_vars="Teams", value_vars=value_vars, var_name="Date", value_name="Gap"
+    )
+    df = df_melted.sort_values(by=["Teams", "Date"])
 
     df["color"] = df["Gap"].apply(lambda x: "orange" if x > 10 else "blue")
     df["text"] = df["Gap"].apply(lambda x: str(x) if x > 10 else "")
@@ -150,7 +153,7 @@ def monetization_report(min_date_sess, max_date_sess):
     )
 
     max_gap = ceiling(df["Gap"].max() * 1.75, 5)
-    min_gap = min(-max_gap/4, ceiling(df["Gap"].min() * 1.25, 5))
+    min_gap = min(-max_gap / 4, ceiling(df["Gap"].min() * 1.25, 5))
 
     fig_subplots = create_line_chart(df, no_of_columns, fig_subplots)
 
@@ -177,9 +180,7 @@ def monetization_report(min_date_sess, max_date_sess):
         textposition="top center",
     )
     fig_subplots.update_yaxes(
-        showgrid=False,
-        range=[min_gap, max_gap],
-        automargin='left+top'
+        showgrid=False, range=[min_gap, max_gap], automargin="left+top"
     )
     fig_subplots.update_layout(
         height=no_of_rows * 700 / 5,
