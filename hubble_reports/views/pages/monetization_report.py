@@ -147,7 +147,7 @@ def monetization_report(min_date_sess, max_date_sess):
     fig_subplots = make_subplots(
         rows=no_of_rows,
         cols=no_of_columns,
-        vertical_spacing=0.04,
+        vertical_spacing=0.075,
         horizontal_spacing=0.03,
         subplot_titles=df["Teams"].unique(),
         start_cell="bottom-left",
@@ -186,7 +186,7 @@ def monetization_report(min_date_sess, max_date_sess):
         showgrid=False, range=[min_gap, max_gap], automargin="left+top"
     )
     fig_subplots.update_layout(
-        height=no_of_rows * 700 / 5,
+        height=no_of_rows * 200,
         hovermode="x",
         template="plotly_white",
         margin=dict(t=50, r=0, l=0, b=0),
