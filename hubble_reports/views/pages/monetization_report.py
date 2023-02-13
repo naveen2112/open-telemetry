@@ -121,9 +121,12 @@ def monetization_report(min_date_sess, max_date_sess):
         con=db.engine,
         parse_dates=["Date"],
     )
+    # Pivoting is done to create a matrix of Teams(row) X Date (column) to find missing records
     df_pivot = df.pivot_table(index="Teams", columns="Date", values="Gap").reset_index()
     df_pivot = df_pivot.fillna(0)
     value_vars = df_pivot.columns[1:]
+    # By using melt we can rearrange the dateframe to our required structure
+    # Basically it is the opposite of pivot_table function of pandas
     df_melted = df_pivot.melt(
         id_vars="Teams", value_vars=value_vars, var_name="Date", value_name="Gap"
     )
