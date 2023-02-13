@@ -5,13 +5,14 @@ from flask import session, url_for, render_template, redirect, request, current_
 
 from app import login_manager
 from hubble_reports.hubble_reports import reports
-from hubble_reports.models import User
+from hubble_reports.models import User, db
+from sqlalchemy.exc import PendingRollbackError
 
 
 @login_manager.user_loader
 def user_loader(user_id):
     user_email = session["user"]["preferred_username"]
-    return User.query.filter(User.email == user_email).first()
+    return db.session.query(User).filter(User.email == mail_id).first()
 
 
 @reports.route("/login")
@@ -46,9 +47,11 @@ def authorized() -> render_template:
         pass  # Simply ignore them
     mail_id = session["user"]["preferred_username"]
     try:
-        login_user(User.query.filter(User.email == mail_id).first())
+        login_user(db.session.query(User).filter(User.email == mail_id).first())
     except AttributeError:
         abort(401)
+    except  PendingRollbackError:
+        db.session.rollback()
     return redirect(url_for("reports.dash_index"))
 
 
