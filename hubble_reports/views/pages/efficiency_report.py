@@ -5,7 +5,6 @@ import plotly.express as px
 from dash import dcc, html, callback
 from dash.dependencies import Input, Output
 from dash.exceptions import PreventUpdate
-from sqlalchemy.exc import PendingRollbackError
 
 from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
 
@@ -204,7 +203,9 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
                     "expected_hours"
                 ),
             )
-            .join(TimesheetEntry, TimesheetEntry.user_id == ExpectedUserEfficiency.user_id)
+            .join(
+                TimesheetEntry, TimesheetEntry.user_id == ExpectedUserEfficiency.user_id
+            )
             .join(Team, Team.id == TimesheetEntry.team_id)
             .filter(
                 db.and_(

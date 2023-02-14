@@ -5,8 +5,7 @@ import plotly.express as px
 from dash import dcc, html, callback
 from dash.dependencies import Input, Output
 from plotly.subplots import make_subplots
-from sqlalchemy import case, null
-from sqlalchemy.exc import PendingRollbackError
+from sqlalchemy import case
 
 from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
 from hubble_reports.utils import ceiling
@@ -90,7 +89,7 @@ def monetization_report(min_date_sess, max_date_sess):
                 db.func.date_trunc("month", TimesheetEntry.entry_date).label("Date"),
                 Team.name.label("Teams"),
                 case(
-                    [(db.func.sum(TimesheetEntry.authorized_hours) == 0, null())],
+                    [(db.func.sum(TimesheetEntry.authorized_hours) == 0, 0)],
                     else_=(
                         100
                         * (
