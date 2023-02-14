@@ -5,6 +5,7 @@ import plotly.express as px
 from dash import dcc, html, callback
 from dash.dependencies import Input, Output
 from plotly.subplots import make_subplots
+from sqlalchemy import case
 
 from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
 from hubble_reports.utils import ceiling
@@ -82,37 +83,56 @@ def create_line_chart(
     ],
 )
 def monetization_report(min_date_sess, max_date_sess):
-    df = pd.read_sql_query(
-        db.session.query(
-            db.func.date_trunc("month", TimesheetEntry.entry_date).label("Date"),
-            db.func.greatest(
-                100
-                * (
-                    db.func.sum(TimesheetEntry.authorized_hours)
-                    - db.func.sum(ExpectedUserEfficiency.expected_efficiency)
-                )
-                / db.func.sum(TimesheetEntry.authorized_hours),
-                0,
-            ).label("Gap"),
-            Team.name.label("Teams"),
-        )
-        .join(
-            ExpectedUserEfficiency,
-            TimesheetEntry.user_id == ExpectedUserEfficiency.user_id,
-        )
-        .join(Team, Team.id == TimesheetEntry.team_id)
-        .filter(
-            db.and_(
-                min_date_sess <= TimesheetEntry.entry_date,
-                max_date_sess >= TimesheetEntry.entry_date,
+    with db.engine.connect() as connect:
+        df = pd.read_sql_query(
+            db.session.query(
+                db.func.date_trunc("month", TimesheetEntry.entry_date).label("Date"),
+                Team.name.label("Teams"),
+                case(
+                    [(db.func.sum(TimesheetEntry.authorized_hours) == 0, 0)],
+                    else_=(
+                        100
+                        * (
+                            db.func.sum(ExpectedUserEfficiency.expected_efficiency)
+                            - db.func.sum(TimesheetEntry.authorized_hours)
+                        )
+                        / db.func.sum(TimesheetEntry.authorized_hours)
+                    ),
+                ).label("Gap"),
             )
+            .join(
+                TimesheetEntry,
+                db.and_(
+                    TimesheetEntry.team_id == Team.id,
+                    db.and_(
+                        TimesheetEntry.entry_date >= min_date_sess,
+                        TimesheetEntry.entry_date <= max_date_sess,
+                    ),
+                ),
+            )
+            .join(
+                ExpectedUserEfficiency,
+                TimesheetEntry.user_id == ExpectedUserEfficiency.user_id,
+            )
+            .group_by(
+                db.func.date_trunc("month", TimesheetEntry.entry_date),
+                Team.name,
+            )
+            .statement,
+            con=connect,
+            parse_dates=["Date"],
         )
-        .group_by(db.func.date_trunc("month", TimesheetEntry.entry_date), Team.name)
-        .order_by(db.func.date_trunc("month", TimesheetEntry.entry_date))
-        .statement,
-        con=db.engine,
-        parse_dates=["Date"],
+        
+    # Pivoting is done to create a matrix of Teams(row) X Date (column) to find missing records
+    df_pivot = df.pivot_table(index="Teams", columns="Date", values="Gap").reset_index()
+    df_pivot = df_pivot.fillna(0)
+    value_vars = df_pivot.columns[1:]
+    # By using melt we can rearrange the dateframe to our required structure
+    # Basically it is the opposite of pivot_table function of pandas
+    df_melted = df_pivot.melt(
+        id_vars="Teams", value_vars=value_vars, var_name="Date", value_name="Gap"
     )
+    df = df_melted.sort_values(by=["Teams", "Date"])
 
     df["color"] = df["Gap"].apply(lambda x: "orange" if x > 10 else "blue")
     df["text"] = df["Gap"].apply(lambda x: str(x) if x > 10 else "")
@@ -129,7 +149,7 @@ def monetization_report(min_date_sess, max_date_sess):
     fig_subplots = make_subplots(
         rows=no_of_rows,
         cols=no_of_columns,
-        vertical_spacing=0.1,
+        vertical_spacing=0.075,
         horizontal_spacing=0.03,
         subplot_titles=df["Teams"].unique(),
         start_cell="bottom-left",
@@ -137,24 +157,25 @@ def monetization_report(min_date_sess, max_date_sess):
         x_title="Date",
     )
 
-    max_gap = ceiling(df["Gap"].max() * 1.25, 5)
+    max_gap = ceiling(df["Gap"].max() * 1.75, 5)
+    min_gap = min(-max_gap / 4, ceiling(df["Gap"].min() * 1.25, 5))
 
     fig_subplots = create_line_chart(df, no_of_columns, fig_subplots)
 
     fig_subplots.add_hrect(
-        y0=-10,
-        y1=10,
+        y0=10,
+        y1=max_gap,
         annotation_text="<b>Good</b>",
-        annotation_position="bottom right",
+        annotation_position="top right",
         fillcolor="green",
         opacity=0.075,
         line_width=0,
     )
     fig_subplots.add_hrect(
-        y0=max_gap,
+        y0=min_gap,
         y1=10,
         annotation_text="<b>Need Improvements</b>",
-        annotation_position="top right",
+        annotation_position="bottom right",
         fillcolor="red",
         opacity=0.075,
         line_width=0,
@@ -164,14 +185,13 @@ def monetization_report(min_date_sess, max_date_sess):
         textposition="top center",
     )
     fig_subplots.update_yaxes(
-        showgrid=False,
-        range=[-10, max_gap],
+        showgrid=False, range=[min_gap, max_gap], automargin="left+top"
     )
     fig_subplots.update_layout(
-        height=700,
+        height=no_of_rows * 200,
         hovermode="x",
         template="plotly_white",
-        margin=dict(t=50, r=12, l=65),
+        margin=dict(t=50, r=0, l=0, b=0),
         hoverlabel=dict(
             font_color="white",
         ),

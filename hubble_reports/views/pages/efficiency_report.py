@@ -60,39 +60,40 @@ layout = [
     Input("max-date-range", "data"),
 )
 def overall_efficiency_report(st_date, end_date):
-
-    df = pd.read_sql_query(
-        db.session.query(
-            db.func.avg(
-                100
-                * (
-                    (
-                        TimesheetEntry.authorized_hours
-                        / ExpectedUserEfficiency.expected_efficiency
+    with db.engine.connect() as connect:
+        df = pd.read_sql_query(
+            db.session.query(
+                db.func.avg(
+                    100
+                    * (
+                        (
+                            TimesheetEntry.authorized_hours
+                            / ExpectedUserEfficiency.expected_efficiency
+                        )
                     )
-                )
-            ).label("capacity"),
-            Team.name.label("team"),
-            Team.id.label("team_id"),
+                ).label("capacity"),
+                Team.name.label("team"),
+                Team.id.label("team_id"),
+            )
+            .join(
+                ExpectedUserEfficiency,
+                TimesheetEntry.user_id == ExpectedUserEfficiency.user_id,
+            )
+            .join(Team, TimesheetEntry.team_id == Team.id)
+            .filter(
+                db.and_(
+                    (st_date <= TimesheetEntry.entry_date),
+                    (TimesheetEntry.entry_date <= end_date),
+                ),
+            )
+            .group_by(
+                Team.name,
+                Team.id,
+            )
+            .statement,
+            connect,
         )
-        .join(
-            ExpectedUserEfficiency,
-            TimesheetEntry.user_id == ExpectedUserEfficiency.user_id,
-        )
-        .join(Team, TimesheetEntry.team_id == Team.id)
-        .filter(
-            db.and_(
-                (st_date <= TimesheetEntry.entry_date),
-                (TimesheetEntry.entry_date <= end_date),
-            ),
-        )
-        .group_by(
-            Team.name,
-            Team.id,
-        )
-        .statement,
-        db.engine,
-    )
+
     df["ratings"] = df["capacity"].apply(
         lambda a: "Excellent" if a > 100 else "Good" if a >= 90 else "Needs Improvement"
     )
@@ -191,34 +192,36 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
 
     if not team:
         raise PreventUpdate
-
-    df = pd.read_sql_query(
-        db.session.query(
-            db.func.date_trunc("month", TimesheetEntry.entry_date).label(
-                "display_date"
-            ),
-            db.func.sum(TimesheetEntry.authorized_hours).label("actual_hours"),
-            db.func.sum(ExpectedUserEfficiency.expected_efficiency).label(
-                "expected_hours"
-            ),
-        )
-        .join(TimesheetEntry, TimesheetEntry.user_id == ExpectedUserEfficiency.user_id)
-        .join(Team, Team.id == TimesheetEntry.team_id)
-        .filter(
-            db.and_(
-                Team.id == team["id"],
-                db.and_(
-                    (min_date_sess <= TimesheetEntry.entry_date),
-                    (TimesheetEntry.entry_date <= max_date_sess),
+    with db.engine.connect() as connect:
+        df = pd.read_sql_query(
+            db.session.query(
+                db.func.date_trunc("month", TimesheetEntry.entry_date).label(
+                    "display_date"
+                ),
+                db.func.sum(TimesheetEntry.authorized_hours).label("actual_hours"),
+                db.func.sum(ExpectedUserEfficiency.expected_efficiency).label(
+                    "expected_hours"
                 ),
             )
+            .join(
+                TimesheetEntry, TimesheetEntry.user_id == ExpectedUserEfficiency.user_id
+            )
+            .join(Team, Team.id == TimesheetEntry.team_id)
+            .filter(
+                db.and_(
+                    Team.id == team["id"],
+                    db.and_(
+                        (min_date_sess <= TimesheetEntry.entry_date),
+                        (TimesheetEntry.entry_date <= max_date_sess),
+                    ),
+                )
+            )
+            .group_by(db.func.date_trunc("month", TimesheetEntry.entry_date))
+            .order_by(db.func.date_trunc("month", TimesheetEntry.entry_date))
+            .statement,
+            con=connect,
+            parse_dates=["display_date"],
         )
-        .group_by(db.func.date_trunc("month", TimesheetEntry.entry_date))
-        .order_by(db.func.date_trunc("month", TimesheetEntry.entry_date))
-        .statement,
-        con=db.engine,
-        parse_dates=["display_date"],
-    )
 
     df = pd.DataFrame(
         pd.melt(

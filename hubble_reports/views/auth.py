@@ -1,22 +1,35 @@
 import msal
 
 from flask_login import login_required, logout_user, login_user
-from flask import session, url_for, render_template, redirect, request, current_app, abort
+from flask import (
+    session,
+    url_for,
+    render_template,
+    redirect,
+    request,
+    current_app,
+    abort,
+)
 
 from app import login_manager
 from hubble_reports.hubble_reports import reports
-from hubble_reports.models import User
+from hubble_reports.models import User, db
+from sqlalchemy.exc import PendingRollbackError
 
 
 @login_manager.user_loader
 def user_loader(user_id):
     user_email = session["user"]["preferred_username"]
-    return User.query.filter(User.email == user_email).first()
+    try:
+        user = db.session.query(User).filter(User.email == user_email).first()
+    except PendingRollbackError:
+        db.session.rollback()
+    return user
 
 
 @reports.route("/login")
 def login() -> render_template:
-    return render_template('login.html', auth_url=url_for('reports.get_token'))
+    return render_template("login.html", auth_url=url_for("reports.get_token"))
 
 
 @reports.route("/get-token")
@@ -26,7 +39,7 @@ def get_token():
     session["flow"] = _build_auth_code_flow(
         authority=current_app.config.get("AUTHORITY_SIGN_ON_SIGN_OUT")
     )
-    return redirect(session['flow']['auth_uri'])
+    return redirect(session["flow"]["auth_uri"])
 
 
 @reports.route(
@@ -46,9 +59,11 @@ def authorized() -> render_template:
         pass  # Simply ignore them
     mail_id = session["user"]["preferred_username"]
     try:
-        login_user(User.query.filter(User.email == mail_id).first())
+        login_user(db.session.query(User).filter(User.email == mail_id).first())
     except AttributeError:
         abort(401)
+    except PendingRollbackError:
+        db.session.rollback()
     return redirect(url_for("reports.dash_index"))
 
 

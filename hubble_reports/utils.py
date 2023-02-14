@@ -1,8 +1,10 @@
 import logging
+
+from datetime import datetime
 from functools import wraps
 from flask import abort, g
 from hubble_reports.models import db, PermissionRole, Permission
-from datetime import datetime
+from  sqlalchemy.exc import PendingRollbackError
 
 
 def get_logger(name: str, level: int = logging.INFO) -> logging.Logger:
@@ -21,16 +23,18 @@ def verify_permission(*permissions_allowed: tuple[str]):
         @wraps(f)
         def inner(*args, **kwargs):
             permissions_set = set(permissions_allowed)
-
-            user_perm = (
-                db.session.query(Permission.name)
-                .join(PermissionRole, PermissionRole.permission_id == Permission.id)
-                .filter(
-                    PermissionRole.role_id == g.user_role_id,
-                    Permission.name.in_(permissions_set),
+            try:
+                user_perm = (
+                    db.session.query(Permission.name)
+                    .join(PermissionRole, PermissionRole.permission_id == Permission.id)
+                    .filter(
+                        PermissionRole.role_id == g.user_role_id,
+                        Permission.name.in_(permissions_set),
+                    )
+                    .all()
                 )
-                .all()
-            )
+            except PendingRollbackError:
+                db.session.rollback()
 
             if user_perm != []:
                 return f(*args, **kwargs)
