@@ -20,7 +20,11 @@ from sqlalchemy.exc import PendingRollbackError
 @login_manager.user_loader
 def user_loader(user_id):
     user_email = session["user"]["preferred_username"]
-    return db.session.query(User).filter(User.email == user_email).first()
+    try:
+        user = db.session.query(User).filter(User.email == user_email).first()
+    except PendingRollbackError:
+        db.session.rollback()
+    return user
 
 
 @reports.route("/login")

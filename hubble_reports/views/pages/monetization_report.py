@@ -6,6 +6,7 @@ from dash import dcc, html, callback
 from dash.dependencies import Input, Output
 from plotly.subplots import make_subplots
 from sqlalchemy import case, null
+from sqlalchemy.exc import PendingRollbackError
 
 from hubble_reports.models import db, Team, ExpectedUserEfficiency, TimesheetEntry
 from hubble_reports.utils import ceiling
@@ -83,44 +84,47 @@ def create_line_chart(
     ],
 )
 def monetization_report(min_date_sess, max_date_sess):
-    df = pd.read_sql_query(
-        db.session.query(
-            db.func.date_trunc("month", TimesheetEntry.entry_date).label("Date"),
-            Team.name.label("Teams"),
-            case(
-                [(db.func.sum(TimesheetEntry.authorized_hours) == 0, null())],
-                else_=(
-                    100
-                    * (
-                        db.func.sum(ExpectedUserEfficiency.expected_efficiency)
-                        - db.func.sum(TimesheetEntry.authorized_hours)
-                    )
-                    / db.func.sum(TimesheetEntry.authorized_hours)
-                ),
-            ).label("Gap"),
-        )
-        .join(
-            TimesheetEntry,
-            db.and_(
-                TimesheetEntry.team_id == Team.id,
+    try:
+        df = pd.read_sql_query(
+            db.session.query(
+                db.func.date_trunc("month", TimesheetEntry.entry_date).label("Date"),
+                Team.name.label("Teams"),
+                case(
+                    [(db.func.sum(TimesheetEntry.authorized_hours) == 0, null())],
+                    else_=(
+                        100
+                        * (
+                            db.func.sum(ExpectedUserEfficiency.expected_efficiency)
+                            - db.func.sum(TimesheetEntry.authorized_hours)
+                        )
+                        / db.func.sum(TimesheetEntry.authorized_hours)
+                    ),
+                ).label("Gap"),
+            )
+            .join(
+                TimesheetEntry,
                 db.and_(
-                    TimesheetEntry.entry_date >= min_date_sess,
-                    TimesheetEntry.entry_date <= max_date_sess,
+                    TimesheetEntry.team_id == Team.id,
+                    db.and_(
+                        TimesheetEntry.entry_date >= min_date_sess,
+                        TimesheetEntry.entry_date <= max_date_sess,
+                    ),
                 ),
-            ),
+            )
+            .join(
+                ExpectedUserEfficiency,
+                TimesheetEntry.user_id == ExpectedUserEfficiency.user_id,
+            )
+            .group_by(
+                db.func.date_trunc("month", TimesheetEntry.entry_date),
+                Team.name,
+            )
+            .statement,
+            con=db.engine,
+            parse_dates=["Date"],
         )
-        .join(
-            ExpectedUserEfficiency,
-            TimesheetEntry.user_id == ExpectedUserEfficiency.user_id,
-        )
-        .group_by(
-            db.func.date_trunc("month", TimesheetEntry.entry_date),
-            Team.name,
-        )
-        .statement,
-        con=db.engine,
-        parse_dates=["Date"],
-    )
+    except PendingRollbackError:
+        db.session.rollback()
     # Pivoting is done to create a matrix of Teams(row) X Date (column) to find missing records
     df_pivot = df.pivot_table(index="Teams", columns="Date", values="Gap").reset_index()
     df_pivot = df_pivot.fillna(0)
