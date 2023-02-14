@@ -61,7 +61,7 @@ layout = [
     Input("max-date-range", "data"),
 )
 def overall_efficiency_report(st_date, end_date):
-    try:
+    with db.engine.connect() as connect:
         df = pd.read_sql_query(
             db.session.query(
                 db.func.avg(
@@ -92,10 +92,8 @@ def overall_efficiency_report(st_date, end_date):
                 Team.id,
             )
             .statement,
-            db.engine,
+            connect,
         )
-    except PendingRollbackError:
-        db.session.rollback()
 
     df["ratings"] = df["capacity"].apply(
         lambda a: "Excellent" if a > 100 else "Good" if a >= 90 else "Needs Improvement"
@@ -195,7 +193,7 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
 
     if not team:
         raise PreventUpdate
-    try:
+    with db.engine.connect() as connect:
         df = pd.read_sql_query(
             db.session.query(
                 db.func.date_trunc("month", TimesheetEntry.entry_date).label(
@@ -220,11 +218,9 @@ def detailed_efficiency_report(team, min_date_sess, max_date_sess):
             .group_by(db.func.date_trunc("month", TimesheetEntry.entry_date))
             .order_by(db.func.date_trunc("month", TimesheetEntry.entry_date))
             .statement,
-            con=db.engine,
+            con=connect,
             parse_dates=["display_date"],
         )
-    except PendingRollbackError:
-        db.session.rollback()
 
     df = pd.DataFrame(
         pd.melt(

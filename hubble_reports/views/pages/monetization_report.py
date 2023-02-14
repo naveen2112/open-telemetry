@@ -84,7 +84,7 @@ def create_line_chart(
     ],
 )
 def monetization_report(min_date_sess, max_date_sess):
-    try:
+    with db.engine.connect() as connect:
         df = pd.read_sql_query(
             db.session.query(
                 db.func.date_trunc("month", TimesheetEntry.entry_date).label("Date"),
@@ -120,11 +120,10 @@ def monetization_report(min_date_sess, max_date_sess):
                 Team.name,
             )
             .statement,
-            con=db.engine,
+            con=connect,
             parse_dates=["Date"],
         )
-    except PendingRollbackError:
-        db.session.rollback()
+        
     # Pivoting is done to create a matrix of Teams(row) X Date (column) to find missing records
     df_pivot = df.pivot_table(index="Teams", columns="Date", values="Gap").reset_index()
     df_pivot = df_pivot.fillna(0)
