@@ -10,15 +10,16 @@ register = template.Library()
 
 @register.simple_tag(takes_context=True)
 def set_active(context, names):
-    current_route_name = resolve(context['request'].path_info).route
-    names = names.split(', ')
+    current_route_name = resolve(context["request"].path_info).route
+    names = names.split(", ")
     for name in names:
-        if '/*' in name:
+        if "/*" in name:
             if current_route_name.startswith(name.replace("*", "")):
-                return 'active'
+                return "active"
         elif current_route_name.startswith(name):
-            return 'active'
-    return ''
+            return "active"
+    return ""
+
 
 @register.simple_tag
 def get_constant(name):
