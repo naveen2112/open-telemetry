@@ -37,7 +37,7 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = [env("DOCKR_SITE")]
+ALLOWED_HOSTS = [env("SITE_HOST")]
 
 
 # Application definition
