@@ -1,9 +1,10 @@
 from django.db import models
-from teams import Teams
-from designations import Designations
+from .teams import Teams
+from .designations import Designations
+from django.contrib.auth.models import AbstractUser
 
 
-class Users(models.Model):
+class Users(AbstractUser):
     id = models.BigAutoField(primary_key=True)
     employee_id = models.CharField(max_length=255, blank=True, null=True)
     email = models.CharField(unique=True, max_length=255)
@@ -24,6 +25,9 @@ class Users(models.Model):
     first_name = models.CharField(max_length=255, blank=True, null=True)
     last_name = models.CharField(max_length=255, blank=True, null=True)
     is_saturday_working = models.BooleanField()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['id', 'name', 'status', 'is_saturday_working']
 
     class Meta:
         managed = False

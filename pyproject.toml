@@ -12,6 +12,7 @@ Django = "^4.1.7"
 django-ajax-datatable = "^4.4.5"
 django-environ = "^0.9.0"
 psycopg2-binary = "^2.9.5"
+msal = "^1.21.0"
 
 
 [build-system]
