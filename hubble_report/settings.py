@@ -15,7 +15,6 @@ import os
 
 from pathlib import Path
 
-
 env = environ.Env(DEBUG=(bool, False))
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -38,6 +37,7 @@ SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
 
 ALLOWED_HOSTS = [env("SITE_HOST")]
+# ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -54,7 +54,10 @@ INSTALLED_APPS = [
 ]
 
 SESSION_ENGINE = "django.contrib.sessions.backends.file"
-SESSION_COOKIE_AGE = 8*60*60
+SESSION_FILE_PATH=os.path.join(BASE_DIR, "session_files")
+
+SESSION_COOKIE_AGE = 288000 
+# Session age should be in secs
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -143,3 +146,19 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
  
 AUTH_USER_MODEL = 'hubble.Users'
+
+# ENV variables
+
+SITE_HOST = env('SITE_HOST')
+DATABASE_URL = env('DATABASE_URL')
+AUTHORITY_SIGN_ON_SIGN_OUT = env('AUTHORITY_SIGN_ON_SIGN_OUT')
+CLIENT_ID = env('CLIENT_ID')
+CLIENT_SECRET = env('CLIENT_SECRET')
+SESSION_TYPE = env('SESSION_TYPE')
+CALLBACK_PATH = env('CALLBACK_PATH')
+REDIRECT_PATH = env('REDIRECT_PATH')
+DEBUG = env('DEBUG')
+SECRET_KEY = env('SECRET_KEY')
+DEVELOP = env('DEVELOP')
+
+CSRF_TRUSTED_ORIGINS = [f'https://*.{SITE_HOST}/']

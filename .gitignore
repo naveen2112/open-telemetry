@@ -50,3 +50,6 @@ Thumbs.db
 
 # Large files to be ignored
 .env
+
+# Session files
+/session_files

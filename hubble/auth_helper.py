@@ -1,11 +1,7 @@
 import msal
-import os
-from pathlib import Path
-import environ
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-env = environ.Env(DEBUG=(bool, False))
-environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
+from django.contrib.auth import login
+from hubble_report.settings import AUTHORITY_SIGN_ON_SIGN_OUT, CLIENT_ID, CLIENT_SECRET, SESSION_TYPE, CALLBACK_PATH, REDIRECT_PATH, DEBUG, SECRET_KEY
+from hubble.models import Users
 
 def load_cache(request):
   cache = msal.SerializableTokenCache()
@@ -19,17 +15,17 @@ def save_cache(request, cache):
 
 def get_msal_app(cache=None):
   auth_app = msal.ConfidentialClientApplication(
-    env('CLIENT_ID'),
-    authority= env('AUTHORITY_SIGN_ON_SIGN_OUT'),
-    client_credential= env('CLIENT_SECRET'),
+    CLIENT_ID,
+    authority= AUTHORITY_SIGN_ON_SIGN_OUT,
+    client_credential= CLIENT_SECRET,
     token_cache=cache)
   return auth_app
 
 def get_sign_in_flow():
   auth_app = get_msal_app()
   return auth_app.initiate_auth_code_flow(
-    scopes=[],
-    redirect_uri=env('CALLBACK_PATH'))
+    scopes=['user.read'],
+    redirect_uri=CALLBACK_PATH)
   
 def get_token_from_code(request):
   cache = load_cache(request)
@@ -39,24 +35,13 @@ def get_token_from_code(request):
   save_cache(request, cache)
   return result
 
-def store_user(request, user):
-  try:
-    request.session['user'] = {
-      'is_authenticated': True,
-      'name': user['displayName'],
-      'email': user['mail'] if (user['mail'] != None) else user['userPrincipalName'],
-      'timeZone': user['mailboxSettings']['timeZone'] if (user['mailboxSettings']['timeZone'] != None) else 'UTC'
-    }
-  except Exception as e:
-    print(e)
-
 def get_token(request):
   cache = load_cache(request)
   auth_app = get_msal_app(cache)
   accounts = auth_app.get_accounts()
   if accounts:
     result = auth_app.acquire_token_silent(
-      scopes = [],
+      scopes = ['user.read'],
       account=accounts[0])
     save_cache(request, cache)
     return result['access_token']

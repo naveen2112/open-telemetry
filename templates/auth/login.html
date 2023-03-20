@@ -128,6 +128,9 @@
                     <div style="width: 100%;font-size: 14px;opacity: 0.5; margin-top: 15px;">Note: Official Mallow Tech
                         ID only works with SSO(for example, username@mallow-tech.com)
                     </div>
+                    {% if error_message %}
+                        {{ error_message }}
+                    {% endif %}
                 </div>
             </div>
         </div>

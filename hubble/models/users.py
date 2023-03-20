@@ -1,10 +1,10 @@
 from django.db import models
 from .teams import Teams
 from .designations import Designations
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractBaseUser
+from datetime import datetime
 
-
-class Users(AbstractUser):
+class Users(AbstractBaseUser):
     id = models.BigAutoField(primary_key=True)
     employee_id = models.CharField(max_length=255, blank=True, null=True)
     email = models.CharField(unique=True, max_length=255)
@@ -25,6 +25,20 @@ class Users(AbstractUser):
     first_name = models.CharField(max_length=255, blank=True, null=True)
     last_name = models.CharField(max_length=255, blank=True, null=True)
     is_saturday_working = models.BooleanField()
+    is_active = True
+    is_staff=True
+    last_login = datetime.now()
+    is_superuser=False
+    
+    def get_full_name(self):
+        return f"{self.first_name} {self.last_name}"
+
+    def get_short_name(self):
+        return self.first_name
+
+    @property
+    def is_authenticated(self):
+        return self.email != None
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['id', 'name', 'status', 'is_saturday_working']
