@@ -15,20 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-
-urlpatterns = [
-    path("admin/", admin.site.urls),
+ 
+urlpatterns = [ 
+    # path("admin/", admin.site.urls),
 ]
-                         
-def include_subdomain_urls(subdomain):
-    if subdomain == 'training':
-        if len(urlpatterns) > 1:
-            urlpatterns.pop(1)
-        urlpatterns.append(path("", include("training.urls")))
-    elif subdomain == 'reports':
-        if len(urlpatterns) > 1:
-            urlpatterns.pop(1)
-        urlpatterns.append(path("", include("reports.urls")))
-
-
-
