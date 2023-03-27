@@ -50,7 +50,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "reports",
-    "training"
+    "training",
+    "hubble",
+    "ajax_datatable"
 ]
 
 MIDDLEWARE = [

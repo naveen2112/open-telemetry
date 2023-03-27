@@ -24,3 +24,14 @@ def set_active(context, names):
 @register.simple_tag
 def get_constant(name):
     return getattr(constants, name)
+
+
+@register.filter()
+def split(value):
+    """
+    It takes a string, splits it at the period, and returns the first part of the string
+    
+    :param value: The value of the variable that is passed to the filter
+    :return: The value of the variable is being split at the decimal point.
+    """
+    return value.split(".")[0]
