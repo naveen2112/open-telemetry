@@ -26,10 +26,10 @@ class Users(AbstractBaseUser):
     last_name = models.CharField(max_length=255, blank=True, null=True)
     is_saturday_working = models.BooleanField()
     is_active = True
-    is_staff=True
+    is_staff = True
     last_login = datetime.now()
-    is_superuser=False
-    
+    is_superuser = False
+
     def get_full_name(self):
         return f"{self.first_name} {self.last_name}"
 

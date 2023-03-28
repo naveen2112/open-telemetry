@@ -47,15 +47,15 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "reports.apps.ReportsConfig",
-    "hubble.apps.HubbleConfig",
+    "reports",
+    "hubble",
 ]
 
 SESSION_ENGINE = "django.contrib.sessions.backends.file"
 SESSION_FILE_PATH=os.path.join(BASE_DIR, "session_files")
 
-SESSION_COOKIE_AGE = 288000 
 # Session age should be in secs
+SESSION_COOKIE_AGE = 288000 
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -145,8 +145,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
  
 AUTH_USER_MODEL = 'hubble.Users'
 
-# ENV variables
-
 SITE_HOST = env('SITE_HOST')
 DATABASE_URL = env('DATABASE_URL')
 AUTHORITY_SIGN_ON_SIGN_OUT = env('AUTHORITY_SIGN_ON_SIGN_OUT')
@@ -155,7 +153,6 @@ CLIENT_SECRET = env('CLIENT_SECRET')
 SESSION_TYPE = env('SESSION_TYPE')
 CALLBACK_PATH = env('CALLBACK_PATH')
 REDIRECT_PATH = env('REDIRECT_PATH')
-DEBUG = env('DEBUG')
 SECRET_KEY = env('SECRET_KEY')
 DEVELOP = env('DEVELOP')
 

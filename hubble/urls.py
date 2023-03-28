@@ -1,11 +1,9 @@
 from django.urls import path
-
-from hubble.views import sign_in, sign_out, callback, index, dashboard
+from hubble import views
 
 urlpatterns = [
-    path(route="dash/", view=dashboard, name="dashboard"),
-    path(route="login/", view=index, name="index",),
-    path(route="sign_in/", view=sign_in, name="sign_in",),
-    path(route='signout/', view=sign_out, name='signout'),
-    path(route='hubble-sso-callback/', view=callback, name='callback'),
+    path(route="login/", view=views.index, name="index"),
+    path(route="signin/", view=views.signin, name="signin"),
+    path(route="signout/", view=views.signout, name="signout"),
+    path(route="hubble-sso-callback/", view=views.callback, name="callback"),
 ]

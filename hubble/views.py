@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from hubble.auth_helper import get_sign_in_flow, get_token_from_code, remove_user_and_token
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from hubble.models import Users
 from django.contrib.auth import login, logout
@@ -27,11 +26,7 @@ def initialize_context(request):
     context['user'] = request.session.get('user', {'is_authenticated': False})
     return context
 
-@login_required(login_url='/login/')
-def dashboard(request):
-    return render(request, 'layouts/base.html')
-
-def sign_in(request):
+def signin(request):
     if dev == 1:
         if request.method == 'POST':
             user_email = request.POST.get('email')
@@ -52,7 +47,7 @@ def sign_in(request):
             print(e)
         return HttpResponseRedirect(flow['auth_uri'])
 
-def sign_out(request):
+def signout(request):
     remove_user_and_token(request)
     logout(request)
     return HttpResponseRedirect(reverse('index'))
@@ -64,7 +59,7 @@ def callback(request):
     user = Users.objects.get(email = user_crendentials)
     if user is not None:
         login(request, user)
-        return redirect('/dash/')
+        return redirect('/reports/')
     else:
         error_message = "Invalid email address."
         return render(request, 'auth/dev_login.html', {'error_message': error_message})

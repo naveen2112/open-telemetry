@@ -1,7 +1,9 @@
 import msal
 from django.contrib.auth import login
-from hubble_report.settings import AUTHORITY_SIGN_ON_SIGN_OUT, CLIENT_ID, CLIENT_SECRET, SESSION_TYPE, CALLBACK_PATH, REDIRECT_PATH, DEBUG, SECRET_KEY
-from hubble.models import Users
+from hubble_report.settings import (
+    AUTHORITY_SIGN_ON_SIGN_OUT, CLIENT_ID,
+      CLIENT_SECRET, CALLBACK_PATH,
+)
 
 def load_cache(request):
   cache = msal.SerializableTokenCache()
@@ -9,24 +11,26 @@ def load_cache(request):
     cache.deserialize(request.session['token_cache'])
   return cache
 
+
 def save_cache(request, cache):
   if cache.has_state_changed:
     request.session['token_cache'] = cache.serialize()
 
+
 def get_msal_app(cache=None):
-  auth_app = msal.ConfidentialClientApplication(
+  return msal.ConfidentialClientApplication(
     CLIENT_ID,
     authority= AUTHORITY_SIGN_ON_SIGN_OUT,
     client_credential= CLIENT_SECRET,
     token_cache=cache)
-  return auth_app
+
 
 def get_sign_in_flow():
-  auth_app = get_msal_app()
-  return auth_app.initiate_auth_code_flow(
+  return   get_msal_app().initiate_auth_code_flow(
     scopes=['user.read'],
     redirect_uri=CALLBACK_PATH)
-  
+
+
 def get_token_from_code(request):
   cache = load_cache(request)
   auth_app = get_msal_app(cache)
@@ -34,6 +38,7 @@ def get_token_from_code(request):
   result = auth_app.acquire_token_by_auth_code_flow(flow, request.GET)
   save_cache(request, cache)
   return result
+
 
 def get_token(request):
   cache = load_cache(request)
@@ -46,10 +51,10 @@ def get_token(request):
     save_cache(request, cache)
     return result['access_token']
 
+
 def remove_user_and_token(request):
   if 'token_cache' in request.session:
     del request.session['token_cache']
 
   if 'user' in request.session:
     del request.session['user']
-
