@@ -1,17 +1,16 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from hubble.auth_helper import get_sign_in_flow, get_token_from_code, remove_user_and_token
+from hubble import auth_helper
 from django.contrib.auth import login
 from hubble.models import Users
 from django.contrib.auth import login, logout
-from hubble_report.settings import DEVELOP
+from hubble_report.settings import DEVELOPMENT
 
-
-dev = int(DEVELOP)
+TESTING_LOGIN = int(DEVELOPMENT)
 
 def index(request):
-    if dev == 1:
+    if TESTING_LOGIN:
         return render(request, 'auth/dev_login.html')
     else:
         context = initialize_context(request)
@@ -27,20 +26,20 @@ def initialize_context(request):
     return context
 
 def signin(request):
-    if dev == 1:
+    if TESTING_LOGIN:
         if request.method == 'POST':
             user_email = request.POST.get('email')
             user = Users.objects.get(email=user_email)
             if user.name is not None:
                 login(request, user)
-                return redirect('/dash/')            
+                return redirect('index')            
             else:
                 error_message = "Invalid email address."
                 return render(request, 'auth/dev_login.html', {'error_message': error_message})
         else:
             return render(request, 'auth/dev_login.html')
     else:
-        flow = get_sign_in_flow()
+        flow = auth_helper.get_sign_in_flow()
         try:
             request.session['auth_flow'] = flow
         except Exception as e:
@@ -48,18 +47,18 @@ def signin(request):
         return HttpResponseRedirect(flow['auth_uri'])
 
 def signout(request):
-    remove_user_and_token(request)
+    auth_helper.remove_user_and_token(request)
     logout(request)
     return HttpResponseRedirect(reverse('index'))
 
 def callback(request):
-    result = get_token_from_code(request)
+    result = auth_helper.get_token_from_code(request)
     data = result['id_token_claims']
     user_crendentials = data['preferred_username']
     user = Users.objects.get(email = user_crendentials)
     if user is not None:
         login(request, user)
-        return redirect('/reports/')
+        return redirect('index')
     else:
         error_message = "Invalid email address."
         return render(request, 'auth/dev_login.html', {'error_message': error_message})

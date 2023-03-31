@@ -1,9 +1,11 @@
 import msal
-from django.contrib.auth import login
-from hubble_report.settings import (
-    AUTHORITY_SIGN_ON_SIGN_OUT, CLIENT_ID,
-      CLIENT_SECRET, CALLBACK_PATH,
-)
+from hubble_report.settings import BASE_DIR
+import environ
+import os
+
+env = environ.Env(DEBUG=(bool, False))
+environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
+
 
 def load_cache(request):
   cache = msal.SerializableTokenCache()
@@ -19,16 +21,16 @@ def save_cache(request, cache):
 
 def get_msal_app(cache=None):
   return msal.ConfidentialClientApplication(
-    CLIENT_ID,
-    authority= AUTHORITY_SIGN_ON_SIGN_OUT,
-    client_credential= CLIENT_SECRET,
+    env('CLIENT_ID'),
+    authority= env('AUTHORITY_SIGN_ON_SIGN_OUT'),
+    client_credential= env('CLIENT_SECRET'),
     token_cache=cache)
 
 
 def get_sign_in_flow():
   return   get_msal_app().initiate_auth_code_flow(
     scopes=['user.read'],
-    redirect_uri=CALLBACK_PATH)
+    redirect_uri=env('CALLBACK_PATH'))
 
 
 def get_token_from_code(request):
