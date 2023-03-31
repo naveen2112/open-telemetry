@@ -62,7 +62,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "hubble.subdomainclassifier.SubdomainClassifier",
-] 
+]
 
 ROOT_URLCONF = "hubble_report.urls"
 
