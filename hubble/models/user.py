@@ -1,9 +1,9 @@
 from django.db import models
-from teams import Teams
-from designations import Designations
+from .team import Teams
+from .designation import Designations
 
 
-class Users(models.Model):
+class User(models.Model):
     id = models.BigAutoField(primary_key=True)
     employee_id = models.CharField(max_length=255, blank=True, null=True)
     email = models.CharField(unique=True, max_length=255)
