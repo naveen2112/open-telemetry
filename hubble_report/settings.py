@@ -49,7 +49,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "reports.apps.ReportsConfig",
+    "reports",
+    "training"
 ]
 
 MIDDLEWARE = [
@@ -60,6 +61,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "hubble.middlewares.subdomain_classifier.SubdomainClassifier",
 ]
 
 ROOT_URLCONF = "hubble_report.urls"
