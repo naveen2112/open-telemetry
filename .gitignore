@@ -53,3 +53,13 @@ Thumbs.db
 
 # Session files
 /session_files
+# Cache files 
+
+hubble_report/hubble_report/__pycache__
+hubble_report/core/__pycache__
+hubble_report/hubble/__pycache__
+hubble_report/hubble/migrations/__pycache__
+hubble_report/reports/__pycache__
+hubble_report/reports/migrations/__pycache__
+hubble_report/training/__pycache__
+hubble_report/training/migrations/__pycache__
