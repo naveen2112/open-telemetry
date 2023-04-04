@@ -1,3 +1,3 @@
-from .designations import Designations
-from .teams import Teams
-from .users import Users
+from .designation import Designation
+from .team import Team
+from .user import User

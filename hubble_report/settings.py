@@ -52,10 +52,10 @@ INSTALLED_APPS = [
 ]
 
 SESSION_ENGINE = "django.contrib.sessions.backends.file"
-SESSION_FILE_PATH=os.path.join(BASE_DIR, "session_files")
+SESSION_FILE_PATH = os.path.join(BASE_DIR, "session_files")
 
 # Session age should be in secs
-SESSION_COOKIE_AGE = 288000 
+SESSION_COOKIE_AGE = 288000
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -142,9 +142,33 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
- 
-AUTH_USER_MODEL = 'hubble.Users'
 
-DEVELOPMENT = env('DEVELOPMENT')
+AUTH_USER_MODEL = "hubble.User"
 
-CSRF_TRUSTED_ORIGINS = [f'https://*.{env("SITE_HOST")}/']
+ENV_NAME = env("ENV_NAME")
+
+CSRF_TRUSTED_ORIGINS = [f'https://*.{env("SITE_HOST")}']
+
+LOGIN_URL = "login"
+
+LOGGING = {
+    "version": 1,
+    "filters": {
+        "require_debug_true": {
+            "()": "django.utils.log.RequireDebugTrue",
+        }
+    },
+    "handlers": {
+        "console": {
+            "level": "DEBUG",
+            "filters": ["require_debug_true"],
+            "class": "logging.StreamHandler",
+        }
+    },
+    "loggers": {
+        "django.db.backends": {
+            "level": "DEBUG",
+            "handlers": ["console"],
+        }
+    },
+}

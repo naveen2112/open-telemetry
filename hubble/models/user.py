@@ -31,6 +31,8 @@ class User(AbstractBaseUser):
     is_superuser = False
 
     USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+    
     class Meta:
         managed = False
         db_table = 'users'

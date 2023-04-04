@@ -26,7 +26,7 @@
                     <div
                         class="flex items-center my-6 before:flex-1 before:border-t before:border-gray-300 before:mt-0.5 after:flex-1 after:border-t after:border-gray-300 after:mt-0.5">
                     </div>
-
+                    {% if login_method == 'production' %}
                     <div class="flex items-center flex-wrap">
 
                         <div class="text-center lg:text-left ">
@@ -125,11 +125,22 @@
                             </a>
                         </div>
                     </div>
+                    {% endif %}
+                    {% if login_method == 'testing' %}
+                        <form method="POST" action="{% url 'signin' %}">
+                            {% csrf_token %}
+                            <label for="email">Email</label>
+                            <input type="email" type="email" name="email">
+                            <button type="submit">Login</button>
+                        </form> 
+                    {% endif %}
                     <div style="width: 100%;font-size: 14px;opacity: 0.5; margin-top: 15px;">Note: Official Mallow Tech
                         ID only works with SSO(for example, username@mallow-tech.com)
                     </div>
-                    {% if error_message %}
-                        {{ error_message }}
+                    {% if messages %}
+                        {% for message in messages %}
+                            <p {% if message.tags %} class = "{{ message.tags }}" {% endif %}>{{ message }}</p>
+                        {% endfor %}
                     {% endif %}
                 </div>
             </div>

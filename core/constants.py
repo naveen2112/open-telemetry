@@ -6,3 +6,6 @@ COPY_RIGHTS_TEXT = (
     + "ISO 27001:2013 Certified"
     )
 COMPANY_NAME = "Mallow Technologies Pvt Ltd."
+
+ENVIRONMENT_DEVELOPMENT = 'Development'
+ENVIRONMENT_PRODUCTION = 'Production'
