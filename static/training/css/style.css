@@ -1,0 +1,18 @@
+thead {
+    background-color: rgb(205 211 229);
+}
+
+#card-link {
+    margin: 15px 20px 15px 0px;
+}
+
+#card-container {
+    width: 18rem;
+    height: 9.5rem;
+}
+
+.dataTables_filter {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
