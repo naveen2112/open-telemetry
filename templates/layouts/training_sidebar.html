@@ -6,12 +6,20 @@
             <a><img src="{% static 'images/logo.png' %}" alt="Mallow Technologies - Mobile and web app development" class='mb-8 w-full h-auto mx-auto' /></a>
         </div>
         <div class='text-white text-sm grow overflow-auto font-medium text-center w-full' id="sidebar">
-            <div class="py-3  flex-wrap rounded-bl-lg flex w-full justify-start {% set_active 'induction-kit' %}">
+            <div class="py-3  flex-wrap rounded-bl-lg flex w-full justify-start {% set_active 'induction-kit/*' %}">
                 <a href="{% url 'induction-kit' %}" tabindex="-1" class="flex px-2.5 justify-start items-center w-full">
                     <div class="flex justify-center mr-4">
                         <img src="{% static 'images/time-sheet.svg' %}" alt="timesheet icon">
                     </div>
                     <div>Induction Kit</div>
+                </a>
+            </div>
+            <div class="py-3  flex-wrap rounded-bl-lg flex w-full justify-start {% set_active 'timeline-template/*' %}">
+                <a href="{% url 'timeline-template' %}" tabindex="-1" class="flex px-2.5 justify-start items-center w-full">
+                    <div class="flex justify-center mr-4">
+                        <img src="{% static 'images/time-sheet.svg' %}" alt="timesheet icon">
+                    </div>
+                    <div>Timeline</div>
                 </a>
             </div>
             <div class="py-3 px-2.5 rounded-bl-lg flex justify-start">

@@ -1,0 +1,313 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}
+    Timeline Template
+{% endblock title %}
+
+{% block header %}
+    Timeline Template List
+{% endblock %}
+
+{% block body %}
+    <div class="mb-5 flex justify-end items-center">
+        <button class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal" onclick="openModal()">Create Timeline</button>
+        <!-- Create Modal -->
+        <div class="jquery-modal current hidden" id="modal">
+            <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
+                <p class="font-semibold text-lg mb-10">Create Timeline</p>
+                <form method="post" class="timeline-form" id="timeline-create-form">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <div class="form-group mb-7" id="{{ form.name.label|lower }}_group">
+                            {{ form.name |show_label }}
+                            {{ form.name }}
+                        </div>
+                        <div class="work-basic-dropdown mb-7" id="{{ form.team.label|lower }}_group">
+                            {{ form.team |show_label }}
+                            <div class="relative">
+                                {{ form.team }}
+                            </div>
+                        </div>
+                        <div class="flex items-center mb-7" id="{{ form.is_active.label|lower }}_group">
+                            {{ form.is_active }}
+                            <label for="is_active" class="ml-3 mb-3.6 text-sm text-dark-black-50">Active Template</label>
+                        </div>
+                    </div>
+                    <div class="text-center mt-10">
+                        <a class="cursor-pointer inline-block align-middle border border-grey px-8 py-2 rounded mr-6" onclick="closeModal()">Close</a>
+                        <a class="cursor-pointer inline-block align-middle text-white bg-dark-blue rounded inline-flex items-center rounded px-8 py-2 text-base font-normal" onclick="createTimeline()">Submit</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="flex mb-7">
+        <div class="relative mr-5" id="timeline-table_filter">
+            <input type="text" value="" name="search_project" placeholder="Search by Name, Project Id, Version"
+                class="w-397 h-10 pl-11 pr-2.5 py-3 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0"
+                id="search_project">
+            <span class="absolute top-2 left-2"><!--?xml version="1.0" encoding="UTF-8"?-->
+                <svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink">
+                    <title>Search</title>
+                    <defs>
+                        <rect id="path-1" x="0" y="0" width="397" height="40" rx="10"></rect>
+                        <filter x="-2.3%" y="-22.5%" width="104.5%" height="145.0%" filterUnits="objectBoundingBox"
+                            id="filter-2">
+                            <feOffset dx="0" dy="0" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+                            <feGaussianBlur stdDeviation="3" in="shadowOffsetOuter1" result="shadowBlurOuter1">
+                            </feGaussianBlur>
+                            <feColorMatrix
+                                values="0 0 0 0 0.0509803922   0 0 0 0 0.0470588235   0 0 0 0 0.11372549  0 0 0 0.05 0"
+                                type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+                        </filter>
+                    </defs>
+                    <g id="Final---User-Profile" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                        <g id="UserProfile---list" transform="translate(-130.000000, -111.000000)">
+                            <rect fill="#5D3E91" opacity="0.06" x="0" y="0" width="1440" height="900"></rect>
+                            <g id="Group" transform="translate(120.000000, 103.000000)">
+                                <g id="Rectangle">
+                                    <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
+                                    <use fill="#FBFCFF" fill-rule="evenodd" xlink:href="#path-1"></use>
+                                </g>
+                                <g id="search-icon" transform="translate(10.000000, 8.000000)">
+                                    <rect id="Rectangle" fill="#F3F6FF" opacity="0" x="0" y="0" width="24" height="24">
+                                    </rect>
+                                    <path
+                                        d="M6.05025253,6.05025253 C8.78392257,3.31658249 13.2160774,3.31658249 15.9497475,6.05025253 C18.4484927,8.5489978 18.6632287,12.4668446 16.5939552,15.2094979 C16.6570068,15.2527187 16.7176613,15.3034478 16.7747054,15.3604918 L20.074537,18.6603235 C20.5301487,19.1159351 20.5829124,19.8018639 20.1923882,20.1923882 C19.8018639,20.5829124 19.1159351,20.5301487 18.6603235,20.074537 L15.3604918,16.7747054 C15.3034478,16.7176613 15.2527187,16.6570068 15.208384,16.5937738 C12.4668446,18.6632287 8.5489978,18.4484927 6.05025253,15.9497475 C3.31658249,13.2160774 3.31658249,8.78392257 6.05025253,6.05025253 Z M7.46446609,7.46446609 C5.51184464,9.41708755 5.51184464,12.5829124 7.46446609,14.5355339 C9.41708755,16.4881554 12.5829124,16.4881554 14.5355339,14.5355339 C16.4881554,12.5829124 16.4881554,9.41708755 14.5355339,7.46446609 C12.5829124,5.51184464 9.41708755,5.51184464 7.46446609,7.46446609 Z"
+                                        id="Shape" fill-opacity="0.5" fill="#020C2D"></path>
+                                </g>
+                            </g>
+                        </g>
+                    </g>
+                </svg>
+            </span>
+        </div>
+    </div>
+    <table id="timeline-table" class="display border-0 table-with-no-border dataTable no-footer" style="width: 100%;" role="grid" aria-describedby="timeline-table_info">
+    </table>
+    <!-- Update Modal -->
+    <div class="jquery-modal current hidden" id="update-modal">
+        <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
+            <p class="font-semibold text-lg mb-10">Update Timeline</p>
+            <form method="post" class="timeline-form">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <input type="hidden" name="update_id" id="update_id">
+                    {% csrf_token %}
+                    <div class="form-group mb-7" id="{{ form.name.label|lower }}_update_group">
+                        {{ form.name |show_label }}
+                        {{ form.name|add_id }}
+                    </div>
+                    <div class="work-basic-dropdown mb-7" id="{{ form.name.label|lower }}_update_group">
+                        {{ form.team |show_label }}
+                        <div class="relative">
+                            {{ form.team|add_id }}
+                        </div>
+                    </div>
+                    <div class="flex items-center mb-7" id="{{ form.is_active.label|lower }}_update_group">
+                        {{ form.is_active|add_id }}
+                        <label for="is_active" class="ml-3 mb-3.6 text-sm text-dark-black-50">Active Template</label>
+                    </div>
+                </div>
+                <div class="text-center mt-10">
+                    <a class="cursor-pointer inline-block align-middle border border-grey px-8 py-2 rounded mr-6"
+                        onclick="closeUpdateModal()">Close</a>
+                    <a class="cursor-pointer inline-block align-middle text-white bg-dark-blue rounded inline-flex items-center rounded px-8 py-2 text-base font-normal"
+                        onclick="updateTimeline()">
+                        Submit
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        $(document).ready(function () {
+            var selectTemplate = `
+                <div id="drop-btn" class="cus-dropdown-icon block border border-primary-dark-30 rounded-md mt-2.5 w-full focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 py-1 px-2">
+                    <div class="cursor-pointer text-truncate w-11/12" id="show-value">
+                    </div>
+                </div>`;
+
+            $('.work-basic-dropdown').each(function () {
+                console.log($(this).find('.multi-select'));
+                if ($(this).find('.multi-select').length == 0) {
+                    console.log("hello");
+                    var elemId = $(this).find("select").attr("id");
+                    console.log(elemId);
+                    $("#" + elemId).customSearch({
+                        closeOnCheck: true,
+                        clickBtnTemplate: selectTemplate,
+                        listStyle: "p-3",
+                        hideClearIcon: true,
+                        targetId: "#show-value",
+                        popupStyles: "z-20 absolute rounded-md bg-white text-dark-black block shadow-md w-64 top-10 left-0 max-h-96 overflow-hidden",
+                        onItemCheck: function (values) {
+                            if (elemId == "work_schedule") {
+                                hideShowDays();
+                            }
+                        },
+                        onSelectOpen: function () {
+                            $('.content-page').css("overflow-y", "hidden");
+                        },
+                        onSelectClose: function () {
+                            $('.content-page').css("overflow-y", "auto");
+                        }
+                    })
+                }
+            })
+
+            $(document).ready(function () {
+                AjaxDatatableViewUtils.initialize_table(
+                    $('#timeline-table'),
+                    "{% url 'timeline-template.datatable' %}",
+                    {
+                        serverSide: true,
+                        processing: true,
+                        autoWidth: false,
+                        scrollX: false,
+                    },
+                );
+            });
+            $("#search_project").on('input', function () {
+                var searchvalue = $(this).val()
+                var table = $("#timeline-table").DataTable();
+                table.search(searchvalue).draw()
+            });
+        });
+
+        function openModal() {
+            document.getElementById("modal").classList.remove("hidden");
+            document.getElementById("modal").classList.add("blocker");
+
+        }
+
+        function closeModal() {
+            document.getElementById("modal").classList.remove("blocker");
+            document.getElementById("modal").classList.add("hidden");
+        }
+
+        function createTimeline() {
+            $('.page-loader').show();
+            let active = null;
+            if ($('.checkbox_active').is(":checked")) {
+                active = true;
+            }
+            else {
+                active = false;
+            }
+            console.log($('.checkbox_active').is(":checked"));
+            console.log($('#id_is_active:checked').val());
+            $.ajax({
+                type: "POST",
+                url: "{% url 'timeline-template.create' %}",
+                headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
+                data: {
+                    name: $('#id_name').val(),
+                    team: $('#id_team').val(),
+                    is_active: $('.checkbox_active').is(":checked"),
+                },
+                success: function (data) {
+                    $('.form_errors').remove()
+                    $('.page-loader').hide();
+                    if (data.status === 'success') {
+                        $('#timeline-table').DataTable().ajax.reload()
+                        closeModal();
+                    }
+                    else {
+                        const fieldErrors = JSON.parse(data.field_errors);
+                        const nonFieldErrors = JSON.parse(data.non_field_errors);
+                        console.log(fieldErrors);
+                        console.log(nonFieldErrors);
+                        for (field in fieldErrors) {
+                            $('#' + field + '_group').append('<span id="reason_error" class="form_errors ajax-error text-red-600">' + fieldErrors[field][0].message + '</span>');
+                        }
+                    }
+                }
+            });
+        }
+
+        function openUpdateModel(id) {
+            $('.page-loader').show();
+            $('.update-form-fields-container').empty()
+            const modal = document.getElementById("update-modal");
+            $.ajax({
+                type: "GET",
+                url: "{% url 'timeline-template.timeline-update-form' %}",
+                data: { id: id },
+                success: function (data) {
+                    $('.page-loader').hide();
+                    $('#update_name').val(data.timeline.name),
+                    $('#update_team').val(data.timeline.team),
+                    $('#update_id').val(id);
+                    console.log(data.timeline.is_active);
+                    if(data.timeline.is_active) {
+                        $("input:checkbox").attr('checked', true);
+                    }
+                    else {
+                        $("input:checkbox").attr('checked', false);
+                    }
+                }
+            });
+            modal.classList.remove("hidden");
+            modal.classList.add("blocker");
+        }
+
+        function closeUpdateModal() {
+            document.getElementById("update-modal").classList.remove("blocker");
+            document.getElementById("update-modal").classList.add("hidden");
+        }
+
+        function updateTimeline() {
+            $('.page-loader').show();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'timeline-template.update' %}",
+                headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
+                data: {
+                    id: $("#update_id").val(),
+                    name: $('#update_name').val(),
+                    team: $("#update_team").val(),
+                    is_active: $('#update_is_active').is(":checked"),
+                },
+                success: function (data) {
+                    $('.form_errors').remove()
+                    $('.page-loader').hide();
+                    if (data.status === 'success') {
+                        $('#timeline-table').DataTable().ajax.reload()
+                        closeUpdateModal();
+                    }
+                    else {
+                        const fieldErrors = JSON.parse(data.field_errors);
+                        const nonFieldErrors = JSON.parse(data.non_field_errors);
+                        console.log(fieldErrors);
+                        console.log(nonFieldErrors);
+                        for (field in fieldErrors) {
+                            $('#' + field + '_update_group').append('<span id="reason_error" class="ajax-error form_errors text-red-600">' + fieldErrors[field][0].message + '</span>');
+                        }
+                    }
+                }
+            });
+        }
+
+        function deleteTimeline(id) {
+            let text = 'Are you do you want to delete'
+            if (confirm(text) == true) {
+                $('.page-loader').show();
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'timeline-template.delete' %}",
+                    headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
+                    data: { id: id },
+                    success: function (data) {
+                        $('.page-loader').hide();
+                        $('#timeline-table').DataTable().ajax.reload()
+                    }
+                });
+            }
+        }
+    </script>
+{% endblock %}
