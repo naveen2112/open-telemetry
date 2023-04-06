@@ -49,7 +49,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "reports",
     "hubble",
-    "training"
+    "training",
+    "ajax_datatable",
 ]
 
 SESSION_ENGINE = "django.contrib.sessions.backends.file"
