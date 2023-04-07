@@ -13,6 +13,8 @@ urlpatterns = [
     path("timeline-template/timeline-update-form", views.timeline_update_form, name="timeline-template.timeline-update-form"),
     path("timeline-template/update-timeline-template", views.update_timeline_template, name="timeline-template.update"),
     path("timeline-template/delete-timeline-template", views.delete_timeline_template, name="timeline-template.delete"),
+    path("timeline-template/timeline-duplicate-form", views.timeline_duplicate_form, name="timeline-template.timeline-duplicate-form"),
+    path("timeline-template/duplicate-timeline-template", views.duplicate_timeline_template, name="timeline-template.duplicate"),
     path("timeline-template/<int:pk>/details", views.timeline_template_details, name="timeline-template.detail"),
 
     # Timeline Task

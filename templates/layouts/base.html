@@ -29,6 +29,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
+    {% block style %}
+
+    {% endblock style %}
 </head>
 
 <body class="min-h-screen bg-gray-50">
@@ -36,11 +39,10 @@
     <div class="flex h-screen">
         {% include 'layouts/'|add:request.subdomain|add:'_sidebar.html' %}
 
-
         <div class="overflow-hidden max-h-screen flex main-screen grow flex-col">
             <div class="header bg-white">
                 <div class="px-5 pt-9 bg-mild-violet pb-7">
-                    <div class="flex justify-between mb-7 items-center">
+                    <div class="flex justify-between items-center">
                         <div>
 
                             <div class="text-dark-black text-lg mb-1 leading-none">
@@ -54,6 +56,9 @@
                             </div>
 
                         </div>
+                        {% block adder %}
+                          
+                        {% endblock adder %}
                     </div>
                 </div>
             </div>

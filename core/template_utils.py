@@ -1,5 +1,5 @@
 def show_btn(url):
-    return f'''<a href="{url}">  
+    return f"""<a href="{url}">  
                     <div class="inline mr-1">
                         <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
                             <title>View</title>
@@ -16,11 +16,11 @@ def show_btn(url):
                             </g>
                         </svg>
                     </div>
-                </a>'''
+                </a>"""
 
 
-def  edit_btn(id):
-    return f'''<a href="#" onclick="openUpdateModel({id})" tabindex="-1">
+def edit_btn(id):
+    return f"""<a href="#" onclick="openUpdateModel({id})" tabindex="-1">
                     <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
                         <title>Edit</title>
                         <g id="Final---User-Profile" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" fill-opacity="0.5">
@@ -33,11 +33,11 @@ def  edit_btn(id):
                             </g>
                         </g>
                     </svg>
-                </a>'''
+                </a>"""
 
 
 def delete_btn(id):
-    return f'''<a href="#" onclick="deleteTimeline({id})" tabindex="-1">
+    return f"""<a href="#" onclick="deleteTimeline({id})" tabindex="-1">
                     <svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                         <title>Delete</title>
                         <g id="Final---User-Profile" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
@@ -54,4 +54,13 @@ def delete_btn(id):
                             </g>
                         </g>
                     </svg>
-                </a>'''
+                </a>"""
+
+
+def duplicate_btn(id):
+    return f"""<a href="#" onclick="duplicateTimelineModal({id})" tabindex="-1">
+                    <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" width="20px" height="20px">
+                        <path d="M0 0h48v48H0z" fill="none"></path>
+                        <path d="M32 2H8C5.79 2 4 3.79 4 6v28h4V6h24V2zm6 8H16c-2.21 0-4 1.79-4 4v28c0 2.21 1.79 4 4 4h22c2.21 0 4-1.79 4-4V14c0-2.21-1.79-4-4-4zm0 32H16V14h22v28z" fill="#7c7f93" class="fill-000000"></path>
+                    </svg>
+                </a>"""
