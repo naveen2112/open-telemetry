@@ -9,4 +9,4 @@ from .project_resource_position import ProjectResourcePosition
 from .project_resource import ProjectResource
 from .project import Project
 from .task import Task
-from .timesheet_entry import TimesheetEntry
+from .timesheet_entry import TimesheetEntry, TimesheetUser

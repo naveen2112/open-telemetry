@@ -4,8 +4,8 @@ from . import ExpectedUserEfficiency, Project, Module, Task
 
 class TimesheetEntry(models.Model):
     id = models.BigAutoField(primary_key=True)
-    user_id = models.ForeignKey(ExpectedUserEfficiency, models.CASCADE, to_field="user_id",unique = False, db_column='user_id', related_name= 'timesheet_user_id')
-    # user_id = models.ManyToManyField(ExpectedUserEfficiencies, models.CASCADE, through='TimesheetUser', through_fields= ('t_user', 'e_user'), related_name='timesheet_entries')
+    # user_id = models.ForeignKey(ExpectedUserEfficiency, models.CASCADE, to_field="user_id",unique = False, db_column='user_id', related_name= 'timesheet_user_id')
+    user_id = models.ManyToManyField(ExpectedUserEfficiency,through= 'TimesheetUser',  related_name='timesheetuser')
     project = models.ForeignKey(Project, models.CASCADE, related_name= 'TimesheetEntries_project_id')
     module = models.ForeignKey(Module, models.CASCADE, related_name= 'TimesheetEntries_module_id')
     task = models.ForeignKey(Task, models.CASCADE, related_name= 'TimesheetEntries_task_id')
@@ -21,16 +21,20 @@ class TimesheetEntry(models.Model):
     updated_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
+        # constraints = [models.UniqueConstraint(fields=['user_id'], name='unique_user_id')]
         managed = False
         db_table = 'timesheet_entries'
 
+    
+class TimesheetUser(models.Model):
+    # pass
+    t_user = models.ForeignKey(ExpectedUserEfficiency, on_delete = models.CASCADE, related_name='t_user', to_field= 'user_id')
+    e_user = models.ForeignKey(TimesheetEntry, on_delete = models.CASCADE, related_name= 'e_user', to_field= 'user_id')
 
-# class TimesheetUser(models.Model):
-#     t_user = models.ForeignKey(ExpectedUserEfficiencies, on_delete = models.CASCADE, to_field="user_id", related_name='many_to_timesheet')
-#     e_user = models.ForeignKey(TimesheetEntries, on_delete = models.CASCADE, to_field="user_id", related_name= 'many_to_expected')
-
-#     class Meta:
-#         unique_together = ['t_user', 'e_user']
+    class Meta:
+        unique_together = ['t_user', 'e_user']
+        managed = False
+        db_table = 'timesheet_user'
 
 
 
