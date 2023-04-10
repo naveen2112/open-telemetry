@@ -15,17 +15,3 @@ class Timeline(db.BaseModel):
         db_table = "timeline"
 
 
-    def clean(self):
-        """
-        This function checks if a team already has an active template and raises a validation error if
-        it does.
-        """
-        super().clean()
-        if (
-            self.is_active
-            and Timeline.objects.filter(team=self.team, is_active=True)
-            .exclude(id=self.id)
-            .exists()
-        ):
-            raise ValidationError("Team already has an active template.")
-

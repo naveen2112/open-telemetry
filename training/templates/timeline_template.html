@@ -260,8 +260,10 @@
                 else {
                     const fieldErrors = JSON.parse(data.field_errors);
                     const nonFieldErrors = JSON.parse(data.non_field_errors);
-                    let non_field_error = nonFieldErrors[0]['message']
-                    $('#non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + non_field_error + '</span>')
+                    if (Object.keys(nonFieldErrors).length > 0) { 
+                        let non_field_error = nonFieldErrors[0]['message']
+                        $('#non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + non_field_error + '</span>')
+                    }
                     for (field in fieldErrors) {
                         $('#' + field + '_group').append('<span id="reason_error" class="form_errors ajax-error text-red-600">' + fieldErrors[field][0].message + '</span>');
                     }
@@ -319,8 +321,10 @@
                 else {
                     const fieldErrors = JSON.parse(data.field_errors);
                     const nonFieldErrors = JSON.parse(data.non_field_errors);
-                    let non_field_error = nonFieldErrors[0]['message']
-                    $('#update_non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + non_field_error + '</span>')
+                    if (Object.keys(nonFieldErrors).length > 0) {
+                        let non_field_error = nonFieldErrors[0]['message']
+                        $('#update_non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + non_field_error + '</span>')
+                    }
                     for (field in fieldErrors) {
                         $('#' + field + '_update_group').append('<span id="reason_error" class="ajax-error form_errors text-red-600">' + fieldErrors[field][0].message + '</span>');
                     }
@@ -388,8 +392,10 @@
                 else {
                     const fieldErrors = JSON.parse(data.field_errors);
                     const nonFieldErrors = JSON.parse(data.non_field_errors);
-                    let non_field_error = nonFieldErrors[0]['message']
-                    $('#duplicate_non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + non_field_error + '</span>')
+                    if (Object.keys(nonFieldErrors).length > 0) { 
+                        let non_field_error = nonFieldErrors[0]['message']
+                        $('#duplicate_non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + non_field_error + '</span>')
+                    }
                     for (field in fieldErrors) {
                         $('#' + field + '_duplicate_group').append('<span id="reason_error" class="ajax-error form_errors text-red-600">' + fieldErrors[field][0].message + '</span>');
                     }
