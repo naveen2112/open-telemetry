@@ -158,7 +158,7 @@ LOGGING = {
     "version": 1,
     "filters": {
         "require_debug_true": {
-            "()": "django.utils.log.RequireDebugTrue",
+            "()": "django.utils.log.RequireDebugTrue", 
         }
     },
     "handlers": {

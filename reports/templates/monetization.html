@@ -6,8 +6,7 @@
         <div class="px-2 pt-9 bg-mild-violet pb-7" x-data="userHeaderDetails()">
             <div class="flex">
                 <div>
-                    <div class="text-dark-black text-lg mb-1 leading-none">Reports</div>
-                    <div class="text-dark-black-50 text-sm">List of Team Reports</div>
+                    <div class="text-dark-black text-lg mb-1 leading-none">Monetization Report</div>
                 </div>
             </div>
         </div>
@@ -17,7 +16,7 @@
 {% block sub_header %}
 <div class="flex">
     <div class="relative mr-5">
-        <input type="text" value="" name="search_project" placeholder="Search by Team"
+        <input type="text" value="" name="search_project" placeholder="Search by Team, Date"
                 class="w-397 h-10 pl-11 pr-2.5 py-3 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0"
                 id="search_project"/>
         <span class="absolute top-2 left-2"><?xml version="1.0" encoding="UTF-8"?>
@@ -48,8 +47,6 @@
                 </g>
             </svg>
         </span>  
-    </div>
-</div>
 {% endblock %}
 
 {% block body %}
@@ -62,7 +59,7 @@
         $(document).ready(function() {
         AjaxDatatableViewUtils.initialize_table(
             $('#reports-table'),
-            "{% url 'datatable' %}",
+            "{% url 'monetization_datatable' %}",
             {
                 processing : true,
                 searching : true,
@@ -75,12 +72,22 @@
                 dom : 'ltip',
 
             }, 
+            {
+                'team_filter': function(){
+                    return $("#project_filterdropdown").val() 
+                }
+            }
         );
         $("#search_project").on('input', function () {
             var searchvalue = $(this).val();
             var table = $("#reports-table").DataTable();
             table.search(searchvalue).draw();
             });
+        $("#project_filterdropdown").change (function(){
+            console.log($(this).val());
+            var table = $("#reports-table").DataTable();
+            table.ajax.reload();
         });  
+        });
     </script>
 {% endblock %}

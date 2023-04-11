@@ -4,7 +4,7 @@ from hubble.models import User
 
 class ExpectedUserEfficiency(models.Model):
     id = models.BigAutoField(primary_key=True)
-    user_id = models.IntegerField(unique=True, db_column="user_id")
+    user = models.ForeignKey(User, models.CASCADE, related_name= 'expected_user_efficiencies', db_column = 'user_id')
     expected_efficiency = models.FloatField()
     effective_from = models.DateField()
     effective_to = models.DateField(blank=True, null=True)
