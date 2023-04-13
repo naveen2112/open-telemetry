@@ -6,7 +6,7 @@
         <div class="px-2 pt-9 bg-mild-violet pb-7" x-data="userHeaderDetails()">
             <div class="flex">
                 <div>
-                    <div class="text-dark-black text-lg mb-1 leading-none">Monetization Report</div>
+                    <div class="text-dark-black text-lg mb-1 leading-none">Monetization Gap Report</div>
                 </div>
             </div>
         </div>
@@ -46,7 +46,9 @@
                     </g>
                 </g>
             </svg>
-        </span>  
+        </span>
+    </div>
+</div>  
 {% endblock %}
 
 {% block body %}
@@ -65,7 +67,7 @@
                 searching : true,
                 serverSide : true,
                 autoWidth : false,
-                full_row_select : true,
+                full_row_select : false,
                 scrollX : false,
                 bFilter : true,
                 bSort : true,
