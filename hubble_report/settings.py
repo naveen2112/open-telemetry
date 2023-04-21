@@ -10,11 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
-import environ
 import os
-
 from pathlib import Path
 
+import environ
 
 env = environ.Env(DEBUG=(bool, False))
 
@@ -52,7 +51,7 @@ INSTALLED_APPS = [
     "reports",
     "training",
     "hubble",
-    "ajax_datatable"
+    "ajax_datatable",
 ]
 
 MIDDLEWARE = [

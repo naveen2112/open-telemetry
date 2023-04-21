@@ -1,6 +1,7 @@
 from django.db import models
-from .team import Teams
-from .designation import Designations
+
+from .designation import Designation
+from .team import Team
 
 
 class User(models.Model):
@@ -14,9 +15,9 @@ class User(models.Model):
     is_employed = models.BooleanField(blank=True, null=True)
     remember_token = models.CharField(max_length=100, blank=True, null=True)
     status = models.CharField(max_length=255)
-    team = models.ForeignKey(Teams, models.CASCADE, blank=True, null=True)
+    team = models.ForeignKey(Team, models.CASCADE, blank=True, null=True)
     branch_id = models.BigIntegerField(blank=True, null=True)
-    designation = models.ForeignKey(Designations, models.CASCADE, blank=True, null=True)
+    designation = models.ForeignKey(Designation, models.CASCADE, blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
     updated_at = models.DateTimeField(blank=True, null=True)
     deleted_at = models.DateTimeField(blank=True, null=True)
@@ -27,4 +28,4 @@ class User(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'users'
+        db_table = "users"

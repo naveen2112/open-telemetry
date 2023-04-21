@@ -7,4 +7,3 @@ class SubdomainClassifier:
         request.subdomain = request.get_host().split(".")[0]
         request.urlconf = request.subdomain + ".urls"
         return self.get_response(request)
-
