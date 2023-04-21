@@ -11,4 +11,4 @@ class Designation(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'designations'
+        db_table = "designations"
