@@ -2,28 +2,39 @@
 {% load static %}
 
 {% block header %}
-    <div class="header bg-white">
-        <div class="px-2 pt-9 bg-mild-violet pb-7" x-data="userHeaderDetails()">
-            <div class="flex">
-                <div>
-                    <div class="text-dark-black text-lg mb-1 leading-none">Efficiency Report</div>
-                    <div class="text-dark-black-50 text-sm">List of Team Reports</div>
+            <header class='px-2 pt-5 '>
+                <a href="{% url 'index' %}" class='flex items-center text-sm text-dark-blue'>
+                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px"
+                     height="24px" viewBox="0 0 24 24" version="1.1">
+                    <title>Back</title>
+                        <g id="Final---User-Profile" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                            <g id="UserProfile---Account-Info" transform="translate(-143.000000, -15.000000)">
+                                <g id="Back-Arrow" transform="translate(143.000000, 15.000000)">
+                                    <rect id="Rectangle" fill="#000000" fill-rule="nonzero" opacity="0"
+                                        transform="translate(12.000000, 12.000000) rotate(90.000000) translate(-12.000000, -12.000000) "
+                                        x="0" y="0" width="24" height="24"/>
+                                    <path id="Path" fill="#2248C3"
+                                        d="M13.83,19.0000686 C13.5274116,19.0010289 13.2406301,18.8649915 13.05,18.63 L8.22,12.63 C7.91668285,12.2609981 7.91668285,11.7290019 8.22,11.36 L13.22,5.36 C13.5734622,4.93474075 14.2047407,4.87653778 14.63,5.23000001 C15.0552592,5.58346225 15.1134622,6.21474074 14.76,6.64 L10.29,12 L14.61,17.36 C14.8596926,17.6597233 14.9122976,18.0772862 14.7447459,18.4295743 C14.5771943,18.7818624 14.2200765,19.0045572 13.83,19.0000686 Z"/>
+                                </g>
+                            </g>
+                        </g>
+                    </svg>
+                    Back to Projects
+                </a>
+                <div class='flex justify-between items-center my-5'>
+                    <div class='flex items-center px-2'>
+                        <div>
+                            <p class='text-base text-dark-black mb-1'>{{ data.name }} | {{data.id}} </p>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
+            </header>
 {% endblock %}
 
 {% block sub_header %}
-<div class="flex items-center pt-7 px-2">
-    <div id="leaves_range" class="relative cursor-pointer -mt-1 mr-8">
-        <p class="text-dark-black font-medium absolute -top-3/4 left-0">Choose date range</p>
-        <div
-        class="w-241 h-10 px-5 py-2.6 h-10 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0"
-        id="leaves_range_display"></div>
-    </div>
+<div class="flex pt-10 px-2">
     <div class="relative mr-5">
-        <input type="text" value="" name="search_project" placeholder="Search by Team"
+        <input type="text" value="" name="search_project" placeholder="Search by Date"
                 class="w-397 h-10 pl-11 pr-2.5 py-3 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0"
                 id="search_project"/>
         <span class="absolute top-2 left-2"><?xml version="1.0" encoding="UTF-8"?>
@@ -53,9 +64,9 @@
                     </g>
                 </g>
             </svg>
-        </span>  
+        </span>
     </div>
-</div>
+</div>  
 {% endblock %}
 
 {% block body %}
@@ -64,34 +75,11 @@
 {% endblock %}
 
 {% block script %}
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
-
-    <script>
-        $('#leaves_range').daterangepicker({
-            showDropdowns: true,
-            startDate: moment().startOf('year').subtract(1, 'year'),
-            endDate: moment().endOf('year').subtract(1, 'year'),
-            maxSpan: {months: 12},
-            ranges: {
-                'This Year': [moment().startOf('year'), moment().endOf('year')],
-                'Last Year': [moment().startOf('year').subtract(1, 'year'), moment().endOf('year').subtract(1, 'year')],
-                'Last 6 months': [moment().subtract(6, 'months').startOf('month'), moment().subtract(1, 'months').endOf('month')],
-                'Last 3 Months': [moment().subtract(3, 'months').startOf('month'), moment().subtract(1, 'months').endOf('month')],
-                'This Month': [moment().startOf('month'), moment().endOf('month')],
-                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-            },
-            alwaysShowCalendars : true
-        })
-    $('#leaves_range_display').text('01 Jan 2022 - 31 Dec 2022');
-
-    </script>
     <script>
         $(document).ready(function() {
         AjaxDatatableViewUtils.initialize_table(
             $('#reports-table'),
-            "{% url 'datatable' %}",
+            "{% url 'detailed_efficiency_datatable' %}",
             {
                 processing : true,
                 searching : true,
@@ -102,26 +90,25 @@
                 bFilter : true,
                 bSort : true,
                 dom : 'ltip',
-
+                order : []
             }, 
             {
-                datafrom : function() {return $('#leaves_range').data('daterangepicker').startDate.format('YYYY-MM-DD')},
-                dateto : function() {return $('#leaves_range').data('daterangepicker').endDate.format('YYYY-MM-DD')},
+                'team_filter': function(){
+                    var url = window.location.href.split('/')
+                    return url[url.length - 1]; 
+                }
             }
         );
-        $('#leaves_range').on('apply.daterangepicker', function(ev, picker){
-            var start = picker.startDate.format('DD MMM Y');
-            var end = picker.endDate.format('DD MMM Y');
-            $('#leaves_range_display').text(start + ' - ' + end);
-            var table = $("#reports-table").DataTable();
-            table.ajax.reload();
-        });
-       
         $("#search_project").on('input', function () {
             var searchvalue = $(this).val();
             var table = $("#reports-table").DataTable();
             table.search(searchvalue).draw();
             });
+        $("#project_filterdropdown").change (function(){
+            console.log($(this).val());
+            var table = $("#reports-table").DataTable();
+            table.ajax.reload();
         });  
+        });
     </script>
 {% endblock %}

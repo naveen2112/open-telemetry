@@ -48,7 +48,20 @@
             </svg>
         </span>
     </div>
+    <div class=''><label for="cars">Choose a Year:</label>
+        <select name="year" id="years"
+                class='date-change mt-2 border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-8 px-5'>
+        </select>
+    </div>
 </div>  
+<div class='grid grid-cols-12 text-xs py-4 items-center mt-3 px-2'>
+    <div class="col-span-12">
+        <label for="">Choose a Month:</label>
+    </div>
+    <br>
+    <div class='col-span-12 grid grid-cols-12' id='months'>
+    </div>
+</div>
 {% endblock %}
 
 {% block body %}
@@ -75,8 +88,11 @@
 
             }, 
             {
-                'team_filter': function(){
-                    return $("#project_filterdropdown").val() 
+                'year_filter': function(){
+                    return $("#years").val() 
+                },
+                'month_filter' : function(){
+                    return $("[name='month']:checked").val()
                 }
             }
         );
@@ -85,11 +101,65 @@
             var table = $("#reports-table").DataTable();
             table.search(searchvalue).draw();
             });
-        $("#project_filterdropdown").change (function(){
-            console.log($(this).val());
+        $("#months, #years").change (function(){
             var table = $("#reports-table").DataTable();
             table.ajax.reload();
         });  
         });
     </script>
+    <script>
+        dateRender();
+        function dateRender() {
+            var start_year = 2010,
+                end_year = new Date().getFullYear();
+
+            for (i = start_year; i <= end_year; i++) {
+                var selected = "";
+                if (end_year == (i)) {
+                    selected = 'selected';
+                }
+                $("#years").append(`<option value="${i}" ${selected}>${i}</option>`);
+            }
+            var months = [
+                    "January",
+                    "February",
+                    "March",
+                    "April",
+                    "May",
+                    "June",
+                    "July",
+                    "August",
+                    "September",
+                    "October",
+                    "November",
+                    "December"
+                ];
+
+                months.forEach((number, index) => {
+                    var checked = "";
+                    if (new Date().getMonth() == index) {
+                        checked = "checked";
+                    }
+
+                    $("#months")
+                        .append(`<div class="col-span-1 "><label for="${number}" class='custom-radio'>
+                                                   <input type="radio" id="${number}" value='${index+1}'
+                                                    name='month' ${checked} class='date-change'><span>${number}</span>
+                                                   </label>
+                                                 </div>`);
+                });
+
+        }
+    </script>
+    <script>
+        $("document").ready(function(){
+            $("#months").on('change', function(){
+                console.log($("[name='month']:checked").val())
+        });
+            $("#years").on('change', function(){
+                console.log($("#years").val())
+            });
+    });
+    </script>
+    
 {% endblock %}

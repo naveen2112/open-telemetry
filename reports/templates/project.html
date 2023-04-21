@@ -1,0 +1,162 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block header %}
+    <div class="header bg-white">
+        <div class="px-2 pt-9 bg-mild-violet pb-7" x-data="userHeaderDetails()">
+            <div class="flex">
+                <div>
+                    <div class="text-dark-black text-lg mb-1 leading-none">Project-Efficiency Report</div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block sub_header %}
+    {% include 'filter.html' %}
+{% endblock %}
+{% block body %}
+
+    <div class='grid grid-cols-6 gap-6 grow px-2 py-2  estimation-view sticky' >
+        <div
+            class=' py-2 text-dark-black text-sm bg-dark-black/10 rounded-lg text-center	inline-flex flex-col items-center justify-center'>
+            <div>
+                <span class='font-bold text-base' id="total_employees"></span>
+            </div>
+            <div>Total Number of Projects</div>
+        </div>
+        <div
+            class='px-4 py-2 text-dark-black text-sm bg-dark-blue/10 rounded-lg text-center	inline-flex flex-col items-center justify-center'>
+            <div>
+                <span class='font-bold text-base'
+                    id="expected_daily_efficiency"></span>
+            </div>
+            <div class='text-dark-blue'>Capacity<br/> Man - hours</div>
+        </div>
+        <div
+            class='px-4 py-2 text-dark-black text-sm bg-dark-red/10 rounded-lg text-center	inline-flex flex-col items-center justify-center'>
+            <div>
+                <span class='font-bold text-base'
+                    id="actual_daily_efficiency"></span>
+            </div>
+            <div class='text-dark-red'>Efficiency <br/>Man - Hours</div>
+        </div>
+        <div
+            class='px-4 py-2 text-dark-black text-sm bg-mild-green/10 rounded-lg	text-center inline-flex flex-col items-center justify-center'>
+            <div>
+                <span class='font-bold text-base'
+                    id="expected_monthly_efficiency"></span>
+            </div>
+            <div class='text-mild-green'>Productivity <br/> Man - Hours</div>
+        </div>
+        <div
+            class='px-4 py-2 text-dark-black text-sm bg-dark-blue/10 rounded-lg text-center	inline-flex flex-col items-center justify-center'>
+            <div>
+                                    <span class='font-bold text-base text-dark-red'
+                        id="actual_monthly_efficiency"></span>
+                
+            </div>
+            <div class='text-dark-blue'>Gap in Efficiency <br/> Percentage </div>
+        </div>
+        <div
+            class='px-4 py-2 text-dark-black text-sm bg-dark-blue/10 rounded-lg text-center	inline-flex flex-col items-center justify-center'>
+            <div>
+                <span class='font-bold text-base'
+                    id="productivity"></span>
+            </div>
+            <div class='text-dark-blue'>Gap in Productivity <br/> Percentage </div>
+        </div>
+    </div>
+
+    <table id="reports-table" style="width: 100%;" class="display border-0 table-with-no-border dataTable no-footer pt-10">
+    </table>    
+{% endblock %}
+
+{% block script %}
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+    <script>
+        $('#leaves_range').daterangepicker({
+            showDropdowns: true,
+            startDate: moment().startOf('year').subtract(1, 'year'),
+            endDate: moment().endOf('year').subtract(1, 'year'),
+            maxSpan: {months: 12},
+            ranges: {
+                'This Year': [moment().startOf('year'), moment().endOf('year')],
+                'Last Year': [moment().startOf('year').subtract(1, 'year'), moment().endOf('year').subtract(1, 'year')],
+                'Last 6 months': [moment().subtract(6, 'months').startOf('month'), moment().subtract(1, 'months').endOf('month')],
+                'Last 3 Months': [moment().subtract(3, 'months').startOf('month'), moment().subtract(1, 'months').endOf('month')],
+                'This Month': [moment().startOf('month'), moment().endOf('month')],
+                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            },
+            alwaysShowCalendars : true
+        })
+    $('#leaves_range_display').text('01 Jan 2022 - 31 Dec 2022');
+
+    </script>
+    <script>
+        $(document).ready(function() {    
+            $('#reports-table').on('xhr.dt', function (e, settings, json, xhr) {
+                if (json['extra_data'].length === 0){
+                    $("#total_employees").text(0)
+                    $("#expected_daily_efficiency").text(0)         
+                    $("#actual_daily_efficiency").text(0)
+                    $("#expected_monthly_efficiency").text(0)
+                    $("#actual_monthly_efficiency").text(0)
+                    $("#productivity").text(0)         
+                }
+                else{
+                $("#total_employees").text(json['extra_data'][0]['number'])
+                $("#expected_daily_efficiency").text(json['extra_data'][0]['capacity'])         
+                $("#actual_daily_efficiency").text(json['extra_data'][0]['efficiency'])
+                $("#expected_monthly_efficiency").text(json['extra_data'][0]['productivity'])
+                $("#actual_monthly_efficiency").text(json['extra_data'][0]['efficiency_gap'])
+                $("#productivity").text(json['extra_data'][0]['productivity_gap'])         
+                console.log('sample : %o', json['extra_data'][0])
+                }
+            });
+        }); 
+    </script>
+    <script>
+        $(document).ready(function() {
+            AjaxDatatableViewUtils.initialize_table(
+                $('#reports-table'),
+                "{% url 'project_datatable' %}",
+                {
+                    processing : true,
+                    searching : true,
+                    serverSide : true,
+                    autoWidth : false,
+                    full_row_select : false,
+                    scrollX : false,
+                    bFilter : true,
+                    bSort : true,
+                    dom : 'ltip',
+                },
+                {
+                    datafrom : function() {return $('#leaves_range').data('daterangepicker').startDate.format('YYYY-MM-DD')},
+                    dateto : function() {return $('#leaves_range').data('daterangepicker').endDate.format('YYYY-MM-DD')},
+                }
+            );
+            $("#search_project").on('input', function () {
+                var searchvalue = $(this).val();
+                var table = $("#reports-table").DataTable();
+                table.search(searchvalue).draw();
+                
+                }); 
+            $('#leaves_range').on('apply.daterangepicker', function(ev, picker){
+                var start = picker.startDate.format('DD MMM Y');
+                var end = picker.endDate.format('DD MMM Y');
+                $('#leaves_range_display').text(start + ' - ' + end);
+                var table = $("#reports-table").DataTable();
+                table.ajax.reload();
+                console.log('connect');
+                var data = table.ajax.json();
+                console.log(data);
+                });
+        });
+    </script>
+{% endblock %}
