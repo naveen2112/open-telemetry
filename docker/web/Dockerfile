@@ -11,7 +11,7 @@ ENV HUBBLE_ROOT=/var/app
 # Set our working directory inside the image
 WORKDIR $HUBBLE_ROOT
 
-ADD docker/web/webserver.conf /app/webserver.conf
+ADD docker/web/webserver.conf /etc/nginx/conf.d/default.conf
 
 ADD docker/web/nginx.conf /etc/nginx/nginx.conf
 
