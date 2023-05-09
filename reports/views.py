@@ -909,6 +909,7 @@ class ProjectSummaryDatatable(CustomDatatable):
                     "productivity": "-",
                     "efficiency_gap": "-",
                     "productivity_gap": "-",
+                    "members": "-"
                 }
             ]
         response["extra_data"] = data
