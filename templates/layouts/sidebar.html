@@ -1,3 +1,4 @@
+{% load custom_tags %}
 <div class="bg-primary-dark nav-animation">
 
     <div class="py-5 flex items-start  justify-between flex-col h-full nav-content">
@@ -19,22 +20,23 @@
                 </a>
             </div>
 
-            <div class="py-3  flex-wrap rounded-bl-lg flex w-full justify-start ">
-                <a href="{% url 'team_report' %}" tabindex="-1" class='flex px-2.5 justify-start items-center w-full'>
+            <div class=" py-3 flex-wrap rounded-bl-lg flex w-full justify-start sub-category block">
+                <a href='javascript:void(0)' tabindex="-1"
+                    class='{% set_active "team-report,project-report" %} flex px-2.5 justify-start items-center w-full'
+                    data-bs-toggle="collapse" data-bs-target='#efficiency' aria-expanded="false">
                     <div class="flex justify-center mr-4">
-                        <img src="https://hubble-dev.mallow-tech.com/assets/svgs/time-sheet.svg" alt="timesheet" />
+                        <span class = "hbl hbl-efficiency text-2xl"></span>
                     </div>
-                    <div>Team Reports</div>
+                    <div>Efficiency</div>
                 </a>
-            </div>
-
-            <div class="py-3  flex-wrap rounded-bl-lg flex w-full justify-start ">
-                <a href="{% url 'project_report' %}" tabindex="-1" class='flex px-2.5 justify-start items-center w-full'>
-                    <div class="flex justify-center mr-4">
-                        <img src="https://hubble-dev.mallow-tech.com/assets/svgs/time-sheet.svg" alt="timesheet" />
-                    </div>
-                    <div>Project Reports</div>
-                </a>
+                <ul class='text-left mt-3' id='efficiency'>
+                    <li class='py-3 {% set_active "team-report" %} block'>
+                        <a href="{% url 'team_report' %}">Teams</a>
+                    </li>
+                    <li class='py-3 {% set_active "project-report" %} block'>
+                        <a href="{% url 'project_report' %}">Projects</a>
+                    </li>
+                </ul>
             </div>
 
             <div class="py-3  flex-wrap rounded-bl-lg flex w-full justify-start ">
@@ -64,7 +66,7 @@
                     </svg>
                 </span>
                 <a href="{% url 'signout' %}"><span>Logout</span></a>
-                    
+
             </div>
 
         </div>

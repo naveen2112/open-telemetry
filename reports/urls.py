@@ -1,5 +1,8 @@
-from django.urls import path, include
+from django.urls import path, include, register_converter
 from reports import views
+from .converters import DateConverter
+
+register_converter(DateConverter, 'date')
 
 urlpatterns = [
     path("auth", include("hubble.urls")),
@@ -9,8 +12,8 @@ urlpatterns = [
     path("kpi", views.kpi_report, name="kpi"),
     path("team-report", views.team_report, name="team_report"),
     path("project-report", views.project_report, name="project_report"),
-    path("team-summary/<int:pk>", views.team_summary, name="team_summary"),
-    path("project-summary/<int:pk>", views.project_summary, name="project_summary"),
+    path("team-summary/<int:pk>/<date:start>/<date:end>", views.team_summary, name="team_summary"),
+    path("project-summary/<int:pk>/<date:start>/<date:end>", views.project_summary, name="project_summary"),
 
     path("datatable", views.Datatable.as_view(), name="datatable"),
     path("monetization-datatable", views.MonetizationDatatable.as_view(), name="monetization_datatable"),

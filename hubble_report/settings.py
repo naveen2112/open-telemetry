@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",
     "reports",
     "hubble",
     "training",
@@ -158,7 +159,7 @@ LOGIN_URL = "login"
 #     "version": 1,
 #     "filters": {
 #         "require_debug_true": {
-#             "()": "django.utils.log.RequireDebugTrue", 
+#             "()": "django.utils.log.RequireDebugTrue",
 #         }
 #     },
 #     "handlers": {

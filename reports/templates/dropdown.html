@@ -1,0 +1,105 @@
+{% load static %}
+<script>
+    $(document).ready(function () {
+        var badgeColors = {
+            "in-progress": "text-mild-green bg-mild-green-10 rounded-xl px-1.5 py-0.5",
+            "proposal": "text-dark-red bg-dark-red-10 rounded-xl px-1.5 py-0.5",
+            "completed": "text-dark-black bg-dark-black-10 rounded-xl px-1.5 py-0.5"
+        }
+
+        function filterCount(id, count) {
+            if (count > 0) {
+                $(`#${id}_count`).text(count);
+                $(`#${id}_count`).css('display', 'inline-block');
+                $(`#${id}_inner .bg-grey-svg`).show();
+                $(`#${id}_inner .bg-white-svg`).hide();
+                $(`#${id}_inner .bg-blue-svg`).hide();
+                $(`#${id}_inner`).addClass('bg-dark-blue');
+                $(`#${id}_inner`).css('opacity', '0.85');
+            } else {
+                $(`#${id}_count`).css('display', 'none');
+                $(`#${id}_inner .bg-blue-svg`).hide();
+                if (!$(`.${id}`).hasClass('bg-mild-grey')) {
+                    $(`#${id}_inner .bg-grey-svg`).show();
+                    $(`#${id}_inner .bg-white-svg`).hide();
+                } else {
+                    $(`#${id}_inner .bg-grey-svg`).hide();
+                    $(`#${id}_inner .bg-white-svg`).show();
+                }
+                $(`#${id}_inner`).removeClass('bg-dark-blue');
+            }
+        }
+
+        var clickTemplate = `<div id="drop-btn" class="py-px px-2 flex items-center">
+                                <span>
+                                    <span class="rounded-3xl count-show inline-block min-w-4 min-h-4 w-auto py-px px-1 text-center -top-1.5 -left-1.5 absolute bg-primary-dark text-xs text-white p-0.5 hidden" id="filter_by_user_count"></span>
+                                    <div class="inline-block w-6 h-6 rounded-md" id="filter_by_user_inner">
+                                        <span class="bg-grey-svg"><span class="{% if request.path == "/project-report" %} hbl hbl-project text-2xl {% else %} hbl hbl-team text-2xl {% endif %}">
+                                        </span>
+                                        <span class="bg-dark-blue" ><span class="{% if request.path == "/project-report" %} hbl hbl-project text-2xl {% else %} hbl hbl-team text-2xl {% endif %}">
+                                        </span>
+                                        <span class="bg-white-svg"><span class="{% if request.path == "/project-report" %} hbl hbl-project text-2xl {% else %} hbl hbl-team text-2xl {% endif %}">
+                                        </span>
+                                    </div>
+                                </span>
+                                <span class="pl-1">{% if request.path == "/team-report" %} Teams {% else %} Projects {% endif %}</span>
+                            </div>`
+        // For User Filter
+
+        $(".custom-multi-select").each(function () {
+            if ($(this).find('.multi-select').length == 0) {
+                var elemId = $(this).find("select").attr("id");
+                var badgeClr = '';
+                var ishideSelected = true;
+                var clickTem = clickTemplate;
+                var defaultCheck = undefined;
+                if (elemId == 'filter_by_project') {
+                    badgeClr = badgeColors;
+                    badge = "text-mild-green bg-mild-green-10 rounded-xl px-1.5 py-0.5";
+                    clickTem = `<div id="drop-btn" class="py-px px-2 flex items-center">
+                                    <span>
+                                        <span class="rounded-3xl count-show inline-block min-w-4 min-h-4 w-auto py-px px-1 text-center -top-1.5 -left-1 absolute bg-primary-dark text-xs text-white p-0.5 hidden" id="filter_by_project_count"></span>
+                                        <div class="inline-block w-6 h-6 rounded-md" id="filter_by_project_inner">
+                                            <span class=" bg-grey-svg"><span class="{% if request.path == "/project-report" %} hbl hbl-project text-2xl {% else %} hbl hbl-team text-2xl {% endif %}">
+                                            </span>
+                                            <span class=" bg-blue-svg"><span class="{% if request.path == "/project-report" %} hbl hbl-project text-2xl {% else %} hbl hbl-team text-2xl {% endif %}">
+                                            </span>
+                                            <span class="bg-white-svg"><span class="{% if request.path == "/project-report" %} hbl hbl-project text-2xl {% else %} hbl hbl-team text-2xl {% endif %}">
+                                            </span>
+                                        </div>
+                                        </span>
+                                    <span class="pl-1">Projects</span>
+                                    </div>`
+                } else if (elemId == 'group_by_filter') {
+                    badge = '';
+                    badgeClr = '';
+                    ishideSelected = false;
+                    clickTem = `<div id='drop-btn' class="py-px px-2 flex items-center">
+<div class="cursor-pointer" id="show-value"></div>
+</div>`
+                    defaultCheck = ['date'];
+                }
+                $(`#${elemId}`).customSearch({
+                    opentType: 'click',
+                    targetId: '#show-value',
+                    loading: function (e) {
+                        return new Promise(function (resolve, reject) {
+                            setTimeout(function () {
+                                return resolve("resolved");
+                            }, 500)
+                        })
+                    },
+                    onItemCheck: function (value) {
+                        var count = value.length;
+                        filterCount(elemId, count)
+                    },
+                    hideSelected: ishideSelected,
+                    badgeColors: badgeClr,
+                    clickBtnTemplate: clickTem,
+                    badgeStyle: "rounded-xl bg-mild-gray text-xs text-dark-black-50 pl-2.5 pr-1 py-1 team-badge",
+                    defaultCheck: defaultCheck
+                });
+            }
+        })
+    })
+</script>

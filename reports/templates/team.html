@@ -2,161 +2,159 @@
 {% load static %}
 
 {% block header %}
-    <div class="header bg-white">
-        <div class="px-2 pt-9 bg-mild-violet pb-7" x-data="userHeaderDetails()">
-            <div class="flex">
-                <div>
-                    <div class="text-dark-black text-lg mb-1 leading-none">Team-Efficiency Report</div>
-                </div>
+<div class="header bg-white">
+    <div class="px-2 pt-9 bg-mild-violet pb-7" x-data="userHeaderDetails()">
+        <div class="flex">
+            <div>
+                <div class="text-dark-black text-lg mb-1 leading-none">Team-Efficiency Report</div>
             </div>
         </div>
     </div>
+</div>
 {% endblock %}
 
 {% block sub_header %}
+<form id="filter-form" method="POST" >
+    {% csrf_token %}
+    <input type="hidden" name="datafrom" id="datafrom" value="">
+    <input type="hidden" name="dateto" id="dateto" value="">
+</form>
+<div class="flex pt-10 px-2">
     {% include 'filter.html' %}
+    <div class="flex pt-10 px-2">
+        <div class="h-10 bg-white text-dark-black-50 rounded-xl text-xs leading-none px-3 flex  items-center  mr-3.5">
+            <div>Filter By:</div>
+            <div class="relative cursor-pointer filter_by_project custom-multi-select">
+                <select name="filter_by_user_name" subtitle="Projects" id="filter_by_user" class="custom-search" multiple>
+                    {% for field in data %}
+                    <option value="{{ field.team__name }}" >{{ field.team__name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+{% block table %}
+<table id="overall" style="width: 100%;" class="display border-0 table-with-no-border  no-footer px-5 pt-10">
+    <thead style="background-color : rgb(205 211 229); ">
+        <th>Number of Teams</th>
+        <th>Capacity<br /> Man - hours</th>
+        <th>Efficiency<br /> Man - hours</th>
+        <th>Productivity<br /> Man - hours</th>
+        <th>Gap in Efficiency <br /> Percentage</th>
+        <th>Gap in Productivity <br /> Percentage</td>
+    </thead>
+    <tbody style="text-align : center">
+        <tr>
+            <td id="total_employees"></td>
+            <td id="expected_daily_efficiency"></td>
+            <td id="actual_daily_efficiency"></td>
+            <td id="expected_monthly_efficiency"></td>
+            <td id="actual_monthly_efficiency"></td>
+            <td id="productivity"></td>
+        </tr>
+    </tbody>
+</table>
 {% endblock %}
 {% block body %}
 
-    <div class='grid grid-cols-6 gap-6 grow px-2 py-2  estimation-view sticky' >
-        <div
-            class=' py-2 text-dark-black text-sm bg-dark-black/10 rounded-lg text-center	inline-flex flex-col items-center justify-center'>
-            <div>
-                <span class='font-bold text-base' id="total_employees"></span>
-            </div>
-            <div>Total Number of Teams</div>
-        </div>
-        <div
-            class='px-4 py-2 text-dark-black text-sm bg-dark-blue/10 rounded-lg text-center	inline-flex flex-col items-center justify-center'>
-            <div>
-                <span class='font-bold text-base'
-                    id="expected_daily_efficiency"></span>
-            </div>
-            <div class='text-dark-blue'>Capacity<br/> Man - hours</div>
-        </div>
-        <div
-            class='px-4 py-2 text-dark-black text-sm bg-dark-red/10 rounded-lg text-center	inline-flex flex-col items-center justify-center'>
-            <div>
-                <span class='font-bold text-base'
-                    id="actual_daily_efficiency"></span>
-            </div>
-            <div class='text-dark-red'>Efficiency <br/>Man - Hours</div>
-        </div>
-        <div
-            class='px-4 py-2 text-dark-black text-sm bg-mild-green/10 rounded-lg	text-center inline-flex flex-col items-center justify-center'>
-            <div>
-                <span class='font-bold text-base'
-                    id="expected_monthly_efficiency"></span>
-            </div>
-            <div class='text-mild-green'>Productivity <br/> Man - Hours</div>
-        </div>
-        <div
-            class='px-4 py-2 text-dark-black text-sm bg-dark-blue/10 rounded-lg text-center	inline-flex flex-col items-center justify-center'>
-            <div>
-                                    <span class='font-bold text-base text-dark-red'
-                        id="actual_monthly_efficiency"></span>
-                
-            </div>
-            <div class='text-dark-blue'>Gap in Efficiency <br/> Percentage </div>
-        </div>
-        <div
-            class='px-4 py-2 text-dark-black text-sm bg-dark-blue/10 rounded-lg text-center	inline-flex flex-col items-center justify-center'>
-            <div>
-                <span class='font-bold text-base'
-                    id="productivity"></span>
-            </div>
-            <div class='text-dark-blue'>Gap in Productivity <br/> Percentage </div>
-        </div>
-    </div>
 
-    <table id="reports-table" style="width: 100%;" class="display border-0 table-with-no-border dataTable no-footer pt-10">
-    </table>    
+<table id="reports-table" style="width: 100%;" class="display border-0 table-with-no-border dataTable no-footer pt-10">
+</table>
 {% endblock %}
 
 {% block script %}
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 
-    <script>
+<script>
+    $(function () {
         $('#leaves_range').daterangepicker({
             showDropdowns: true,
-            startDate: moment().startOf('year').subtract(1, 'year'),
-            endDate: moment().endOf('year').subtract(1, 'year'),
-            maxSpan: {months: 12},
+            startDate: moment().startOf('year').subtract(1, 'year').set('month', 3).set('date', 1),
+            endDate: moment().endOf('year').set('month', 2).set('date', 31),
+            maxSpan: { months: 12 },
             ranges: {
-                'This Year': [moment().startOf('year'), moment().endOf('year')],
-                'Last Year': [moment().startOf('year').subtract(1, 'year'), moment().endOf('year').subtract(1, 'year')],
+                'This Year': [moment().endOf('year').set('month', 3).set('date', 1), moment().endOf('year').add('year', 1).set('month', 2).set('date', 31)],
+                'Last Year': [moment().startOf('year').subtract(1, 'year').set('month', 3).set('date', 1), moment().endOf('year').set('month', 2).set('date', 31)],
                 'Last 6 months': [moment().subtract(6, 'months').startOf('month'), moment().subtract(1, 'months').endOf('month')],
                 'Last 3 Months': [moment().subtract(3, 'months').startOf('month'), moment().subtract(1, 'months').endOf('month')],
                 'This Month': [moment().startOf('month'), moment().endOf('month')],
                 'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
             },
-            alwaysShowCalendars : true
-        })
-    $('#leaves_range_display').text('01 Jan 2022 - 31 Dec 2022');
-
-    </script>
-    <script>
-        $(document).ready(function() {    
-            $('#reports-table').on('xhr.dt', function (e, settings, json, xhr) {
-                if (json['extra_data'].length === 0){
-                    $("#total_employees").text(0)
-                    $("#expected_daily_efficiency").text(0)         
-                    $("#actual_daily_efficiency").text(0)
-                    $("#expected_monthly_efficiency").text(0)
-                    $("#actual_monthly_efficiency").text(0)
-                    $("#productivity").text(0)         
-                }
-                else{
-                $("#total_employees").text(json['extra_data'][0]['number'])
-                $("#expected_daily_efficiency").text(json['extra_data'][0]['capacity'])         
-                $("#actual_daily_efficiency").text(json['extra_data'][0]['efficiency'])
-                $("#expected_monthly_efficiency").text(json['extra_data'][0]['productivity'])
-                $("#actual_monthly_efficiency").text(json['extra_data'][0]['efficiency_gap'])
-                $("#productivity").text(json['extra_data'][0]['productivity_gap'])         
-                console.log('sample : %o', json['extra_data'][0])
-                }
-            });
-        }); 
-    </script>
-    <script>
-        $(document).ready(function() {
-            AjaxDatatableViewUtils.initialize_table(
-                $('#reports-table'),
-                "{% url 'team_datatable' %}",
-                {
-                    processing : true,
-                    searching : true,
-                    serverSide : true,
-                    autoWidth : false,
-                    full_row_select : false,
-                    scrollX : false,
-                    bFilter : true,
-                    bSort : true,
-                    dom : 'ltip',
-                },
-                {
-                    datafrom : function() {return $('#leaves_range').data('daterangepicker').startDate.format('YYYY-MM-DD')},
-                    dateto : function() {return $('#leaves_range').data('daterangepicker').endDate.format('YYYY-MM-DD')},
-                }
-            );
-            $("#search_project").on('input', function () {
-                var searchvalue = $(this).val();
-                var table = $("#reports-table").DataTable();
-                table.search(searchvalue).draw();
-                
-                }); 
-            $('#leaves_range').on('apply.daterangepicker', function(ev, picker){
-                var start = picker.startDate.format('DD MMM Y');
-                var end = picker.endDate.format('DD MMM Y');
-                $('#leaves_range_display').text(start + ' - ' + end);
-                var table = $("#reports-table").DataTable();
-                table.ajax.reload();
-                console.log('connect');
-                var data = table.ajax.json();
-                console.log(data);
-                });
+            alwaysShowCalendars: true
         });
-    </script>
+        var start = $('#leaves_range').data('daterangepicker').startDate.format('DD MMM Y');
+        var end = $('#leaves_range').data('daterangepicker').endDate.format('DD MMM Y')
+        $('#leaves_range_display').text(start + ' - ' + end);
+    });
+</script>
+
+
+<script>
+    $(document).ready(function () {
+        $('#reports-table').on('xhr.dt', function (e, settings, json, xhr) {
+            $("#total_employees").text(json['extra_data'][0]['number'])
+            $("#expected_daily_efficiency").text(json['extra_data'][0]['capacity'])
+            $("#actual_daily_efficiency").text(json['extra_data'][0]['efficiency'])
+            $("#expected_monthly_efficiency").text(json['extra_data'][0]['productivity'])
+            $("#actual_monthly_efficiency").text(json['extra_data'][0]['efficiency_gap'])
+            $("#productivity").text(json['extra_data'][0]['productivity_gap'])
+            console.log('sample : %o', json['extra_data'][0])
+        });
+        $('#reports-table').on('click', 'tr', function(){
+            var table = $("#reports-table").DataTable();
+            var rowData = table.row(this).data();
+            var link = rowData['action'].split("<")[2].split("=")[1];
+            window.location.href = link.substring(link.indexOf('t'), link.indexOf('">'));    
+        });
+    }); 
+</script>
+
+<script>
+    $(document).ready(function () {
+        AjaxDatatableViewUtils.initialize_table(
+            $('#reports-table'),
+            "{% url 'team_datatable' %}",
+            {
+                processing: true,
+                searching: true,
+                serverSide: true,
+                autoWidth: false,
+                full_row_select: false,
+                scrollX: false,
+                bFilter: true,
+                bSort: true,
+                dom: 'ltip',
+            },
+            {
+                datafrom: function () { return $('#leaves_range').data('daterangepicker').startDate.format('YYYY-MM-DD') },
+                dateto: function () { return $('#leaves_range').data('daterangepicker').endDate.format('YYYY-MM-DD') },
+                dropdown: function () { return $('#filter_by_user').val() }
+            }
+        );
+        $('#leaves_range').on('apply.daterangepicker', function (ev, picker) {
+            var start = picker.startDate.format('DD MMM Y');
+            var end = picker.endDate.format('DD MMM Y');
+            $('#leaves_range_display').text(start + ' - ' + end);
+            var table = $("#reports-table").DataTable();
+            table.ajax.reload();
+            console.log('connect');
+            var data = table.ajax.json();
+            console.log(data);
+        });
+        $("#filter_by_user").change(function () {
+            console.log($(this).val());
+            var table = $("#reports-table").DataTable();
+            table.ajax.reload();
+        });
+    });
+</script>
+
+{% include 'dropdown.html' %}
+
 {% endblock %}
