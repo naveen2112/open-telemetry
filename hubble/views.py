@@ -3,4 +3,4 @@ from django.http import JsonResponse
 
 # Create your views here.
 def health_check(request):
-    return JsonResponse(data=dict(), status=200)
+    return JsonResponse(data="", status=200, safe=False)
