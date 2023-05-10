@@ -11,7 +11,7 @@ register = template.Library()
 
 @register.simple_tag(takes_context=True)
 def set_active(context, names):
-    current_route_name = resolve(context["request"].path_info).route
+    current_route_name = resolve(context["request"].path_info).route # Get the url of the current request
     names = names.split(", ")
     for name in names:
         if (
@@ -49,7 +49,7 @@ def show_field_errors(field):
 @register.filter()
 def show_non_field_errors(error):
     if error:
-        error_message = strip_tags(error)
+        error_message = strip_tags(error) 
         return mark_safe(
             '<div class="alert alert-danger"><p><span class="fe fe-alert-triangle fe-16 mr-2"></span>{}'
             "</p></div>".format(error_message)
@@ -61,9 +61,8 @@ def show_non_field_errors(error):
 @register.filter()
 def show_label(field):
     if isinstance(field, str):
-        # Convert the field parameter to a form field object
-        field = template.Variable(field).resolve({})
-    if field.field.required:
+        field = template.Variable(field).resolve({}) # Convert the field parameter to a form field object
+    if field.field.required: # Check the field is required or not
         required = '<span class="text-red-600">*</span>'
     else:
         required = ""

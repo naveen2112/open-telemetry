@@ -1,9 +1,9 @@
 from django.db import models
-from teams import Teams
-from designations import Designations
+from .team import Team
+from .designation import Designation
 
 
-class Users(models.Model):
+class User(models.Model):
     id = models.BigAutoField(primary_key=True)
     employee_id = models.CharField(max_length=255, blank=True, null=True)
     email = models.CharField(unique=True, max_length=255)
@@ -14,9 +14,9 @@ class Users(models.Model):
     is_employed = models.BooleanField(blank=True, null=True)
     remember_token = models.CharField(max_length=100, blank=True, null=True)
     status = models.CharField(max_length=255)
-    team = models.ForeignKey(Teams, models.CASCADE, blank=True, null=True)
+    team = models.ForeignKey(Team, models.CASCADE, blank=True, null=True)
     branch_id = models.BigIntegerField(blank=True, null=True)
-    designation = models.ForeignKey(Designations, models.CASCADE, blank=True, null=True)
+    designation = models.ForeignKey(Designation, models.CASCADE, blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
     updated_at = models.DateTimeField(blank=True, null=True)
     deleted_at = models.DateTimeField(blank=True, null=True)

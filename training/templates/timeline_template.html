@@ -5,25 +5,29 @@
 {% endblock title %}
 
 {% block header %}
-    Timeline Template List
+    <div class="flex justify-between items-center">
+        <div>
+            <div class="text-dark-black text-lg mb-1 leading-none">
+                Timeline Template List
+            </div>
+            <div class="text-dark-black-50 text-sm">
+                List of Timeline Templates
+            </div>
+        </div>
+        <button class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal"
+            onclick="openModal()">
+            <span class="text-xl mr-2">+</span>
+            Create Timeline
+        </button>
+    </div>
+    
 {% endblock %}
-
-{% block sub_header %}
-    List of Timeline Templates
-{% endblock %}
-
-{% block adder %}
-    <button class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal"
-        onclick="openModal()">
-        <span class="text-xl mr-2">+</span>
-        Create Timeline
-    </button>
-{% endblock %}
-
 
 {% block body %}
     <div class="mb-5 flex justify-end items-center">
-        <!-- Timeline tempate create Modal -->
+        {% comment %}
+          Timeline Template create modal
+        {% endcomment %}
         <div class="jquery-modal current hidden" id="modal">
             <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
                 <p class="font-semibold text-lg mb-10">Create Timeline</p>
@@ -31,11 +35,11 @@
                     <div class="modal-body">
                         {% csrf_token %}
                         <div class="form-group mb-7" id="{{ form.name.label|lower }}_group">
-                            {{ form.name |show_label }}
+                            {{ form.name|show_label }}
                             {{ form.name }}
                         </div>
                         <div class="work-basic-dropdown mb-7" id="{{ form.team.label|lower }}_group">
-                            {{ form.team |show_label }}
+                            {{ form.team|show_label }}
                             <div class="relative">
                                 {{ form.team }}
                             </div>
@@ -56,7 +60,12 @@
             </div>
         </div>
     </div>
-    <div class="flex mb-7">
+    <div class="flex mb-7 items-center">
+        <div class="mr-5 relative">
+            <p class="text-dark-black font-medium absolute -top-24 left-0">Choose date range</p>
+            <div id="reportrange" class="w-241 px-5 py-2.6 h-10 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0 flex justify-center items-center">
+            </div>
+        </div>
         <div class="relative mr-5" id="timeline-table_filter">
             <input type="text" value="" name="search_project" placeholder="Search by Name, Team"
                 class="w-397 h-10 pl-11 pr-2.5 py-3 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0"
@@ -102,7 +111,9 @@
     <table id="timeline-table" class="display border-0 table-with-no-border dataTable no-footer" style="width: 100%;"
         role="grid" aria-describedby="timeline-table_info">
     </table>
-    <!-- Timepline template update Modal -->
+    {% comment %}
+      Timeline template update modal
+    {% endcomment %}
     <div class="jquery-modal current hidden" id="update-modal">
         <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
             <p class="font-semibold text-lg mb-10">Update Timeline</p>
@@ -111,11 +122,11 @@
                     <input type="hidden" name="update_id" id="update_id">
                     {% csrf_token %}
                     <div class="form-group mb-7" id="{{ form.name.label|lower }}_update_group">
-                        {{ form.name |show_label }}
+                        {{ form.name|show_label }}
                         {{ form.name|add_id:'update' }}
                     </div>
                     <div class="work-basic-dropdown mb-7" id="{{ form.team.label|lower }}_update_group">
-                        {{ form.team |show_label }}
+                        {{ form.team|show_label }}
                         <div class="relative">
                             {{ form.team|add_id:'update' }}
                         </div>
@@ -137,7 +148,9 @@
             </form>
         </div>
     </div>
-    <!-- Duplicate timeline template Modal -->
+    {% comment %}
+        Duplicate timeline template modal
+    {% endcomment %}
     <div class="jquery-modal current hidden" id="duplicate-modal">
         <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
             <p class="font-semibold text-lg mb-10">Duplicate <span id="timeline_name"></span></p>
@@ -146,11 +159,11 @@
                     {% csrf_token %}
                     <input type="hidden" name="duplicate_id" id="duplicate_id">
                     <div class="form-group mb-7" id="{{ form.name.label|lower }}_duplicate_group">
-                        {{ form.name |show_label }}
+                        {{ form.name|show_label }}
                         {{ form.name|add_id:'duplicate' }}
                     </div>
                     <div class="work-basic-dropdown mb-7" id="{{ form.team.label|lower }}_duplicate_group">
-                        {{ form.team |show_label }}
+                        {{ form.team|show_label }}
                         <div class="relative">
                             {{ form.team|add_id:'duplicate' }}
                         </div>
@@ -173,236 +186,270 @@
 {% endblock %}
 
 {% block script %}
-<script>
-    $(document).ready(function () {
-        var selectTemplate = `
-                <div id="drop-btn" class="cus-dropdown-icon block border border-primary-dark-30 rounded-md mt-2.5 w-full focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 py-1 px-2">
-                    <div class="cursor-pointer text-truncate w-11/12 dropdown_selected_value" id="show-value">
-                    </div>
-                </div>`;
-
-        $('.work-basic-dropdown').each(function () {
-            if ($(this).find('.multi-select').length == 0) {
-                var elemId = $(this).find("select").attr("id");
-                $("#" + elemId).customSearch({
-                    closeOnCheck: true,
-                    clickBtnTemplate: selectTemplate,
-                    listStyle: "p-3",
-                    hideClearIcon: true,
-                    targetId: "#show-value",
-                    popupStyles: "z-20 absolute rounded-md bg-white text-dark-black block shadow-md w-64 top-10 left-0 max-h-96 overflow-hidden",
-                    onItemCheck: function (values) {
-                        if (elemId == "work_schedule") {
-                            hideShowDays();
-                        }
-                    },
-                    onSelectOpen: function () {
-                        $('.content-page').css("overflow-y", "hidden");
-                    },
-                    onSelectClose: function () {
-                        $('.content-page').css("overflow-y", "auto");
-                    }
-                })
-            }
-        })
-
+    <script>
         $(document).ready(function () {
-            AjaxDatatableViewUtils.initialize_table(
-                $('#timeline-table'),
-                "{% url 'timeline-template.datatable' %}",
-                {
-                    serverSide: true,
-                    processing: true,
-                    autoWidth: false,
-                    scrollX: false,
-                },
-            );
-        });
-        $("#search_project").on('input', function () {
-            var searchvalue = $(this).val()
-            var table = $("#timeline-table").DataTable();
-            table.search(searchvalue).draw()
-        });
-    });
+            var selectTemplate = `
+                    <div id="drop-btn" class="cus-dropdown-icon block border border-primary-dark-30 rounded-md mt-2.5 w-full focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 py-1 px-2">
+                        <div class="cursor-pointer text-truncate w-11/12 dropdown_selected_value" id="show-value">
+                        </div>
+                    </div>`;
 
-    function openModal() {
-        document.getElementById("modal").classList.remove("hidden");
-        document.getElementById("modal").classList.add("blocker");
-        $('#id_team').val('')
-        $('.dropdown_selected_value').html('')
-        $('#id_name').val('')
-        $('#id_is_active').prop('checked', false)
-    }
-
-    function closeModal(name) {
-        document.getElementById(name).classList.remove("blocker");
-        document.getElementById(name).classList.add("hidden");
-    }
-
-    function createTimeline() {
-        $('.page-loader').show();
-        $.ajax({
-            type: "POST",
-            url: "{% url 'timeline-template.create' %}",
-            headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
-            data: {
-                name: $('#id_name').val(),
-                team: $('#id_team').val(),
-                is_active: $('.checkbox_active').is(":checked"),
-            },
-            success: function (data) {
-                $('.form_errors').remove()
-                $('.page-loader').hide();
-                if (data.status === 'success') {
-                    $('#timeline-table').DataTable().ajax.reload()
-                    closeModal('modal');
+            $('.work-basic-dropdown').each(function () {
+                if ($(this).find('.multi-select').length == 0) {
+                    var elemId = $(this).find("select").attr("id");
+                    $("#" + elemId).customSearch({
+                        closeOnCheck: true,
+                        clickBtnTemplate: selectTemplate,
+                        listStyle: "p-3",
+                        hideClearIcon: true,
+                        targetId: "#show-value",
+                        popupStyles: "z-20 absolute rounded-md bg-white text-dark-black block shadow-md w-64 top-10 left-0 max-h-96 overflow-hidden",
+                        onItemCheck: function (values) {
+                            if (elemId == "work_schedule") {
+                                hideShowDays();
+                            }
+                        },
+                        onSelectOpen: function () {
+                            $('.content-page').css("overflow-y", "hidden");
+                        },
+                        onSelectClose: function () {
+                            $('.content-page').css("overflow-y", "auto");
+                        }
+                    })
                 }
-                else {
-                    const fieldErrors = JSON.parse(data.field_errors);
-                    const nonFieldErrors = JSON.parse(data.non_field_errors);
-                    if (Object.keys(nonFieldErrors).length > 0) { 
-                        let non_field_error = nonFieldErrors[0]['message']
-                        $('#non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + non_field_error + '</span>')
+            })
+
+            $(document).ready(function () {
+                AjaxDatatableViewUtils.initialize_table(
+                    $('#timeline-table'),
+                    "{% url 'timeline-template.datatable' %}",
+                    {
+                        serverSide: true,
+                        processing: true,
+                        autoWidth: false,
+                        scrollX: false,
+                        order: [],
+                    },
+                    {
+                        "start-date": function() {
+                            return $("#reportrange").attr('start-date')
+                        },
+                        "end-date": function() {
+                            return $("#reportrange").attr('end-date')
+                        }
                     }
-                    for (field in fieldErrors) {
-                        $('#' + field + '_group').append('<span id="reason_error" class="form_errors ajax-error text-red-600">' + fieldErrors[field][0].message + '</span>');
-                    }
-                }
-            }
+                );
+            });
+            $("#search_project").on('input', function () {
+                var searchvalue = $(this).val()
+                var table = $("#timeline-table").DataTable();
+                table.search(searchvalue).draw()
+            });
         });
-    }
 
-    function openUpdateModel(id) {
-        $('.page-loader').show();
-        $('#update_team').val('');
-        $('.dropdown_selected_value').html('')
-        const modal = document.getElementById("update-modal");
-        $.ajax({
-            type: "GET",
-            url: "{% url 'timeline-template.timeline-update-form' %}",
-            data: { id: id },
-            success: function (data) {
-                $('.page-loader').hide();
-                $('#update_name').val(data.timeline.name),
-                    $('#update_team').val(data.timeline.team),
-                    $('#update_id').val(id);
-                if (data.timeline.is_active) {
-                    $("#update_is_active").attr('checked', true);
-                }
-                else {
-                    $("#update_is_active").attr('checked', false);
-                }
-                $('.dropdown_selected_value').html($("#update_team option[value='" + data.timeline.team + "']").text())
-            }
-        });
-        modal.classList.remove("hidden");
-        modal.classList.add("blocker");
-    }
+        function openModal() {
+            document.getElementById("modal").classList.remove("hidden");
+            document.getElementById("modal").classList.add("blocker");
+            $('#id_team').val('')
+            $('.dropdown_selected_value').html('')
+            $('#id_name').val('')
+            $('#id_is_active').prop('checked', false)
+        }
 
-    function updateTimeline() {
-        $('.page-loader').show();
-        $.ajax({
-            type: "POST",
-            url: "{% url 'timeline-template.update' %}",
-            headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
-            data: {
-                id: $("#update_id").val(),
-                name: $('#update_name').val(),
-                team: $("#update_team").val(),
-                is_active: $('#update_is_active').is(":checked"),
-            },
-            success: function (data) {
-                $('.form_errors').remove()
-                $('.page-loader').hide();
-                if (data.status === 'success') {
-                    $('#timeline-table').DataTable().ajax.reload()
-                    closeModal('update-modal')
-                }
-                else {
-                    const fieldErrors = JSON.parse(data.field_errors);
-                    const nonFieldErrors = JSON.parse(data.non_field_errors);
-                    if (Object.keys(nonFieldErrors).length > 0) {
-                        let non_field_error = nonFieldErrors[0]['message']
-                        $('#update_non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + non_field_error + '</span>')
-                    }
-                    for (field in fieldErrors) {
-                        $('#' + field + '_update_group').append('<span id="reason_error" class="ajax-error form_errors text-red-600">' + fieldErrors[field][0].message + '</span>');
-                    }
-                }
-            }
-        });
-    }
+        function closeModal(name) {
+            document.getElementById(name).classList.remove("blocker");
+            document.getElementById(name).classList.add("hidden");
+        }
 
-    function deleteTimeline(id) {
-        let text = 'Are you do you want to delete'
-        if (confirm(text) == true) {
+        function createTimeline() {
             $('.page-loader').show();
             $.ajax({
-                type: "DELETE",
-                url: "{% url 'timeline-template.delete' %}",
-                headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
-                data: { id: id },
+                type: "POST",
+                url: "{% url 'timeline-template.create' %}",
+                data: {
+                    name: $('#id_name').val(),
+                    team: $('#id_team').val(),
+                    is_active: $('.checkbox_active').is(":checked"),
+                },
                 success: function (data) {
+                    $('.form_errors').remove()
                     $('.page-loader').hide();
-                    $('#timeline-table').DataTable().ajax.reload()
+                    if (data.status === 'success') {
+                        $('#timeline-table').DataTable().ajax.reload()
+                        closeModal('modal');
+                    }
+                    else {
+                        const fieldErrors = JSON.parse(data.field_errors);
+                        const nonFieldErrors = JSON.parse(data.non_field_errors);
+                        if (Object.keys(nonFieldErrors).length > 0) { 
+                            let non_field_error = nonFieldErrors[0]['message']
+                            $('#non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + non_field_error + '</span>')
+                        }
+                        for (field in fieldErrors) {
+                            $('#' + field + '_group').append('<span id="reason_error" class="form_errors ajax-error text-red-600">' + fieldErrors[field][0].message + '</span>');
+                        }
+                    }
                 }
             });
         }
-    }
 
-    function duplicateTimelineModal(id) {
-        $('.page-loader').show();
-        $('#duplicate_team').val('');
-        $('.dropdown_selected_value').html('')
-        const modal = document.getElementById("duplicate-modal");
-        $.ajax({
-            type: "GET",
-            url: "{% url 'timeline-template.timeline-duplicate-form' %}",
-            data: { id: id },
-            success: function (data) {
-                $('.page-loader').hide();
-                $('#duplicate_name').val('Copy_' + data.timeline.name)
-                $('#timeline_name').html(data.timeline.name)
-                $('#duplicate_id').val(id);
-            }
-        });
-        modal.classList.remove("hidden");
-        modal.classList.add("blocker");
-    }
-
-    function duplicateTimeline() {
-        $('.page-loader').show();
-        $.ajax({
-            type: "POST",
-            url: "{% url 'timeline-template.duplicate' %}",
-            headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
-            data: {
-                id: $("#duplicate_id").val(),
-                name: $('#duplicate_name').val(),
-                team: $("#duplicate_team").val(),
-                is_active: $('#duplicate_is_active').is(":checked"),
-            },
-            success: function (data) {
-                $('.form_errors').remove()
-                $('.page-loader').hide();
-                if (data.status === 'success') {
-                    $('#timeline-table').DataTable().ajax.reload()
-                    closeModal('duplicate-modal');
-                }
-                else {
-                    const fieldErrors = JSON.parse(data.field_errors);
-                    const nonFieldErrors = JSON.parse(data.non_field_errors);
-                    if (Object.keys(nonFieldErrors).length > 0) { 
-                        let non_field_error = nonFieldErrors[0]['message']
-                        $('#duplicate_non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + non_field_error + '</span>')
+        function openUpdateModel(id) {
+            $('.page-loader').show();
+            $('#update_team').val('');
+            $('.dropdown_selected_value').html('')
+            const modal = document.getElementById("update-modal");
+            $.ajax({
+                type: "GET",
+                url: "{% url 'timeline-template.timeline-update-form' %}",
+                data: {id: id},
+                success: function (data) {
+                    $('.page-loader').hide();
+                    $('#update_name').val(data.timeline.name),
+                        $('#update_team').val(data.timeline.team),
+                        $('#update_id').val(id);
+                    if (data.timeline.is_active) {
+                        $("#update_is_active").attr('checked', true);
                     }
-                    for (field in fieldErrors) {
-                        $('#' + field + '_duplicate_group').append('<span id="reason_error" class="ajax-error form_errors text-red-600">' + fieldErrors[field][0].message + '</span>');
+                    else {
+                        $("#update_is_active").attr('checked', false);
+                    }
+                    $('.dropdown_selected_value').html($("#update_team option[value='" + data.timeline.team + "']").text())
+                }
+            });
+            modal.classList.remove("hidden");
+            modal.classList.add("blocker");
+        }
+
+        function updateTimeline() {
+            $('.page-loader').show();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'timeline-template.update' %}",
+                data: {
+                    id: $("#update_id").val(),
+                    name: $('#update_name').val(),
+                    team: $("#update_team").val(),
+                    is_active: $('#update_is_active').is(":checked"),
+                },
+                success: function (data) {
+                    $('.form_errors').remove()
+                    $('.page-loader').hide();
+                    if (data.status === 'success') {
+                        $('#timeline-table').DataTable().ajax.reload()
+                        closeModal('update-modal')
+                    }
+                    else {
+                        const fieldErrors = JSON.parse(data.field_errors);
+                        const nonFieldErrors = JSON.parse(data.non_field_errors);
+                        if (Object.keys(nonFieldErrors).length > 0) {
+                            let non_field_error = nonFieldErrors[0]['message']
+                            $('#update_non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + non_field_error + '</span>')
+                        }
+                        for (field in fieldErrors) {
+                            $('#' + field + '_update_group').append('<span id="reason_error" class="ajax-error form_errors text-red-600">' + fieldErrors[field][0].message + '</span>');
+                        }
                     }
                 }
-            }
-        });
-    }
+            });
+        }
 
-</script>
+        function deleteTimeline(id) {
+            let text = 'Are you do you want to delete'
+            if (confirm(text) == true) {
+                $('.page-loader').show();
+                $.ajax({
+                    type: "DELETE",
+                    url: "{% url 'timeline-template.delete' %}",
+                    headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
+                    data: { id: id },
+                    success: function (data) {
+                        $('.page-loader').hide();
+                        $('#timeline-table').DataTable().ajax.reload()
+                    }
+                });
+            }
+        }
+
+        function duplicateTimelineModal(id) {
+            $('.page-loader').show();
+            $('#duplicate_team').val('');
+            $('.dropdown_selected_value').html('')
+            const modal = document.getElementById("duplicate-modal");
+            $.ajax({
+                type: "GET",
+                url: "{% url 'timeline-template.timeline-duplicate-form' %}",
+                data: {id: id},
+                success: function (data) {
+                    $('.page-loader').hide();
+                    $('#duplicate_name').val('Copy_' + data.timeline.name)
+                    $('#timeline_name').html(data.timeline.name)
+                    $('#duplicate_id').val(id);
+                }
+            });
+            modal.classList.remove("hidden");
+            modal.classList.add("blocker");
+        }
+
+        function duplicateTimeline() {
+            $('.page-loader').show();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'timeline-template.duplicate' %}",
+                data: {
+                    id: $("#duplicate_id").val(),
+                    name: $('#duplicate_name').val(),
+                    team: $("#duplicate_team").val(),
+                    is_active: $('#duplicate_is_active').is(":checked"),
+                },
+                success: function (data) {
+                    $('.form_errors').remove()
+                    $('.page-loader').hide();
+                    if (data.status === 'success') {
+                        $('#timeline-table').DataTable().ajax.reload()
+                        closeModal('duplicate-modal');
+                    }
+                    else {
+                        const fieldErrors = JSON.parse(data.field_errors);
+                        const nonFieldErrors = JSON.parse(data.non_field_errors);
+                        if (Object.keys(nonFieldErrors).length > 0) { 
+                            let non_field_error = nonFieldErrors[0]['message']
+                            $('#duplicate_non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + non_field_error + '</span>')
+                        }
+                        for (field in fieldErrors) {
+                            $('#' + field + '_duplicate_group').append('<span id="reason_error" class="ajax-error form_errors text-red-600">' + fieldErrors[field][0].message + '</span>');
+                        }
+                    }
+                }
+            });
+        }
+        $('#reportrange').daterangepicker({
+                showDropdowns: true,
+                startDate: moment().subtract(7, 'days').format('L'),
+                endDate: moment().add(23, 'days').format('L'),
+                maxSpan: {months: 3},
+                ranges: {
+                    'Today': [moment(), moment()],
+                    'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                    'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                    'This Month': [moment().startOf('month'), moment().endOf('month')],
+                    'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                },
+                alwaysShowCalendars: true
+            }).on('apply.daterangepicker', function (ev, picker) {
+                $('#reportrange')
+                    .text(`${picker.startDate.format('DD MMM Y')} - ${picker.endDate.format('DD MMM Y')}`)
+                    .attr('start-date', `${picker.startDate.format('YYYY-MM-DD')}`)
+                    .attr('end-date', `${picker.endDate.format('YYYY-MM-DD')}`)
+                var table = $("#timeline-table").DataTable();
+                console.log(table);
+                table.ajax.reload();
+            });
+
+            $('#reportrange')
+                .text(`${moment().subtract(7, 'days').format('DD MMM Y')} - ${moment().add(23, 'days').format('DD MMM Y')}`)
+                .attr('start-date', `${moment().subtract(7, 'days').format('YYYY-MM-DD')}`)
+                .attr('end-date', `${moment().add(23, 'days').format('YYYY-MM-DD')}`);
+
+    </script>
 {% endblock %}

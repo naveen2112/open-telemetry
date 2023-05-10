@@ -45,8 +45,6 @@ class TimelineForm(forms.ModelForm):
         This function checks if a team already has an active template and raises a validation error if
         it does.
         """
-        # super().clean()
-        print(self.cleaned_data.get('team'))
         if (
             self.cleaned_data.get('is_active')
             and models.Timeline.objects.filter(team=self.cleaned_data.get('team'), is_active=True) 
@@ -79,14 +77,13 @@ class TimelineTaskForm(forms.ModelForm):
 
     class Meta:
         model = models.TimelineTask
-        fields = ("name", "days", "present_type", "type")
+        fields = ("name", "days", "present_type", "task_type")
 
         widgets = {
             "name": forms.TextInput(
                 attrs={
                     "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
                     "placeholder": "Timeline name...",
-                    "required": True,
                 }
             ),
             "present_type": forms.RadioSelect(),

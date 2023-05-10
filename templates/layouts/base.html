@@ -20,10 +20,13 @@
         href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
         rel="stylesheet">
     <!-- Styles -->
-    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    <link href="{% static 'css/app.css' %}" rel="stylesheet">
     <link href="{% static 'css/search.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" />
-    <link rel="stylesheet" href="{% static 'training/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/icon.css' %}">
+    <link rel="stylesheet" href="{% static 'css/ie7.css' %}">
     <!-- Tailwind elements -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tw-elements/dist/css/index.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
@@ -42,24 +45,9 @@
         <div class="overflow-hidden max-h-screen flex main-screen grow flex-col">
             <div class="header bg-white">
                 <div class="px-5 pt-9 bg-mild-violet pb-7">
-                    <div class="flex justify-between items-center">
-                        <div>
-
-                            <div class="text-dark-black text-lg mb-1 leading-none">
-                                {% block header %}
-                                {% endblock %}
-                            </div>
-
-                            <div class="text-dark-black-50 text-sm">
-                                {% block sub_header %}
-                                {% endblock %}
-                            </div>
-
-                        </div>
-                        {% block adder %}
-                          
-                        {% endblock adder %}
-                    </div>
+                    {% block header %}
+                        
+                    {% endblock header %}
                 </div>
             </div>
 
@@ -104,6 +92,7 @@
             src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap-collapse.js"></script>
 
         <script src="{% static 'js/search.js' %}"></script>
+        <script src="{% static 'js/ie7.js' %}"></script>
 
         <script>
             let showLoader = () => {
@@ -122,6 +111,10 @@
                 hideLoader()
                 $('.sub-category .sidebar-active').closest('.sub-category').addClass('sidebar-active')
             })
+
+            $.ajaxSetup({
+                headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
+            });
         </script>
 
         {% block script %}

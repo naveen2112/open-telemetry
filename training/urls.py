@@ -9,7 +9,7 @@ urlpatterns = [
     # Timeline Template
     path("timeline-template", views.timeline_template, name="timeline-template"),
     path("timeline-datatable", views.TimelineTemplateDataTable.as_view(), name="timeline-template.datatable"),
-    path("timeline-template/create-timeline-template", views.create_timeline_template, name="timeline-template.create"),
+    path("timeline-template/create", views.create_timeline_template, name="timeline-template.create"),
     path("timeline-template/timeline-update-form", views.timeline_update_form, name="timeline-template.timeline-update-form"),
     path("timeline-template/update-timeline-template", views.update_timeline_template, name="timeline-template.update"),
     path("timeline-template/delete-timeline-template", views.delete_timeline_template, name="timeline-template.delete"),

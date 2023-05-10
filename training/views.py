@@ -6,7 +6,7 @@ from django.conf import settings
 from django.views.generic import TemplateView
 from django.http import FileResponse
 from ajax_datatable import AjaxDatatableView
-from hubble.models import Timeline, Teams, TimelineTask, Users
+from hubble.models import Timeline, Team, TimelineTask, User
 from core import template_utils
 from django.urls import reverse
 from training.forms import TimelineForm, TimelineTaskForm
@@ -50,6 +50,7 @@ def timeline_template(request):
 
 
 class TimelineTemplateDataTable(CustomDatatable):
+    print("bh")
     """
     Timeline Template Datatable
     """
@@ -72,20 +73,25 @@ class TimelineTemplateDataTable(CustomDatatable):
         return
     
     def render_column(self, row, column):
+
         if column == 'is_active':
             if row.is_active:
                 return '<span class="bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm">Active</span>'
             else:
                 return '<span class="bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm">In Active</span>'
         return super().render_column(row, column)
+    
 
+    def get_initial_queryset(self, request=None):
+        print(Timeline.objects.all())
+        return Timeline.objects.all()
 
 def create_timeline_template(request):
     """
     Create Timeline Template
     """
     if request.method == 'POST':
-        user = Users.objects.get(id = 58)
+        user = User.objects.get(id = 58)
         form = TimelineForm(request.POST)
         if form.is_valid(): # Check if form is valid or not
             timeline = form.save(commit=False)
@@ -157,7 +163,7 @@ def duplicate_timeline_template(request):
     Duplicate Timeline Template
     """
     id = request.POST.get('id')
-    user = Users.objects.get(id = 58)
+    user = User.objects.get(id = 58)
     timeline = Timeline.objects.get(id = id)
     form = TimelineForm(request.POST)
     if form.is_valid(): # Check the form is valid or not
@@ -207,7 +213,7 @@ class TimelineTemplateTaskDataTable(CustomDatatable):
         {"name": "name", "visible": True, "searchable": False},
         {"name": "days", "visible": True, "searchable": False},
         {"name": "present_type", "visible": True, "searchable": False},
-        {"name": "type", "visible": True, "searchable": False},
+        {"name": "task_type", "visible": True, "searchable": False},
         {"name": "action", "title": "Action", "visible": True,"searchable": False,"orderable": False,"className": "text-center",},
     ]
 
@@ -230,10 +236,10 @@ def create_timelinetask_template(request):
     if request.method == 'POST':
         form = TimelineTaskForm(request.POST)
         timeline = Timeline.objects.get(id = request.POST.get('timeline_id'))
-        user = Users.objects.get(id = 58)
+        user = User.objects.get(id = 58)
         if form.is_valid(): # Check if the valid or not
             timeline_task = form.save(commit=False)
-            timeline_task.timeline_id = timeline
+            timeline_task.timeline = timeline
             timeline_task.created_by = user
             timeline_task.save()
             return JsonResponse({"status": 'success'})
@@ -283,4 +289,4 @@ def delete_timelinetask_template(request):
         return JsonResponse({"message": 'Timeline Template Task deleted succcessfully'})
     except Exception as e:
         return JsonResponse({'message': 'Error while deleting Timeline Template Task!'}, status=500)
-
+    
