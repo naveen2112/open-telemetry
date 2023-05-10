@@ -4,14 +4,6 @@
     Timeline Template Detail
 {% endblock title %}
 
-{% block style %}
-    <style>
-        #timeline_template_link {
-            margin: 15px 0px;
-        }
-    </style>
-{% endblock style %}
-
 {% block header %}
     <div class="flex justify-between items-center">
         <div>
@@ -32,7 +24,7 @@
             Create Task
         </button>
         {% comment %}
-          create modal
+        create modal
         {% endcomment %}
         <div class="jquery-modal current hidden" id="modal">
             <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
@@ -68,22 +60,13 @@
             </div>
         </div>
     </div>
-    
 {% endblock %}
-
-{% block sub_header %}
-    
-{% endblock %}
-
-{% block adder %}
-    
-{% endblock adder %}
 
 {% block body %}
     <table id="timeline-table" class="display border-0 table-with-no-border dataTable no-footer" style="width: 100%;"
         role="grid" aria-describedby="timeline-table_info">
         {% comment %}
-          update modal
+            update modal
         {% endcomment %}
         <div class="jquery-modal current hidden" id="update-modal">
             <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
@@ -133,16 +116,16 @@
                                         class="text-red-600">*</span></label>
                                 <div id="id_task_type">
                                     <div>
-                                        <label for="id_task_type_0"><input type="radio" name="update_task_type" value="Task" required=""
-                                                id="id_task_type_0" checked="">
+                                        <label for="id_task_type_0"><input type="radio" name="update_task_type" value="Task"
+                                                required="" id="id_task_type_0" checked="">
                                             Task</label>
-                            
+
                                     </div>
                                     <div>
-                                        <label for="id_task_type_1"><input type="radio" name="update_task_type" value="Assessment" required=""
-                                                id="id_task_type_1">
+                                        <label for="id_task_type_1"><input type="radio" name="update_task_type"
+                                                value="Assessment" required="" id="id_task_type_1">
                                             Assessment</label>
-                            
+
                                     </div>
                                 </div>
                             </div>
@@ -224,7 +207,7 @@
             $.ajax({
                 type: "GET",
                 url: "{% url 'timeline-template.timelinetask-update-form' %}",
-                data: {id: id},
+                data: { id: id },
                 success: function (data) {
                     $('input[name="update_present_type"]').attr('checked', false);
                     $('input[name="update_task_type"]').attr('checked', false);
@@ -278,7 +261,7 @@
                 $.ajax({
                     type: "DELETE",
                     url: "{% url 'timeline-template.task-delete' %}",
-                    data: {id: id},
+                    data: { id: id },
                     success: function (data) {
                         $('#timeline-table').DataTable().ajax.reload()
                         $('.page-loader').hide();
@@ -287,4 +270,4 @@
             }
         }
     </script>
-    {% endblock %}
+{% endblock %}

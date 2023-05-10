@@ -60,3 +60,7 @@ thead {
 .-top-24 {
     top: -24px;
 }
+
+#timeline_template_link {
+    margin: 15px 0px;
+}

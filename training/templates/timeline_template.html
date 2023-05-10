@@ -20,13 +20,12 @@
             Create Timeline
         </button>
     </div>
-    
 {% endblock %}
 
 {% block body %}
     <div class="mb-5 flex justify-end items-center">
         {% comment %}
-          Timeline Template create modal
+        Timeline Template create modal
         {% endcomment %}
         <div class="jquery-modal current hidden" id="modal">
             <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
@@ -63,7 +62,8 @@
     <div class="flex mb-7 items-center">
         <div class="mr-5 relative">
             <p class="text-dark-black font-medium absolute -top-24 left-0">Choose date range</p>
-            <div id="reportrange" class="w-241 px-5 py-2.6 h-10 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0 flex justify-center items-center">
+            <div id="reportrange"
+                class="w-241 px-5 py-2.6 h-10 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0 flex justify-center items-center">
             </div>
         </div>
         <div class="relative mr-5" id="timeline-table_filter">
@@ -112,7 +112,7 @@
         role="grid" aria-describedby="timeline-table_info">
     </table>
     {% comment %}
-      Timeline template update modal
+        Timeline template update modal
     {% endcomment %}
     <div class="jquery-modal current hidden" id="update-modal">
         <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
@@ -189,10 +189,10 @@
     <script>
         $(document).ready(function () {
             var selectTemplate = `
-                    <div id="drop-btn" class="cus-dropdown-icon block border border-primary-dark-30 rounded-md mt-2.5 w-full focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 py-1 px-2">
-                        <div class="cursor-pointer text-truncate w-11/12 dropdown_selected_value" id="show-value">
-                        </div>
-                    </div>`;
+                        <div id="drop-btn" class="cus-dropdown-icon block border border-primary-dark-30 rounded-md mt-2.5 w-full focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 py-1 px-2">
+                            <div class="cursor-pointer text-truncate w-11/12 dropdown_selected_value" id="show-value">
+                            </div>
+                        </div>`;
 
             $('.work-basic-dropdown').each(function () {
                 if ($(this).find('.multi-select').length == 0) {
@@ -231,10 +231,10 @@
                         order: [],
                     },
                     {
-                        "start-date": function() {
+                        "start-date": function () {
                             return $("#reportrange").attr('start-date')
                         },
-                        "end-date": function() {
+                        "end-date": function () {
                             return $("#reportrange").attr('end-date')
                         }
                     }
@@ -281,7 +281,7 @@
                     else {
                         const fieldErrors = JSON.parse(data.field_errors);
                         const nonFieldErrors = JSON.parse(data.non_field_errors);
-                        if (Object.keys(nonFieldErrors).length > 0) { 
+                        if (Object.keys(nonFieldErrors).length > 0) {
                             let non_field_error = nonFieldErrors[0]['message']
                             $('#non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + non_field_error + '</span>')
                         }
@@ -301,7 +301,7 @@
             $.ajax({
                 type: "GET",
                 url: "{% url 'timeline-template.timeline-update-form' %}",
-                data: {id: id},
+                data: { id: id },
                 success: function (data) {
                     $('.page-loader').hide();
                     $('#update_name').val(data.timeline.name),
@@ -378,7 +378,7 @@
             $.ajax({
                 type: "GET",
                 url: "{% url 'timeline-template.timeline-duplicate-form' %}",
-                data: {id: id},
+                data: { id: id },
                 success: function (data) {
                     $('.page-loader').hide();
                     $('#duplicate_name').val('Copy_' + data.timeline.name)
@@ -411,7 +411,7 @@
                     else {
                         const fieldErrors = JSON.parse(data.field_errors);
                         const nonFieldErrors = JSON.parse(data.non_field_errors);
-                        if (Object.keys(nonFieldErrors).length > 0) { 
+                        if (Object.keys(nonFieldErrors).length > 0) {
                             let non_field_error = nonFieldErrors[0]['message']
                             $('#duplicate_non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + non_field_error + '</span>')
                         }
@@ -423,33 +423,33 @@
             });
         }
         $('#reportrange').daterangepicker({
-                showDropdowns: true,
-                startDate: moment().subtract(7, 'days').format('L'),
-                endDate: moment().add(23, 'days').format('L'),
-                maxSpan: {months: 3},
-                ranges: {
-                    'Today': [moment(), moment()],
-                    'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                    'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                    'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                    'This Month': [moment().startOf('month'), moment().endOf('month')],
-                    'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-                },
-                alwaysShowCalendars: true
-            }).on('apply.daterangepicker', function (ev, picker) {
-                $('#reportrange')
-                    .text(`${picker.startDate.format('DD MMM Y')} - ${picker.endDate.format('DD MMM Y')}`)
-                    .attr('start-date', `${picker.startDate.format('YYYY-MM-DD')}`)
-                    .attr('end-date', `${picker.endDate.format('YYYY-MM-DD')}`)
-                var table = $("#timeline-table").DataTable();
-                console.log(table);
-                table.ajax.reload();
-            });
-
+            showDropdowns: true,
+            startDate: moment().subtract(7, 'days').format('L'),
+            endDate: moment().add(23, 'days').format('L'),
+            maxSpan: { months: 3 },
+            ranges: {
+                'Today': [moment(), moment()],
+                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                'This Month': [moment().startOf('month'), moment().endOf('month')],
+                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            },
+            alwaysShowCalendars: true
+        }).on('apply.daterangepicker', function (ev, picker) {
             $('#reportrange')
-                .text(`${moment().subtract(7, 'days').format('DD MMM Y')} - ${moment().add(23, 'days').format('DD MMM Y')}`)
-                .attr('start-date', `${moment().subtract(7, 'days').format('YYYY-MM-DD')}`)
-                .attr('end-date', `${moment().add(23, 'days').format('YYYY-MM-DD')}`);
+                .text(`${picker.startDate.format('DD MMM Y')} - ${picker.endDate.format('DD MMM Y')}`)
+                .attr('start-date', `${picker.startDate.format('YYYY-MM-DD')}`)
+                .attr('end-date', `${picker.endDate.format('YYYY-MM-DD')}`)
+            var table = $("#timeline-table").DataTable();
+            console.log(table);
+            table.ajax.reload();
+        });
+
+        $('#reportrange')
+            .text(`${moment().subtract(7, 'days').format('DD MMM Y')} - ${moment().add(23, 'days').format('DD MMM Y')}`)
+            .attr('start-date', `${moment().subtract(7, 'days').format('YYYY-MM-DD')}`)
+            .attr('end-date', `${moment().add(23, 'days').format('YYYY-MM-DD')}`);
 
     </script>
 {% endblock %}
