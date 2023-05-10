@@ -1,5 +1,6 @@
 from django.urls import path, include, register_converter
 from reports import views
+from reports.view import project_efficiency, team_efficiency
 from .converters import DateConverter
 
 register_converter(DateConverter, 'date')
@@ -16,13 +17,12 @@ urlpatterns = [
     path("project-summary/<int:pk>/<date:start>/<date:end>", views.project_summary, name="project_summary"),
 
     path("datatable", views.Datatable.as_view(), name="datatable"),
+    path("detailed-efficiency-datatable", views.DetaileEfficiencyDatatable.as_view(), name="detailed_efficiency_datatable"),
     path("monetization-datatable", views.MonetizationDatatable.as_view(), name="monetization_datatable"),
     path("kpi-datatable", views.KPIDatatable.as_view(), name="kpi_datatable"),
-    path("team-datatable", views.TeamsDatatable.as_view(), name="team_datatable"),
-    path("organization-datatable", views.Organization.as_view(), name="organization_datatable"),
-    path("project-datatable", views.ProjectsDatatable.as_view(), name="project_datatable"),
-
-    path("detailed-efficiency-datatable", views.DetaileEfficiencyDatatable.as_view(), name="detailed_efficiency_datatable"),
-    path("project-summary-datatable", views.ProjectSummaryDatatable.as_view(), name="project_summary_datatable"),
+    path("team-datatable", team_efficiency.TeamsDatatable.as_view(), name="team_datatable"),
+    path("team-summary-datatable", team_efficiency.TeamSummaryDatatable.as_view(), name="team_summary_datatable"),
+    path("project-datatable", project_efficiency.ProjectsDatatable.as_view(), name="project_datatable"),
+    path("project-summary-datatable", project_efficiency.ProjectSummaryDatatable.as_view(), name="project_summary_datatable"),
 
 ]

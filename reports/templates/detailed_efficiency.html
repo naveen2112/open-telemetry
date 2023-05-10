@@ -2,33 +2,33 @@
 {% load static %}
 
 {% block header %}
-            <header class='px-2 pt-5 '>
-                <a href="{% url 'index' %}" class='flex items-center text-sm text-dark-blue'>
-                    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px"
-                     height="24px" viewBox="0 0 24 24" version="1.1">
-                    <title>Back</title>
-                        <g id="Final---User-Profile" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                            <g id="UserProfile---Account-Info" transform="translate(-143.000000, -15.000000)">
-                                <g id="Back-Arrow" transform="translate(143.000000, 15.000000)">
-                                    <rect id="Rectangle" fill="#000000" fill-rule="nonzero" opacity="0"
-                                        transform="translate(12.000000, 12.000000) rotate(90.000000) translate(-12.000000, -12.000000) "
-                                        x="0" y="0" width="24" height="24"/>
-                                    <path id="Path" fill="#2248C3"
-                                        d="M13.83,19.0000686 C13.5274116,19.0010289 13.2406301,18.8649915 13.05,18.63 L8.22,12.63 C7.91668285,12.2609981 7.91668285,11.7290019 8.22,11.36 L13.22,5.36 C13.5734622,4.93474075 14.2047407,4.87653778 14.63,5.23000001 C15.0552592,5.58346225 15.1134622,6.21474074 14.76,6.64 L10.29,12 L14.61,17.36 C14.8596926,17.6597233 14.9122976,18.0772862 14.7447459,18.4295743 C14.5771943,18.7818624 14.2200765,19.0045572 13.83,19.0000686 Z"/>
-                                </g>
-                            </g>
+    <header class='px-2 pt-5 '>
+        <a href="{% url 'index' %}" class='flex items-center text-sm text-dark-blue'>
+            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px"
+                height="24px" viewBox="0 0 24 24" version="1.1">
+                <title>Back</title>
+                <g id="Final---User-Profile" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                    <g id="UserProfile---Account-Info" transform="translate(-143.000000, -15.000000)">
+                        <g id="Back-Arrow" transform="translate(143.000000, 15.000000)">
+                            <rect id="Rectangle" fill="#000000" fill-rule="nonzero" opacity="0"
+                                transform="translate(12.000000, 12.000000) rotate(90.000000) translate(-12.000000, -12.000000) "
+                                x="0" y="0" width="24" height="24"/>
+                            <path id="Path" fill="#2248C3"
+                                d="M13.83,19.0000686 C13.5274116,19.0010289 13.2406301,18.8649915 13.05,18.63 L8.22,12.63 C7.91668285,12.2609981 7.91668285,11.7290019 8.22,11.36 L13.22,5.36 C13.5734622,4.93474075 14.2047407,4.87653778 14.63,5.23000001 C15.0552592,5.58346225 15.1134622,6.21474074 14.76,6.64 L10.29,12 L14.61,17.36 C14.8596926,17.6597233 14.9122976,18.0772862 14.7447459,18.4295743 C14.5771943,18.7818624 14.2200765,19.0045572 13.83,19.0000686 Z"/>
                         </g>
-                    </svg>
-                    Back to Projects
-                </a>
-                <div class='flex justify-between items-center my-5'>
-                    <div class='flex items-center px-2'>
-                        <div>
-                            <p class='text-base text-dark-black mb-1'>{{ data.name }} | {{data.id}} </p>
-                        </div>
-                    </div>
+                    </g>
+                </g>
+            </svg>
+            Back to Projects
+        </a>
+        <div class='flex justify-between items-center my-5'>
+            <div class='flex items-center px-2'>
+                <div>
+                    <p class='text-base text-dark-black mb-1'>{{ data.name }} | {{data.id}} </p>
                 </div>
-            </header>
+            </div>
+        </div>
+    </header>
 {% endblock %}
 
 {% block sub_header %}

@@ -61,10 +61,6 @@
 {% endblock %}
 
 {% block script %}
-<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
-
 <script>
     $('#leaves_range').daterangepicker({
         showDropdowns: true,
@@ -102,8 +98,11 @@
             $("#filter-form").submit();
             var table = $("#reports-table").DataTable();
             var rowData = table.row(this).data();
-            var link = rowData['action'].split("<")[2].split("=")[1];
-            window.location.href = link.substring(link.indexOf('p'), link.indexOf('">'));
+            console.log(rowData['capacity']);
+            var link = rowData['capacity']
+            console.log(link.substring(link.indexOf('pr'), link.indexOf('">')))
+            // var link = rowData['action'].split("<")[2].split("=")[1];
+            window.location.href = link.substring(link.indexOf('pr'), link.indexOf('">'));
         });
     }); 
 </script>

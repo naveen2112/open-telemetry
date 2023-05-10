@@ -33,15 +33,15 @@
         var clickTemplate = `<div id="drop-btn" class="py-px px-2 flex items-center">
                                 <span>
                                     <span class="rounded-3xl count-show inline-block min-w-4 min-h-4 w-auto py-px px-1 text-center -top-1.5 -left-1.5 absolute bg-primary-dark text-xs text-white p-0.5 hidden" id="filter_by_user_count"></span>
-                                    <div class="inline-block w-6 h-6 rounded-md" id="filter_by_user_inner">
-                                        <span class="bg-grey-svg"><span class="{% if request.path == "/project-report" %} hbl hbl-project text-2xl {% else %} hbl hbl-team text-2xl {% endif %}">
-                                        </span>
-                                        <span class="bg-dark-blue" ><span class="{% if request.path == "/project-report" %} hbl hbl-project text-2xl {% else %} hbl hbl-team text-2xl {% endif %}">
-                                        </span>
-                                        <span class="bg-white-svg"><span class="{% if request.path == "/project-report" %} hbl hbl-project text-2xl {% else %} hbl hbl-team text-2xl {% endif %}">
-                                        </span>
-                                    </div>
-                                </span>
+                                        <div class="inline-block w-6 h-6 rounded-md" id="filter_by_user_inner">
+                                            <span class="bg-grey-svg"><span class="{% if request.path == "/project-report" %} hbl hbl-project text-2xl {% else %} hbl hbl-team text-2xl {% endif %}">
+                                            </span>
+                                            <span class="bg-dark-blue" ><span class="{% if request.path == "/project-report" %} hbl hbl-project text-2xl {% else %} hbl hbl-team text-2xl {% endif %}">
+                                            </span>
+                                            <span class="bg-white-svg"><span class="{% if request.path == "/project-report" %} hbl hbl-project text-2xl {% else %} hbl hbl-team text-2xl {% endif %}">
+                                            </span>
+                                        </div>
+                                    </span>
                                 <span class="pl-1">{% if request.path == "/team-report" %} Teams {% else %} Projects {% endif %}</span>
                             </div>`
         // For User Filter
@@ -59,24 +59,24 @@
                     clickTem = `<div id="drop-btn" class="py-px px-2 flex items-center">
                                     <span>
                                         <span class="rounded-3xl count-show inline-block min-w-4 min-h-4 w-auto py-px px-1 text-center -top-1.5 -left-1 absolute bg-primary-dark text-xs text-white p-0.5 hidden" id="filter_by_project_count"></span>
-                                        <div class="inline-block w-6 h-6 rounded-md" id="filter_by_project_inner">
-                                            <span class=" bg-grey-svg"><span class="{% if request.path == "/project-report" %} hbl hbl-project text-2xl {% else %} hbl hbl-team text-2xl {% endif %}">
-                                            </span>
-                                            <span class=" bg-blue-svg"><span class="{% if request.path == "/project-report" %} hbl hbl-project text-2xl {% else %} hbl hbl-team text-2xl {% endif %}">
-                                            </span>
-                                            <span class="bg-white-svg"><span class="{% if request.path == "/project-report" %} hbl hbl-project text-2xl {% else %} hbl hbl-team text-2xl {% endif %}">
-                                            </span>
-                                        </div>
+                                            <div class="inline-block w-6 h-6 rounded-md" id="filter_by_project_inner">
+                                                <span class=" bg-grey-svg"><span class="{% if request.path == "/project-report" %} hbl hbl-project text-2xl {% else %} hbl hbl-team text-2xl {% endif %}">
+                                                </span>
+                                                <span class=" bg-blue-svg"><span class="{% if request.path == "/project-report" %} hbl hbl-project text-2xl {% else %} hbl hbl-team text-2xl {% endif %}">
+                                                </span>
+                                                <span class="bg-white-svg"><span class="{% if request.path == "/project-report" %} hbl hbl-project text-2xl {% else %} hbl hbl-team text-2xl {% endif %}">
+                                                </span>
+                                            </div>
                                         </span>
                                     <span class="pl-1">Projects</span>
-                                    </div>`
+                                </div>`
                 } else if (elemId == 'group_by_filter') {
                     badge = '';
                     badgeClr = '';
                     ishideSelected = false;
                     clickTem = `<div id='drop-btn' class="py-px px-2 flex items-center">
-<div class="cursor-pointer" id="show-value"></div>
-</div>`
+                                    <div class="cursor-pointer" id="show-value"></div>
+                                </div>`
                     defaultCheck = ['date'];
                 }
                 $(`#${elemId}`).customSearch({
