@@ -17,8 +17,8 @@ def set_active(context, names):
             current_route_name == name
             or (name.endswith("/*"))
             and (
-                current_route_name.startswith(name.replace("*", ""))
-                or current_route_name == name.replace("*", "")
+                current_route_name.startswith(name.replace("/*", ""))
+                or current_route_name == name.replace("/*", "")
             )
         ):
             return "sidebar-active"
