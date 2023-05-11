@@ -18,7 +18,6 @@ ADD pyproject.toml pyproject.toml
 RUN pip install poetry==1.3.2
 RUN poetry config virtualenvs.create false
 RUN poetry install --no-interaction --no-ansi --no-root
-RUN pip install gunicorn
 
 # Adding project files
 ADD . .
@@ -29,4 +28,4 @@ ENTRYPOINT ["entrypoint.sh"]
 
 EXPOSE 8000
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "manage:main"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "hubble_report.wsgi"]
