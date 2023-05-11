@@ -6,12 +6,9 @@ services:
       context: .
       dockerfile: docker/app/Dockerfile
     image: app
-    volumes:
-      - .:/var/app
     container_name: app
     ports:
       - "8000:8000"
-    hostname: reports-dev.hubble.dev
     env_file:
       - .env
     networks:
@@ -23,7 +20,6 @@ services:
       dockerfile: docker/web/Dockerfile
     image: web
     container_name: webserver
-    hostname: reports-dev.hubble.dev
     ports:
       - "80:80"
     networks:
