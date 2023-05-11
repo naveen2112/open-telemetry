@@ -92,6 +92,7 @@ class Datatable(CustomDatatable):
         },
     ]
 
+
     def customize_row(self, row, obj):
         buttons = template_utils.show_btn(
             reverse("detailed_efficiency", args=[obj["pk"]])
@@ -100,6 +101,7 @@ class Datatable(CustomDatatable):
             "action"
         ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         return
+
 
     def get_initial_queryset(self, request=None):
         """Please rename anyone of the fields in the query to `pk`,
@@ -123,6 +125,7 @@ class Datatable(CustomDatatable):
             .order_by("team__id")
         )
         return data
+
 
     def render_column(self, row, column):
         if column == "capacity":
@@ -186,6 +189,7 @@ class MonetizationDatatable(CustomDatatable):
         },
     ]
 
+
     def get_initial_queryset(self, request=None):
         data = (
             TimesheetEntry.objects.select_related("user", "project")
@@ -200,6 +204,7 @@ class MonetizationDatatable(CustomDatatable):
             )
         )
         return data
+
 
     def render_column(self, row, column):
         if column == "gap":
@@ -260,6 +265,7 @@ class KPIDatatable(CustomDatatable):
         },
     ]
 
+
     def get_initial_queryset(self, request=None):
         data = (
             TimesheetEntry.objects.select_related("user", "project")
@@ -303,6 +309,7 @@ class DetaileEfficiencyDatatable(CustomDatatable):
         },
     ]
 
+
     def get_initial_queryset(self, request=None):
         data = (
             TimesheetEntry.objects.select_related("user", "team")
@@ -334,6 +341,7 @@ class DetaileEfficiencyDatatable(CustomDatatable):
         )
         return data
 
+
     def render_column(self, row, column):
         if column == "Capacity":
             if int(row["Capacity"]) >= 75:
@@ -343,6 +351,3 @@ class DetaileEfficiencyDatatable(CustomDatatable):
             else:
                 return f'<span class="bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm">{row["Capacity"]}</span>'
         return super().render_column(row, column)
-
-
-
