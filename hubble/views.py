@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.http import JsonResponse
 from django.contrib.auth import login, logout
 from django.contrib import messages
 from hubble_report.settings import ENV_NAME
@@ -68,3 +69,7 @@ def callback(request):
             % user_crendentials,
         )
         return redirect("index")
+
+
+def health_check(request):
+    return JsonResponse(data="", status=200, safe=False)
