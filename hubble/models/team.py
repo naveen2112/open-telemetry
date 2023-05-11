@@ -12,4 +12,4 @@ class Team(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'teams'
+        db_table = "teams"
