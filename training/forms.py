@@ -40,18 +40,6 @@ class TimelineForm(forms.ModelForm):
             ),
         }
 
-    def clean(self):
-        """
-        This function checks if a team already has an active template and raises a validation error if
-        it does.
-        """
-        if (
-            self.cleaned_data.get('is_active')
-            and models.Timeline.objects.filter(team=self.cleaned_data.get('team'), is_active=True) 
-            .exists()
-        ):
-            raise ValidationError("Team already has an active template.")
-
 
 class TimelineTaskForm(forms.ModelForm):
     def validate_days(value):
@@ -87,5 +75,5 @@ class TimelineTaskForm(forms.ModelForm):
                 }
             ),
             "present_type": forms.RadioSelect(),
-            "type": forms.RadioSelect(),
+            "task_type": forms.RadioSelect(),
         }

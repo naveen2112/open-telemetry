@@ -90,27 +90,42 @@
 }
 
 #id_present_type,
-#id_type {
+#id_task_type,
+#update_present_type,
+#update_task_type,
+#id_status {
     display: flex;
     align-items: center;
 }
 
 #id_present_type>div:first-child,
-#id_type>div:first-child {
+#id_task_type>div:first-child,
+#update_present_type>div:first-child,
+#update_task_type>div:first-child #id_status>div:first-child {
     padding-right: 20px;
 }
 
 #id_present_type label,
-#id_type label {
+#id_task_type label,
+#update_present_type label,
+#id_status label,
+#update_task_type label {
     display: flex;
     align-items: center;
     margin-top: 5px;
 }
 
 #id_present_type label input,
-#id_type label input {
+#id_task_type label input,
+#id_status label input,
+#update_present_type label input,
+#update_task_type label input {
     width: 24px;
     height: 24px;
     accent-color: #2248C3;
     margin-right: 10px;
+}
+
+#id_task_type>div:nth-child(2) {
+    padding-right: 16px;
 }

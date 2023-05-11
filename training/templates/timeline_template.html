@@ -60,12 +60,6 @@
         </div>
     </div>
     <div class="flex mb-7 items-center">
-        <div class="mr-5 relative">
-            <p class="text-dark-black font-medium absolute -top-24 left-0">Choose date range</p>
-            <div id="reportrange"
-                class="w-241 px-5 py-2.6 h-10 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0 flex justify-center items-center">
-            </div>
-        </div>
         <div class="relative mr-5" id="timeline-table_filter">
             <input type="text" value="" name="search_project" placeholder="Search by Name, Team"
                 class="w-397 h-10 pl-11 pr-2.5 py-3 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0"
@@ -289,7 +283,11 @@
                             $('#' + field + '_group').append('<span id="reason_error" class="form_errors ajax-error text-red-600">' + fieldErrors[field][0].message + '</span>');
                         }
                     }
-                }
+                },
+                error: function () {
+                    alert("Something went wrong");
+                    location.reload();
+                },
             });
         }
 
@@ -300,7 +298,7 @@
             const modal = document.getElementById("update-modal");
             $.ajax({
                 type: "GET",
-                url: "{% url 'timeline-template.timeline-update-form' %}",
+                url: "{% url 'timeline-template.edit-form' %}",
                 data: { id: id },
                 success: function (data) {
                     $('.page-loader').hide();
@@ -314,7 +312,11 @@
                         $("#update_is_active").attr('checked', false);
                     }
                     $('.dropdown_selected_value').html($("#update_team option[value='" + data.timeline.team + "']").text())
-                }
+                },
+                error: function () {
+                    alert("Something went wrong");
+                    location.reload();
+                },
             });
             modal.classList.remove("hidden");
             modal.classList.add("blocker");
@@ -324,7 +326,7 @@
             $('.page-loader').show();
             $.ajax({
                 type: "POST",
-                url: "{% url 'timeline-template.update' %}",
+                url: "{% url 'timeline-template.edit' %}",
                 data: {
                     id: $("#update_id").val(),
                     name: $('#update_name').val(),
@@ -349,7 +351,11 @@
                             $('#' + field + '_update_group').append('<span id="reason_error" class="ajax-error form_errors text-red-600">' + fieldErrors[field][0].message + '</span>');
                         }
                     }
-                }
+                },
+                error: function () {
+                    alert("Something went wrong");
+                    location.reload();
+                },
             });
         }
 
@@ -365,7 +371,11 @@
                     success: function (data) {
                         $('.page-loader').hide();
                         $('#timeline-table').DataTable().ajax.reload()
-                    }
+                    },
+                    error: function () {
+                        alert("Something went wrong");
+                        location.reload();
+                    },
                 });
             }
         }
@@ -377,14 +387,18 @@
             const modal = document.getElementById("duplicate-modal");
             $.ajax({
                 type: "GET",
-                url: "{% url 'timeline-template.timeline-duplicate-form' %}",
+                url: "{% url 'timeline-template.duplicate-form' %}",
                 data: { id: id },
                 success: function (data) {
                     $('.page-loader').hide();
                     $('#duplicate_name').val('Copy_' + data.timeline.name)
                     $('#timeline_name').html(data.timeline.name)
                     $('#duplicate_id').val(id);
-                }
+                },
+                error: function () {
+                    alert("Something went wrong");
+                    location.reload();
+                },
             });
             modal.classList.remove("hidden");
             modal.classList.add("blocker");

@@ -22,12 +22,15 @@ class TimelineTask(db.SoftDeleteWithBaseModel):
 
     name = models.CharField(max_length=250)
     days = models.FloatField()
-    timeline = models.ForeignKey(Timeline, on_delete=models.CASCADE)
-    present_type = models.CharField(
-        max_length=250, choices=PRESENT_TYPES, default=PRESENT_TYPE_REMOTE
-    )
+    timeline = models.ForeignKey(Timeline, on_delete=models.CASCADE, related_name="task_timeline")
+    present_type = models.CharField(max_length=250, choices=PRESENT_TYPES, default=PRESENT_TYPE_REMOTE)
     task_type = models.CharField(max_length=250, choices=TASK_TYPES, default=TASK_TYPE_TASK)
+    order = models.IntegerField(blank=True) 
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'timeline_task'
+        ordering = ['order']
+
+    def __str__(self):
+        return self.name
