@@ -1,6 +1,6 @@
 from django.urls import path
 
-from training.views import induction_kit, timeline, timeline_task
+from training.views import induction_kit, timeline, timeline_task, batch
  
 urlpatterns = [
     # Induction kit
@@ -25,5 +25,14 @@ urlpatterns = [
     path("timeline-task/edit", timeline_task.update_timelinetask_template, name="timeline-task.edit"),
     path("timeline-task/delete", timeline_task.delete_timelinetask_template, name="timeline-task.delete"),
     path("timeline-task/order", timeline_task.update_order, name="timeline-task.order"),
+
+    # Batch
+    path("batch", batch.batch, name="batch"),
+    path("batch-datatable", batch.BatchDataTable.as_view(), name="batch.datatable"),
+    path("batch/create", batch.create_batch, name="batch.create"),
+    path("batch/edit-form", batch.batch_update_form, name="batch.edit-form"),
+    path("batch/edit", batch.update_batch, name="batch.edit"),
+    path("batch/delete", batch.delete_batch, name="batch.delete"),
+    path("batch/<int:pk>/details", batch.batch_details, name="batch.detail"),
 ]
 

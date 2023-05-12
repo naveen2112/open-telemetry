@@ -1,0 +1,199 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}
+    Batch
+{% endblock title %}
+
+{% block header %}
+    <div class="flex justify-between items-center">
+        <div>
+            <div class="text-dark-black text-lg mb-1 leading-none">
+                Batch List
+            </div>
+            <div class="text-dark-black-50 text-sm">
+                List of Batches
+            </div>
+        </div>
+        <button class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal"
+            onclick="openModal()">
+            <span class="text-xl mr-2">+</span>
+            Create Batch
+        </button>
+        <div class="jquery-modal current hidden batch-model" id="modal">
+            <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
+                <p class="font-semibold text-lg mb-10">Create Batch</p>
+                <form method="post" class="timeline-form" id="timeline-create-form">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <div class="form-group mb-7" id="{{ form.name.label|lower }}_group">
+                            {{ form.name|show_label }}
+                            {{ form.name }}
+                        </div>
+                    </div>
+                    <div id="non_field_error"></div>
+                    <div class="text-center mt-10">
+                        <a class="cursor-pointer inline-block align-middle border border-grey px-8 py-2 rounded mr-6"
+                            onclick="closeModal('modal')">Close</a>
+                        <a class="cursor-pointer inline-block align-middle text-white bg-dark-blue rounded inline-flex items-center rounded px-8 py-2 text-base font-normal"
+                            onclick="createBatch()">Submit</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block body %}
+    <table id="batch-table" class="display border-0 table-with-no-border dataTable no-footer" style="width: 100%;"
+        role="grid" aria-describedby="batch-table_info">
+        <!-- Timepline template update Modal -->
+        <div class="jquery-modal current hidden batch_model" id="update-modal">
+            <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
+                <p class="font-semibold text-lg mb-10">Update Batch</p>
+                <form method="post" class="timeline-form">
+                    <div class="modal-body">
+                        <input type="hidden" name="update_id" id="update_id">
+                        {% csrf_token %}
+                        <div class="form-group mb-7" id="{{ form.name.label|lower }}_update_group">
+                            {{ form.name|show_label }}
+                            {{ form.name|add_id:'update' }}
+                        </div>
+                    </div>
+                    <div id="update_non_field_error"></div>
+                    <div class="text-center mt-10">
+                        <a class="cursor-pointer inline-block align-middle border border-grey px-8 py-2 rounded mr-6"
+                            onclick="closeModal('update-modal')">Close</a>
+                        <a class="cursor-pointer inline-block align-middle text-white bg-dark-blue rounded inline-flex items-center rounded px-8 py-2 text-base font-normal"
+                            onclick="updateBatch()">
+                            Submit
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </table>
+{% endblock %}
+
+{% block script %}
+    <script>
+        $(document).ready(function () {
+            $(document).ready(function () {
+                AjaxDatatableViewUtils.initialize_table(
+                    $('#batch-table'),
+                    "{% url 'batch.datatable' %}",
+                    {
+                        serverSide: true,
+                        processing: true,
+                        autoWidth: false,
+                        scrollX: false,
+                    },
+                );
+            });
+        });
+
+        function openModal() {
+            document.getElementById("modal").classList.remove("hidden");
+            document.getElementById("modal").classList.add("blocker");
+        }
+
+        function closeModal(name) {
+            document.getElementById(name).classList.remove("blocker");
+            document.getElementById(name).classList.add("hidden");
+        }
+
+        function createBatch() {
+            $('.page-loader').show();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'batch.create' %}",
+                headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
+                data: {
+                    name: $('#id_name').val(),
+                },
+                success: function (data) {
+                    $('.form_errors').remove()
+                    $('.page-loader').hide();
+                    if (data.status === 'success') {
+                        $('#batch-table').DataTable().ajax.reload()
+                        closeModal('modal');
+                    }
+                    else {
+                        const fieldErrors = JSON.parse(data.field_errors);
+                        const nonFieldErrors = JSON.parse(data.non_field_errors);
+                        // let non_field_error = nonFieldErrors[0]['message']
+                        // $('#non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + non_field_error + '</span>')
+                        for (field in fieldErrors) {
+                            $('#' + field + '_group').append('<span id="reason_error" class="form_errors ajax-error text-red-600">' + fieldErrors[field][0].message + '</span>');
+                        }
+                    }
+                }
+            });
+        }
+
+        function openUpdateModel(id) {
+            $('.page-loader').show();
+            const modal = document.getElementById("update-modal");
+            $.ajax({
+                type: "GET",
+                url: "{% url 'batch.edit-form' %}",
+                data: {
+                    id: id
+                },
+                success: function (data) {
+                    $('.page-loader').hide();
+                    $('#update_name').val(data.batch.name);
+                    $('#update_id').val(id);
+                }
+            });
+            modal.classList.remove("hidden");
+            modal.classList.add("blocker");
+        }
+
+        function updateBatch() {
+            $('.page-loader').show();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'batch.edit' %}",
+                headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
+                data: {
+                    id: $("#update_id").val(),
+                    name: $('#update_name').val(),
+                },
+                success: function (data) {
+                    $('.form_errors').remove()
+                    $('.page-loader').hide();
+                    if (data.status === 'success') {
+                        $('#batch-table').DataTable().ajax.reload()
+                        closeModal('update-modal')
+                    }
+                    else {
+                        const fieldErrors = JSON.parse(data.field_errors);
+                        const nonFieldErrors = JSON.parse(data.non_field_errors);
+                        // let non_field_error = nonFieldErrors[0]['message']
+                        // $('#update_non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + non_field_error + '</span>')
+                        for (field in fieldErrors) {
+                            $('#' + field + '_update_group').append('<span id="reason_error" class="ajax-error form_errors text-red-600">' + fieldErrors[field][0].message + '</span>');
+                        }
+                    }
+                }
+            });
+        }
+
+        function deleteBatch(id) {
+            let text = 'Are you do you want to delete'
+            if (confirm(text) == true) {
+                $('.page-loader').show();
+                $.ajax({
+                    type: "DELETE",
+                    url: "{% url 'batch.delete' %}",
+                    headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
+                    data: { id: id },
+                    success: function (data) {
+                        $('.page-loader').hide();
+                        $('#batch-table').DataTable().ajax.reload()
+                    }
+                });
+            }
+        }
+    </script>
+{% endblock %}
