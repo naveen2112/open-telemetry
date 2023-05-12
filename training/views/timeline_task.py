@@ -12,7 +12,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 
 
-class TimelineTemplateTaskDataTable(CustomDatatable, LoginRequiredMixin):
+class TimelineTemplateTaskDataTable(LoginRequiredMixin, CustomDatatable):
     """
     Timeline Template Task Datatable
     """

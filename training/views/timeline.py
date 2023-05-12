@@ -16,7 +16,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 
 
-class TimelineTemplate(FormView, LoginRequiredMixin):
+class TimelineTemplate(LoginRequiredMixin, FormView):
     """
     Timeline Template
     """
@@ -24,7 +24,7 @@ class TimelineTemplate(FormView, LoginRequiredMixin):
     template_name = "timeline_template.html"
 
 
-class TimelineTemplateDataTable(CustomDatatable, LoginRequiredMixin):
+class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
     """
     Timeline Template Datatable
     """
