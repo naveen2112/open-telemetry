@@ -24,7 +24,6 @@
     <link href="{% static 'css/search.css' %}" rel="stylesheet">
     <link href="{% static 'css/style.css' %}" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" />
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <!-- Tailwind elements -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tw-elements/dist/css/index.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
@@ -92,6 +91,7 @@
         <script>
             let showLoader = () => {
                 $('.page-loader').show();
+                hideLoader()
             }
             let hideLoader = () => {
                 $('.page-loader').hide();

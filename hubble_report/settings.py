@@ -36,8 +36,7 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = [env("SITE_HOST")]
-
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -53,6 +52,12 @@ INSTALLED_APPS = [
     "hubble",
     "ajax_datatable",
 ]
+
+SESSION_ENGINE = "django.contrib.sessions.backends.file"
+SESSION_FILE_PATH = os.path.join(BASE_DIR, "session_files")
+
+# Session age should be in secs
+SESSION_COOKIE_AGE = 288000
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -140,3 +145,36 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+AUTH_USER_MODEL = "hubble.User"
+
+ENV_NAME = env("ENV_NAME")
+
+CSRF_TRUSTED_ORIGINS = [f'https://*.{env("SITE_HOST")}']
+
+LOGIN_URL = "index"
+
+LOGGING = {
+    "version": 1,
+    "filters": {
+        "require_debug_true": {
+            "()": "django.utils.log.RequireDebugTrue",
+        }
+    },
+    "handlers": {
+        "console": {
+            "level": "DEBUG",
+            "filters": ["require_debug_true"],
+            "class": "logging.StreamHandler",
+        }
+    },
+    "loggers": {
+        "django.db.backends": {
+            "level": "DEBUG",
+            "handlers": ["console"],
+        }
+    },
+}
+
+LOGIN_REDIRECT_URL = 'training.home'
+LOGIN_URL = '/login'
