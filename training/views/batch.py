@@ -136,7 +136,6 @@ def delete_batch(request):
 
 def batch_details(request, pk):
     batch = Batch.objects.get(id=pk)
-    request.session['batch'] = pk
     context = {
         "batch": batch,
         "batch_id": pk,
