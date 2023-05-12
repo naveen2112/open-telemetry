@@ -10,8 +10,8 @@ def edit_btn(id):
             </a>"""
 
 
-def delete_btn(id):
-    return f"""<a href="javascript:void(0)" onclick="deleteTimeline({id})">
+def delete_btn(function):
+    return f"""<a href="javascript:void(0)" onclick="{function}">
                 <div class="inline mr-1"> <span class="hbl hbl-delete text-2xl text-dark-black/50"></span></div>
             </a>"""   
 

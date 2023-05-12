@@ -433,7 +433,11 @@
                             $('#' + field + '_duplicate_group').append('<span id="reason_error" class="ajax-error form_errors text-red-600">' + fieldErrors[field][0].message + '</span>');
                         }
                     }
-                }
+                },
+                error: function () {
+                    alert("Something went wrong");
+                    location.reload();
+                },
             });
         }
         $('#reportrange').daterangepicker({
