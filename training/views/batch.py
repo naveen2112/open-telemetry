@@ -25,7 +25,6 @@ class BatchDataTable(CustomDatatable):
     column_defs = [
         {"name": "id", "visible": False, "searchable": False},
         {"name": "name", "visible": True, "searchable": False},
-        # {"name": "count", "visible": True, "searchable": False},
         {
             "name": "action",
             "title": "Action",
@@ -49,11 +48,6 @@ class BatchDataTable(CustomDatatable):
             "action"
         ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         return
-    
-
-    # def get_initial_queryset(self, request=None):
-    #     data = Batch.objects.annotate(count=Count(F("batch_id__intern")))
-    #     return data
 
 
 def create_batch(request):
