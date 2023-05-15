@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.http import JsonResponse
-from django.contrib.auth import login, logout
+from django.contrib.auth import login as auth_login, logout
 from django.contrib import messages
 from hubble_report.settings import ENV_NAME
 from django.http import HttpResponseRedirect
@@ -26,7 +26,7 @@ def signin(request):
             if User.objects.filter(email=user_email).exists():
                 user = User.objects.get(email=user_email)
                 if user is not None:
-                    login(request, user)
+                    auth_login(request, user)
                     return redirect("report")
             else:
                 messages.add_message(
