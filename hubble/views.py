@@ -28,7 +28,7 @@ def signin(request):
                 user = User.objects.get(email=user_email)
                 if user is not None:
                     auth_login(request, user)
-                    return redirect("report")
+                    return redirect("index")
             else:
                 messages.add_message(
                     request,
