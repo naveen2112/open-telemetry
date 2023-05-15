@@ -22,6 +22,9 @@ RUN poetry install --no-interaction --no-ansi --no-root
 # Adding project files
 ADD . .
 
+RUN mkdir -p session_files
+RUN mkdir -p /var/app/static/training/pdf
+
 ADD docker/app/entrypoint.sh /usr/bin/
 RUN chmod +x /usr/bin/entrypoint.sh
 ENTRYPOINT ["entrypoint.sh"]

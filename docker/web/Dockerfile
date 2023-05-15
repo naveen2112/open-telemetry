@@ -5,6 +5,12 @@ FROM nginx:1.23.1
 # Install dependencies
 RUN apt-get update -qq && apt-get -y install apache2-utils curl build-essential
 
+# RUN wget https://www.python.org/ftp/python/3.10.9/Python-3.10.9.tgz 
+# RUN tar xzf Python-3.10.9.tgz 
+# RUN cd Python-3.10.9
+# RUN ./configure --enable-optimizations 
+# RUN make altinstall
+
 # establish where Nginx should look for files\
 ENV HUBBLE_ROOT=/var/app
 
@@ -14,6 +20,8 @@ WORKDIR $HUBBLE_ROOT
 ADD docker/web/webserver.conf /etc/nginx/conf.d/default.conf
 
 ADD docker/web/nginx.conf /etc/nginx/nginx.conf
+
+ADD static static
 
 #Log Config
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
