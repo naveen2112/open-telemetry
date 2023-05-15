@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.http import JsonResponse
 from django.contrib.auth import login, logout
 from django.contrib import messages
 from hubble_report.settings import ENV_NAME
@@ -10,7 +11,7 @@ from core import constants
 from django.http import JsonResponse
 
 
-def index(request):
+def login(request):
     context = {}
     if ENV_NAME == constants.ENVIRONMENT_DEVELOPMENT:
         context["login_method"] = "testing"
@@ -27,7 +28,7 @@ def signin(request):
                 user = User.objects.get(email=user_email)
                 if user is not None:
                     login(request, user)
-                    return redirect("index")
+                    return redirect("report")
             else:
                 messages.add_message(
                     request,
@@ -39,7 +40,7 @@ def signin(request):
         else:
             return redirect("index")
     else:
-        flow = auth_helper.get_sign_in_flow()
+        flow = auth_helper.get_sign_in_flow(request.get_host())
         try:
             request.session["auth_flow"] = flow
         except Exception as e:
