@@ -35,9 +35,9 @@ def signin(request):
                     " %s is an invalid mail-id, please enter a valid mail-id."
                     % user_email,
                 )
-                return redirect("index")
+                return redirect("login")
         else:
-            return redirect("index")
+            return redirect("login")
     else:
         flow = auth_helper.get_sign_in_flow(request.get_host())
         try:
@@ -50,7 +50,7 @@ def signin(request):
 def signout(request):
     auth_helper.remove_user_and_token(request)
     logout(request)
-    return HttpResponseRedirect(reverse("index"))
+    return HttpResponseRedirect(reverse("login"))
 
 
 def callback(request):
@@ -60,7 +60,7 @@ def callback(request):
     user = User.objects.get(email=user_crendentials)
     if user is not None:
         login(request, user)
-        return redirect("index")
+        return redirect("login")
     else:
         messages.add_message(
             request,
@@ -68,7 +68,7 @@ def callback(request):
             " %s is an invalid mail-id, please enter a valid mail-id."
             % user_crendentials,
         )
-        return redirect("index")
+        return redirect("login")
 
 
 def health_check(request):
