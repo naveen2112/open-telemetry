@@ -10,7 +10,7 @@ from hubble.models import User
 from core import constants
 
 
-def index(request):
+def login(request):
     context = {}
     if ENV_NAME == constants.ENVIRONMENT_DEVELOPMENT:
         context["login_method"] = "testing"
@@ -39,7 +39,7 @@ def signin(request):
         else:
             return redirect("index")
     else:
-        flow = auth_helper.get_sign_in_flow()
+        flow = auth_helper.get_sign_in_flow(request.get_host())
         try:
             request.session["auth_flow"] = flow
         except Exception as e:

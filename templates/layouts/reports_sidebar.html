@@ -1,11 +1,13 @@
+{% load static %}
+
 <div class="bg-primary-dark nav-animation">
 
     <div class="py-5 flex items-start  justify-between flex-col h-full nav-content">
 
         <div class='px-2.5'>
-            <a><img src="https://hubble-dev.mallow-tech.com/assets/png/logo.png" alt="logo"
+            <a><img src="{% static 'images/logo.png' %}" alt="Mallow Technologies - Mobile and web app development"
                     class='mb-8 w-full h-auto mx-auto' />
-            </a>
+                </a>
         </div>
 
         <div class='text-white text-sm grow overflow-auto font-medium text-center w-full' id="sidebar">
@@ -13,7 +15,7 @@
             <div class="py-3  flex-wrap rounded-bl-lg flex w-full justify-start ">
                 <a href="" tabindex="-1" class='flex px-2.5 justify-start items-center w-full'>
                     <div class="flex justify-center mr-4">
-                        <img src="https://hubble-dev.mallow-tech.com/assets/svgs/time-sheet.svg" alt="timesheet" />
+                        <img src="{% static 'images/time-sheet.svg' %}" alt="timesheet icon" />
                     </div>
                     <div>Report</div>
                 </a>
@@ -34,8 +36,7 @@
 
         <div class='mt-2 px-3'>
             <a href="" tabindex="-1">
-                <img src='https://hubble-dev.mallow-tech.com/assets/svgs/user-profile.svg' class='w-8 h-8 rounded-full'
-                    alt="" />
+                <img src="{% static 'images/user-profile.svg' %}" class='w-8 h-8 rounded-full' alt="profile icon" />
             </a>
         </div>
 

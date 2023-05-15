@@ -1,10 +1,5 @@
 import msal
-from hubble_report.settings import BASE_DIR
-import environ
-import os
-
-env = environ.Env(DEBUG=(bool, False))
-environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
+from hubble_report.settings import env
 
 
 def load_cache(request):
@@ -28,9 +23,9 @@ def get_msal_app(cache=None):
     )
 
 
-def get_sign_in_flow():
+def get_sign_in_flow(callback_module):
     return get_msal_app().initiate_auth_code_flow(
-        scopes=["user.read"], redirect_uri=env("CALLBACK_PATH")
+        scopes=["user.read"], redirect_uri="https://" + callback_module + env("REDIRECT_PATH")
     )
 
 

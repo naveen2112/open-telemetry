@@ -150,28 +150,6 @@ AUTH_USER_MODEL = "hubble.User"
 
 ENV_NAME = env("ENV_NAME")
 
-CSRF_TRUSTED_ORIGINS = [f'https://*.{env("SITE_HOST")}']
+CSRF_TRUSTED_ORIGINS = []
 
-LOGIN_URL = "index"
-
-LOGGING = {
-    "version": 1,
-    "filters": {
-        "require_debug_true": {
-            "()": "django.utils.log.RequireDebugTrue",
-        }
-    },
-    "handlers": {
-        "console": {
-            "level": "DEBUG",
-            "filters": ["require_debug_true"],
-            "class": "logging.StreamHandler",
-        }
-    },
-    "loggers": {
-        "django.db.backends": {
-            "level": "DEBUG",
-            "handlers": ["console"],
-        }
-    },
-}
+LOGIN_URL = "login"
