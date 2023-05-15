@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.http import JsonResponse
-from django.contrib.auth import login, logout
+from django.contrib.auth import login as auth_login, logout
 from django.contrib import messages
 from hubble_report.settings import ENV_NAME
 from django.http import HttpResponseRedirect
@@ -27,7 +27,7 @@ def signin(request):
             if User.objects.filter(email=user_email).exists():
                 user = User.objects.get(email=user_email)
                 if user is not None:
-                    login(request, user)
+                    auth_login(request, user)
                     return redirect("report")
             else:
                 messages.add_message(
@@ -36,9 +36,9 @@ def signin(request):
                     " %s is an invalid mail-id, please enter a valid mail-id."
                     % user_email,
                 )
-                return redirect("index")
+                return redirect("login")
         else:
-            return redirect("index")
+            return redirect("login")
     else:
         flow = auth_helper.get_sign_in_flow(request.get_host())
         try:
@@ -51,7 +51,7 @@ def signin(request):
 def signout(request):
     auth_helper.remove_user_and_token(request)
     logout(request)
-    return HttpResponseRedirect(reverse("index"))
+    return HttpResponseRedirect(reverse("login"))
 
 
 def callback(request):
@@ -61,7 +61,7 @@ def callback(request):
     user = User.objects.get(email=user_crendentials)
     if user is not None:
         login(request, user)
-        return redirect("index")
+        return redirect("login")
     else:
         messages.add_message(
             request,
@@ -69,8 +69,8 @@ def callback(request):
             " %s is an invalid mail-id, please enter a valid mail-id."
             % user_crendentials,
         )
-        return redirect("index")
-    
+        return redirect("login")
+
 
 def health_check(request):
     return JsonResponse(data="", status=200, safe=False)
