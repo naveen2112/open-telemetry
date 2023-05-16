@@ -440,34 +440,5 @@
                 },
             });
         }
-        $('#reportrange').daterangepicker({
-            showDropdowns: true,
-            startDate: moment().subtract(7, 'days').format('L'),
-            endDate: moment().add(23, 'days').format('L'),
-            maxSpan: { months: 3 },
-            ranges: {
-                'Today': [moment(), moment()],
-                'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
-                'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-                'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-                'This Month': [moment().startOf('month'), moment().endOf('month')],
-                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-            },
-            alwaysShowCalendars: true
-        }).on('apply.daterangepicker', function (ev, picker) {
-            $('#reportrange')
-                .text(`${picker.startDate.format('DD MMM Y')} - ${picker.endDate.format('DD MMM Y')}`)
-                .attr('start-date', `${picker.startDate.format('YYYY-MM-DD')}`)
-                .attr('end-date', `${picker.endDate.format('YYYY-MM-DD')}`)
-            var table = $("#timeline-table").DataTable();
-            console.log(table);
-            table.ajax.reload();
-        });
-
-        $('#reportrange')
-            .text(`${moment().subtract(7, 'days').format('DD MMM Y')} - ${moment().add(23, 'days').format('DD MMM Y')}`)
-            .attr('start-date', `${moment().subtract(7, 'days').format('YYYY-MM-DD')}`)
-            .attr('end-date', `${moment().add(23, 'days').format('YYYY-MM-DD')}`);
-
     </script>
 {% endblock %}
