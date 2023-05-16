@@ -1,10 +1,12 @@
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 
 
-def index(request):
+@login_required()
+def report(request):
     context = {}
     return render(
         request=request,
-        template_name="index.html",
+        template_name="report.html",
         context=context,
     )

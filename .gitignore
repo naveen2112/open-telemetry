@@ -51,6 +51,8 @@ Thumbs.db
 # Large files to be ignored
 .env
 
+# Session files
+/session_files
 # Cache files 
 
 hubble_report/hubble_report/__pycache__
