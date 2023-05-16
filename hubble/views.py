@@ -13,9 +13,9 @@ from core import constants
 def login(request):
     context = {}
     if ENV_NAME == constants.ENVIRONMENT_DEVELOPMENT:
-        context["login_method"] = "testing"
+        context["login_method"] = constants.ENVIRONMENT_DEVELOPMENT
     else:
-        context["login_method"] = "production"
+        context["login_method"] = constants.ENVIRONMENT_PRODUCTION
     return render(request, "auth/login.html", context)
 
 
