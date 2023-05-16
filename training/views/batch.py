@@ -4,6 +4,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from core import template_utils
 from core.utils import CustomDatatable
+from hubble.models.sub_batch import SubBatch
 from hubble.models.batch import Batch
 from hubble.models.user import User
 from training.forms import BatchForm
@@ -25,6 +26,7 @@ class BatchDataTable(CustomDatatable):
     column_defs = [
         {"name": "id", "visible": False, "searchable": False},
         {"name": "name", "visible": True, "searchable": False},
+        {"name": "total_trainies", "title": "Total Trainies", "visible": True, "searchable": False},
         {
             "name": "action",
             "title": "Action",
@@ -48,6 +50,11 @@ class BatchDataTable(CustomDatatable):
             "action"
         ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         return
+
+
+    def get_initial_queryset(self, request=None):
+        data = Batch.objects.annotate(total_trainies=Count(F("batch_id__intern")))
+        return data
 
 
 def create_batch(request):
@@ -116,16 +123,16 @@ def delete_batch(request):
     Delete Batch
     Soft delete the batch and record the deletion time in deleted_at field
     """
-    
-    delete = QueryDict(
-        request.body
-    )  # Creates a QueryDict object from the request body
-    id = delete.get("id")  # Get id from dictionary
-    batch = get_object_or_404(Batch, id=id)
-    batch.delete()
-    return JsonResponse({"message": "Batch deleted succcessfully"})
-    # except Exception as e:
-    #     return JsonResponse({"message": "Error while deleting Batch!"}, status=500)
+    try:
+        delete = QueryDict(
+            request.body
+        )  # Creates a QueryDict object from the request body
+        id = delete.get("id")  # Get id from dictionary
+        batch = get_object_or_404(Batch, id=id)
+        batch.delete()
+        return JsonResponse({"message": "Batch deleted succcessfully"})
+    except Exception as e:
+        return JsonResponse({"message": "Error while deleting Batch!"}, status=500)
 
 
 def batch_details(request, pk):

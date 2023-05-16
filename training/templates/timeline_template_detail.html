@@ -166,7 +166,6 @@
             $("#sortable > tr").each(function() {
             copy_selected.push($(this).children(':first').text());
         })
-        console.log('copy',copy_seleted)
         });
         $(function() {
             $( "#sortable" ).sortable({
@@ -180,7 +179,6 @@
                         copy_seleted = selectedData
                         updateOrder(copy_seleted)
                     }
-                    console.log(selectedData);
                 }
             });
         });

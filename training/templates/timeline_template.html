@@ -182,36 +182,6 @@
 {% block script %}
     <script>
         $(document).ready(function () {
-            var selectTemplate = `
-                        <div id="drop-btn" class="cus-dropdown-icon block border border-primary-dark-30 rounded-md mt-2.5 w-full focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 py-1 px-2">
-                            <div class="cursor-pointer text-truncate w-11/12 dropdown_selected_value" id="show-value">
-                            </div>
-                        </div>`;
-
-            $('.work-basic-dropdown').each(function () {
-                if ($(this).find('.multi-select').length == 0) {
-                    var elemId = $(this).find("select").attr("id");
-                    $("#" + elemId).customSearch({
-                        closeOnCheck: true,
-                        clickBtnTemplate: selectTemplate,
-                        listStyle: "p-3",
-                        hideClearIcon: true,
-                        targetId: "#show-value",
-                        popupStyles: "z-20 absolute rounded-md bg-white text-dark-black block shadow-md w-64 top-10 left-0 max-h-96 overflow-hidden",
-                        onItemCheck: function (values) {
-                            if (elemId == "work_schedule") {
-                                hideShowDays();
-                            }
-                        },
-                        onSelectOpen: function () {
-                            $('.content-page').css("overflow-y", "hidden");
-                        },
-                        onSelectClose: function () {
-                            $('.content-page').css("overflow-y", "auto");
-                        }
-                    })
-                }
-            })
 
             $(document).ready(function () {
                 AjaxDatatableViewUtils.initialize_table(
@@ -460,7 +430,6 @@
                 .attr('start-date', `${picker.startDate.format('YYYY-MM-DD')}`)
                 .attr('end-date', `${picker.endDate.format('YYYY-MM-DD')}`)
             var table = $("#timeline-table").DataTable();
-            console.log(table);
             table.ajax.reload();
         });
 

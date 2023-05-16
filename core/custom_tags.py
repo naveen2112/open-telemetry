@@ -49,10 +49,10 @@ def show_field_errors(field):
 @register.filter()
 def show_non_field_errors(error):
     if error:
-        error_message = strip_tags(error) 
         return mark_safe(
-            '<div class="alert alert-danger"><p><span class="fe fe-alert-triangle fe-16 mr-2"></span>{}'
-            "</p></div>".format(error_message)
+            '<span id="reason_error" class="ajax-error text-red-600">{}</span>'.format(
+                error
+            )
         )
     else:
         return ""

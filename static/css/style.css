@@ -1,4 +1,4 @@
-thead {
+.dataTable thead {
     background-color: rgb(205 211 229);
 }
 
@@ -67,4 +67,43 @@ thead {
 
 #sortable:first-child {
     cursor: grab;
+}
+
+.gap-205 {
+    row-gap: 2rem !important;
+    column-gap: 2.5rem !important;
+}
+
+.gap-cols-1 {
+    column-gap: 1rem;
+}
+
+.gap-210 {
+    row-gap: 2rem !important;
+    column-gap: 10rem !important;
+}
+
+.mr-6 {
+    margin-right: 30px;
+}
+
+#id_comment {
+    width: 100%;
+}
+
+.timeline-input {
+    visibility: hidden;
+}
+
+.start_date_input {
+    width: 100%;
+}
+
+#tool-tip-data {
+    background-color: #2248C3 !important;
+    position: relative;
+    top: -48px;
+    left: 77px;
+    padding: 12px;
+    display: none;
 }
