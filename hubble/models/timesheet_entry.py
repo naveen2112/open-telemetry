@@ -194,7 +194,7 @@ class TimesheetEntry(models.Model):
     created_at = models.DateTimeField(blank=True, null=True)
     updated_at = models.DateTimeField(blank=True, null=True)
     objects = TableManager()
-    # datatable = DatatableQuery.as_manager()
+
 
     class Meta:
         managed = False

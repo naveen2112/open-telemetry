@@ -17,6 +17,7 @@ from core import template_utils
 
 @login_required()
 def index(request):
+    #To render the initial or home page, also efficiency report
     context = {}
     return render(
         request=request,
@@ -27,6 +28,7 @@ def index(request):
 
 @login_required()
 def monetization_report(request):
+    #To render the monetization gap report
     context = {}
     return render(
         request=request,
@@ -37,6 +39,7 @@ def monetization_report(request):
 
 @login_required()
 def kpi_report(request):
+    #To render KPI report 
     context = {}
     return render(
         request=request,
@@ -47,6 +50,7 @@ def kpi_report(request):
 
 @login_required()
 def detailed_efficiency(request, pk):
+    #This function is responsible for the detailed efficiency for respective teams
     data = get_object_or_404(Team, pk=pk)
     context = {"data": data}
     return render(
@@ -56,7 +60,10 @@ def detailed_efficiency(request, pk):
     )
 
 
-class Datatable(CustomDatatable):
+class EfficiencyDatatable(CustomDatatable):
+    """
+    Datatable for overall efficiency
+    """
     model = TimesheetEntry
     initial_order = [
         ["team__name", "asc"],
@@ -93,7 +100,7 @@ class Datatable(CustomDatatable):
     ]
 
 
-    def customize_row(self, row, obj):
+    def customize_row(self, row, obj): #This is responsible for adding the view action button
         buttons = template_utils.show_btn(
             reverse("detailed_efficiency", args=[obj["pk"]])
         )
@@ -104,8 +111,9 @@ class Datatable(CustomDatatable):
 
 
     def get_initial_queryset(self, request=None):
-        """Please rename anyone of the fields in the query to `pk`,
-        so that it would be useful to render_row_details"""
+        """
+        To load a queryset into the datatable
+        """
         data = (
             TimesheetEntry.objects.select_related("user", "team")
             .date_range(datefrom = request.REQUEST.get("datafrom"), dateto = request.REQUEST.get("dateto"))
@@ -127,7 +135,7 @@ class Datatable(CustomDatatable):
         return data
 
 
-    def render_column(self, row, column):
+    def render_column(self, row, column): #Used to differnetiate the data through various colors
         if column == "capacity":
             if int(row["capacity"]) >= 75:
                 return f'<span class="bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm">{row["capacity"]}</span>'
@@ -139,6 +147,9 @@ class Datatable(CustomDatatable):
 
 
 class MonetizationDatatable(CustomDatatable):
+    """
+    Monetization Gap report
+    """
     model = TimesheetEntry
     initial_order = [
         ["team__name", "asc"],
@@ -190,7 +201,10 @@ class MonetizationDatatable(CustomDatatable):
     ]
 
 
-    def get_initial_queryset(self, request=None):
+    def get_initial_queryset(self, request=None): 
+        """
+            To load a queryset into the datatable
+        """
         data = (
             TimesheetEntry.objects.select_related("user", "project")
             .date_range(
@@ -206,7 +220,7 @@ class MonetizationDatatable(CustomDatatable):
         return data
 
 
-    def render_column(self, row, column):
+    def render_column(self, row, column): #This is responsible for percentage symbol and data tag colors
         if column == "gap":
             return f'{row["gap"]}%'
         if column == "ratings":
@@ -218,6 +232,9 @@ class MonetizationDatatable(CustomDatatable):
 
 
 class KPIDatatable(CustomDatatable):
+    """
+    Datatable for KPI report
+    """
     model = TimesheetEntry
     show_column_filters = False
     column_defs = [
@@ -266,7 +283,10 @@ class KPIDatatable(CustomDatatable):
     ]
 
 
-    def get_initial_queryset(self, request=None):
+    def get_initial_queryset(self, request=None): 
+        """
+            To load a queryset into the datatable
+        """
         data = (
             TimesheetEntry.objects.select_related("user", "project")
             .date_range(
@@ -279,6 +299,9 @@ class KPIDatatable(CustomDatatable):
 
 
 class DetaileEfficiencyDatatable(CustomDatatable):
+    """
+        Datatable for detailed efficiency report
+    """
     model = TimesheetEntry
     search_value_seperator = "+"
     show_column_filters = False
@@ -311,6 +334,9 @@ class DetaileEfficiencyDatatable(CustomDatatable):
 
 
     def get_initial_queryset(self, request=None):
+        """
+            To load a queryset into the datatable
+        """ 
         data = (
             TimesheetEntry.objects.select_related("user", "team")
             .date_range(datefrom = "2022-01-01", dateto = "2023-01-01")
@@ -342,7 +368,7 @@ class DetaileEfficiencyDatatable(CustomDatatable):
         return data
 
 
-    def render_column(self, row, column):
+    def render_column(self, row, column): #This is responsible for updating the capacity data with various colors based on the value
         if column == "Capacity":
             if int(row["Capacity"]) >= 75:
                 return f'<span class="bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm">{row["Capacity"]}</span>'

@@ -107,7 +107,6 @@
             table.search(searchvalue).draw();
             });
         $("#project_filterdropdown").change (function(){
-            console.log($(this).val());
             var table = $("#reports-table").DataTable();
             table.ajax.reload();
         });  
