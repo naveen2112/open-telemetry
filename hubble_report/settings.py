@@ -150,6 +150,11 @@ AUTH_USER_MODEL = "hubble.User"
 
 ENV_NAME = env("ENV_NAME")
 
-CSRF_TRUSTED_ORIGINS = []
+CSRF_TRUSTED_ORIGINS = [
+    "https://reports.hubble-reports.test",
+    "https://training.hubble-reports.test",
+    "https://reports-dev.mallow-tech.com",
+    "https://training-dev.mallow-tech.com",
+]
 
 LOGIN_URL = "login"

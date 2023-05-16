@@ -7,6 +7,6 @@ def report(request):
     context = {}
     return render(
         request=request,
-        template_name="reports.html",
+        template_name="report.html",
         context=context,
     )
