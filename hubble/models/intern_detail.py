@@ -2,7 +2,7 @@ from django.db import models
 from .user import User
 from core import db
 
-class InternDetail(db.BaseModel):
+class InternDetail(db.SoftDeleteWithBaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="intern_user")
     primary_mentor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="intern_primary_mentor")
     secondary_mentor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="intern_secondary_mentor")

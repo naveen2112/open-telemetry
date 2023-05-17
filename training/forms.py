@@ -115,7 +115,6 @@ class SubBatchForm(forms.ModelForm):
                 attrs={
                     "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
                     "placeholder": "Select Team...",
-                    "required": False,
                 }
             ),
             "start_date": forms.DateInput(
@@ -127,7 +126,6 @@ class SubBatchForm(forms.ModelForm):
             "timeline": forms.TextInput(
                 attrs={
                     "class": "w-full block border border-primary-dark-30 mt-2.5 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 bg-transparent w-250 timeline-input",
-                    "readonly": True,
                 }
             ),
         }
@@ -148,14 +146,12 @@ class InternDetailForm(forms.ModelForm):
                 attrs={
                     "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
                     "placeholder": "Select Primary Mentor...",
-                    "required": False,
                 }
             ),
             "secondary_mentor": forms.Select(
                 attrs={
                     "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
                     "placeholder": "Select Secondary Mentor...",
-                    "required": False,
                 }
             ),
         }
@@ -171,7 +167,6 @@ class AddInternForm(forms.ModelForm):
                 attrs={
                     "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
                     "placeholder": "Select Trainie...",
-                    "required": False,
                 }
             ),
             "college": forms.TextInput(

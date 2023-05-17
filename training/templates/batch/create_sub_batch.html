@@ -42,7 +42,7 @@
                 {{ form.name|show_field_errors }}
             </div>
             <div class="work-basic-dropdown form-field">
-                {{ form.team |show_label }}
+                {{ form.team|show_label }}
                 <div class="relative mt-2.5">
                     {{ form.team }}
                 </div>
@@ -187,7 +187,6 @@
                 locale: {
                     format: 'YYYY-MM-DD'
                 }
-                // maxYear: parseInt(moment().format('YYYY'),10)
             });
         });
     </script>

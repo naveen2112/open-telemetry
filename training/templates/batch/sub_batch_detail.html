@@ -76,12 +76,12 @@
                         <div class="modal-body">
                             {% csrf_token %}
                             <div class="work-basic-dropdown mb-7" id="{{ form.user.label|lower }}_group">
-                                {{ form.user |show_label }}
+                                {{ form.user|show_label }}
                                 <div class="relative">
                                     {{ form.user }}
                                 </div>
                             </div>
-                            <div class="mb-7" id="{{form.college.label|lower}}_group">
+                            <div class="mb-7" id="{{ form.college.label|lower }}_group">
                                 {{ form.college|show_label }}
                                 {{ form.college }}
                             </div>
@@ -142,7 +142,7 @@
                 data: {
                     user: $('#id_user').val(),
                     college: $('#id_college').val(),
-                    sub_batch: '{{sub_batch.id}}'
+                    sub_batch: '{{ sub_batch.id }}'
                 },
                 success: function (data) {
                     $('.form_errors').remove()

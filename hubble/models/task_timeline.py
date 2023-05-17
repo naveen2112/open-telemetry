@@ -3,7 +3,7 @@ from core import db
 from .sub_batch import SubBatch
 from .user import User
 
-class Task_Timeline(db.BaseModel):
+class Task_Timeline(db.SoftDeleteWithBaseModel):
     PRESENT_TYPE_REMOTE = "Remote"
     PRESENT_TYPE_IN_PERSON = "In-Person"
     PRESENT_TYPES = [
