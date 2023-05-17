@@ -26,7 +26,7 @@
         <div class='flex justify-between items-center my-5'>
             <div class='flex items-center px-2'>
                 <div>
-                    <p class='text-base text-dark-black mb-1'>{{ data.name }} | {{data.id}} </p>
+                    <p class='text-base text-dark-black mb-1'>{{ data.name }} | {{ data.id }} </p>
                 </div>
             </div>
         </div>
@@ -95,7 +95,7 @@
                 order : []
             }, 
             {
-                'team_filter': function(){
+                'team_filter': function() {
                     var url = window.location.href.split('/')
                     return url[url.length - 1]; 
                 }
@@ -105,11 +105,11 @@
             var searchvalue = $(this).val();
             var table = $("#reports-table").DataTable();
             table.search(searchvalue).draw();
-            });
-        $("#project_filterdropdown").change (function(){
+        });
+        $("#project_filterdropdown").change (function() {
             var table = $("#reports-table").DataTable();
             table.ajax.reload();
         });  
-        });
+    });
     </script>
 {% endblock %}

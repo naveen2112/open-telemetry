@@ -79,7 +79,7 @@ class EfficiencyDatatable(CustomDatatable):
         },
         {
             "name": "team__name",
-            "title": "Team-Name",
+            "title": "Team Name",
             "visible": True,
             "searchable": True,
         },
@@ -116,7 +116,7 @@ class EfficiencyDatatable(CustomDatatable):
         """
         data = (
             TimesheetEntry.objects.select_related("user", "team")
-            .date_range(datefrom = request.REQUEST.get("datafrom"), dateto = request.REQUEST.get("dateto"))
+            .date_range(from_date = request.REQUEST.get("from_date"), to_date = request.REQUEST.get("to_date"))
             .values("team__name")
             .annotate(
                 capacity=Round(
@@ -208,8 +208,8 @@ class MonetizationDatatable(CustomDatatable):
         data = (
             TimesheetEntry.objects.select_related("user", "project")
             .date_range(
-                datefrom="2022-01-01",
-                dateto="2023-01-01",
+                from_date="2022-01-01",
+                to_date="2023-01-01",
             )
             .monetization_fields()
             .filter(
@@ -290,8 +290,8 @@ class KPIDatatable(CustomDatatable):
         data = (
             TimesheetEntry.objects.select_related("user", "project")
             .date_range(
-                datefrom="2022-01-01",
-                dateto="2023-01-01",
+                from_date="2022-01-01",
+                to_date="2023-01-01",
             )
             .kpi_fields()
         )
@@ -339,7 +339,7 @@ class DetaileEfficiencyDatatable(CustomDatatable):
         """ 
         data = (
             TimesheetEntry.objects.select_related("user", "team")
-            .date_range(datefrom = "2022-01-01", dateto = "2023-01-01")
+            .date_range(from_date = "2022-01-01", to_date = "2023-01-01")
             .annotate(
                 Month=Func(
                     F("entry_date"),

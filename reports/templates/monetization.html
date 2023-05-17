@@ -1,7 +1,9 @@
 {% extends 'layouts/base.html' %}
 {% load static %}
 
-{% block title %}Monetization Gap {% endblock %}
+{% block title %}
+    Monetization Gap 
+{% endblock %}
 
 {% block header %}
     <div class="header bg-white">
@@ -90,11 +92,11 @@
 
             }, 
             {
-                'year_filter': function(){
-                    return $("#years").val() 
+                'year_filter': function() {
+                    return $("#years").val(); 
                 },
-                'month_filter' : function(){
-                    return $("[name='month']:checked").val()
+                'month_filter' : function() {
+                    return $("[name='month']:checked").val();
                 }
             }
         );
@@ -107,9 +109,6 @@
             var table = $("#reports-table").DataTable();
             table.ajax.reload();
         });  
-        });
-    </script>
-    <script>
         dateRender();
         function dateRender() {
             var start_year = 2010,
@@ -153,5 +152,6 @@
                 });
 
         }
+    });
     </script>
 {% endblock %}

@@ -19,7 +19,7 @@ from django.db.models import (
 
 
 class DatatableQuery(models.QuerySet):
-    def date_range(self, datefrom, dateto):
+    def date_range(self, from_date, to_date):
         return self.filter(
             Q(
                 entry_date__range=(
@@ -27,7 +27,7 @@ class DatatableQuery(models.QuerySet):
                     Coalesce(F("user__expected_user_efficiencies__effective_to"), timezone.now()),
                 )
             )
-            & Q(entry_date__range=(datefrom, dateto))
+            & Q(entry_date__range=(from_date, to_date))
         )
 
 
