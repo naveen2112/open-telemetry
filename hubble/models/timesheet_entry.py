@@ -158,18 +158,17 @@ class TableManager(models.Manager):
     def get_queryset(self):
         return DatatableQuery(self.model, using=self._db)
 
-
-    def date_range(self, datefrom, dateto):
-        return self.get_queryset.date_range(datefrom, dateto)
-
+    def date_range(self, from_date, to_date):
+        return self.get_queryset.date_range(from_date, to_date)
 
     def efficiency_fields(self):
         return self.get_queryset.efficiency_fields()
 
-
     def monetization_fields(self):
         return self.get_queryset.monetization_fields()
 
+    def kpi_fields(self):
+        return self.get_queryset.kpi_fields()
 
 class TimesheetEntry(models.Model):
     id = models.BigAutoField(primary_key=True)

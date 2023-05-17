@@ -1,6 +1,6 @@
-from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import TemplateView, DetailView
 from django.urls import reverse
-from django.contrib.auth.decorators import login_required
 from hubble.models import TimesheetEntry, Team
 from django.db.models.functions import Round
 from django.db.models import (
@@ -15,108 +15,82 @@ from core.utils import CustomDatatable
 from core import template_utils
 
 
-@login_required()
-def index(request):
-    #To render the initial or home page, also efficiency report
-    context = {}
-    return render(
-        request=request,
-        template_name="report.html",
-        context=context,
-    )
+class Index(LoginRequiredMixin, TemplateView):
+    template_name = "report.html"
 
 
-@login_required()
-def monetization_report(request):
-    #To render the monetization gap report
-    context = {}
-    return render(
-        request=request,
-        template_name="monetization.html",
-        context=context,
-    )
+class MonetizationReport(LoginRequiredMixin, TemplateView):
+    template_name = "monetization.html"
 
 
-@login_required()
-def kpi_report(request):
-    #To render KPI report 
-    context = {}
-    return render(
-        request=request,
-        template_name="kpi.html",
-        context=context,
-    )
+class KpiReport(LoginRequiredMixin, TemplateView):
+    template_name = "kpi.html"
 
 
-@login_required()
-def detailed_efficiency(request, pk):
-    #This function is responsible for the detailed efficiency for respective teams
-    data = get_object_or_404(Team, pk=pk)
-    context = {"data": data}
-    return render(
-        request=request,
-        template_name="detailed_efficiency.html",
-        context=context,
-    )
+class DetailedEfficiency(LoginRequiredMixin, DetailView):
+    model = Team
+    template_name = "detailed_efficiency.html"
+    context_object_name = "data"
+    pk_url_kwarg = "pk"
 
 
 class EfficiencyDatatable(CustomDatatable):
     """
     Datatable for overall efficiency
     """
+
     model = TimesheetEntry
-    initial_order = [
-        ["team__name", "asc"],
-    ]
+    initial_order = ["team__name", "asc"],
     search_value_seperator = "+"
-    show_column_filters = False
+
     column_defs = [
         {
             "name": "pk",
-            "title": "Team-ID",
+            "title": "Team ID",
+            "className": "text-center",
             "visible": False,
             "searchable": False,
         },
         {
             "name": "team__name",
             "title": "Team Name",
+            "className": "text-center",
             "visible": True,
             "searchable": True,
         },
         {
             "name": "capacity",
             "title": "Capacity",
+            "className": "text-center",
             "visible": True,
             "searchable": True,
         },
         {
             "name": "action",
             "title": "Action",
+            "className": "text-center",
             "visible": True,
             "searchable": False,
             "orderable": False,
-            "className": "text-center",
         },
     ]
 
-
-    def customize_row(self, row, obj): #This is responsible for adding the view action button
+    def customize_row(self, row, obj):
+        #This is responsible for adding the view action button
         buttons = template_utils.show_btn(
             reverse("detailed_efficiency", args=[obj["pk"]])
         )
-        row[
-            "action"
-        ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         return
 
-
     def get_initial_queryset(self, request=None):
-        """
-        To load a queryset into the datatable
-        """
-        data = (
+        #To load a queryset into the datatable
+        return (
             TimesheetEntry.objects.select_related("user", "team")
-            .date_range(from_date = request.REQUEST.get("from_date"), to_date = request.REQUEST.get("to_date"))
+            .date_range(
+                request.REQUEST.get("from_date"),
+                request.REQUEST.get("to_date"),
+            )
             .values("team__name")
             .annotate(
                 capacity=Round(
@@ -128,14 +102,12 @@ class EfficiencyDatatable(CustomDatatable):
                     2,
                 ),
                 pk=F("team__id"),
-                action=F("team__id"),
             )
             .order_by("team__id")
         )
-        return data
 
-
-    def render_column(self, row, column): #Used to differnetiate the data through various colors
+    def render_dict_column(self, row, column):
+        #Used to differnetiate the data through various colors#
         if column == "capacity":
             if int(row["capacity"]) >= 75:
                 return f'<span class="bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm">{row["capacity"]}</span>'
@@ -143,84 +115,75 @@ class EfficiencyDatatable(CustomDatatable):
                 return f'<span class="bg-yellow-100 text-yellow-800 py-0.5 px-1.5 rounded-xl text-sm">{row["capacity"]}</span>'
             else:
                 return f'<span class="bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm">{row["capacity"]}</span>'
-        return super().render_column(row, column)
+        return super().render_dict_column(row, column)
 
 
 class MonetizationDatatable(CustomDatatable):
     """
     Monetization Gap report
     """
+
     model = TimesheetEntry
-    initial_order = [
-        ["team__name", "asc"],
-    ]
-    show_column_filters = False
+    initial_order = ["team__name", "asc"],
+
     column_defs = [
         {
             "name": "team__name",
-            "title": "<div class= 'text-center'>Team-Name</div>",
+            "title": "Team Name",
             "className": "text-center",
             "visible": True,
             "searchable": True,
         },
         {
             "name": "day",
-            "title": "<div class= 'text-center'>Date</div>",
+            "title": "Date",
             "className": "text-center",
             "visible": True,
             "searchable": True,
         },
         {
             "name": "efficiency_capacity",
-            "title": "<div class= 'text-center'>Efficiency Capacity <br> (Accomplishment)</div>",
+            "title": "Efficiency Capacity <br> (Accomplishment)",
             "className": "text-center",
             "visible": True,
             "searchable": True,
         },
         {
             "name": "monetization_capacity",
-            "title": "<div class= 'text-center'>Monetization Capacity</div>",
+            "title": "Monetization Capacity",
             "className": "text-center",
             "visible": True,
             "searchable": True,
         },
         {
             "name": "gap",
-            "title": "<div class= 'text-center'>Gap</div>",
+            "title": "Gap",
             "className": "text-center",
             "visible": True,
             "searchable": True,
         },
         {
             "name": "ratings",
-            "title": "<div class= 'text-center'>Ratings</div>",
+            "title": "Ratings",
             "className": "text-center",
             "visible": True,
             "searchable": True,
         },
     ]
 
-
-    def get_initial_queryset(self, request=None): 
-        """
-            To load a queryset into the datatable
-        """
-        data = (
+    def get_initial_queryset(self, request=None):
+        #To load a queryset into the datatable
+        return (
             TimesheetEntry.objects.select_related("user", "project")
-            .date_range(
-                from_date="2022-01-01",
-                to_date="2023-01-01",
-            )
             .monetization_fields()
             .filter(
                 entry_date__year=request.REQUEST.get("year_filter"),
                 entry_date__month=request.REQUEST.get("month_filter"),
             )
         )
-        return data
 
-
-    def render_column(self, row, column): #This is responsible for percentage symbol and data tag colors
+    def render_dict_column(self, row, column):
+        #This is responsible for percentage symbol and data tag colors
         if column == "gap":
             return f'{row["gap"]}%'
         if column == "ratings":
@@ -228,118 +191,128 @@ class MonetizationDatatable(CustomDatatable):
                 return f'<span class="bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm">Good</span>'
             else:
                 return f'<span class="bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm">Need Improvements</span>'
-        return super().render_column(row, column)
+        return super().render_dict_column(row, column)
 
 
 class KPIDatatable(CustomDatatable):
     """
     Datatable for KPI report
     """
+
     model = TimesheetEntry
-    show_column_filters = False
+    search_value_seperator = "+"
+
     column_defs = [
         {
             "name": "Project",
-            "title": "<div class= 'text-center'>Project</div>",
+            "title": "Project",
+            "className": "text-center",
             "visible": True,
             "searchable": True,
         },
         {
             "name": "User_name",
-            "title": "<div class= 'text-center'>User-Name</div>",
+            "title": "User Name",
+            "className": "text-center",
             "visible": True,
             "searchable": True,
         },
         {
             "name": "Team_name",
-            "title": "<div class= 'text-center'>Team-Name</div>",
+            "title": "Team Name",
+            "className": "text-center",
             "visible": True,
             "searchable": True,
         },
         {
             "name": "Billed_sum",
-            "title": "<div class= 'text-center'>Billed-sum</div>",
+            "title": "Billed sum",
+            "className": "text-center",
             "visible": True,
             "searchable": True,
         },
         {
             "name": "Authorized_sum",
-            "title": "<div class= 'text-center'>Authorized_sum</div>",
+            "title": "Authorized sum",
+            "className": "text-center",
             "visible": True,
             "searchable": True,
         },
         {
             "name": "Working_hours",
-            "title": "<div class= 'text-center'>Working_hours</div>",
+            "title": "Working hours",
+            "className": "text-center",
             "visible": True,
             "searchable": True,
         },
         {
             "name": "expected_efficiency",
-            "title": "<div class= 'text-center'>Expected_Efficiency</div>",
+            "title": "Expected Efficiency",
+            "className": "text-center",
             "visible": True,
             "searchable": True,
         },
     ]
 
-
-    def get_initial_queryset(self, request=None): 
-        """
-            To load a queryset into the datatable
-        """
-        data = (
+    def get_initial_queryset(self, request=None):
+        #To load a queryset into the datatable
+        return (
             TimesheetEntry.objects.select_related("user", "project")
             .date_range(
-                from_date="2022-01-01",
-                to_date="2023-01-01",
+                request.REQUEST.get("from_date"),
+                request.REQUEST.get("to_date"),
             )
             .kpi_fields()
         )
-        return data
 
 
 class DetaileEfficiencyDatatable(CustomDatatable):
     """
-        Datatable for detailed efficiency report
+    Datatable for detailed efficiency report
     """
+
     model = TimesheetEntry
     search_value_seperator = "+"
-    show_column_filters = False
+
     column_defs = [
         {
             "name": "Month",
             "title": "Month",
+            "className": "text-center",
             "visible": True,
             "searchable": True,
         },
         {
             "name": "Expected_hours",
             "title": "Expected hours",
+            "className": "text-center",
             "visible": True,
             "searchable": True,
         },
         {
             "name": "Actual_hours",
             "title": "Actual hours",
+            "className": "text-center",
             "visible": True,
             "searchable": True,
         },
         {
             "name": "Capacity",
             "title": "Capacity",
+            "className": "text-center",
             "visible": True,
             "searchable": True,
         },
     ]
 
-
     def get_initial_queryset(self, request=None):
-        """
-            To load a queryset into the datatable
-        """ 
-        data = (
+        #To load a queryset into the datatable
+        return (
             TimesheetEntry.objects.select_related("user", "team")
-            .date_range(from_date = "2022-01-01", to_date = "2023-01-01")
+            .date_range(
+                request.REQUEST.get("from_date"),
+                request.REQUEST.get("to_date"),
+            )
             .annotate(
                 Month=Func(
                     F("entry_date"),
@@ -365,10 +338,9 @@ class DetaileEfficiencyDatatable(CustomDatatable):
                 ),
             )
         )
-        return data
 
-
-    def render_column(self, row, column): #This is responsible for updating the capacity data with various colors based on the value
+    def render_dict_column(self, row, column):
+        #This is responsible for updating the capacity data with various colors based on the value
         if column == "Capacity":
             if int(row["Capacity"]) >= 75:
                 return f'<span class="bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm">{row["Capacity"]}</span>'
@@ -376,4 +348,4 @@ class DetaileEfficiencyDatatable(CustomDatatable):
                 return f'<span class="bg-yellow-100 text-yellow-800 py-0.5 px-1.5 rounded-xl text-sm">{row["Capacity"]}</span>'
             else:
                 return f'<span class="bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm">{row["Capacity"]}</span>'
-        return super().render_column(row, column)
+        return super().render_dict_column(row, column)

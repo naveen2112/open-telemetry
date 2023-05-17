@@ -35,6 +35,7 @@
 
 {% block sub_header %}
 <div class="flex pt-10 px-2">
+    {% include 'filter.html' %}
     <div class="relative mr-5">
         <input type="text" value="" name="search_project" placeholder="Search by Date"
                 class="w-397 h-10 pl-11 pr-2.5 py-3 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0"
@@ -72,35 +73,75 @@
 {% endblock %}
 
 {% block body %}
+    <input type="hidden" id="team" value="{{ data.id }}">
     <table id="reports-table" style="width: 100%;" class="display border-0 table-with-no-border dataTable no-footer px-2">
     </table>    
 {% endblock %}
 
 {% block script %}
     <script>
+        $('#date_range').daterangepicker({
+            showDropdowns: true,
+            startDate: moment().startOf('year').subtract(1, 'year'),
+            endDate: moment().endOf('year').subtract(1, 'year'),
+            maxSpan: { months: 12 },
+            ranges: {
+                'This Year': [moment().startOf('year'), moment().endOf('year')],
+                'Last Year': [moment().startOf('year').subtract(1, 'year'), moment().endOf('year').subtract(1, 'year')],
+                'Last 6 months': [moment().subtract(6, 'months').startOf('month'), moment().subtract(1, 'months').endOf('month')],
+                'Last 3 Months': [moment().subtract(3, 'months').startOf('month'), moment().subtract(1, 'months').endOf('month')],
+                'This Month': [moment().startOf('month'), moment().endOf('month')],
+                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            },
+            alwaysShowCalendars: true
+        });
+        var start = $('#date_range').data('daterangepicker').startDate.format('DD MMM Y');
+        var end = $('#date_range').data('daterangepicker').endDate.format('DD MMM Y');
+        $('#date_range_display').text(start + ' - ' + end);
+
+        $('#date_range').on('apply.daterangepicker', function (ev, picker) {
+            var start = picker.startDate.format('DD MMM Y');
+            var end = picker.endDate.format('DD MMM Y');
+            $('#date_range_display').text(start + ' - ' + end);
+            var table = $("#reports-table").DataTable();
+            table.ajax.reload();
+        });
+
+        $("#search_project").on('input', function () {
+            var searchvalue = $(this).val();
+            var table = $("#reports-table").DataTable();
+            table.search(searchvalue).draw();
+        });
+
         $(document).ready(function() {
-        AjaxDatatableViewUtils.initialize_table(
-            $('#reports-table'),
-            "{% url 'detailed_efficiency_datatable' %}",
-            {
-                processing : true,
-                searching : true,
-                serverSide : true,
-                autoWidth : false,
-                full_row_select : false,
-                scrollX : false,
-                bFilter : true,
-                bSort : true,
-                dom : 'ltip',
-                order : []
-            }, 
-            {
-                'team_filter': function() {
-                    var url = window.location.href.split('/')
-                    return url[url.length - 1]; 
+            AjaxDatatableViewUtils.initialize_table(
+                $('#reports-table'),
+                "{% url 'detailed_efficiency_datatable' %}",
+                {
+                    processing : true,
+                    searching : true,
+                    serverSide : true,
+                    autoWidth : false,
+                    full_row_select : false,
+                    scrollX : false,
+                    bFilter : true,
+                    bSort : true,
+                    dom : 'ltip',
+                    order : []
+                }, 
+                {
+                    'team_filter': function() {
+                        return $("#team").val(); 
+                    },
+                    'from_date': function () {
+                        return $('#date_range').data('daterangepicker').startDate.format('YYYY-MM-DD');
+                    },
+                    'to_date': function () {
+                        return $('#date_range').data('daterangepicker').endDate.format('YYYY-MM-DD');
+                    },
                 }
-            }
-        );
+            );
+        });
         $("#search_project").on('input', function () {
             var searchvalue = $(this).val();
             var table = $("#reports-table").DataTable();
@@ -110,6 +151,5 @@
             var table = $("#reports-table").DataTable();
             table.ajax.reload();
         });  
-    });
     </script>
 {% endblock %}
