@@ -33,7 +33,7 @@
                     <div class="modal-body">
                         {% csrf_token %}
                         <input type="hidden" name="timeline_id" value="{{ timeline_id }}" id="timeline_id">
-                        <div class="mb-7" id="{{form.name.label|lower}}_group">
+                        <div class="mb-7" id="{{ form.name.label|lower }}_group">
                             {{ form.name|show_label }}
                             {{ form.name }}
                         </div>
@@ -160,7 +160,7 @@
                     dom: 't',
                     pageLength: 50
                 }, {
-                'timeline_id': '{{timeline_id}}',
+                'timeline_id': '{{ timeline_id }}',
                 }
             );
             $("#sortable > tr").each(function() {
