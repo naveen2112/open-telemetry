@@ -494,7 +494,7 @@ class SubBatchTrainiesDataTable(CustomDatatable):
 
     def customize_row(self, row, obj):
         buttons = template_utils.show_btn(
-            reverse("bsub-batch.detail", args=[obj["intern__user_id"]])
+            reverse("sub-batch.detail", args=[obj["intern__user_id"]])
         ) + template_utils.edit_btn(
             f"/batch",
         )
