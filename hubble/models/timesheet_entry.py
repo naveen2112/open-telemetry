@@ -18,7 +18,7 @@ from django.db.models import (
 )
 
 
-class DatatableQuery(models.QuerySet):
+class TimesheetCustomQuerySet(models.QuerySet):
     def date_range(self, from_date, to_date):
         return self.filter(
             Q(
@@ -87,26 +87,26 @@ class DatatableQuery(models.QuerySet):
     def kpi_fields(self):
         return (
             self.annotate(
-                Project=F("project__name"),
-                Working_hours=Sum("working_hours"),
+                project_name=F("project__name"),
+                worked_hours=Sum("working_hours"),
                 expected_efficiency=F(
                     "user__expected_user_efficiencies__expected_efficiency"
                 ),
-                Authorized_sum=Sum("authorized_hours"),
-                Billed_sum=Sum("billed_hours"),
-                User_name=F("user__name"),
-                Team_name=F("team__name"),
+                authorized_sum=Sum("authorized_hours"),
+                billed_sum=Sum("billed_hours"),
+                user_name=F("user__name"),
+                team_name=F("team__name"),
             )
             .values(
-                "Project",
-                "User_name",
-                "Team_name",
-                "Billed_sum",
-                "Authorized_sum",
-                "Working_hours",
+                "project_name",
+                "user_name",
+                "team_name",
+                "billed_sum",
+                "authorized_sum",
+                "worked_hours",
                 "expected_efficiency",
             )
-            .order_by("-Authorized_sum", "Billed_sum")
+            .order_by("-authorized_sum", "billed_sum")
         )
 
 
@@ -153,10 +153,10 @@ class DatatableQuery(models.QuerySet):
         )
 
 
-class TableManager(models.Manager):
+class TimesheetManager(models.Manager):
     
     def get_queryset(self):
-        return DatatableQuery(self.model, using=self._db)
+        return TimesheetCustomQuerySet(self.model, using=self._db)
 
     def date_range(self, from_date, to_date):
         return self.get_queryset.date_range(from_date, to_date)
@@ -192,7 +192,7 @@ class TimesheetEntry(models.Model):
     admin_comments = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True)
     updated_at = models.DateTimeField(blank=True, null=True)
-    objects = TableManager()
+    objects = TimesheetManager()
 
 
     class Meta:

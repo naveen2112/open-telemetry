@@ -204,42 +204,42 @@ class KPIDatatable(CustomDatatable):
 
     column_defs = [
         {
-            "name": "Project",
+            "name": "project_name",
             "title": "Project",
             "className": "text-center",
             "visible": True,
             "searchable": True,
         },
         {
-            "name": "User_name",
+            "name": "user_name",
             "title": "User Name",
             "className": "text-center",
             "visible": True,
             "searchable": True,
         },
         {
-            "name": "Team_name",
+            "name": "team_name",
             "title": "Team Name",
             "className": "text-center",
             "visible": True,
             "searchable": True,
         },
         {
-            "name": "Billed_sum",
+            "name": "billed_sum",
             "title": "Billed sum",
             "className": "text-center",
             "visible": True,
             "searchable": True,
         },
         {
-            "name": "Authorized_sum",
+            "name": "authorized_sum",
             "title": "Authorized sum",
             "className": "text-center",
             "visible": True,
             "searchable": True,
         },
         {
-            "name": "Working_hours",
+            "name": "worked_hours",
             "title": "Working hours",
             "className": "text-center",
             "visible": True,
@@ -276,28 +276,28 @@ class DetaileEfficiencyDatatable(CustomDatatable):
 
     column_defs = [
         {
-            "name": "Month",
+            "name": "month",
             "title": "Month",
             "className": "text-center",
             "visible": True,
             "searchable": True,
         },
         {
-            "name": "Expected_hours",
+            "name": "expected_hours",
             "title": "Expected hours",
             "className": "text-center",
             "visible": True,
             "searchable": True,
         },
         {
-            "name": "Actual_hours",
+            "name": "actual_hours",
             "title": "Actual hours",
             "className": "text-center",
             "visible": True,
             "searchable": True,
         },
         {
-            "name": "Capacity",
+            "name": "capacity",
             "title": "Capacity",
             "className": "text-center",
             "visible": True,
@@ -314,22 +314,21 @@ class DetaileEfficiencyDatatable(CustomDatatable):
                 request.REQUEST.get("to_date"),
             )
             .annotate(
-                Month=Func(
+                month=Func(
                     F("entry_date"),
                     Value("Month-YYYY"),
                     function="to_char",
                     output_field=CharField(),
                 ),
             )
-            .values("Month")
+            .values("month")
             .filter(team__id=int(request.REQUEST.get("team_filter")))
             .annotate(
-                Team_Name=F("team__name"),
-                Expected_hours=Sum(
+                expected_hours=Sum(
                     "user__expected_user_efficiencies__expected_efficiency"
                 ),
-                Actual_hours=Sum("authorized_hours"),
-                Capacity=Round(
+                actual_hours=Sum("authorized_hours"),
+                capacity=Round(
                     Avg(
                         100
                         * (F("authorized_hours"))
