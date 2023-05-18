@@ -16,27 +16,33 @@ from core import template_utils
 
 
 class Index(LoginRequiredMixin, TemplateView):
+    """This Class is responsible for checking whether user is authenticated or not, and redirects the user to Efficiency report"""
+
     template_name = "report.html"
 
 
 class MonetizationReport(LoginRequiredMixin, TemplateView):
+    """This Class is responsible for checking whether user is authenticated or not, and redirects the user to MOnetization Gap report"""
+
     template_name = "monetization.html"
 
 
 class KpiReport(LoginRequiredMixin, TemplateView):
+    """This Class is responsible for checking whether user is authenticated or not, and redirects the user to KPI report"""
+
     template_name = "kpi.html"
 
 
 class DetailedEfficiency(LoginRequiredMixin, DetailView):
+    """This Class is responsible for checking whether user is authenticated or not, and redirects the user to Team specific report"""
+
     model = Team
     template_name = "detailed_efficiency.html"
-    context_object_name = "data"
-    pk_url_kwarg = "pk"
 
 
 class EfficiencyDatatable(CustomDatatable):
     """
-    Datatable for overall efficiency
+    This class is responsible for Datatable corresponding to Overall efficiency
     """
 
     model = TimesheetEntry
@@ -76,7 +82,7 @@ class EfficiencyDatatable(CustomDatatable):
     ]
 
     def customize_row(self, row, obj):
-        #This is responsible for adding the view action button
+        # This is responsible for adding the view action button
         buttons = template_utils.show_btn(
             reverse("detailed_efficiency", args=[obj["pk"]])
         )
@@ -84,7 +90,7 @@ class EfficiencyDatatable(CustomDatatable):
         return
 
     def get_initial_queryset(self, request=None):
-        #To load a queryset into the datatable
+        # To load a queryset into the datatable
         return (
             TimesheetEntry.objects.select_related("user", "team")
             .date_range(
@@ -107,7 +113,7 @@ class EfficiencyDatatable(CustomDatatable):
         )
 
     def render_dict_column(self, row, column):
-        #Used to differnetiate the data through various colors#
+        # Used to differnetiate the data through various colors#
         if column == "capacity":
             if int(row["capacity"]) >= 75:
                 return f'<span class="bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm">{row["capacity"]}</span>'
@@ -120,7 +126,7 @@ class EfficiencyDatatable(CustomDatatable):
 
 class MonetizationDatatable(CustomDatatable):
     """
-    Monetization Gap report
+    This class is responsible for Datatable corresponding to Monetization Gap report
     """
 
     model = TimesheetEntry
@@ -172,7 +178,7 @@ class MonetizationDatatable(CustomDatatable):
     ]
 
     def get_initial_queryset(self, request=None):
-        #To load a queryset into the datatable
+        # To load a queryset into the datatable
         return (
             TimesheetEntry.objects.select_related("user", "project")
             .monetization_fields()
@@ -183,7 +189,7 @@ class MonetizationDatatable(CustomDatatable):
         )
 
     def render_dict_column(self, row, column):
-        #This is responsible for percentage symbol and data tag colors
+        # This is responsible for percentage symbol and data tag colors
         if column == "gap":
             return f'{row["gap"]}%'
         if column == "ratings":
@@ -196,7 +202,7 @@ class MonetizationDatatable(CustomDatatable):
 
 class KPIDatatable(CustomDatatable):
     """
-    Datatable for KPI report
+    This class is responsible for Datatable corresponding to KPI report
     """
 
     model = TimesheetEntry
@@ -255,7 +261,7 @@ class KPIDatatable(CustomDatatable):
     ]
 
     def get_initial_queryset(self, request=None):
-        #To load a queryset into the datatable
+        # To load a queryset into the datatable
         return (
             TimesheetEntry.objects.select_related("user", "project")
             .date_range(
@@ -268,7 +274,7 @@ class KPIDatatable(CustomDatatable):
 
 class DetaileEfficiencyDatatable(CustomDatatable):
     """
-    Datatable for detailed efficiency report
+    This class is responsible for Datatable corresponding to Team specific Efficiency
     """
 
     model = TimesheetEntry
@@ -306,7 +312,7 @@ class DetaileEfficiencyDatatable(CustomDatatable):
     ]
 
     def get_initial_queryset(self, request=None):
-        #To load a queryset into the datatable
+        # To load a queryset into the datatable
         return (
             TimesheetEntry.objects.select_related("user", "team")
             .date_range(
@@ -322,7 +328,7 @@ class DetaileEfficiencyDatatable(CustomDatatable):
                 ),
             )
             .values("month")
-            .filter(team__id=int(request.REQUEST.get("team_filter")))
+            .filter(team__id=int(request.REQUEST.get("team_id")))
             .annotate(
                 expected_hours=Sum(
                     "user__expected_user_efficiencies__expected_efficiency"
@@ -339,7 +345,7 @@ class DetaileEfficiencyDatatable(CustomDatatable):
         )
 
     def render_dict_column(self, row, column):
-        #This is responsible for updating the capacity data with various colors based on the value
+        # This is responsible for updating the capacity data with various colors based on the value
         if column == "Capacity":
             if int(row["Capacity"]) >= 75:
                 return f'<span class="bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm">{row["Capacity"]}</span>'

@@ -1,10 +1,9 @@
 from django.db import models
 from hubble.models import User, Team
-from . import ExpectedUserEfficiency, Project, Module, Task
+from . import Project, Module, Task
 from django.utils import timezone
 from django.db.models.functions import Coalesce, Round
 from django.db.models import (
-    Avg,
     F,
     Q,
     Sum,
@@ -14,7 +13,6 @@ from django.db.models import (
     Func,
     Value,
     CharField,
-    Count,
 )
 
 
@@ -24,12 +22,14 @@ class TimesheetCustomQuerySet(models.QuerySet):
             Q(
                 entry_date__range=(
                     F("user__expected_user_efficiencies__effective_from"),
-                    Coalesce(F("user__expected_user_efficiencies__effective_to"), timezone.now()),
+                    Coalesce(
+                        F("user__expected_user_efficiencies__effective_to"),
+                        timezone.now(),
+                    ),
                 )
             )
             & Q(entry_date__range=(from_date, to_date))
         )
-
 
     def efficiency_fields(self):
         return self.annotate(
@@ -80,9 +80,12 @@ class TimesheetCustomQuerySet(models.QuerySet):
                 0,
                 output_field=FloatField(),
             ),
-            role = Coalesce(F('user__project_resource__position__name'), Value('TBA'), output_field=CharField())
+            role=Coalesce(
+                F("user__project_resource__position__name"),
+                Value("TBA"),
+                output_field=CharField(),
+            ),
         )
-
 
     def kpi_fields(self):
         return (
@@ -108,7 +111,6 @@ class TimesheetCustomQuerySet(models.QuerySet):
             )
             .order_by("-authorized_sum", "billed_sum")
         )
-
 
     def monetization_fields(self):
         return (
@@ -154,7 +156,6 @@ class TimesheetCustomQuerySet(models.QuerySet):
 
 
 class TimesheetManager(models.Manager):
-    
     def get_queryset(self):
         return TimesheetCustomQuerySet(self.model, using=self._db)
 
@@ -169,6 +170,7 @@ class TimesheetManager(models.Manager):
 
     def kpi_fields(self):
         return self.get_queryset.kpi_fields()
+
 
 class TimesheetEntry(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -193,7 +195,6 @@ class TimesheetEntry(models.Model):
     created_at = models.DateTimeField(blank=True, null=True)
     updated_at = models.DateTimeField(blank=True, null=True)
     objects = TimesheetManager()
-
 
     class Meta:
         managed = False

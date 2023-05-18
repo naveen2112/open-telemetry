@@ -2,7 +2,6 @@ from ajax_datatable import AjaxDatatableView
 
 
 class CustomDatatable(AjaxDatatableView):
-
     show_column_filters = False
 
     def get_table_row_id(self, request, obj, i):
@@ -29,16 +28,12 @@ class CustomDatatable(AjaxDatatableView):
                     result = ""
         return result
 
-
     def render_dict_column(self, row, column):
+        """This function is responsible for assigning values to the respective columns in a row"""
         return row.get(column, None)
 
-    def render_column(self, row, column):
-        value = self.column_obj(column).render_column(row)
-        return value
-
-
     def prepare_results(self, request, qs):
+        """This function is responsible for preparing the json data which should be returned as response when the datatable is called"""
         json_data = []
         columns = [c["name"] for c in self.column_specs]
         if len(qs) > 0 and type(qs[0]) is dict:

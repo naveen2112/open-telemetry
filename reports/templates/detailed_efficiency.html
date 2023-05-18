@@ -1,7 +1,7 @@
 {% extends 'layouts/base.html' %}
 {% load static %}
 
-{% block title %} Team {{ data.name }} Efficiency {% endblock %}
+{% block title %} Team {{ object.name }} Efficiency {% endblock %}
 
 {% block header %}
     <header class='px-2 pt-5 '>
@@ -26,7 +26,7 @@
         <div class='flex justify-between items-center my-5'>
             <div class='flex items-center px-2'>
                 <div>
-                    <p class='text-base text-dark-black mb-1'>{{ data.name }} | {{ data.id }} </p>
+                    <p class='text-base text-dark-black mb-1'>{{ object.name }} | {{ object.id }} </p>
                 </div>
             </div>
         </div>
@@ -35,7 +35,9 @@
 
 {% block sub_header %}
 <div class="flex pt-10 px-2">
+
     {% include 'filter.html' %}
+
     <div class="relative mr-5">
         <input type="text" value="" name="search_project" placeholder="Search by Date"
                 class="w-397 h-10 pl-11 pr-2.5 py-3 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0"
@@ -73,7 +75,6 @@
 {% endblock %}
 
 {% block body %}
-    <input type="hidden" id="team" value="{{ data.id }}">
     <table id="reports-table" style="width: 100%;" class="display border-0 table-with-no-border dataTable no-footer px-2">
     </table>    
 {% endblock %}
@@ -130,8 +131,8 @@
                     order : []
                 }, 
                 {
-                    'team_filter': function() {
-                        return $("#team").val(); 
+                    'team_id': function() {
+                        return '{{ object.id }}'; 
                     },
                     'from_date': function () {
                         return $('#date_range').data('daterangepicker').startDate.format('YYYY-MM-DD');

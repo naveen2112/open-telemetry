@@ -116,19 +116,7 @@
         var table = $("#reports-table").DataTable();
         table.ajax.reload();
     });
-    dateRender();
-    function dateRender() {
-        var start_year = 2010,
-            end_year = new Date().getFullYear();
-
-        for (i = start_year; i <= end_year; i++) {
-            var selected = "";
-            if (end_year == (i)) {
-                selected = 'selected';
-            }
-            $("#years").append(`<option value="${i}" ${selected}>${i}</option>`);
-        }
-        var months = [
+    var months = [
             "January",
             "February",
             "March",
@@ -142,6 +130,18 @@
             "November",
             "December"
         ];
+    dateRender();
+    function dateRender() {
+        var start_year = 2010,
+            end_year = new Date().getFullYear();
+
+        for (i = start_year; i <= end_year; i++) {
+            var selected = "";
+            if (end_year == (i)) {
+                selected = 'selected';
+            }
+            $("#years").append(`<option value="${i}" ${selected}>${i}</option>`);
+        }
         months.forEach((number, index) => {
             var checked = "";
             if (new Date().getMonth() == index) {
