@@ -113,7 +113,7 @@ class EfficiencyDatatable(CustomDatatable):
         )
 
     def render_dict_column(self, row, column):
-        # Used to differnetiate the data through various colors#
+        # Used to differnetiate the data through various colors
         if column == "capacity":
             if int(row["capacity"]) >= 75:
                 return f'<span class="bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm">{row["capacity"]}</span>'

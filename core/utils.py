@@ -2,6 +2,8 @@ from ajax_datatable import AjaxDatatableView
 
 
 class CustomDatatable(AjaxDatatableView):
+    """This class provides the feature of sending a list of dictionaries as input to the datatable"""
+
     show_column_filters = False
 
     def get_table_row_id(self, request, obj, i):
