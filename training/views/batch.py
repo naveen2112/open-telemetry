@@ -20,7 +20,6 @@ class BatchDataTable(CustomDatatable):
     """
     Batch Datatable
     """
-
     model = Batch
     column_defs = [
         {"name": "id", "visible": False, "searchable": False},
@@ -34,7 +33,6 @@ class BatchDataTable(CustomDatatable):
             "className": "text-center",
         },
     ]
-
 
     def customize_row(self, row, obj):
         buttons = (
@@ -78,12 +76,15 @@ def batch_update_form(request):
     """
     Batch Update Form Data
     """
-    id = request.GET.get("id")
-    batch = Batch.objects.get(id=id)
-    data = {
-        "batch": model_to_dict(batch)
-    }  # Covert django queryset object to dict,which can be easily serialized and sent as a JSON response
-    return JsonResponse(data, safe=False)
+    try:
+        id = request.GET.get("id")
+        batch = Batch.objects.get(id=id)
+        data = {
+            "batch": model_to_dict(batch)
+        }  # Covert django queryset object to dict,which can be easily serialized and sent as a JSON response
+        return JsonResponse(data, safe=False)
+    except Exception as e:
+        return JsonResponse({"message": "Error while getting the data!"}, status=500)
 
 
 def update_batch(request):
@@ -116,16 +117,16 @@ def delete_batch(request):
     Delete Batch
     Soft delete the batch and record the deletion time in deleted_at field
     """
-    
-    delete = QueryDict(
-        request.body
-    )  # Creates a QueryDict object from the request body
-    id = delete.get("id")  # Get id from dictionary
-    batch = get_object_or_404(Batch, id=id)
-    batch.delete()
-    return JsonResponse({"message": "Batch deleted succcessfully"})
-    # except Exception as e:
-    #     return JsonResponse({"message": "Error while deleting Batch!"}, status=500)
+    try:
+        delete = QueryDict(
+            request.body
+        )  # Creates a QueryDict object from the request body
+        id = delete.get("id")  # Get id from dictionary
+        batch = get_object_or_404(Batch, id=id)
+        batch.delete()
+        return JsonResponse({"message": "Batch deleted succcessfully"})
+    except Exception as e:
+        return JsonResponse({"message": "Error while deleting Batch!"}, status=500)
 
 
 def batch_details(request, pk):
