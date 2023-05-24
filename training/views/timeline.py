@@ -53,10 +53,10 @@ class TimelineTemplateDataTable(CustomDatatable):
 
     def customize_row(self, row, obj):
         buttons = (
-            template_utils.show_btn(reverse("timeline-template.detail", args=[obj.id]))
-            + template_utils.edit_btn(obj.id)
-            + template_utils.delete_btn("deleteTimeline(" + str(obj.id) + ")")
-            + template_utils.duplicate_btn(obj.id)
+            template_utils.show_button(reverse("timeline-template.detail", args=[obj.id]))
+            + template_utils.edit_button(obj.id)
+            + template_utils.delete_button("deleteTimeline(" + str(obj.id) + ")")
+            + template_utils.duplicate_button(obj.id)
         )
         row[
             "action"

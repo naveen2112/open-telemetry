@@ -16,16 +16,3 @@ class Timeline(db.SoftDeleteWithBaseModel):
 
     def __str__(self):
         return self.name
-
-    def clean(self):
-        """
-        This function checks if a team already has an active template and raises a validation error if
-        it does.
-        """
-        if (
-            self.is_active
-            and Timeline.objects.filter(team=self.team, is_active=True)
-            .exclude(id=self.id)
-            .exists()
-        ):
-            raise ValidationError("Team already has an active template.")

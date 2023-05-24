@@ -34,7 +34,7 @@ class TimelineTemplateTaskDataTable(CustomDatatable):
     ]
 
     def customize_row(self, row, obj):
-        buttons = template_utils.edit_btn(obj.id) + template_utils.delete_btn(
+        buttons = template_utils.edit_button(obj.id) + template_utils.delete_button(
             "deleteTimeline(" + str(obj.id) + ")"
         )
         row[
