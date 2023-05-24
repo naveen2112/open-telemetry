@@ -1,0 +1,156 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %} Team {{ object.name }} Efficiency {% endblock %}
+
+{% block header %}
+    <header class='px-2 pt-5 '>
+        <a href="{% url 'index' %}" class='flex items-center text-sm text-dark-blue'>
+            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24px"
+                height="24px" viewBox="0 0 24 24" version="1.1">
+                <title>Back</title>
+                <g id="Final---User-Profile" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                    <g id="UserProfile---Account-Info" transform="translate(-143.000000, -15.000000)">
+                        <g id="Back-Arrow" transform="translate(143.000000, 15.000000)">
+                            <rect id="Rectangle" fill="#000000" fill-rule="nonzero" opacity="0"
+                                transform="translate(12.000000, 12.000000) rotate(90.000000) translate(-12.000000, -12.000000) "
+                                x="0" y="0" width="24" height="24"/>
+                            <path id="Path" fill="#2248C3"
+                                d="M13.83,19.0000686 C13.5274116,19.0010289 13.2406301,18.8649915 13.05,18.63 L8.22,12.63 C7.91668285,12.2609981 7.91668285,11.7290019 8.22,11.36 L13.22,5.36 C13.5734622,4.93474075 14.2047407,4.87653778 14.63,5.23000001 C15.0552592,5.58346225 15.1134622,6.21474074 14.76,6.64 L10.29,12 L14.61,17.36 C14.8596926,17.6597233 14.9122976,18.0772862 14.7447459,18.4295743 C14.5771943,18.7818624 14.2200765,19.0045572 13.83,19.0000686 Z"/>
+                        </g>
+                    </g>
+                </g>
+            </svg>
+            Back to Projects
+        </a>
+        <div class='flex justify-between items-center my-5'>
+            <div class='flex items-center px-2'>
+                <div>
+                    <p class='text-base text-dark-black mb-1'>{{ object.name }} | {{ object.id }} </p>
+                </div>
+            </div>
+        </div>
+    </header>
+{% endblock %}
+
+{% block sub_header %}
+<div class="flex pt-10 px-2">
+
+    {% include 'filter.html' %}
+
+    <div class="relative mr-5">
+        <input type="text" value="" name="search_project" placeholder="Search by Date"
+                class="w-397 h-10 pl-11 pr-2.5 py-3 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0"
+                id="search_project"/>
+        <span class="absolute top-2 left-2"><?xml version="1.0" encoding="UTF-8"?>
+            <svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                <title>Search</title>
+                <defs>
+                    <rect id="path-1" x="0" y="0" width="397" height="40" rx="10"></rect>
+                    <filter x="-2.3%" y="-22.5%" width="104.5%" height="145.0%" filterUnits="objectBoundingBox" id="filter-2">
+                        <feOffset dx="0" dy="0" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+                        <feGaussianBlur stdDeviation="3" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+                        <feColorMatrix values="0 0 0 0 0.0509803922   0 0 0 0 0.0470588235   0 0 0 0 0.11372549  0 0 0 0.05 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+                    </filter>
+                </defs>
+                <g id="Final---User-Profile" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                    <g id="UserProfile---list" transform="translate(-130.000000, -111.000000)">
+                        <rect fill="#5D3E91" opacity="0.06" x="0" y="0" width="1440" height="900"></rect>
+                        <g id="Group" transform="translate(120.000000, 103.000000)">
+                            <g id="Rectangle">
+                                <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
+                                <use fill="#FBFCFF" fill-rule="evenodd" xlink:href="#path-1"></use>
+                            </g>
+                            <g id="search-icon" transform="translate(10.000000, 8.000000)">
+                                <rect id="Rectangle" fill="#F3F6FF" opacity="0" x="0" y="0" width="24" height="24"></rect>
+                                <path d="M6.05025253,6.05025253 C8.78392257,3.31658249 13.2160774,3.31658249 15.9497475,6.05025253 C18.4484927,8.5489978 18.6632287,12.4668446 16.5939552,15.2094979 C16.6570068,15.2527187 16.7176613,15.3034478 16.7747054,15.3604918 L20.074537,18.6603235 C20.5301487,19.1159351 20.5829124,19.8018639 20.1923882,20.1923882 C19.8018639,20.5829124 19.1159351,20.5301487 18.6603235,20.074537 L15.3604918,16.7747054 C15.3034478,16.7176613 15.2527187,16.6570068 15.208384,16.5937738 C12.4668446,18.6632287 8.5489978,18.4484927 6.05025253,15.9497475 C3.31658249,13.2160774 3.31658249,8.78392257 6.05025253,6.05025253 Z M7.46446609,7.46446609 C5.51184464,9.41708755 5.51184464,12.5829124 7.46446609,14.5355339 C9.41708755,16.4881554 12.5829124,16.4881554 14.5355339,14.5355339 C16.4881554,12.5829124 16.4881554,9.41708755 14.5355339,7.46446609 C12.5829124,5.51184464 9.41708755,5.51184464 7.46446609,7.46446609 Z" id="Shape" fill-opacity="0.5" fill="#020C2D"></path>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </svg>
+        </span>
+    </div>
+</div>  
+{% endblock %}
+
+{% block body %}
+    <table id="reports-table" style="width: 100%;" class="display border-0 table-with-no-border dataTable no-footer px-2">
+    </table>    
+{% endblock %}
+
+{% block script %}
+    <script>
+        $('#date_range').daterangepicker({
+            showDropdowns: true,
+            startDate: moment().startOf('year').subtract(1, 'year'),
+            endDate: moment().endOf('year').subtract(1, 'year'),
+            maxSpan: { months: 12 },
+            ranges: {
+                'This Year': [moment().startOf('year'), moment().endOf('year')],
+                'Last Year': [moment().startOf('year').subtract(1, 'year'), moment().endOf('year').subtract(1, 'year')],
+                'Last 6 months': [moment().subtract(6, 'months').startOf('month'), moment().subtract(1, 'months').endOf('month')],
+                'Last 3 Months': [moment().subtract(3, 'months').startOf('month'), moment().subtract(1, 'months').endOf('month')],
+                'This Month': [moment().startOf('month'), moment().endOf('month')],
+                'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            },
+            alwaysShowCalendars: true
+        });
+        var start = $('#date_range').data('daterangepicker').startDate.format('DD MMM Y');
+        var end = $('#date_range').data('daterangepicker').endDate.format('DD MMM Y');
+        $('#date_range_display').text(start + ' - ' + end);
+
+        $('#date_range').on('apply.daterangepicker', function (ev, picker) {
+            var start = picker.startDate.format('DD MMM Y');
+            var end = picker.endDate.format('DD MMM Y');
+            $('#date_range_display').text(start + ' - ' + end);
+            var table = $("#reports-table").DataTable();
+            table.ajax.reload();
+        });
+
+        $("#search_project").on('input', function () {
+            var searchvalue = $(this).val();
+            var table = $("#reports-table").DataTable();
+            table.search(searchvalue).draw();
+        });
+
+        $(document).ready(function() {
+            AjaxDatatableViewUtils.initialize_table(
+                $('#reports-table'),
+                "{% url 'detailed_efficiency_datatable' %}",
+                {
+                    processing : true,
+                    searching : true,
+                    serverSide : true,
+                    autoWidth : false,
+                    full_row_select : false,
+                    scrollX : false,
+                    bFilter : true,
+                    bSort : true,
+                    dom : 'ltip',
+                    order : []
+                }, 
+                {
+                    'team_id': function() {
+                        return '{{ object.id }}'; 
+                    },
+                    'from_date': function () {
+                        return $('#date_range').data('daterangepicker').startDate.format('YYYY-MM-DD');
+                    },
+                    'to_date': function () {
+                        return $('#date_range').data('daterangepicker').endDate.format('YYYY-MM-DD');
+                    },
+                }
+            );
+        });
+        $("#search_project").on('input', function () {
+            var searchvalue = $(this).val();
+            var table = $("#reports-table").DataTable();
+            table.search(searchvalue).draw();
+        });
+        $("#project_filterdropdown").change (function() {
+            var table = $("#reports-table").DataTable();
+            table.ajax.reload();
+        });  
+    </script>
+{% endblock %}

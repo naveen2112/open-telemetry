@@ -8,6 +8,7 @@ from django.http import HttpResponseRedirect
 from hubble import auth_helper
 from hubble.models import User
 from core import constants
+from django.http import JsonResponse
 
 
 #To make sure correct authentication method is renderred
@@ -28,7 +29,7 @@ def signin(request):
                 user = User.objects.get(email=user_email)
                 if user is not None:
                     auth_login(request, user)
-                    return redirect("report")
+                    return redirect("index")
             else:
                 messages.add_message(
                     request,
