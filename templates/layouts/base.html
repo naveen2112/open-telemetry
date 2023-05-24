@@ -43,15 +43,8 @@
         <div class="overflow-hidden max-h-screen flex main-screen grow flex-col">
             <div class="header bg-white">
                 <div class="px-5 pt-9 bg-mild-violet pb-7">
-                    <div class="flex justify-between mb-7 items-center">
-                        <div>
-
-                            <div class="text-dark-black text-lg mb-1 leading-none">
-                                {% block header %}
-                                {% endblock %}
-                            </div>
-
-                    {% endblock header %}
+                    {% block header %}
+                    {% endblock %}
                 </div>
             </div>
 
@@ -99,6 +92,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.js"></script>
         <script type="text/javascript"
             src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap-collapse.js"></script>
+        <script src="{% static 'js/search.js' %}"></script>
 
         <script>
             let showLoader = () => {
@@ -128,8 +122,6 @@
                     $('#non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + JSON.parse(data.non_field_errors)[0]['message'] + '</span>')
                 }
                 for (field in JSON.parse(data.field_errors)) {
-                    console.log(JSON.parse(data.field_errors)[field][0])
-                    console.log(JSON.parse(data.field_errors)[field][0].message)
                     $('#' + field + '_group').append('<span id="reason_error" class="form_errors ajax-error text-red-600">' + JSON.parse(data.field_errors)[field][0].message + '</span>');
                 }
             }
