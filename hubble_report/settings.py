@@ -36,8 +36,7 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = [env("SITE_HOST")]
-
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -48,11 +47,18 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",
     "reports",
-    "training",
     "hubble",
+    "training",
     "ajax_datatable",
 ]
+
+SESSION_ENGINE = "django.contrib.sessions.backends.file"
+SESSION_FILE_PATH = os.path.join(BASE_DIR, "session_files")
+
+# Session age should be in secs
+SESSION_COOKIE_AGE = 288000
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -140,3 +146,16 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+AUTH_USER_MODEL = "hubble.User"
+
+ENV_NAME = env("ENV_NAME")
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://reports.hubble-reports.test",
+    "https://training.hubble-reports.test",
+    "https://reports-dev.mallow-tech.com",
+    "https://training-dev.mallow-tech.com",
+]
+
+LOGIN_URL = "login"

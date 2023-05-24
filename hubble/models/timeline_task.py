@@ -29,7 +29,7 @@ class TimelineTask(db.SoftDeleteWithBaseModel):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
-        db_table = 'timeline_task'
+        db_table = 'timeline_tasks'
         ordering = ['order']
 
     def __str__(self):

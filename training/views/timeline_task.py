@@ -88,12 +88,17 @@ def timelinetask_update_form(request):
     """
     Timeline Template Task Update Form Data
     """
-    id = request.GET.get("id")
-    timeline_task = TimelineTask.objects.get(id=id)
-    data = {
-        "timeline_task": model_to_dict(timeline_task)
-    }  # Covert django queryset object to dict,which can be easily serialized and sent as a JSON response
-    return JsonResponse(data, safe=False)
+    try:
+        id = request.GET.get("id")
+        timeline_task = TimelineTask.objects.get(id=id)
+        data = {
+            "timeline_task": model_to_dict(timeline_task)
+        }  # Covert django queryset object to dict,which can be easily serialized and sent as a JSON response
+        return JsonResponse(data, safe=False)
+    except Exception as e:
+        return JsonResponse(
+            {"message": "No timeline template task found"}, status=500
+        )
 
 
 def update_timelinetask_template(request):
