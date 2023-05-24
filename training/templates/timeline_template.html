@@ -24,13 +24,11 @@
 
 {% block body %}
     <div class="mb-5 flex justify-end items-center">
-        {% comment %}
-        Timeline Template create modal
-        {% endcomment %}
         <div class="jquery-modal current hidden" id="modal">
             <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
-                <p class="font-semibold text-lg mb-10">Create Timeline</p>
+                <p class="font-semibold text-lg mb-10" id="form_heading">Create Timeline</p>
                 <form method="post" class="timeline-form" id="timeline-create-form">
+                    <input type="hidden" name="timeline_id" id="timeline_id">
                     <div class="modal-body">
                         {% csrf_token %}
                         <div class="form-group mb-7" id="{{ form.name.label|lower }}_group">
@@ -53,130 +51,26 @@
                         <a class="cursor-pointer inline-block align-middle border border-grey px-8 py-2 rounded mr-6"
                             onclick="closeModal('modal')">Close</a>
                         <a class="cursor-pointer inline-block align-middle text-white bg-dark-blue rounded inline-flex items-center rounded px-8 py-2 text-base font-normal"
-                            onclick="createTimeline()">Submit</a>
+                             id="submit-btn">Submit</a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
     <div class="flex mb-7 items-center">
         <div class="relative mr-5" id="timeline-table_filter">
             <input type="text" value="" name="search_project" placeholder="Search by Name, Team"
                 class="w-397 h-10 pl-11 pr-2.5 py-3 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0"
                 id="search_project">
-            <span class="absolute top-2 left-2">
-                <svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg"
-                    xmlns:xlink="http://www.w3.org/1999/xlink">
-                    <title>Search</title>
-                    <defs>
-                        <rect id="path-1" x="0" y="0" width="397" height="40" rx="10"></rect>
-                        <filter x="-2.3%" y="-22.5%" width="104.5%" height="145.0%" filterUnits="objectBoundingBox"
-                            id="filter-2">
-                            <feOffset dx="0" dy="0" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
-                            <feGaussianBlur stdDeviation="3" in="shadowOffsetOuter1" result="shadowBlurOuter1">
-                            </feGaussianBlur>
-                            <feColorMatrix
-                                values="0 0 0 0 0.0509803922   0 0 0 0 0.0470588235   0 0 0 0 0.11372549  0 0 0 0.05 0"
-                                type="matrix" in="shadowBlurOuter1"></feColorMatrix>
-                        </filter>
-                    </defs>
-                    <g id="Final---User-Profile" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                        <g id="UserProfile---list" transform="translate(-130.000000, -111.000000)">
-                            <rect fill="#5D3E91" opacity="0.06" x="0" y="0" width="1440" height="900"></rect>
-                            <g id="Group" transform="translate(120.000000, 103.000000)">
-                                <g id="Rectangle">
-                                    <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
-                                    <use fill="#FBFCFF" fill-rule="evenodd" xlink:href="#path-1"></use>
-                                </g>
-                                <g id="search-icon" transform="translate(10.000000, 8.000000)">
-                                    <rect id="Rectangle" fill="#F3F6FF" opacity="0" x="0" y="0" width="24" height="24">
-                                    </rect>
-                                    <path
-                                        d="M6.05025253,6.05025253 C8.78392257,3.31658249 13.2160774,3.31658249 15.9497475,6.05025253 C18.4484927,8.5489978 18.6632287,12.4668446 16.5939552,15.2094979 C16.6570068,15.2527187 16.7176613,15.3034478 16.7747054,15.3604918 L20.074537,18.6603235 C20.5301487,19.1159351 20.5829124,19.8018639 20.1923882,20.1923882 C19.8018639,20.5829124 19.1159351,20.5301487 18.6603235,20.074537 L15.3604918,16.7747054 C15.3034478,16.7176613 15.2527187,16.6570068 15.208384,16.5937738 C12.4668446,18.6632287 8.5489978,18.4484927 6.05025253,15.9497475 C3.31658249,13.2160774 3.31658249,8.78392257 6.05025253,6.05025253 Z M7.46446609,7.46446609 C5.51184464,9.41708755 5.51184464,12.5829124 7.46446609,14.5355339 C9.41708755,16.4881554 12.5829124,16.4881554 14.5355339,14.5355339 C16.4881554,12.5829124 16.4881554,9.41708755 14.5355339,7.46446609 C12.5829124,5.51184464 9.41708755,5.51184464 7.46446609,7.46446609 Z"
-                                        id="Shape" fill-opacity="0.5" fill="#020C2D"></path>
-                                </g>
-                            </g>
-                        </g>
-                    </g>
-                </svg>
-            </span>
+                <span class="absolute top-2 left-2"><span class="hbl hbl-search-icon text-dark-black-50 text-2xl"></span></span>
+
         </div>
     </div>
+
     <table id="timeline-table" class="display border-0 table-with-no-border dataTable no-footer" style="width: 100%;"
         role="grid" aria-describedby="timeline-table_info">
     </table>
-    {% comment %}
-        Timeline template update modal
-    {% endcomment %}
-    <div class="jquery-modal current hidden" id="update-modal">
-        <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
-            <p class="font-semibold text-lg mb-10">Update Timeline</p>
-            <form method="post" class="timeline-form">
-                <div class="modal-body">
-                    <input type="hidden" name="update_id" id="update_id">
-                    {% csrf_token %}
-                    <div class="form-group mb-7" id="{{ form.name.label|lower }}_update_group">
-                        {{ form.name|show_label }}
-                        {{ form.name|add_id:'update' }}
-                    </div>
-                    <div class="work-basic-dropdown mb-7" id="{{ form.team.label|lower }}_update_group">
-                        {{ form.team|show_label }}
-                        <div class="relative">
-                            {{ form.team|add_id:'update' }}
-                        </div>
-                    </div>
-                    <div class="flex items-center mb-7" id="{{ form.is_active.label|lower }}_update_group">
-                        {{ form.is_active|add_id:'update' }}
-                        <label for="is_active" class="ml-3 mb-3.6 text-sm text-dark-black-50">Active Template</label>
-                    </div>
-                </div>
-                <div id="update_non_field_error"></div>
-                <div class="text-center mt-10">
-                    <a class="cursor-pointer inline-block align-middle border border-grey px-8 py-2 rounded mr-6"
-                        onclick="closeModal('update-modal')">Close</a>
-                    <a class="cursor-pointer inline-block align-middle text-white bg-dark-blue rounded inline-flex items-center rounded px-8 py-2 text-base font-normal"
-                        onclick="updateTimeline()">
-                        Submit
-                    </a>
-                </div>
-            </form>
-        </div>
-    </div>
-    {% comment %}
-        Duplicate timeline template modal
-    {% endcomment %}
-    <div class="jquery-modal current hidden" id="duplicate-modal">
-        <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
-            <p class="font-semibold text-lg mb-10">Duplicate <span id="timeline_name"></span></p>
-            <form method="post" class="timeline-form" id="timeline-create-form">
-                <div class="modal-body">
-                    {% csrf_token %}
-                    <input type="hidden" name="duplicate_id" id="duplicate_id">
-                    <div class="form-group mb-7" id="{{ form.name.label|lower }}_duplicate_group">
-                        {{ form.name|show_label }}
-                        {{ form.name|add_id:'duplicate' }}
-                    </div>
-                    <div class="work-basic-dropdown mb-7" id="{{ form.team.label|lower }}_duplicate_group">
-                        {{ form.team|show_label }}
-                        <div class="relative">
-                            {{ form.team|add_id:'duplicate' }}
-                        </div>
-                    </div>
-                    <div class="flex items-center mb-7" id="{{ form.is_active.label|lower }}_duplicate_group">
-                        {{ form.is_active|add_id:'duplicate' }}
-                        <label for="is_active" class="ml-3 mb-3.6 text-sm text-dark-black-50">Active Template</label>
-                    </div>
-                </div>
-                <div id="duplicate_non_field_error"></div>
-                <div class="text-center mt-10">
-                    <a class="cursor-pointer inline-block align-middle border border-grey px-8 py-2 rounded mr-6"
-                        onclick="closeModal('duplicate-modal')">Close</a>
-                    <a class="cursor-pointer inline-block align-middle text-white bg-dark-blue rounded inline-flex items-center rounded px-8 py-2 text-base font-normal"
-                        onclick="duplicateTimeline()">Submit</a>
-                </div>
-            </form>
-        </div>
-    </div>
 {% endblock %}
 
 {% block script %}
@@ -224,30 +118,24 @@
                         scrollX: false,
                         order: [],
                     },
-                    {
-                        "start-date": function () {
-                            return $("#reportrange").attr('start-date')
-                        },
-                        "end-date": function () {
-                            return $("#reportrange").attr('end-date')
-                        }
-                    }
                 );
             });
             $("#search_project").on('input', function () {
-                var searchvalue = $(this).val()
+                var searchvalue = $(this).val();
                 var table = $("#timeline-table").DataTable();
-                table.search(searchvalue).draw()
+                table.search(searchvalue).draw();
             });
         });
 
         function openModal() {
             document.getElementById("modal").classList.remove("hidden");
             document.getElementById("modal").classList.add("blocker");
-            $('#id_team').val('')
-            $('.dropdown_selected_value').html('')
-            $('#id_name').val('')
-            $('#id_is_active').prop('checked', false)
+            $('#id_team').val('');
+            $('.dropdown_selected_value').html('');
+            $('#id_name').val('');
+            $('#id_is_active').prop('checked', false);
+            $('#submit-btn').attr("onclick", "createTimeline()");
+            $('#form_heading').html("Create Timeline");
         }
 
         function closeModal(name) {
@@ -266,60 +154,55 @@
                     is_active: $('.checkbox_active').is(":checked"),
                 },
                 success: function (data) {
-                    $('.form_errors').remove()
+                    $('.form_errors').remove();
                     $('.page-loader').hide();
                     if (data.status === 'success') {
                         $('#timeline-table').DataTable().ajax.reload()
                         closeModal('modal');
                     }
                     else {
-                        const fieldErrors = JSON.parse(data.field_errors);
-                        const nonFieldErrors = JSON.parse(data.non_field_errors);
-                        if (Object.keys(nonFieldErrors).length > 0) {
-                            let non_field_error = nonFieldErrors[0]['message']
-                            $('#non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + non_field_error + '</span>')
-                        }
-                        for (field in fieldErrors) {
-                            $('#' + field + '_group').append('<span id="reason_error" class="form_errors ajax-error text-red-600">' + fieldErrors[field][0].message + '</span>');
-                        }
+                        renderFormError(data);
                     }
                 },
                 error: function () {
-                    alert("Something went wrong");
-                    location.reload();
+                    $('.page-loader').hide();
+                    alert("Something went wrong"); 
                 },
             });
         }
 
         function openUpdateModel(id) {
             $('.page-loader').show();
-            $('#update_team').val('');
-            $('.dropdown_selected_value').html('')
-            const modal = document.getElementById("update-modal");
+            $('#id_team').val('');
+            $('.dropdown_selected_value').html('');
             $.ajax({
                 type: "GET",
                 url: "{% url 'timeline-template.edit-form' %}",
-                data: { id: id },
+                data: {
+                    id: id,
+                },
                 success: function (data) {
                     $('.page-loader').hide();
-                    $('#update_name').val(data.timeline.name),
-                        $('#update_team').val(data.timeline.team),
-                        $('#update_id').val(id);
+                    $('#form_heading').html("Update Timeline");
+                    $('#id_name').val(data.timeline.name);
+                    $('#id_team').val(data.timeline.team);
+                    $('#timeline_id').val(id);
                     if (data.timeline.is_active) {
-                        $("#update_is_active").attr('checked', true);
+                        $("#id_is_active").attr('checked', true);
                     }
                     else {
-                        $("#update_is_active").attr('checked', false);
+                        $("#id_is_active").attr('checked', false);
                     }
-                    $('.dropdown_selected_value').html($("#update_team option[value='" + data.timeline.team + "']").text())
+                    $('.dropdown_selected_value').html($("#id_team option[value='" + data.timeline.team + "']").text());
                 },
-                error: function () {
-                    alert("Something went wrong");
-                    location.reload();
+                error: function(jqXHR, textStatus, errorThrown) {
+                    alert(jqXHR.responseJSON.message);
+                    $('.page-loader').hide();
                 },
             });
-            modal.classList.remove("hidden");
-            modal.classList.add("blocker");
+            document.getElementById("modal").classList.remove("hidden");
+            document.getElementById("modal").classList.add("blocker");
+            $('#submit-btn').attr("onclick", "updateTimeline()");
         }
 
         function updateTimeline() {
@@ -328,117 +211,49 @@
                 type: "POST",
                 url: "{% url 'timeline-template.edit' %}",
                 data: {
-                    id: $("#update_id").val(),
-                    name: $('#update_name').val(),
-                    team: $("#update_team").val(),
-                    is_active: $('#update_is_active').is(":checked"),
+                    id: $("#timeline_id").val(),
+                    name: $('#id_name').val(),
+                    team: $("#id_team").val(),
+                    is_active: $('#id_is_active').is(":checked"),
                 },
                 success: function (data) {
                     $('.form_errors').remove()
                     $('.page-loader').hide();
                     if (data.status === 'success') {
                         $('#timeline-table').DataTable().ajax.reload()
-                        closeModal('update-modal')
+                        closeModal('modal')
                     }
                     else {
-                        const fieldErrors = JSON.parse(data.field_errors);
-                        const nonFieldErrors = JSON.parse(data.non_field_errors);
-                        if (Object.keys(nonFieldErrors).length > 0) {
-                            let non_field_error = nonFieldErrors[0]['message']
-                            $('#update_non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + non_field_error + '</span>')
-                        }
-                        for (field in fieldErrors) {
-                            $('#' + field + '_update_group').append('<span id="reason_error" class="ajax-error form_errors text-red-600">' + fieldErrors[field][0].message + '</span>');
-                        }
+                        renderFormError(data);
                     }
                 },
                 error: function () {
+                    $('.page-loader').hide();
                     alert("Something went wrong");
-                    location.reload();
                 },
             });
         }
 
         function deleteTimeline(id) {
-            let text = 'Are you do you want to delete'
+            let text = 'Are you sure do you want to delete';
             if (confirm(text) == true) {
                 $('.page-loader').show();
                 $.ajax({
                     type: "DELETE",
                     url: "{% url 'timeline-template.delete' %}",
-                    headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
-                    data: { id: id },
+                    data: {
+                        id: id,
+                    },
                     success: function (data) {
                         $('.page-loader').hide();
                         $('#timeline-table').DataTable().ajax.reload()
                     },
                     error: function () {
+                        $('.page-loader').hide();
                         alert("Something went wrong");
-                        location.reload();
                     },
                 });
             }
-        }
-
-        function duplicateTimelineModal(id) {
-            $('.page-loader').show();
-            $('#duplicate_team').val('');
-            $('.dropdown_selected_value').html('')
-            const modal = document.getElementById("duplicate-modal");
-            $.ajax({
-                type: "GET",
-                url: "{% url 'timeline-template.duplicate-form' %}",
-                data: { id: id },
-                success: function (data) {
-                    $('.page-loader').hide();
-                    $('#duplicate_name').val('Copy_' + data.timeline.name)
-                    $('#timeline_name').html(data.timeline.name)
-                    $('#duplicate_id').val(id);
-                },
-                error: function () {
-                    alert("Something went wrong");
-                    location.reload();
-                },
-            });
-            modal.classList.remove("hidden");
-            modal.classList.add("blocker");
-        }
-
-        function duplicateTimeline() {
-            $('.page-loader').show();
-            $.ajax({
-                type: "POST",
-                url: "{% url 'timeline-template.duplicate' %}",
-                data: {
-                    id: $("#duplicate_id").val(),
-                    name: $('#duplicate_name').val(),
-                    team: $("#duplicate_team").val(),
-                    is_active: $('#duplicate_is_active').is(":checked"),
-                },
-                success: function (data) {
-                    $('.form_errors').remove()
-                    $('.page-loader').hide();
-                    if (data.status === 'success') {
-                        $('#timeline-table').DataTable().ajax.reload()
-                        closeModal('duplicate-modal');
-                    }
-                    else {
-                        const fieldErrors = JSON.parse(data.field_errors);
-                        const nonFieldErrors = JSON.parse(data.non_field_errors);
-                        if (Object.keys(nonFieldErrors).length > 0) {
-                            let non_field_error = nonFieldErrors[0]['message']
-                            $('#duplicate_non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + non_field_error + '</span>')
-                        }
-                        for (field in fieldErrors) {
-                            $('#' + field + '_duplicate_group').append('<span id="reason_error" class="ajax-error form_errors text-red-600">' + fieldErrors[field][0].message + '</span>');
-                        }
-                    }
-                },
-                error: function () {
-                    alert("Something went wrong");
-                    location.reload();
-                },
-            });
         }
     </script>
 {% endblock %}

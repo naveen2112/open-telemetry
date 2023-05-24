@@ -104,13 +104,24 @@
             })
 
             $(function () {
-                hideLoader()
-                $('.sub-category .sidebar-active').closest('.sub-category').addClass('sidebar-active')
+                hideLoader();
+                $('.sub-category .sidebar-active').closest('.sub-category').addClass('sidebar-active');
             })
 
             $.ajaxSetup({
                 headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
             });
+
+            function renderFormError(data) {
+                if (Object.keys(JSON.parse(data.non_field_errors)).length > 0) {
+                    $('#non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + JSON.parse(data.non_field_errors)[0]['message'] + '</span>')
+                }
+                for (field in JSON.parse(data.field_errors)) {
+                    console.log(JSON.parse(data.field_errors)[field][0])
+                    console.log(JSON.parse(data.field_errors)[field][0].message)
+                    $('#' + field + '_group').append('<span id="reason_error" class="form_errors ajax-error text-red-600">' + JSON.parse(data.field_errors)[field][0].message + '</span>');
+                }
+            }
         </script>
 
         {% block script %}

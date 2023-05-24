@@ -18,11 +18,9 @@ class SoftDeleteWithBaseModel(models.Model):
     deleted_at = models.DateTimeField(null=True)
 
     objects = SoftDeleteManager()
-    
 
     class Meta:
         abstract = True
-
     
     def delete(self, *args, **kwargs):
         """
@@ -30,7 +28,6 @@ class SoftDeleteWithBaseModel(models.Model):
         """
         self.deleted_at = datetime.datetime.now()
         self.save()
-
 
     def restore(self):
         """
@@ -43,7 +40,6 @@ class SoftDeleteWithBaseModel(models.Model):
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
 
     class Meta:
         abstract = True

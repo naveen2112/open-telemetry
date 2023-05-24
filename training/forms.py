@@ -13,14 +13,6 @@ class TimelineForm(forms.ModelForm):
         )
     )
 
-
-    def __init__(self, *args, **kwargs):
-        """
-        This function sets the "is_active" field as not required in a form.
-        """
-        super(TimelineForm, self).__init__(*args, **kwargs)
-        self.fields["is_active"].required = False
-
     class Meta:
         model = models.Timeline
         fields = ("name", "team", "is_active")
@@ -51,7 +43,6 @@ class TimelineTaskForm(forms.ModelForm):
             raise ValidationError("Value must be greater than 0")
         if value % 0.5 != 0: 
             raise ValidationError("Value must be a multiple of 0.5")
-
 
     days = forms.FloatField(
         widget=forms.NumberInput(
