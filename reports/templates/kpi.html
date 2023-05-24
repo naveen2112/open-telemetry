@@ -1,14 +1,14 @@
 {% extends 'layouts/base.html' %}
 {% load static %}
 
-{% block title %} Reports {% endblock %}
+{% block title %} Key Performance Indicator {% endblock %}
+
 {% block header %}
 <div class="header bg-white">
     <div class="px-2 pt-9 bg-mild-violet pb-7">
         <div class="flex">
             <div>
-                <div class="text-dark-black text-lg mb-1 leading-none">Efficiency Report</div>
-                <div class="text-dark-black-50 text-sm">List of Team Reports</div>
+                <div class="text-dark-black text-lg mb-1 leading-none">KPI Report</div>
             </div>
         </div>
     </div>
@@ -16,12 +16,12 @@
 {% endblock %}
 
 {% block sub_header %}
-<div class="flex items-center pt-7 px-2">
+<div class="flex">
 
     {% include 'filter.html' %}
     
     <div class="relative mr-5">
-        <input type="text" value="" name="search_project" placeholder="Search by Team"
+        <input type="text" value="" name="search_project" placeholder="Search by Project, Username, Team"
             class="w-397 h-10 pl-11 pr-2.5 py-3 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0"
             id="search_project" />
         <span class="absolute top-2 left-2">
@@ -66,7 +66,7 @@
 {% endblock %}
 
 {% block body %}
-<table id="reports-table" style="width: 100%;" class="display border-0 table-with-no-border dataTable no-footer px-2">
+<table id="reports-table" style="width: 100%;" class="display border-0 table-with-no-border dataTable no-footer">
 </table>
 {% endblock %}
 
@@ -98,17 +98,10 @@
         var table = $("#reports-table").DataTable();
         table.ajax.reload();
     });
-
-    $("#search_project").on('input', function () {
-        var searchvalue = $(this).val();
-        var table = $("#reports-table").DataTable();
-        table.search(searchvalue).draw();
-    });
-
     $(document).ready(function () {
         AjaxDatatableViewUtils.initialize_table(
             $('#reports-table'),
-            "{% url 'efficiency_datatable' %}",
+            "{% url 'kpi_datatable' %}",
             {
                 processing: true,
                 searching: true,
@@ -121,14 +114,19 @@
                 dom: 'ltip',
             },
             {
-                from_date: function () {
+                'from_date' : function () {
                     return $('#date_range').data('daterangepicker').startDate.format('YYYY-MM-DD');
                 },
-                to_date: function () {
+                'to_date' : function () {
                     return $('#date_range').data('daterangepicker').endDate.format('YYYY-MM-DD');
                 },
             }
         );
-    }); 
+        $("#search_project").on('input', function () {
+            var searchvalue = $(this).val();
+            var table = $("#reports-table").DataTable();
+            table.search(searchvalue).draw();
+        });
+    });  
 </script>
 {% endblock %}

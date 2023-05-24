@@ -1,14 +1,14 @@
 {% extends 'layouts/base.html' %}
 {% load static %}
 
-{% block title %} Reports {% endblock %}
+{% block title %} Monetization Gap {% endblock %}
+
 {% block header %}
 <div class="header bg-white">
     <div class="px-2 pt-9 bg-mild-violet pb-7">
         <div class="flex">
             <div>
-                <div class="text-dark-black text-lg mb-1 leading-none">Efficiency Report</div>
-                <div class="text-dark-black-50 text-sm">List of Team Reports</div>
+                <div class="text-dark-black text-lg mb-1 leading-none">Monetization Gap Report</div>
             </div>
         </div>
     </div>
@@ -16,12 +16,9 @@
 {% endblock %}
 
 {% block sub_header %}
-<div class="flex items-center pt-7 px-2">
-
-    {% include 'filter.html' %}
-    
+<div class="flex">
     <div class="relative mr-5">
-        <input type="text" value="" name="search_project" placeholder="Search by Team"
+        <input type="text" value="" name="search_project" placeholder="Search by Team, Date"
             class="w-397 h-10 pl-11 pr-2.5 py-3 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0"
             id="search_project" />
         <span class="absolute top-2 left-2">
@@ -62,53 +59,33 @@
             </svg>
         </span>
     </div>
+    <div class=''><label for="cars">Choose a Year:</label>
+        <select name="year" id="years"
+            class='date-change mt-2 border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-8 px-5'>
+        </select>
+    </div>
+</div>
+<div class='grid grid-cols-12 text-xs py-4 items-center mt-3 px-2'>
+    <div class="col-span-12">
+        <label for="">Choose a Month:</label>
+    </div>
+    <br>
+    <div class='col-span-12 grid grid-cols-12' id='months'>
+    </div>
 </div>
 {% endblock %}
 
 {% block body %}
-<table id="reports-table" style="width: 100%;" class="display border-0 table-with-no-border dataTable no-footer px-2">
+<table id="reports-table" style="width: 100%;" class="display border-0 table-with-no-border dataTable no-footer">
 </table>
 {% endblock %}
 
 {% block script %}
 <script>
-    $('#date_range').daterangepicker({
-        showDropdowns: true,
-        startDate: moment().startOf('year').subtract(1, 'year'),
-        endDate: moment().endOf('year').subtract(1, 'year'),
-        maxSpan: { months: 12 },
-        ranges: {
-            'This Year': [moment().startOf('year'), moment().endOf('year')],
-            'Last Year': [moment().startOf('year').subtract(1, 'year'), moment().endOf('year').subtract(1, 'year')],
-            'Last 6 months': [moment().subtract(6, 'months').startOf('month'), moment().subtract(1, 'months').endOf('month')],
-            'Last 3 Months': [moment().subtract(3, 'months').startOf('month'), moment().subtract(1, 'months').endOf('month')],
-            'This Month': [moment().startOf('month'), moment().endOf('month')],
-            'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
-        },
-        alwaysShowCalendars: true
-    });
-    var start = $('#date_range').data('daterangepicker').startDate.format('DD MMM Y');
-    var end = $('#date_range').data('daterangepicker').endDate.format('DD MMM Y');
-    $('#date_range_display').text(start + ' - ' + end);
-
-    $('#date_range').on('apply.daterangepicker', function (ev, picker) {
-        var start = picker.startDate.format('DD MMM Y');
-        var end = picker.endDate.format('DD MMM Y');
-        $('#date_range_display').text(start + ' - ' + end);
-        var table = $("#reports-table").DataTable();
-        table.ajax.reload();
-    });
-
-    $("#search_project").on('input', function () {
-        var searchvalue = $(this).val();
-        var table = $("#reports-table").DataTable();
-        table.search(searchvalue).draw();
-    });
-
     $(document).ready(function () {
         AjaxDatatableViewUtils.initialize_table(
             $('#reports-table'),
-            "{% url 'efficiency_datatable' %}",
+            "{% url 'monetization_datatable' %}",
             {
                 processing: true,
                 searching: true,
@@ -121,14 +98,63 @@
                 dom: 'ltip',
             },
             {
-                from_date: function () {
-                    return $('#date_range').data('daterangepicker').startDate.format('YYYY-MM-DD');
+                'year_filter': function () {
+                    return $("#years").val();
                 },
-                to_date: function () {
-                    return $('#date_range').data('daterangepicker').endDate.format('YYYY-MM-DD');
+                'month_filter': function () {
+                    return $("[name='month']:checked").val();
                 },
             }
         );
-    }); 
+    });
+    $("#search_project").on('input', function () {
+        var searchvalue = $(this).val();
+        var table = $("#reports-table").DataTable();
+        table.search(searchvalue).draw();
+    });
+    $("#months, #years").change(function () {
+        var table = $("#reports-table").DataTable();
+        table.ajax.reload();
+    });
+    var months = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December"
+        ];
+    dateRender();
+    function dateRender() {
+        var start_year = 2010,
+            end_year = new Date().getFullYear();
+
+        for (i = start_year; i <= end_year; i++) {
+            var selected = "";
+            if (end_year == (i)) {
+                selected = 'selected';
+            }
+            $("#years").append(`<option value="${i}" ${selected}>${i}</option>`);
+        }
+        months.forEach((number, index) => {
+            var checked = "";
+            if (new Date().getMonth() == index) {
+                checked = "checked";
+            }
+
+            $("#months").append(`<div class="col-span-1 ">
+                                    <label for="${number}" class='custom-radio'>
+                                        <input type="radio" id="${number}" value='${index + 1}'
+                                            name='month' ${checked} class='date-change'><span>${number}</span>
+                                    </label>
+                                </div>`);
+        });
+    }
 </script>
 {% endblock %}

@@ -16,6 +16,7 @@
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito">
     <link
         href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
         rel="stylesheet">
@@ -36,15 +37,27 @@
 <body class="min-h-screen bg-gray-50">
 
     <div class="flex h-screen">
+
         {% include 'layouts/'|add:request.subdomain|add:'_sidebar.html' %}
 
         <div class="overflow-hidden max-h-screen flex main-screen grow flex-col">
             <div class="header bg-white">
                 <div class="px-5 pt-9 bg-mild-violet pb-7">
-                    {% block header %}
+                    <div class="flex justify-between mb-7 items-center">
+                        <div>
+
+                            <div class="text-dark-black text-lg mb-1 leading-none">
+                                {% block header %}
+                                {% endblock %}
+                            </div>
 
                     {% endblock header %}
                 </div>
+            </div>
+
+            <div class="text-dark-black-50 px-5 text-sm">
+                {% block table %}
+                {% endblock %}
             </div>
 
             <div class="overflow-auto grow bg-light-violet content-page">
@@ -86,9 +99,7 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.js"></script>
         <script type="text/javascript"
             src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap-collapse.js"></script>
-        <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
-        <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
-        <script src="{% static 'js/search.js' %}"></script>
+
         <script>
             let showLoader = () => {
                 $('.page-loader').show();
