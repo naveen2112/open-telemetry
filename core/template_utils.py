@@ -12,7 +12,7 @@ def edit_btn(value):
         url = "javascript:void(0)"
     else:
         url = value
-    return f"""<a href="{url}" onclick="openUpdateModel({function})">
+    return f"""<a href="{url}" onclick="{function}">
                 <div class="inline mr-1"> <span class="hbl hbl-edit text-2xl text-dark-black/50"></span></div>
             </a>"""
 

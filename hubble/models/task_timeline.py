@@ -29,7 +29,6 @@ class Task_Timeline(db.SoftDeleteWithBaseModel):
     end_date = models.DateTimeField(null=True, blank=True, auto_now_add=False, auto_now=False)
     order = models.IntegerField(blank=True) 
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
-    
 
     class Meta:
         db_table = 'task_timeline'
