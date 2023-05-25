@@ -74,7 +74,7 @@ class TimelineTemplateDataTable(CustomDatatable):
 
 
     def get_initial_queryset(self, request=None):
-        data = models.Timeline.objects.annotate(Days=Sum(F("task_timeline__days")))
+        data = models.Timeline.objects.all().annotate(Days=Sum(F("task_timeline__days")))
         return data
 
 
@@ -92,6 +92,21 @@ def create_timeline_template(request):
             )  # Set is_active to true if the input is checked else it will be false
             timeline.created_by = user
             timeline.save()
+
+            if request.POST.get('id'):
+                timeline_task = models.TimelineTask.objects.filter(timeline=request.POST.get('id'))
+                order = 0
+                for task in timeline_task:
+                    order += 1
+                    models.TimelineTask.objects.create(
+                        name=task.name,
+                        days=task.days,
+                        timeline=timeline,
+                        present_type=task.present_type,
+                        task_type=task.task_type,
+                        order=order,
+                        created_by=task.created_by,
+                    )
             return JsonResponse({"status": "success"})
         else:
             field_errors = form.errors.as_json()
@@ -109,12 +124,17 @@ def timeline_update_form(request):
     """
     Timeline Template Update Form Data
     """
-    id = request.GET.get("id")
-    timeline = models.Timeline.objects.get(id=id)
-    data = {
-        "timeline": model_to_dict(timeline)
-    }  # Covert django queryset object to dict,which can be easily serialized and sent as a JSON response
-    return JsonResponse(data, safe=False)
+    try:
+        id = request.GET.get("id")
+        timeline = models.Timeline.objects.get(id=id)
+        data = {
+            "timeline": model_to_dict(timeline)
+        }  # Covert django queryset object to dict,which can be easily serialized and sent as a JSON response
+        return JsonResponse(data, safe=False)
+    except Exception as e:
+        return JsonResponse(
+            {"message": "No timeline template found"}, status=500
+        )
 
 
 def update_timeline_template(request):
@@ -162,59 +182,6 @@ def delete_timeline_template(request):
     except Exception as e:
         return JsonResponse(
             {"message": "Error while deleting Timeline Template!"}, status=500
-        )
-
-
-def timeline_duplicate_form(request):
-    """
-    Timeline Template Form Data
-    """
-    id = request.GET.get("id")
-    timeline = models.Timeline.objects.get(id=id)
-    data = {
-        "timeline": model_to_dict(timeline)
-    }  # Covert django queryset object to dict,which can be easily serialized and sent as a JSON response
-    return JsonResponse(data, safe=False)
-
-
-def duplicate_timeline_template(request):
-    """
-    Duplicate Timeline Template
-    """
-    id = request.POST.get("id")
-    user = models.User.objects.get(id=58)
-    timeline = models.Timeline.objects.get(id=id)
-    form = forms.TimelineForm(request.POST)
-    if form.is_valid():  # Check the form is valid or not
-        timeline = form.save(commit=False)
-        timeline.is_active = (
-            True if request.POST.get("is_active") == "true" else False
-        )  # Set is_active to true if the input is checked else it will be false
-        timeline.created_by = user
-        timeline.save()
-        timeline_task = models.TimelineTask.objects.filter(timeline=id)
-        order = 0
-        for task in timeline_task:
-            order += 1
-            timetask = models.TimelineTask.objects.create(
-                name=task.name,
-                days=task.days,
-                timeline=timeline,
-                present_type=task.present_type,
-                task_type=task.task_type,
-                order=order,
-                created_by=task.created_by,
-            )
-        return JsonResponse({"status": "success"})
-    else:
-        field_errors = form.errors.as_json()
-        non_field_errors = form.non_field_errors().as_json()
-        return JsonResponse(
-            {
-                "status": "error",
-                "field_errors": field_errors,
-                "non_field_errors": non_field_errors,
-            }
         )
 
 

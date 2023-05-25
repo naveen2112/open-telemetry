@@ -23,124 +23,48 @@
             <span class="text-xl mr-2">+</span>
             Create Task
         </button>
-        {% comment %}
-        create modal
-        {% endcomment %}
-        <div class="jquery-modal current hidden" id="modal">
-            <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
-                <p class="font-semibold text-lg mb-10">Create Task</p>
-                <form method="post" class="timeline-task-form" id="timeline-task-create-form">
-                    <div class="modal-body">
-                        {% csrf_token %}
-                        <input type="hidden" name="timeline_id" value="{{ timeline_id }}" id="timeline_id">
-                        <div class="mb-7" id="{{form.name.label|lower}}_group">
-                            {{ form.name|show_label }}
-                            {{ form.name }}
-                        </div>
-                        <div class="mb-7" id="{{form.days.label|lower}}_group">
-                            {{ form.days|show_label }}
-                            {{ form.days }}
-                        </div>
-                        <div class="mb-7" id="{{form.present_type.label|lower}}_group">
-                            {{ form.present_type|show_label }}
-                            {{ form.present_type }}
-                        </div>
-                        <div class="mb-7" id="{{form.task_type.label|lower}}_group">
-                            {{ form.task_type|show_label }}
-                            {{ form.task_type }}
-                        </div>
-                    </div>
-                    <div class="text-center mt-10">
-                        <a class="cursor-pointer inline-block align-middle border border-grey px-8 py-2 rounded mr-6"
-                            onclick="closeModal('modal')">Close</a>
-                        <a class="cursor-pointer inline-block align-middle text-white bg-dark-blue rounded inline-flex items-center rounded px-8 py-2 text-base font-normal"
-                            onclick="createTimelineTask()">Submit</a>
-                    </div>
-                </form>
-            </div>
-        </div>
     </div>
 {% endblock %}
 
 {% block body %}
+    <div class="jquery-modal current hidden" id="modal">
+        <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
+            <p class="font-semibold text-lg mb-10">Create Task</p>
+            <form method="post" class="timeline-task-form" id="timeline-task-create-form">
+                <input type="hidden" name="timeline-task" id="timeline-task">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <input type="hidden" name="timeline_id" value="{{ timeline_id }}" id="timeline_id">
+                    <div class="mb-7" id="{{ form.name.label|lower }}_group">
+                        {{ form.name|show_label }}
+                        {{ form.name }}
+                    </div>
+                    <div class="mb-7" id="{{form.days.label|lower}}_group">
+                        {{ form.days|show_label }}
+                        {{ form.days }}
+                    </div>
+                    <div class="mb-7" id="{{form.present_type.label|lower}}_group">
+                        {{ form.present_type|show_label }}
+                        {{ form.present_type }}
+                    </div>
+                    <div class="mb-7" id="{{form.task_type.label|lower}}_group">
+                        {{ form.task_type|show_label }}
+                        {{ form.task_type }}
+                    </div>
+                </div>
+                <div class="text-center mt-10">
+                    <a class="cursor-pointer inline-block align-middle border border-grey px-8 py-2 rounded mr-6"
+                        onclick="closeModal('modal')">Close</a>
+                    <a class="cursor-pointer inline-block align-middle text-white bg-dark-blue rounded inline-flex items-center rounded px-8 py-2 text-base font-normal"
+                        id="submit-btn">Submit</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <table id="timeline-table" class="display border-0 table-with-no-border dataTable no-footer" style="width: 100%;"
         role="grid" aria-describedby="timeline-table_info">
         <tbody id="sortable"></tbody>
-        {% comment %}
-            update modal
-        {% endcomment %}
-        <div class="jquery-modal current hidden" id="update-modal">
-            <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
-                <p class="font-semibold text-lg mb-10">Update Timeline</p>
-                <div class="modal-body">
-                    <form method="post" class="timeline-task-form" id="timeline-task-create-form">
-                        {% csrf_token %}
-                        <input type="hidden" name="update_id" id="update_id">
-                        <div class="modal-body">
-                            <input type="hidden" name="timeline_id" value="1" id="timeline_id">
-                            <div class="mb-7" id="name_update_group">
-                                <label for="name" class="mb-3.6 text-sm text-dark-black-50">Name <span
-                                        class="text-red-600">*</span></label>
-                                <input type="text" name="name"
-                                    class="w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2"
-                                    placeholder="Timeline name..." required="" maxlength="255" id="update_name">
-                            </div>
-                            <div class="mb-7" id="days_update_group">
-                                <label for="name" class="mb-3.6 text-sm text-dark-black-50">
-                                    Days
-                                    <span class="text-red-600">*</span></label>
-                                <input type="number" name="days"
-                                    class="w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2"
-                                    placeholder="No of days..." required="" id="update_days">
-                            </div>
-                            <div class="mb-7" id="present_type_update_group">
-                                <label for="name" class="mb-3.6 text-sm text-dark-black-50">
-                                    Present type
-                                    <span class="text-red-600">*</span></label>
-                                <div id="id_present_type">
-                                    <div>
-                                        <label for="id_present_type_0"><input type="radio" name="update_present_type"
-                                                value="Remote" required="" id="id_present_type_0" checked="">
-                                            Remote
-                                        </label>
-                                    </div>
-                                    <div>
-                                        <label for="id_present_type_1"><input type="radio" name="update_present_type"
-                                                value="In-Person" required="" id="id_present_type_1">
-                                            In-Person
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mb-7" id="task_type_update_group">
-                                <label for="Task type" class="mb-3.6 text-sm text-dark-black-50">Task type <span
-                                        class="text-red-600">*</span></label>
-                                <div id="id_task_type">
-                                    <div>
-                                        <label for="id_task_type_0"><input type="radio" name="update_task_type" value="Task"
-                                                required="" id="id_task_type_0" checked="">
-                                            Task</label>
-
-                                    </div>
-                                    <div>
-                                        <label for="id_task_type_1"><input type="radio" name="update_task_type"
-                                                value="Assessment" required="" id="id_task_type_1">
-                                            Assessment</label>
-
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="text-center mt-10">
-                            <a class="cursor-pointer inline-block align-middle border border-grey px-8 py-2 rounded mr-6"
-                                onclick="closeModal('update-modal')">Close</a>
-                            <a class="cursor-pointer inline-block align-middle text-white bg-dark-blue rounded inline-flex items-center rounded px-8 py-2 text-base font-normal"
-                                onclick="updateTimeline()">Submit</a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
     </table>
 {% endblock %}
 
@@ -160,48 +84,51 @@
                     dom: 't',
                     pageLength: 50
                 }, {
-                'timeline_id': '{{timeline_id}}',
+                'timeline_id': '{{ timeline_id }}',
                 }
             );
-            $("#sortable > tr").each(function() {
-            copy_selected.push($(this).children(':first').text());
-        })
+            $("#sortable > tr").each(function () {
+                copy_selected.push($(this).children(':first').text());
+            })
         });
-        $(function() {
-            $( "#sortable" ).sortable({
-                stop: function() {
+        $(function () {
+            $("#sortable").sortable({
+                stop: function () {
                     var selectedData = [];
-                    $("#sortable > tr").each(function() {
+                    $("#sortable > tr").each(function () {
                         selectedData.push($(this).children(':first').children(':first').attr('data-id'));
-                        
                     })
-                    if(copy_seleted.toString() !== selectedData.toString()) {
-                        copy_seleted = selectedData
-                        updateOrder(copy_seleted)
+                    if (copy_seleted.toString() !== selectedData.toString()) {
+                        copy_seleted = selectedData;
+                        updateOrder(copy_seleted);
                     }
                 }
             });
         });
 
         function updateOrder(data) {
+            /**
+            * Updates an order using AJAX                     
+            *
+            * @param {Object} data - The data containing the updated order information.
+            */
             $('.page-loader').show();
             $.ajax({
                 type: "POST",
                 url: "{% url 'timeline-task.order' %}",
-                headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
-                data: { 
-                    data : data
+                data: {
+                    data: data,
                 },
-                success: function (data) { 
+                success: function (data) {
                     if (data.status === 'success') {
                         $('.page-loader').hide();
-                        $('#timeline-table').DataTable().ajax.reload()
+                        $('#timeline-table').DataTable().ajax.reload();
                         closeModal('modal');
                     }
                 },
                 error: function () {
+                    $('.page-loader').hide();
                     alert("Something went wrong");
-                    location.reload();
                 },
             });
         }
@@ -209,8 +136,9 @@
         function openTaskCreateModal() {
             document.getElementById("modal").classList.remove("hidden");
             document.getElementById("modal").classList.add("blocker");
-            $('#id_name').val('')
-            $('#id_days').val('')
+            $('#id_name').val('');
+            $('#id_days').val('');
+            $('#submit-btn').attr("onclick", "createTimelineTask()");
         }
 
         function closeModal(name) {
@@ -223,7 +151,6 @@
             $.ajax({
                 type: "POST",
                 url: "{% url 'timeline-task.create' %}",
-                headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
                 data: {
                     name: $('#id_name').val(),
                     days: $('#id_days').val(),
@@ -239,17 +166,13 @@
                         closeModal('modal');
                     }
                     else {
-                        const fieldErrors = JSON.parse(data.field_errors);
-                        const nonFieldErrors = JSON.parse(data.non_field_errors);
-                        for (field in fieldErrors) {
-                            $('#' + field + '_group').append('<span id="reason_error" class="form_errors ajax-error text-red-600">' + fieldErrors[field][0].message + '</span>');
-                        }
+                        renderFormError(data);
                     }
 
                 },
                 error: function () {
+                    $('.page-loader').hide();
                     alert("Something went wrong");
-                    location.reload();
                 },
             });
         }
@@ -260,33 +183,35 @@
             $.ajax({
                 type: "GET",
                 url: "{% url 'timeline-task.edit-form' %}",
-                data: { id: id },
-                success: function (data) {
-                    $('input[name="update_present_type"]').attr('checked', false);
-                    $('input[name="update_task_type"]').attr('checked', false);
-                    $('.page-loader').hide();
-                    $('#update_id').val(id);
-                    $('#update_name').val(data.timeline_task.name);
-                    $('#update_days').val(data.timeline_task.days);
-                    $('input[name="update_present_type"][value=' + data.timeline_task.present_type + ']').attr('checked', 'checked');
-                    $('input[name="update_task_type"][value="' + data.timeline_task.task_type + '"]').attr('checked', true)
+                data: {
+                    id: id,
                 },
-                error: function () {
-                    alert("Something went wrong");
-                    location.reload();
+                success: function (data) {
+                    $('.page-loader').hide();
+                    $('input[name="id_present_type"]').attr('checked', false);
+                    $('input[name="id_task_type"]').attr('checked', false);
+                    $('#timeline-task').val(id);
+                    $('#id_name').val(data.timeline_task.name);
+                    $('#id_days').val(data.timeline_task.days);
+                    $('input[name="id_present_type"][value=' + data.timeline_task.present_type + ']').attr('checked', 'checked');
+                    $('input[name="id_task_type"][value="' + data.timeline_task.task_type + '"]').attr('checked', true);
+                    $('#submit-btn').attr("onclick", "updateTimeline()");
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    alert(jqXHR.responseJSON.message);
+                    $('.page-loader').hide();
                 },
             });
-            document.getElementById("update-modal").classList.remove("hidden");
-            document.getElementById("update-modal").classList.add("blocker");
+            document.getElementById("modal").classList.remove("hidden");
+            document.getElementById("modal").classList.add("blocker");
         }
 
         function updateTimeline() {
             $('.page-loader').show();
-            var id = $("#update_id").val();
+            var id = $("#timeline-task").val();
             $.ajax({
                 type: "POST",
                 url: "{% url 'timeline-task.edit' %}",
-                headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
                 data: {
                     id: id,
                     name: $('#update_name').val(),
@@ -295,43 +220,41 @@
                     task_type: $('input[name="update_task_type"]:checked').val(),
                 },
                 success: function (data) {
-                    $('.form_errors').remove()
+                    $('.form_errors').remove();
                     $('.page-loader').hide();
                     if (data.status === 'success') {
-                        $('#timeline-table').DataTable().ajax.reload()
+                        $('#timeline-table').DataTable().ajax.reload();
                         closeModal('update-modal');
                     }
                     else {
-                        const fieldErrors = JSON.parse(data.field_errors);
-                        const nonFieldErrors = JSON.parse(data.non_field_errors);
-                        for (field in fieldErrors) {
-                            $('#' + field + '_update_group').append('<span id="reason_error" class="ajax-error form_errors text-red-600">' + fieldErrors[field][0].message + '</span>');
-                        }
+                        renderFormError(data);
                     }
                 },
                 error: function () {
+                    $('.page-loader').hide();
                     alert("Something went wrong");
-                    location.reload();
                 },
             });
         }
 
         function deleteTimeline(id) {
-            let text = 'Are you do you want to delete'
+            let text = 'Are you sure do you want to delete';
             if (confirm(text) == true) {
                 $('.page-loader').show();
                 $.ajax({
                     type: "DELETE",
                     url: "{% url 'timeline-task.delete' %}",
-                    headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
-                    data: { id: id },
+
+                    data: {
+                        id: id,
+                    },
                     success: function (data) {
                         $('#timeline-table').DataTable().ajax.reload()
                         $('.page-loader').hide();
                     },
-                    error: function () {
-                        alert("Something went wrong");
-                        location.reload();
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        alert(jqXHR.responseJSON.message);
+                        $('.page-loader').hide();
                     },
                 });
             }

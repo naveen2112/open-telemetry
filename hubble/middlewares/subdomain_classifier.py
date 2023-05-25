@@ -4,6 +4,7 @@ class SubdomainClassifier:
 
 
     def __call__(self, request):
-        request.subdomain = request.get_host().split(".")[0]
-        request.urlconf = request.subdomain + ".urls"
+        request.subdomain = (request.get_host().split(".")[0]).split("-")[0]  # Get the sub-domain from request
+        if request.subdomain == "training" or request.subdomain == "reports":
+            request.urlconf = request.subdomain + ".urls"
         return self.get_response(request)

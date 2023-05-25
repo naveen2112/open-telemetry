@@ -21,7 +21,6 @@ class BatchDataTable(CustomDatatable):
     """
     Batch Datatable
     """
-
     model = Batch
     column_defs = [
         {"name": "id", "visible": False, "searchable": False},
@@ -36,7 +35,6 @@ class BatchDataTable(CustomDatatable):
             "className": "text-center",
         },
     ]
-
 
     def customize_row(self, row, obj):
         buttons = (
@@ -85,12 +83,15 @@ def batch_update_form(request):
     """
     Batch Update Form Data
     """
-    id = request.GET.get("id")
-    batch = Batch.objects.get(id=id)
-    data = {
-        "batch": model_to_dict(batch)
-    }  # Covert django queryset object to dict,which can be easily serialized and sent as a JSON response
-    return JsonResponse(data, safe=False)
+    try:
+        id = request.GET.get("id")
+        batch = Batch.objects.get(id=id)
+        data = {
+            "batch": model_to_dict(batch)
+        }  # Covert django queryset object to dict,which can be easily serialized and sent as a JSON response
+        return JsonResponse(data, safe=False)
+    except Exception as e:
+        return JsonResponse({"message": "Error while getting the data!"}, status=500)
 
 
 def update_batch(request):
