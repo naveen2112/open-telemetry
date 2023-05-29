@@ -4,14 +4,17 @@ from django.core.exceptions import ValidationError
 
 
 class TimelineForm(forms.ModelForm):
-    is_active = forms.BooleanField(
-        widget=forms.CheckboxInput(
-            attrs={
-                "type": "checkbox",
-                "class": "checkbox_active cursor-pointer block border border-primary-dark-30 rounded-md w-4 mr-3 focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
-            }
-        )
-    )
+    def clean_is_active(self):
+        """
+        This function checks if a team already has an active template and raises a validation error if
+        it does.
+        """
+        if (
+            self.cleaned_data['is_active']
+            and  models.Timeline.objects.filter(team=self.cleaned_data['team'], is_active=True)
+            .exists()
+        ):
+            raise ValidationError("Team already has an active template.")
 
     class Meta:
         model = models.Timeline
@@ -28,6 +31,11 @@ class TimelineForm(forms.ModelForm):
                 attrs={
                     "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select",
                     "placeholder": "Select Team...",
+                }
+            ),
+            "is_active": forms.CheckboxInput(
+                attrs={
+                    "class": "checkbox_active cursor-pointer block border border-primary-dark-30 rounded-md w-4 mr-3 focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
                 }
             ),
         }

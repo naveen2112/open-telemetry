@@ -104,18 +104,15 @@
             });
         }
 
-        function openUpdateModel(id) {
+        function openUpdateModel(url) {
             $('.page-loader').show();
             $.ajax({
                 type: "GET",
-                url: "{% url 'batch.edit-form' %}",
-                data: {
-                    id: id,
-                },
+                url: url,
                 success: function (data) {
                     $('.page-loader').hide();
                     $('#id_name').val(data.batch.name);
-                    $('#batch_id').val(id);
+                    $('#batch_id').val(data.batch.id);
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     alert(jqXHR.responseJSON.message);
@@ -153,14 +150,13 @@
             });
         }
 
-        function deleteBatch(id) {
+        function deleteBatch(url) {
             let text = 'Are you sure do you want to delete'
             if (confirm(text) == true) {
                 $('.page-loader').show();
                 $.ajax({
                     type: "DELETE",
-                    url: "{% url 'batch.delete' %}",
-                    data: { id: id },
+                    url: url,
                     success: function (data) {
                         $('.page-loader').hide();
                         $('#batch-table').DataTable().ajax.reload()

@@ -64,7 +64,6 @@
                 class="w-397 h-10 pl-11 pr-2.5 py-3 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0"
                 id="search_project">
                 <span class="absolute top-2 left-2"><span class="hbl hbl-search-icon text-dark-black-50 text-2xl"></span></span>
-
         </div>
     </div>
 
@@ -149,6 +148,7 @@
                 type: "POST",
                 url: "{% url 'timeline-template.create' %}",
                 data: {
+                    id: $("#timeline_id").val(),
                     name: $('#id_name').val(),
                     team: $('#id_team').val(),
                     is_active: $('.checkbox_active').is(":checked"),
@@ -159,8 +159,7 @@
                     if (data.status === 'success') {
                         $('#timeline-table').DataTable().ajax.reload()
                         closeModal('modal');
-                    }
-                    else {
+                    } else {
                         renderFormError(data);
                     }
                 },
@@ -171,26 +170,22 @@
             });
         }
 
-        function openUpdateModel(id) {
+        function openUpdateModel(url) {
             $('.page-loader').show();
             $('#id_team').val('');
             $('.dropdown_selected_value').html('');
             $.ajax({
                 type: "GET",
-                url: "{% url 'timeline-template.edit-form' %}",
-                data: {
-                    id: id,
-                },
+                url: url,
                 success: function (data) {
                     $('.page-loader').hide();
                     $('#form_heading').html("Update Timeline");
                     $('#id_name').val(data.timeline.name);
                     $('#id_team').val(data.timeline.team);
-                    $('#timeline_id').val(id);
+                    $('#timeline_id').val(data.timeline.id);
                     if (data.timeline.is_active) {
                         $("#id_is_active").attr('checked', true);
-                    }
-                    else {
+                    } else {
                         $("#id_is_active").attr('checked', false);
                     }
                     $('.dropdown_selected_value').html($("#id_team option[value='" + data.timeline.team + "']").text());
@@ -209,9 +204,8 @@
             $('.page-loader').show();
             $.ajax({
                 type: "POST",
-                url: "{% url 'timeline-template.edit' %}",
+                url: "timeline-template/"+ $("#timeline_id").val() +"/edit",
                 data: {
-                    id: $("#timeline_id").val(),
                     name: $('#id_name').val(),
                     team: $("#id_team").val(),
                     is_active: $('#id_is_active').is(":checked"),
@@ -220,10 +214,9 @@
                     $('.form_errors').remove()
                     $('.page-loader').hide();
                     if (data.status === 'success') {
-                        $('#timeline-table').DataTable().ajax.reload()
-                        closeModal('modal')
-                    }
-                    else {
+                        $('#timeline-table').DataTable().ajax.reload();
+                        closeModal('modal');
+                    } else {
                         renderFormError(data);
                     }
                 },
@@ -234,19 +227,16 @@
             });
         }
 
-        function deleteTimeline(id) {
+        function deleteTimeline(url) {
             let text = 'Are you sure do you want to delete';
             if (confirm(text) == true) {
                 $('.page-loader').show();
                 $.ajax({
                     type: "DELETE",
-                    url: "{% url 'timeline-template.delete' %}",
-                    data: {
-                        id: id,
-                    },
+                    url: url,
                     success: function (data) {
                         $('.page-loader').hide();
-                        $('#timeline-table').DataTable().ajax.reload()
+                        $('#timeline-table').DataTable().ajax.reload();
                     },
                     error: function () {
                         $('.page-loader').hide();
@@ -254,6 +244,28 @@
                     },
                 });
             }
+        }
+        
+        function duplicateTimelineModal(url) {
+            $('.page-loader').show();
+            $('#duplicate_team').val('');
+            $('.dropdown_selected_value').html('');
+            $.ajax({
+                type: "GET",
+                url: url,
+                success: function (data) {
+                    $('.page-loader').hide();
+                    $('#id_name').val('Copy_' + data.timeline.name);
+                    $('#timeline_id').val(data.timeline.id);
+                },
+                error: function () {
+                    $('.page-loader').hide();
+                    alert("Something went wrong");
+                },
+            });
+            document.getElementById("modal").classList.remove("hidden");
+            document.getElementById("modal").classList.add("blocker");
+            $('#submit-btn').attr("onclick", "createTimeline()");
         }
     </script>
 {% endblock %}
