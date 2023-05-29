@@ -18,73 +18,50 @@ from hubble.models.timeline_task import TimelineTask
 from hubble.models.user import User
 from training.forms import AddInternForm, InternDetailForm, SubBatchForm
 from django.views.decorators.http import require_http_methods
-
+from django.views.generic import TemplateView, FormView, DetailView
 
 class SubBatchDataTable(CustomDatatable):
     """
     Sub-Batch Datatable
     """
-
     model = SubBatch
     column_defs = [
         {"name": "id", "visible": False, "searchable": False},
         {"name": "name", "visible": True, "searchable": False},
         {"name": "team", "visible": True, "searchable": False},
         {"name": "start_date", "visible": True, "searchable": False},
-        {
-            "name": "traines",
-            "title": "No of Trainies",
-            "visible": True,
-            "searchable": False,
-        },
-        {
-            "name": "timeline",
-            "title": "Assigned Timeline Template",
-            "visible": True,
-            "searchable": False,
-            "foreign_field": "timeline__name",
-        },
-        {
-            "name": "action",
-            "title": "Action",
-            "visible": True,
-            "searchable": False,
-            "orderable": False,
-            "className": "text-center",
-        },
+        {"name": "traines", "title": "No of Trainies", "visible": True, "searchable": False,},
+        {"name": "timeline", "title": "Assigned Timeline Template", "visible": True, "searchable": False, "foreign_field": "timeline__name"},
+        {"name": "action", "title": "Action", "visible": True, "searchable": False, "orderable": False, "className": "text-center"},
     ]
-
 
     def get_initial_queryset(self, request=None):
         return SubBatch.objects.filter(batch=request.POST.get("batch_id")).annotate(
             traines=Count("intern")
         )
 
-
     def customize_row(self, row, obj):
         buttons = (
-            template_utils.show_btn(reverse("sub-batch.detail", args=[obj.id]))
-            + template_utils.edit_btn(
-                f"/batch/{self.request.POST.get('batch_id')}/sub-batch/{obj.id}",
-            )
-            + template_utils.delete_btn("deleteSubBatch(" + str(obj.id) + ")")
+            template_utils.show_button(reverse("sub-batch.detail", args=[obj.id]))
+            + template_utils.edit_button(f"/batch/{self.request.POST.get('batch_id')}/sub-batch/{obj.id}")
+            + template_utils.delete_button("deleteSubBatch('" + reverse("sub-batch.delete", args=[obj.id]) + "')")
         )
-        row[
-            "action"
-        ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         row["start_date"] = obj.start_date.strftime("%d %b %Y")
         return
 
 
-def create_sub_batch(request, pk):
+def create_sub_batch(request, pk):  
+    """
+    Create Sub-batch View
+    """
     usr = User.objects.get(id=58)
+    # TODO : Need to remove the user after adding the authentication
     sub_batch_form = SubBatchForm()
     intern_detail = InternDetailForm()
-
     if request.method == "POST":
         sub_batch_form = SubBatchForm(request.POST)
         intern_detail = InternDetailForm(request.POST)
-
         # Checking the trainie is already added in the other batch or not
         if "users_list_file" in request.FILES:
             excel_file = request.FILES["users_list_file"]
@@ -237,7 +214,11 @@ def get_team(request):
 
 
 def update_sub_batch(request, batch, pk):
+    """
+    Update Sub-batch View
+    """
     usr = User.objects.get(id=58)
+    # TODO : Need to remove the user after adding the authentication
     sub_batch_1 = SubBatch.objects.get(id=pk)
     batch_start_date = sub_batch_1.start_date
     if request.method == "POST":
@@ -418,93 +399,49 @@ def update_sub_batch(request, batch, pk):
     return render(request, "batch/update_sub_batch.html", context)
 
 
-@require_http_methods(
-    ["DELETE"]
-)  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
-def delete_sub_batch(request):
+@require_http_methods(["DELETE"])  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
+def delete_sub_batch(request, pk):
     """
     Delete Batch
     Soft delete the batch and record the deletion time in deleted_at field
     """
     try:
-        delete = QueryDict(
-            request.body
-        )  # Creates a QueryDict object from the request body
-        id = delete.get("id")  # Get id from dictionary
-        sub_batch = get_object_or_404(SubBatch, id=id)
+        sub_batch = get_object_or_404(SubBatch, id=pk)
         sub_batch.delete()
         return JsonResponse({"message": "Sub-Batch deleted succcessfully"})
     except Exception as e:
         return JsonResponse({"message": "Error while deleting Sub-Batch!"}, status=500)
 
 
-def sub_batch_details(request, pk):
-    """
-    Sub Batch Detail View
-    Display all information about the sub-batch trainies
-    """
-    sub_batch = SubBatch.objects.get(id=pk)
-    context = {"sub_batch": sub_batch, "form": AddInternForm()}
-    return render(request, "batch/sub_batch_detail.html", context)
+class SubBatchDetail(DetailView):
+    model = SubBatch
+    extra_context = {"form": AddInternForm()}
+    template_name = "batch/sub_batch_detail.html"
 
 
 class SubBatchTrainiesDataTable(CustomDatatable):
     """
     Sub-Batch-Trainies Datatable
     """
-
     model = SubBatch
     column_defs = [
         {"name": "pk", "visible": False, "searchable": False},
-        {
-            "name": "intern__user__name",
-            "title": "User",
-            "visible": True,
-            "searchable": False,
-        },
+        {"name": "intern__user__name", "title": "User", "visible": True, "searchable": False},
         {"name": "intern__user_id", "visible": False, "searchable": False},
-        {
-            "name": "intern__primary_mentor__name",
-            "title": "Primary mentor",
-            "visible": True,
-            "searchable": False,
-        },
-        {
-            "name": "intern__secondary_mentor__name",
-            "title": "Secondary mentor",
-            "visible": True,
-            "searchable": False,
-        },
-        {
-            "name": "intern__college",
-            "title": "College",
-            "visible": True,
-            "searchable": False,
-        },
-        {
-            "name": "action",
-            "title": "Action",
-            "visible": True,
-            "searchable": False,
-            "orderable": False,
-            "className": "text-center",
-        },
+        {"name": "intern__primary_mentor__name", "title": "Primary mentor", "visible": True, "searchable": False},
+        {"name": "intern__secondary_mentor__name", "title": "Secondary mentor", "visible": True, "searchable": False},
+        {"name": "intern__college", "title": "College", "visible": True, "searchable": False},
+        {"name": "action", "title": "Action", "visible": True, "searchable": False, "orderable": False, "className": "text-center"},
     ]
 
-
     def customize_row(self, row, obj):
-        buttons = template_utils.show_btn(
-            reverse("sub-batch.detail", args=[obj["intern__user_id"]])
-        ) + template_utils.edit_btn(
-            f"/batch",
-        )
-        row[
-            "action"
-        ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        buttons = (template_utils.show_button(reverse("sub-batch.detail", args=[obj["intern__user_id"]])) 
+                   + template_utils.edit_button(f"/batch",))
+        row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         return
 
-
     def get_initial_queryset(self, request=None):
+        print(f'kbbjb {request.POST.get("sub_batch")}')
         data = (
             SubBatch.objects.filter(id=request.POST.get("sub_batch"))
             .prefetch_related("intern")
@@ -527,6 +464,7 @@ def add_trainies(request):
     """
     if request.method == "POST":
         user = User.objects.get(id=58)
+        # TODO : Need to remove the user after adding the authentication
         form = AddInternForm(request.POST)
         sub_batch_id = request.POST.get("sub_batch")
         if request.POST.get("user"):

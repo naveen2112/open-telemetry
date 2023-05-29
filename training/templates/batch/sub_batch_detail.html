@@ -1,16 +1,14 @@
 {% extends 'layouts/base.html' %}
 
-
 {% block title %}
     Sub Batch details
 {% endblock title %}
-
 
 {% block header %}
     <div class="flex justify-between items-center">
         <div>
             <div class="text-dark-black text-lg mb-1 leading-none">
-                {{ sub_batch.name }}
+                {{ object.name }}
             </div>
             <div class="text-dark-black-50 text-sm">
 
@@ -46,7 +44,8 @@
                     <p class="p-3 text-mild-green">Good <span class="pl-2 font-bold text-dark-black">10</span></p>
                 </div>
                 <div class="rounded-md bg-dark-blue-10 mr-4">
-                    <p class="p-3 text-dark-blue">Meet Expectation <span class="pl-2 font-bold text-dark-black">10</span></p>
+                    <p class="p-3 text-dark-blue">Meet Expectation <span class="pl-2 font-bold text-dark-black">10</span>
+                    </p>
                 </div>
                 <div class="rounded-md bg-gray-100 mr-4">
                     <p class="p-3 text-gray-500">Above Average <span class="pl-2 font-bold text-dark-black">10</span></p>
@@ -60,11 +59,14 @@
             </div>
         </div>
     </div>
+
     <div>
         <div class="flex justify-end items-center py-4">
             <a href="" class="text-dark-blue mr-4">Survey</a>
-            <a href="/batch/sub-batch/{{ sub_batch.id }}/timeline" class="p-tb6 mr-4 text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal">Timeline</a>
-            <button class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal" onclick="openModal()">
+            <a href="/batch/sub-batch/{{ object.id }}/timeline"
+                class="p-tb6 mr-4 text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal">Timeline</a>
+            <button class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal"
+                onclick="openModal()">
                 <span class="text-xl mr-2">+</span>
                 Add Trainie
             </button>
@@ -96,29 +98,28 @@
                 </div>
             </div>
         </div>
-        <table id="sub-batch-trainies-table" class="display border-0 table-with-no-border dataTable no-footer" style="width: 100%;" role="grid" aria-describedby="sub-batch-table_info">
+        <table id="sub-batch-trainies-table" class="display border-0 table-with-no-border dataTable no-footer"
+            style="width: 100%;" role="grid" aria-describedby="sub-batch-table_info">
         </table>
     </div>
-
-{% endblock %} 
-
+{% endblock %}
 
 {% block script %}
     <script>
-        $(document).ready(function(){
+        $(document).ready(function () {
             $(document).ready(function () {
                 AjaxDatatableViewUtils.initialize_table(
                     $('#sub-batch-trainies-table'),
-                    "{% url 'batch.sub-batch-trainies-datatable' %}",
+                    "{% url 'sub-batch.trainies-datatable' %}",
                     {
                         serverSide: true,
                         processing: true,
                         autoWidth: false,
                         scrollX: false,
                         order: [],
-                    },{
-                        "sub_batch": "{{ sub_batch.id }}"
-                    }
+                    }, {
+                    "sub_batch": "{{ object.id }}"
+                }
                 );
             });
         });
@@ -142,7 +143,7 @@
                 data: {
                     user: $('#id_user').val(),
                     college: $('#id_college').val(),
-                    sub_batch: '{{ sub_batch.id }}'
+                    sub_batch: '{{ object.id }}'
                 },
                 success: function (data) {
                     $('.form_errors').remove()
@@ -154,7 +155,7 @@
                     else {
                         const fieldErrors = JSON.parse(data.field_errors);
                         const nonFieldErrors = JSON.parse(data.non_field_errors);
-                        if (Object.keys(nonFieldErrors).length > 0) { 
+                        if (Object.keys(nonFieldErrors).length > 0) {
                             let non_field_error = nonFieldErrors[0]['message']
                             $('#non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + non_field_error + '</span>')
                         }

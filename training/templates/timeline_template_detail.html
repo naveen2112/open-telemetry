@@ -34,7 +34,7 @@
                 <input type="hidden" name="timeline-task" id="timeline-task">
                 <div class="modal-body">
                     {% csrf_token %}
-                    <input type="hidden" name="timeline_id" value="{{ timeline_id }}" id="timeline_id">
+                    <input type="hidden" name="timeline_id" value="{{ timeline.id }}" id="timeline_id">
                     <div class="mb-7" id="{{ form.name.label|lower }}_group">
                         {{ form.name|show_label }}
                         {{ form.name }}
@@ -84,13 +84,14 @@
                     dom: 't',
                     pageLength: 50
                 }, {
-                'timeline_id': '{{ timeline_id }}',
+                'timeline_id': '{{ timeline.id }}',
                 }
             );
             $("#sortable > tr").each(function () {
                 copy_selected.push($(this).children(':first').text());
             })
         });
+
         $(function () {
             $("#sortable").sortable({
                 stop: function () {
@@ -115,7 +116,7 @@
             $('.page-loader').show();
             $.ajax({
                 type: "POST",
-                url: "{% url 'timeline-task.order' %}",
+                url: "{% url 'timeline-task.reorder' %}",
                 data: {
                     data: data,
                 },
@@ -164,8 +165,7 @@
                     if (data.status === 'success') {
                         $('#timeline-table').DataTable().ajax.reload()
                         closeModal('modal');
-                    }
-                    else {
+                    } else {
                         renderFormError(data);
                     }
 
@@ -177,20 +177,17 @@
             });
         }
 
-        function openUpdateModel(id) {
+        function openUpdateModel(url) {
             $('.page-loader').show();
             $('.update-form-fields-container').empty()
             $.ajax({
                 type: "GET",
-                url: "{% url 'timeline-task.edit-form' %}",
-                data: {
-                    id: id,
-                },
+                url: url,
                 success: function (data) {
                     $('.page-loader').hide();
                     $('input[name="id_present_type"]').attr('checked', false);
                     $('input[name="id_task_type"]').attr('checked', false);
-                    $('#timeline-task').val(id);
+                    $('#timeline-task').val(data.timeline_task.id);
                     $('#id_name').val(data.timeline_task.name);
                     $('#id_days').val(data.timeline_task.days);
                     $('input[name="id_present_type"][value=' + data.timeline_task.present_type + ']').attr('checked', 'checked');
@@ -208,25 +205,22 @@
 
         function updateTimeline() {
             $('.page-loader').show();
-            var id = $("#timeline-task").val();
             $.ajax({
                 type: "POST",
-                url: "{% url 'timeline-task.edit' %}",
+                url: "/timeline-task/"+ $("#timeline-task").val() +"/edit",
                 data: {
-                    id: id,
-                    name: $('#update_name').val(),
-                    days: $('#update_days').val(),
-                    present_type: $('input[name="update_present_type"]:checked').val(),
-                    task_type: $('input[name="update_task_type"]:checked').val(),
+                    name: $('#id_name').val(),
+                    days: $('#id_days').val(),
+                    present_type: $('input[name="present_type"]:checked').val(),
+                    task_type: $('input[name="task_type"]:checked').val(),
                 },
                 success: function (data) {
                     $('.form_errors').remove();
                     $('.page-loader').hide();
                     if (data.status === 'success') {
                         $('#timeline-table').DataTable().ajax.reload();
-                        closeModal('update-modal');
-                    }
-                    else {
+                        closeModal('modal');
+                    } else {
                         renderFormError(data);
                     }
                 },
@@ -237,17 +231,13 @@
             });
         }
 
-        function deleteTimeline(id) {
+        function deleteTimeline(url) {
             let text = 'Are you sure do you want to delete';
             if (confirm(text) == true) {
                 $('.page-loader').show();
                 $.ajax({
                     type: "DELETE",
-                    url: "{% url 'timeline-task.delete' %}",
-
-                    data: {
-                        id: id,
-                    },
+                    url: url,
                     success: function (data) {
                         $('#timeline-table').DataTable().ajax.reload()
                         $('.page-loader').hide();

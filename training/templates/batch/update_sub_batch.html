@@ -1,10 +1,8 @@
 {% extends 'layouts/base.html' %}
 
-
 {% block title %}
-    Update Sub Batch
+Update Sub Batch
 {% endblock title %}
-
 
 {% block header %}
     <div class="flex justify-between items-center">
@@ -32,7 +30,6 @@
     </div>
 {% endblock %}
 
-
 {% block body %}
     <form method="post" enctype="multipart/form-data" id="sub_batch_form">
         {% csrf_token %}
@@ -59,9 +56,9 @@
                 <div class="relative">
                     <div class="w-full block border border-primary-dark-30 mt-2.5 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 bg-transparent w-250"
                         id="timeline-name" style="
-                                position: absolute;
-                                top: -10px;
-                            "></div>
+                                    position: absolute;
+                                    top: -10px;
+                                "></div>
                     {{ form.timeline }}
                 </div>
                 {{ form.timeline|show_field_errors }}
@@ -85,7 +82,6 @@
     </form>
 {% endblock %}
 
-
 {% block script %}
     <script>
 
@@ -104,7 +100,7 @@
             $("#id_timeline").val("")
             $.ajax({
                 type: "POST",
-                url: "{% url 'batch.sub-batch-team' %}",
+                url: "{% url 'sub-batch.team' %}",
                 headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
                 data: {
                     team: $("#id_team").val()

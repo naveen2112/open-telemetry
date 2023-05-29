@@ -92,8 +92,7 @@
                     if (data.status === 'success') {
                         $('#batch-table').DataTable().ajax.reload();
                         closeModal('modal');
-                    }
-                    else {
+                    } else {
                         renderFormError(data);
                     }
                 },
@@ -104,18 +103,15 @@
             });
         }
 
-        function openUpdateModel(id) {
+        function openUpdateModel(url) {
             $('.page-loader').show();
             $.ajax({
                 type: "GET",
-                url: "{% url 'batch.edit-form' %}",
-                data: {
-                    id: id,
-                },
+                url: url,
                 success: function (data) {
                     $('.page-loader').hide();
                     $('#id_name').val(data.batch.name);
-                    $('#batch_id').val(id);
+                    $('#batch_id').val(data.batch.id);
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     alert(jqXHR.responseJSON.message);
@@ -131,9 +127,8 @@
             $('.page-loader').show();
             $.ajax({
                 type: "POST",
-                url: "{% url 'batch.edit' %}",
+                url: "batch/"+ $("#batch_id").val() +"/edit",
                 data: {
-                    id: $("#batch_id").val(),
                     name: $('#id_name').val(),
                 },
                 success: function (data) {
@@ -141,8 +136,7 @@
                     if (data.status === 'success') {
                         $('#batch-table').DataTable().ajax.reload();
                         closeModal('modal');
-                    }
-                    else {
+                    } else {
                         renderFormError(data);
                     }
                 },
@@ -153,17 +147,16 @@
             });
         }
 
-        function deleteBatch(id) {
-            let text = 'Are you sure do you want to delete'
+        function deleteBatch(url) {
+            let text = 'Are you sure do you want to delete';
             if (confirm(text) == true) {
                 $('.page-loader').show();
                 $.ajax({
                     type: "DELETE",
-                    url: "{% url 'batch.delete' %}",
-                    data: { id: id },
+                    url: url,
                     success: function (data) {
                         $('.page-loader').hide();
-                        $('#batch-table').DataTable().ajax.reload()
+                        $('#batch-table').DataTable().ajax.reload();
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
                         alert(jqXHR.responseJSON.message);
