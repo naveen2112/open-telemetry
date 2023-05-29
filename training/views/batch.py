@@ -10,7 +10,7 @@ from hubble.models.user import User
 from training.forms import BatchForm
 from django.db.models import F, Count
 from django.views.decorators.http import require_http_methods
-from django.views.generic import TemplateView, FormView, DeleteView
+from django.views.generic import TemplateView, FormView, DeleteView, DetailView
 
 class BatchList(FormView):
     """
@@ -121,6 +121,6 @@ def delete_batch(request, pk):
         return JsonResponse({"message": "Error while deleting Batch!"}, status=500)
 
 
-class BatchDetails(DeleteView):
+class BatchDetails(DetailView):
     model = Batch
     template_name = "batch/sub_batch.html"
