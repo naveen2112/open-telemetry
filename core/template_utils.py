@@ -4,8 +4,8 @@ def show_button(url):
             </a>"""
 
 
-def edit_button(id):
-    return f"""<a href="javascript:void(0)" onclick="openUpdateModel({id})">
+def edit_button(url):
+    return f"""<a href="javascript:void(0)" onclick="openUpdateModel(\'{url}\')">
                 <div class="inline mr-1"> <span class="hbl hbl-edit text-2xl text-dark-black/50"></span></div>
             </a>"""
 
@@ -16,7 +16,8 @@ def delete_button(function):
             </a>"""
 
 
-def duplicate_button(id):
-    return f"""<a href="javascript:void(0)" onclick="duplicateTimelineModal({id})">
+def duplicate_button(url):
+    # TODO :: Need to update the duplicate icon once i got from training team
+    return f"""<a href="javascript:void(0)" onclick="duplicateTimelineModal(\'{url}\')">
                 <div class="inline mr-1"> <span class="hbl hbl-description text-2xl text-dark-black/50"></span></div>
             </a>"""

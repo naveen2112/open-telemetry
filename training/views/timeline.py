@@ -1,11 +1,10 @@
 from django.forms.models import model_to_dict
 from django.shortcuts import redirect, render, get_object_or_404
 from django.http import JsonResponse, QueryDict
-from hubble.models.timeline import Timeline
-from training import forms
+from hubble.models import Timeline, TimelineTask, User
+from training.forms import TimelineForm, TimelineTaskForm
 from django.views.generic import TemplateView, FormView, DetailView
 from core.utils import CustomDatatable
-from hubble import models
 from core import template_utils
 from django.db.models import Q, Sum, F, Count, FloatField
 from django.db.models.functions import Coalesce
@@ -13,68 +12,48 @@ from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 from datetime import datetime
 
-
 class TimelineTemplate(FormView):
     """
     Timeline Template
     """
-
-    form_class = forms.TimelineForm
+    form_class = TimelineForm
     template_name = "timeline_template.html"
-
 
 class TimelineTemplateDataTable(CustomDatatable):
     """
     Timeline Template Datatable
     """
-
-    model = models.Timeline
+    model = Timeline
     show_column_filters = False
     column_defs = [
         {"name": "id", "visible": False, "searchable": False},
         {"name": "name", "visible": True, "searchable": True},
         {"name": "Days", "visible": True, "searchable": True},
         {"name": "is_active", "visible": True, "searchable": True},
-        {
-            "name": "team",
-            "visible": True,
-            "searchable": True,
-            "foreign_field": "team__name",
-        },
-        {
-            "name": "action",
-            "title": "Action",
-            "visible": True,
-            "searchable": False,
-            "orderable": False,
-            "className": "text-center",
-        },
+        {"name": "team", "visible": True, "searchable": True, "foreign_field": "team__name"},
+        {"name": "action", "title": "Action", "visible": True, "searchable": False, "orderable": False, "className": "text-center"},
     ]
 
     def customize_row(self, row, obj):
         buttons = (
             template_utils.show_button(reverse("timeline-template.detail", args=[obj.id]))
-            + template_utils.edit_button(obj.id)
-            + template_utils.delete_button("deleteTimeline(" + str(obj.id) + ")")
-            + template_utils.duplicate_button(obj.id)
+            + template_utils.edit_button(reverse("timeline-template.show", args=[obj.id]))
+            + template_utils.delete_button("deleteTimeline('" + reverse("timeline-template.delete", args=[obj.id]) + "')")
+            + template_utils.duplicate_button(reverse("timeline-template.show", args=[obj.id]))
         )
-        row[
-            "action"
-        ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        row["action"] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
         return
-
 
     def render_column(self, row, column):
         if column == "is_active":
             if row.is_active:
-                return '<span class="bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm">Active</span>'
+                return "<span class='bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm'>Active</span>"
             else:
-                return '<span class="bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm">In Active</span>'
+                return "<span class='bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm'>In Active</span>"
         return super().render_column(row, column)
 
-
     def get_initial_queryset(self, request=None):
-        data = models.Timeline.objects.all().annotate(Days=Sum(F("task_timeline__days")))
+        data = Timeline.objects.all().annotate(Days=Sum(F("task_timeline__days")))
         return data
 
 
@@ -83,22 +62,20 @@ def create_timeline_template(request):
     Create Timeline Template
     """
     if request.method == "POST":
-        user = models.User.objects.get(id=58)
-        form = forms.TimelineForm(request.POST)
+        user = User.objects.get(id=58)
+        # TODO :: Need to remove the user after adding the authentication logic
+        form = TimelineForm(request.POST)
         if form.is_valid():  # Check if form is valid or not
             timeline = form.save(commit=False)
-            timeline.is_active = (
-                True if request.POST.get("is_active") == "true" else False
-            )  # Set is_active to true if the input is checked else it will be false
             timeline.created_by = user
             timeline.save()
 
-            if request.POST.get('id'):
-                timeline_task = models.TimelineTask.objects.filter(timeline=request.POST.get('id'))
+            if request.POST.get("id"):
+                timeline_task = TimelineTask.objects.filter(timeline=request.POST.get("id"))
                 order = 0
                 for task in timeline_task:
                     order += 1
-                    models.TimelineTask.objects.create(
+                    TimelineTask.objects.create(
                         name=task.name,
                         days=task.days,
                         timeline=timeline,
@@ -120,15 +97,13 @@ def create_timeline_template(request):
             )
 
 
-def timeline_update_form(request):
+def timeline_template_data(request, pk):
     """
     Timeline Template Update Form Data
     """
     try:
-        id = request.GET.get("id")
-        timeline = models.Timeline.objects.get(id=id)
         data = {
-            "timeline": model_to_dict(timeline)
+            "timeline": model_to_dict(get_object_or_404(Timeline, id=pk))
         }  # Covert django queryset object to dict,which can be easily serialized and sent as a JSON response
         return JsonResponse(data, safe=False)
     except Exception as e:
@@ -137,13 +112,11 @@ def timeline_update_form(request):
         )
 
 
-def update_timeline_template(request):
+def update_timeline_template(request, pk):
     """
     Update Timeline Template
     """
-    id = request.POST.get("id")
-    timeline = models.Timeline.objects.get(id=id)
-    form = forms.TimelineForm(request.POST, instance=timeline)
+    form = TimelineForm(request.POST, instance=get_object_or_404(Timeline, id=pk))
     if form.is_valid():  # check if form is valid or not
         timeline = form.save(commit=False)
         timeline.is_active = (
@@ -163,34 +136,25 @@ def update_timeline_template(request):
         )
 
 
-@require_http_methods(
-    ["DELETE"]
-)  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
-def delete_timeline_template(request):
+@require_http_methods(["DELETE"])  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
+def delete_timeline_template(request, pk):
     """
     Delete Timeline Template
     Soft delete the template and record the deletion time in deleted_at field
     """
     try:
-        delete = QueryDict(
-            request.body
-        )  # Creates a QueryDict object from the request body
-        id = delete.get("id")  # Get id from dictionary
-        timeline = get_object_or_404(models.Timeline, id=id)
+        timeline = get_object_or_404(Timeline, id=pk)
         timeline.delete()
         return JsonResponse({"message": "Timeline Template deleted succcessfully"})
     except Exception as e:
-        return JsonResponse(
-            {"message": "Error while deleting Timeline Template!"}, status=500
-        )
+        return JsonResponse({"message": "Error while deleting Timeline Template!"}, status=500)
 
 
-def timeline_template_details(request, pk):
+class TimelineTemplateDetails(DetailView):
     """
     Timeline Template Detail
     Display the timeline template tasks for the current template
     """
-    timeline = Timeline.objects.get(id=pk)
-    form = forms.TimelineTaskForm()
-    context = {"timeline": timeline, "form": form, "timeline_id": pk}
-    return render(request, "timeline_template_detail.html", context)
+    model = Timeline
+    extra_context = {"form": TimelineTaskForm()}
+    template_name = "timeline_template_detail.html"

@@ -8,13 +8,12 @@ from hubble.models.timeline import Timeline
 from hubble.models.timeline_task import TimelineTask
 from hubble.models.user import User
 from training.forms import TimelineTaskForm
-
+from django.urls import reverse
 
 class TimelineTemplateTaskDataTable(CustomDatatable):
     """
     Timeline Template Task Datatable
     """
-
     model = TimelineTask
     column_defs = [
         {"name": "id", "visible": False, "searchable": False},
@@ -23,24 +22,17 @@ class TimelineTemplateTaskDataTable(CustomDatatable):
         {"name": "present_type", "visible": True, "searchable": False},
         {"name": "task_type", "visible": True, "searchable": False},
         {"name": "created_at", "visible": False, "searchable": False},
-        {
-            "name": "action",
-            "title": "Action",
-            "visible": True,
-            "searchable": False,
-            "orderable": False,
-            "className": "text-center",
-        },
+        {"name": "action", "title": "Action", "visible": True, "searchable": False, "orderable": False, "className": "text-center"},
     ]
 
     def customize_row(self, row, obj):
-        buttons = template_utils.edit_button(obj.id) + template_utils.delete_button(
-            "deleteTimeline(" + str(obj.id) + ")"
-        )
+        buttons = (
+            template_utils.edit_button(reverse("timeline-task.show", args=[obj.id]))
+            + template_utils.delete_button("deleteTimeline('" + reverse("timeline-task.delete", args=[obj.id]) + "')"))
         row[
             "action"
-        ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
-        row["name"] = f'<span data-id="{obj.id}">{obj.name}</span>'
+        ] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
+        row["name"] = f"<span data-id='{obj.id}'>{obj.name}</span>"
         return
 
     def get_initial_queryset(self, request=None):
@@ -56,7 +48,7 @@ def update_order(request):
     return JsonResponse({"status": "success"})
 
 
-def create_timelinetask_template(request):
+def create_timeline_task(request):
     """
     Create Timeline Template Task
     """
@@ -64,6 +56,7 @@ def create_timelinetask_template(request):
         form = TimelineTaskForm(request.POST)
         timeline = Timeline.objects.get(id=request.POST.get("timeline_id"))
         user = User.objects.get(id=58)
+        # TODO :: Need to remove the user after adding the authentication logic
         task = TimelineTask.objects.filter(timeline=request.POST.get("timeline_id"))
         if form.is_valid():  # Check if the valid or not
             timeline_task = form.save(commit=False)
@@ -84,15 +77,13 @@ def create_timelinetask_template(request):
             )
 
 
-def timelinetask_update_form(request):
+def timeline_task_data(request, pk):
     """
     Timeline Template Task Update Form Data
     """
     try:
-        id = request.GET.get("id")
-        timeline_task = TimelineTask.objects.get(id=id)
         data = {
-            "timeline_task": model_to_dict(timeline_task)
+            "timeline_task": model_to_dict(get_object_or_404(TimelineTask, id=pk))
         }  # Covert django queryset object to dict,which can be easily serialized and sent as a JSON response
         return JsonResponse(data, safe=False)
     except Exception as e:
@@ -101,13 +92,11 @@ def timelinetask_update_form(request):
         )
 
 
-def update_timelinetask_template(request):
+def update_timeline_task(request, pk):
     """
     Update Timeline Template Task
     """
-    id = request.POST.get("id")
-    timeline_task = TimelineTask.objects.get(id=id)
-    form = TimelineTaskForm(request.POST, instance=timeline_task)
+    form = TimelineTaskForm(request.POST, instance=get_object_or_404(TimelineTask, id=pk))
     if form.is_valid():  # Check if the valid or not
         form.save()
         return JsonResponse({"status": "success"})
@@ -123,20 +112,14 @@ def update_timelinetask_template(request):
         )
 
 
-@require_http_methods(
-    ["DELETE"]
-)  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
-def delete_timelinetask_template(request):
+@require_http_methods(["DELETE"])  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
+def delete_timeline_task(request, pk):
     """
     Delete Timeline Template Task
     Soft delete the template and record the deletion time in deleted_at field
     """
     try:
-        delete = QueryDict(
-            request.body
-        )  # Creates a QueryDict object from the request body
-        id = delete.get("id")  # Get id from dictionary
-        timeline_task = get_object_or_404(TimelineTask, id=id)
+        timeline_task = get_object_or_404(TimelineTask, id=pk)
         timeline_task.delete()
         return JsonResponse({"message": "Timeline Template Task deleted succcessfully"})
     except Exception as e:
