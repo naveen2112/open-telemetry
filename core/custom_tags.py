@@ -60,8 +60,6 @@ def show_non_field_errors(error):
 
 @register.filter()
 def show_label(field):
-    if isinstance(field, str):
-        field = template.Variable(field).resolve({}) # Convert the field parameter to a form field object
     if field.field.required: # Check the field is required or not
         required = '<span class="text-red-600">*</span>'
     else:
@@ -71,12 +69,3 @@ def show_label(field):
             field.label, field.label, required
         )
     )
-
-
-@register.filter
-def add_id(field, prefix=""):
-    """
-    Adds an ID attribute to a form field.
-    """
-    field_id = f"{prefix}_{field.name}"
-    return format_html("{}", field.as_widget(attrs={"id": field_id}))

@@ -47,9 +47,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",
     "reports",
-    "training",
     "hubble",
+    "training",
     "ajax_datatable",
 ]
 
@@ -150,31 +151,12 @@ AUTH_USER_MODEL = "hubble.User"
 
 ENV_NAME = env("ENV_NAME")
 
-CSRF_TRUSTED_ORIGINS = [f'https://*.{env("SITE_HOST")}']
+CSRF_TRUSTED_ORIGINS = [
+    "https://reports.hubble-reports.test",
+    "https://training.hubble-reports.test",
+    "https://reports-dev.mallow-tech.com",
+    "https://training-dev.mallow-tech.com",
+]
 
-LOGIN_URL = "index"
-
-LOGGING = {
-    "version": 1,
-    "filters": {
-        "require_debug_true": {
-            "()": "django.utils.log.RequireDebugTrue",
-        }
-    },
-    "handlers": {
-        "console": {
-            "level": "DEBUG",
-            "filters": ["require_debug_true"],
-            "class": "logging.StreamHandler",
-        }
-    },
-    "loggers": {
-        "django.db.backends": {
-            "level": "DEBUG",
-            "handlers": ["console"],
-        }
-    },
-}
-
-LOGIN_REDIRECT_URL = 'training.home'
-LOGIN_URL = '/login'
+LOGIN_REDIRECT_URL = 'induction-kit'
+LOGIN_URL = "login"

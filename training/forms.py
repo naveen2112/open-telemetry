@@ -4,22 +4,17 @@ from django.core.exceptions import ValidationError
 
 
 class TimelineForm(forms.ModelForm):
-    is_active = forms.BooleanField(
-        widget=forms.CheckboxInput(
-            attrs={
-                "type": "checkbox",
-                "class": "checkbox_active cursor-pointer block border border-primary-dark-30 rounded-md w-4 mr-3 focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
-            }
-        )
-    )
-
-
-    def __init__(self, *args, **kwargs):
+    def clean_is_active(self):
         """
-        This function sets the "is_active" field as not required in a form.
+        This function checks if a team already has an active template and raises a validation error if
+        it does.
         """
-        super(TimelineForm, self).__init__(*args, **kwargs)
-        self.fields["is_active"].required = False
+        if (
+            self.cleaned_data['is_active']
+            and  models.Timeline.objects.filter(team=self.cleaned_data['team'], is_active=True)
+            .exists()
+        ):
+            raise ValidationError("Team already has an active template.")
 
     class Meta:
         model = models.Timeline
@@ -38,6 +33,11 @@ class TimelineForm(forms.ModelForm):
                     "placeholder": "Select Team...",
                 }
             ),
+            "is_active": forms.CheckboxInput(
+                attrs={
+                    "class": "checkbox_active cursor-pointer block border border-primary-dark-30 rounded-md w-4 mr-3 focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
+                }
+            ),
         }
 
 
@@ -51,7 +51,6 @@ class TimelineTaskForm(forms.ModelForm):
             raise ValidationError("Value must be greater than 0")
         if value % 0.5 != 0: 
             raise ValidationError("Value must be a multiple of 0.5")
-
 
     days = forms.FloatField(
         widget=forms.NumberInput(
