@@ -92,8 +92,7 @@
                     if (data.status === 'success') {
                         $('#batch-table').DataTable().ajax.reload();
                         closeModal('modal');
-                    }
-                    else {
+                    } else {
                         renderFormError(data);
                     }
                 },
@@ -128,9 +127,8 @@
             $('.page-loader').show();
             $.ajax({
                 type: "POST",
-                url: "{% url 'batch.edit' %}",
+                url: "batch/"+ $("#batch_id").val() +"/edit",
                 data: {
-                    id: $("#batch_id").val(),
                     name: $('#id_name').val(),
                 },
                 success: function (data) {
@@ -138,8 +136,7 @@
                     if (data.status === 'success') {
                         $('#batch-table').DataTable().ajax.reload();
                         closeModal('modal');
-                    }
-                    else {
+                    } else {
                         renderFormError(data);
                     }
                 },
@@ -151,7 +148,7 @@
         }
 
         function deleteBatch(url) {
-            let text = 'Are you sure do you want to delete'
+            let text = 'Are you sure do you want to delete';
             if (confirm(text) == true) {
                 $('.page-loader').show();
                 $.ajax({
@@ -159,7 +156,7 @@
                     url: url,
                     success: function (data) {
                         $('.page-loader').hide();
-                        $('#batch-table').DataTable().ajax.reload()
+                        $('#batch-table').DataTable().ajax.reload();
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
                         alert(jqXHR.responseJSON.message);

@@ -48,6 +48,7 @@ def create_batch(request):
     if request.method == "POST":
         form = BatchForm(request.POST)
         user = User.objects.get(id=58)
+        # TODO: Need to remove after adding the authentication
         if form.is_valid():  # Check if the valid or not
             batch = form.save(commit=False)
             batch.created_by = user
@@ -78,12 +79,11 @@ def batch_data(request, pk):
         return JsonResponse({"message": "Error while getting the data!"}, status=500)
 
 
-def update_batch(request):
+def update_batch(request, pk):
     """
     Update Batch
     """
-    id = request.POST.get("id")
-    batch = Batch.objects.get(id=id)
+    batch = get_object_or_404(Batch, id=pk)
     form = BatchForm(request.POST, instance=batch)
     if form.is_valid():  # Check if the valid or not
         form.save()
@@ -100,9 +100,7 @@ def update_batch(request):
         )
 
 
-@require_http_methods(
-    ["DELETE"]
-)  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
+@require_http_methods(["DELETE"])  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
 def delete_batch(request, pk):
     """
     Delete Batch

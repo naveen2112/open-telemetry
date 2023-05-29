@@ -29,7 +29,7 @@ urlpatterns = [
     path("batch-datatable", batch.BatchDataTable.as_view(), name="batch.datatable"),
     path("batch/create", batch.create_batch, name="batch.create"),
     path("batch/<int:pk>/show", batch.batch_data, name="batch.show"),
-    path("batch/edit", batch.update_batch, name="batch.edit"),
+    path("batch/<int:pk>/edit", batch.update_batch, name="batch.edit"),
     path("batch/<int:pk>/delete", batch.delete_batch, name="batch.delete"),
     path("batch/<int:pk>", batch.batch_details, name="batch.detail"),
 ]
