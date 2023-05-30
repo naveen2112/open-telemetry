@@ -99,11 +99,31 @@
     width: 100%;
 }
 
-#tool-tip-data {
-    background-color: #2248C3 !important;
+.tooltip {
     position: relative;
-    top: -48px;
-    left: 77px;
-    padding: 12px;
-    display: none;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 130px;
+    background-color: #fff;
+    color: #000;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    padding: 10px;
+    left: 20px;
+    text-align: left;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+}
+
+.mr-2 {
+    margin-right: 0.5rem;
 }

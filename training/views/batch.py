@@ -37,11 +37,15 @@ class BatchDataTable(CustomDatatable):
             + template_utils.edit_button(reverse("batch.show", args=[obj.id]))
             + template_utils.delete_button("deleteBatch('" + reverse("batch.delete", args=[obj.id]) + "')")
         )
-        row[
-            "action"
-        ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
-        return
 
+        trainies_count = Batch.objects.filter(id= obj.id).values('batch_id__intern__user__team__name').annotate(total_trainies=Count("batch_id__intern"))
+        traines = ''
+        for item in trainies_count:
+            traines += f"{item['batch_id__intern__user__team__name']} - {item['total_trainies']}<br>"
+
+        row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        row["total_trainies"] = f'<div class="flex items-center"><p class="mr-2">{obj.total_trainies}</p><div class="tooltip">ⓘ<span class="tooltiptext">{traines}</span></div></div>'
+        return
 
     def get_initial_queryset(self, request=None):
         data = Batch.objects.annotate(total_trainies=Count(F("batch_id__intern")))
