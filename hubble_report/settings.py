@@ -158,5 +158,4 @@ CSRF_TRUSTED_ORIGINS = [
     "https://training-dev.mallow-tech.com",
 ]
 
-LOGIN_REDIRECT_URL = 'induction-kit'
 LOGIN_URL = "login"
