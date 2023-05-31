@@ -13,7 +13,7 @@ class InternDetail(db.SoftDeleteWithBaseModel):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="trainie_created_by")
 
     class Meta:
-        db_table = 'intern_details'
+        db_table = "intern_details"
 
 
     def __str__(self):

@@ -1,7 +1,7 @@
 {% extends 'layouts/base.html' %}
 
 {% block title %}
-Update Sub Batch
+    Update Sub Batch
 {% endblock title %}
 
 {% block header %}
@@ -84,8 +84,6 @@ Update Sub Batch
 
 {% block script %}
     <script>
-
-
         $(document).ready(function () {
             $('#timeline-name').html('{{ sub_batch.timeline.name }}')
             $('#id_primary_mentor').val('{{ sub_batch_detail.primary_mentor.id }}')

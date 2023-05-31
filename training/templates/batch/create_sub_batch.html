@@ -97,7 +97,7 @@
                     </div>
                 </div>
                 {% if intern_detail.errors %}
-                {{ intern_detail.non_field_errors|show_non_field_errors }}
+                    {{ intern_detail.non_field_errors|show_non_field_errors }}
                 {% endif %}
 
                 <div class="mt-2">
@@ -119,18 +119,17 @@
 {% block script %}
     <script>
         $(document).ready(function () {
-            $("#id_team").val("")
-            $("#id_timeline").val("")
-            $(".dropdown_selected_value").text("")
+            $("#id_team").val("");
+            $("#id_timeline").val("");
+            $(".dropdown_selected_value").text("");
         })
 
         $("#id_team").change(function () {
             $('.page-loader').show();
-            $("#id_timeline").val("")
+            $("#id_timeline").val("");
             $.ajax({
                 type: "POST",
                 url: "{% url 'sub-batch.team' %}",
-                headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
                 data: {
                     team: $("#id_team").val()
                 },
@@ -181,7 +180,7 @@
                 showDropdowns: true,
                 minDate: date,
                 locale: {
-                    format: 'YYYY-MM-DD'
+                    format: 'YYYY-MM-DD',
                 }
             });
         });

@@ -63,7 +63,6 @@
                 $.ajax({
                     type: "DELETE",
                     url: url,
-                    headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
                     success: function (data) {
                         $('.page-loader').hide();
                         $('#sub-batch-table').DataTable().ajax.reload();

@@ -19,6 +19,7 @@ class BatchList(FormView):
     form_class = BatchForm
     template_name = "batch/batch_list.html"
 
+
 class BatchDataTable(CustomDatatable):
     """
     Batch Datatable
@@ -45,6 +46,7 @@ class BatchDataTable(CustomDatatable):
 
         row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         row["total_trainies"] = f'<div class="flex items-center"><p class="mr-2">{obj.total_trainies}</p><div class="tooltip">ⓘ<span class="tooltiptext">{traines}</span></div></div>'
+        # TODO : Need to update the info icon
         return
 
     def get_initial_queryset(self, request=None):
