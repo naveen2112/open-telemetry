@@ -2,8 +2,9 @@ import os
 from django.conf import settings
 from django.views.generic import TemplateView
 from django.http import FileResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
 
-class InductionKit(TemplateView):
+class InductionKit(LoginRequiredMixin, TemplateView):
     """
     Induction Kit
     """
