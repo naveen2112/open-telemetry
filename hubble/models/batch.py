@@ -7,7 +7,7 @@ class Batch(db.SoftDeleteWithBaseModel):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
-        db_table = 'batches'
+        db_table = "batches"
 
     def __str__(self):
         return self.name
