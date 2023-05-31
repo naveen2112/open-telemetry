@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractBaseUser
 from django.db import models
-from . import Team, Designation
+from .team import Team
+from .designation import Designation
 from datetime import datetime
 
 

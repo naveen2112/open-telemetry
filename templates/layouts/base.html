@@ -21,20 +21,16 @@
         href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
         rel="stylesheet">
     <!-- Styles -->
-    <link href="https://hubble.mallow-tech.com/css/app.css" rel="stylesheet">
+    <link href="{% static 'css/app.css' %}" rel="stylesheet">
+    <link href="{% static 'css/search.css' %}" rel="stylesheet">
     <link href="{% static 'css/style.css' %}" rel="stylesheet">
-    <link href="{% static 'style/app.css' %}" rel="stylesheet">
-    <link href="{% static 'ajax_datatable/css/style.css' %}" rel="stylesheet" />
-    <link rel="stylesheet" href="{% static 'training/css/style.css' %}">
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <!-- Tailwind elements -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tw-elements/dist/css/index.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
-
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.1/css/toastr.css" rel="stylesheet" />
-
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 
 </head>
 
@@ -46,22 +42,9 @@
 
         <div class="overflow-hidden max-h-screen flex main-screen grow flex-col">
             <div class="header bg-white">
-                <div class="px-5 pt-2 bg-mild-violet pb-1">
-                    <div class="flex justify-between mb-7 items-center">
-                        <div>
-
-                            <div class="text-dark-black text-lg mb-1 leading-none">
-                                {% block header %}
-                                {% endblock %}
-                            </div>
-
-                            <div class="text-dark-black-50 text-sm">
-                                {% block sub_header %}
-                                {% endblock %}
-                            </div>
-
-                        </div>
-                    </div>
+                <div class="px-5 pt-9 bg-mild-violet pb-7">
+                    {% block header %}
+                    {% endblock %}
                 </div>
             </div>
 
@@ -109,11 +92,10 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.js"></script>
         <script type="text/javascript"
             src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap-collapse.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-        <!-- toastr -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.1/js/toastr.js"></script>
-        <script src="https://hubble.mallow-tech.com/js/app.js"></script>
-        
+        <script src="{% static 'js/search.js' %}"></script>
+        <script src="https://cdn.jsdelivr.net/npm/jquery-sortablejs@latest/jquery-sortable.js"></script>
+        <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
 
         <script>
             let showLoader = () => {
@@ -130,9 +112,22 @@
             })
 
             $(function () {
-                hideLoader()
-                $('.sub-category .sidebar-active').closest('.sub-category').addClass('sidebar-active')
+                hideLoader();
+                $('.sub-category .sidebar-active').closest('.sub-category').addClass('sidebar-active');
             })
+
+            $.ajaxSetup({
+                headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
+            });
+
+            function renderFormError(data) {
+                if (Object.keys(JSON.parse(data.non_field_errors)).length > 0) {
+                    $('#non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + JSON.parse(data.non_field_errors)[0]['message'] + '</span>')
+                }
+                for (field in JSON.parse(data.field_errors)) {
+                    $('#' + field + '_group').append('<span id="reason_error" class="form_errors ajax-error text-red-600">' + JSON.parse(data.field_errors)[field][0].message + '</span>');
+                }
+            }
         </script>
 
         {% block script %}
