@@ -10,15 +10,18 @@ from training.forms import BatchForm
 from django.db.models import F, Count
 from django.views.decorators.http import require_http_methods
 from django.views.generic import TemplateView, FormView, DetailView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 
-class BatchList(FormView):
+class BatchList(LoginRequiredMixin, FormView):
     """
     Timeline Template
     """
     form_class = BatchForm
     template_name = "batch/batch_list.html"
 
-class BatchDataTable(CustomDatatable):
+
+class BatchDataTable(LoginRequiredMixin, CustomDatatable):
     """
     Batch Datatable
     """
@@ -39,17 +42,16 @@ class BatchDataTable(CustomDatatable):
         return
 
 
+@login_required()
 def create_batch(request):
     """
     Create Batch
     """
     if request.method == "POST":
         form = BatchForm(request.POST)
-        user = User.objects.get(id=58)
-        # TODO: Need to remove after adding the authentication
         if form.is_valid():  # Check if the valid or not
             batch = form.save(commit=False)
-            batch.created_by = user
+            batch.created_by = request.user
             batch.save()
             return JsonResponse({"status": "success"})
         else:
@@ -64,6 +66,7 @@ def create_batch(request):
             )
 
 
+@login_required()
 def batch_data(request, pk):
     """
     Batch Update Form Data
@@ -77,6 +80,7 @@ def batch_data(request, pk):
         return JsonResponse({"message": "Error while getting the data!"}, status=500)
 
 
+@login_required()
 def update_batch(request, pk):
     """
     Update Batch
@@ -98,6 +102,7 @@ def update_batch(request, pk):
         )
 
 
+@login_required()
 @require_http_methods(["DELETE"])  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
 def delete_batch(request, pk):
     """
@@ -112,6 +117,6 @@ def delete_batch(request, pk):
         return JsonResponse({"message": "Error while deleting Batch!"}, status=500)
 
 
-class BatchDetails(DetailView):
+class BatchDetails(LoginRequiredMixin, DetailView):
     model = Batch
     template_name = "batch/sub_batch.html"

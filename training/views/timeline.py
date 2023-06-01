@@ -11,15 +11,20 @@ from django.db.models.functions import Coalesce
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 from datetime import datetime
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 
-class TimelineTemplate(FormView):
+
+class TimelineTemplate(LoginRequiredMixin, FormView):
     """
     Timeline Template
     """
+
     form_class = TimelineForm
     template_name = "timeline_template.html"
 
-class TimelineTemplateDataTable(CustomDatatable):
+
+class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
     """
     Timeline Template Datatable
     """
@@ -57,17 +62,19 @@ class TimelineTemplateDataTable(CustomDatatable):
         return data
 
 
+@login_required()
 def create_timeline_template(request):
     """
     Create Timeline Template
     """
     if request.method == "POST":
-        user = User.objects.get(id=58)
-        # TODO :: Need to remove the user after adding the authentication logic
         form = TimelineForm(request.POST)
         if form.is_valid():  # Check if form is valid or not
             timeline = form.save(commit=False)
-            timeline.created_by = user
+            timeline.is_active = (
+                True if request.POST.get("is_active") == "true" else False
+            )  # Set is_active to true if the input is checked else it will be false
+            timeline.created_by = request.user
             timeline.save()
 
             if request.POST.get("id"):
@@ -97,6 +104,7 @@ def create_timeline_template(request):
             )
 
 
+@login_required()
 def timeline_template_data(request, pk):
     """
     Timeline Template Update Form Data
@@ -112,6 +120,7 @@ def timeline_template_data(request, pk):
         )
 
 
+@login_required()
 def update_timeline_template(request, pk):
     """
     Update Timeline Template
@@ -150,7 +159,7 @@ def delete_timeline_template(request, pk):
         return JsonResponse({"message": "Error while deleting Timeline Template!"}, status=500)
 
 
-class TimelineTemplateDetails(DetailView):
+class TimelineTemplateDetails(LoginRequiredMixin, DetailView):
     """
     Timeline Template Detail
     Display the timeline template tasks for the current template

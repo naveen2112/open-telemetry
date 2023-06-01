@@ -2,8 +2,10 @@ import os
 from django.conf import settings
 from django.views.generic import TemplateView
 from django.http import FileResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 
-class InductionKit(TemplateView):
+class InductionKit(LoginRequiredMixin, TemplateView):
     """
     Induction Kit
     """
@@ -16,6 +18,7 @@ class InductionKit(TemplateView):
     }
 
 
+@login_required()
 def induction_kit_detail(request, text):
     """
     Induction Kit Detail
