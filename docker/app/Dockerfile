@@ -7,6 +7,8 @@ ENV HUBBLE_ROOT=/var/app
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
+ARG SECRET_KEY
+
 # Set working directory, where the commands will be ran:
 RUN mkdir -p $HUBBLE_ROOT
 WORKDIR $HUBBLE_ROOT
@@ -22,8 +24,8 @@ RUN poetry install --no-interaction --no-ansi --no-root
 # Adding project files
 ADD . .
 
-RUN mkdir -p session_files
-RUN mkdir -p staticfiles
+RUN mkdir -p /var/app/session_files
+RUN mkdir -p /var/app/staticfiles
 RUN python manage.py collectstatic
 
 ADD docker/app/entrypoint.sh /usr/bin/
