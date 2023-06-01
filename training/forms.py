@@ -76,3 +76,18 @@ class TimelineTaskForm(forms.ModelForm):
             "present_type": forms.RadioSelect(),
             "task_type": forms.RadioSelect(),
         }
+
+
+class BatchForm(forms.ModelForm):
+    class Meta:
+        model = models.Batch
+        fields = ("name",)
+
+        widgets = {
+            "name": forms.TextInput(
+                attrs={
+                    "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
+                    "placeholder": "Batch Name...",
+                }
+            )
+        }

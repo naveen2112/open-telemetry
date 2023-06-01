@@ -3,6 +3,7 @@ from .designation import Designation
 from .team import Team
 from .timeline import Timeline
 from .timeline_task import TimelineTask
+from .batch import Batch
 from .user import User
 from .client import Client
 from .currency import Currency

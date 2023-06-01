@@ -22,6 +22,14 @@
                     <div>Timeline</div>
                 </a>
             </div>
+            <div class="py-3  flex-wrap rounded-bl-lg flex w-full justify-start {% set_active 'batch/*' %}">
+                <a href="{% url 'batch' %}" tabindex="-1" class="flex px-2.5 justify-start items-center w-full">
+                    <div class="flex justify-center mr-4">
+                        <img src="{% static 'images/time-sheet.svg' %}" alt="timesheet icon">
+                    </div>
+                    <div>Batch</div>
+                </a>
+            </div>
             <div class="py-3 px-2.5 rounded-bl-lg flex justify-start">
                 <a href="{% url 'signout' %}">
                     <span class='mr-4'> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="25px" height="20px">
