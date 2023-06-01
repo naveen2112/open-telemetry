@@ -23,7 +23,8 @@ RUN poetry install --no-interaction --no-ansi --no-root
 ADD . .
 
 RUN mkdir -p session_files
-RUN mkdir -p /var/app/static/training/pdf
+RUN mkdir -p staticfiles
+RUN python manage.py collectstatic
 
 ADD docker/app/entrypoint.sh /usr/bin/
 RUN chmod +x /usr/bin/entrypoint.sh

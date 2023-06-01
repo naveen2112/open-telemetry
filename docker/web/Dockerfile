@@ -21,8 +21,6 @@ ADD docker/web/webserver.conf /etc/nginx/conf.d/default.conf
 
 ADD docker/web/nginx.conf /etc/nginx/nginx.conf
 
-ADD static static
-
 #Log Config
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log
