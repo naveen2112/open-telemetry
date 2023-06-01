@@ -1,8 +1,12 @@
-from django.urls import path
+from django.urls import path, include
 
 from training.views import induction_kit, timeline, timeline_task, batch, sub_batch
+from training import view
  
 urlpatterns = [
+    path("", include('hubble.urls')),
+    path("", view.home, name="training.home"),
+    
     # Induction kit
     path("induction-kit", induction_kit.InductionKit.as_view(), name="induction-kit"),
     path("induction-kit/<text>", induction_kit.induction_kit_detail, name="induction-kit.detail"),

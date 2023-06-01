@@ -8,9 +8,11 @@ from hubble.models.timeline import Timeline
 from hubble.models.timeline_task import TimelineTask
 from hubble.models.user import User
 from training.forms import TimelineTaskForm
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 
-class TimelineTemplateTaskDataTable(CustomDatatable):
+class TimelineTemplateTaskDataTable(LoginRequiredMixin, CustomDatatable):
     """
     Timeline Template Task Datatable
     """
@@ -39,6 +41,7 @@ class TimelineTemplateTaskDataTable(CustomDatatable):
         return TimelineTask.objects.filter(timeline=request.POST.get("timeline_id"))
 
 
+@login_required()
 def update_order(request):
     data = request.POST.getlist("data[]")
     for order, id in enumerate(data):
@@ -48,6 +51,7 @@ def update_order(request):
     return JsonResponse({"status": "success"})
 
 
+@login_required()
 def create_timeline_task(request):
     """
     Create Timeline Template Task
@@ -55,13 +59,11 @@ def create_timeline_task(request):
     if request.method == "POST":
         form = TimelineTaskForm(request.POST)
         timeline = Timeline.objects.get(id=request.POST.get("timeline_id"))
-        user = User.objects.get(id=58)
-        # TODO :: Need to remove the user after adding the authentication logic
         task = TimelineTask.objects.filter(timeline=request.POST.get("timeline_id"))
         if form.is_valid():  # Check if the valid or not
             timeline_task = form.save(commit=False)
             timeline_task.timeline = timeline
-            timeline_task.created_by = user
+            timeline_task.created_by = request.user
             timeline_task.order = task.count() + 1
             timeline_task.save()
             return JsonResponse({"status": "success"})
@@ -77,6 +79,7 @@ def create_timeline_task(request):
             )
 
 
+@login_required()
 def timeline_task_data(request, pk):
     """
     Timeline Template Task Update Form Data
@@ -92,6 +95,7 @@ def timeline_task_data(request, pk):
         )
 
 
+@login_required()
 def update_timeline_task(request, pk):
     """
     Update Timeline Template Task
@@ -112,6 +116,7 @@ def update_timeline_task(request, pk):
         )
 
 
+@login_required()
 @require_http_methods(["DELETE"])  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
 def delete_timeline_task(request, pk):
     """

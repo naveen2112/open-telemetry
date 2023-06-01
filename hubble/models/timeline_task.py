@@ -3,7 +3,6 @@ from .user import User
 from core import db
 from .timeline import Timeline
 
-
 class TimelineTask(db.SoftDeleteWithBaseModel):
     PRESENT_TYPE_REMOTE = "Remote"
     PRESENT_TYPE_IN_PERSON = "In-Person"
@@ -23,15 +22,9 @@ class TimelineTask(db.SoftDeleteWithBaseModel):
 
     name = models.CharField(max_length=250)
     days = models.FloatField()
-    timeline = models.ForeignKey(
-        Timeline, on_delete=models.CASCADE, related_name="task_timeline"
-    )
-    present_type = models.CharField(
-        max_length=250, choices=PRESENT_TYPES, default=PRESENT_TYPE_REMOTE
-    )
-    task_type = models.CharField(
-        max_length=250, choices=TASK_TYPES, default=TASK_TYPE_TASK
-    )
+    timeline = models.ForeignKey(Timeline, on_delete=models.CASCADE, related_name="task_timeline")
+    present_type = models.CharField(max_length=250, choices=PRESENT_TYPES, default=PRESENT_TYPE_REMOTE)
+    task_type = models.CharField(max_length=250, choices=TASK_TYPES, default=TASK_TYPE_TASK)
     order = models.IntegerField(blank=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
 

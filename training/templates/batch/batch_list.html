@@ -27,7 +27,6 @@
         <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
             <p class="font-semibold text-lg mb-10">Create Batch</p>
             <form method="post" class="timeline-form" id="timeline-create-form">
-                <input type="hidden" name="batch_id" id="batch_id">
                 <div class="modal-body">
                     {% csrf_token %}
                     <div class="form-group mb-7" id="{{ form.name.label|lower }}_group">
@@ -112,6 +111,7 @@
                     $('.page-loader').hide();
                     $('#id_name').val(data.batch.name);
                     $('#batch_id').val(data.batch.id);
+                    $('#submit-btn').attr("onclick", "updateBatch("+ data.batch.id +")");
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
                     alert(jqXHR.responseJSON.message);
@@ -120,14 +120,13 @@
             });
             document.getElementById("modal").classList.remove("hidden");
             document.getElementById("modal").classList.add("blocker");
-            $('#submit-btn').attr("onclick", "updateBatch()");
         }
 
-        function updateBatch() {
+        function updateBatch(id) {
             $('.page-loader').show();
             $.ajax({
                 type: "POST",
-                url: "batch/"+ $("#batch_id").val() +"/edit",
+                url: "batch/"+ id +"/edit",
                 data: {
                     name: $('#id_name').val(),
                 },

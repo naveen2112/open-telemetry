@@ -19,8 +19,10 @@ from hubble.models.user import User
 from training.forms import AddInternForm, InternDetailForm, SubBatchForm
 from django.views.decorators.http import require_http_methods
 from django.views.generic import TemplateView, FormView, DetailView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 
-class SubBatchDataTable(CustomDatatable):
+class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
     """
     Sub-Batch Datatable
     """
@@ -51,12 +53,11 @@ class SubBatchDataTable(CustomDatatable):
         return
 
 
+@login_required()
 def create_sub_batch(request, pk):  
     """
     Create Sub-batch View
     """
-    usr = User.objects.get(id=58)
-    # TODO : Need to remove the user after adding the authentication
     sub_batch_form = SubBatchForm()
     intern_detail = InternDetailForm()
     if request.method == "POST":
@@ -70,27 +71,19 @@ def create_sub_batch(request, pk):
                 data = list(row)
                 user = User.objects.get(id=data[0])
                 if InternDetail.objects.filter(id=user.id).exists():
-                    intern_detail.add_error(
-                        None, f"{user.name} is already added in the another sub-batch."
-                    )  # Adding the non-form-field error if the trainie is already is added in another branch
+                    intern_detail.add_error(None, f"{user.name} is already added in the another sub-batch.")  # Adding the non-form-field error if the trainie is already is added in another branch
         else:
-            intern_detail.add_error(
-                None, "Please upload the file"
-            )  # Adding the non-field-error if the file was not uploaded while submission
+            intern_detail.add_error( None, "Please upload the file")  # Adding the non-field-error if the file was not uploaded while submission
 
-        if (
-            sub_batch_form.is_valid() or intern_detail.is_valid()
-        ):  # Check if both the forms are valid or not
+        if (sub_batch_form.is_valid() or intern_detail.is_valid()):  # Check if both the forms are valid or not
             primary_mentor = request.POST.get("primary_mentor")
             secondary_mentor = request.POST.get("secondary_mentor")
             sub_batch = sub_batch_form.save(commit=False)
             sub_batch.batch = Batch.objects.get(id=pk)
-            sub_batch.created_by = usr
+            sub_batch.created_by = request.user
             sub_batch.save()
 
-            start_date = datetime.datetime.strptime(
-                str(sub_batch.start_date), "%Y-%m-%d"
-            )
+            start_date = datetime.datetime.strptime(str(sub_batch.start_date), "%Y-%m-%d")
             start_time = datetime.time(hour=9, minute=0)  # Day start time
             end_time = datetime.time(hour=18, minute=0)  # Day end time
             break_time = datetime.time(hour=13, minute=0)  # Day break time
@@ -104,7 +97,7 @@ def create_sub_batch(request, pk):
                     sub_batch=sub_batch,
                     present_type=task.present_type,
                     task_type=task.task_type,
-                    created_by=usr,
+                    created_by=request.user,
                     order=order,
                 )
 
@@ -178,13 +171,13 @@ def create_sub_batch(request, pk):
                     secondary_mentor=User.objects.get(id=secondary_mentor),
                     expected_completion=end_datetime.date(),
                     college=data[1],
-                    created_by=usr,
+                    created_by=request.user,
                 )
                 sub_batch_intern.intern.add(
                     trainie_detail.id
                 )  # Adding the trainies to sub-batch
 
-            return redirect(f"/batch/{pk}/details")
+            return redirect(f"/batch/{pk}")
     context = {
         "form": sub_batch_form,
         "sub_batch_id": pk,
@@ -193,6 +186,7 @@ def create_sub_batch(request, pk):
     return render(request, "batch/create_sub_batch.html", context)
 
 
+@login_required()
 def get_team(request):
     """
     This function retrieves an active timeline template for a given team and returns it as a JSON
@@ -213,12 +207,11 @@ def get_team(request):
         )
 
 
+@login_required()
 def update_sub_batch(request, batch, pk):
     """
     Update Sub-batch View
     """
-    usr = User.objects.get(id=58)
-    # TODO : Need to remove the user after adding the authentication
     sub_batch_1 = SubBatch.objects.get(id=pk)
     batch_start_date = sub_batch_1.start_date
     if request.method == "POST":
@@ -249,7 +242,7 @@ def update_sub_batch(request, batch, pk):
                         sub_batch=sub_batch,
                         present_type=task.present_type,
                         task_type=task.task_type,
-                        created_by=usr,
+                        created_by=request.user,
                         order=order,
                     )
 
@@ -384,7 +377,7 @@ def update_sub_batch(request, batch, pk):
                 if sub_batch.start_date != sub_batch_1.start_date:
                     trainie.expected_completion = expected_date.date()
                 trainie.save()
-        return redirect(f"/batch/{batch}/details")
+        return redirect(f"/batch/{batch}")
 
     sub_batch = SubBatch.objects.get(id=pk)
     sub_batch_detail = sub_batch.intern.all().first()
@@ -399,6 +392,7 @@ def update_sub_batch(request, batch, pk):
     return render(request, "batch/update_sub_batch.html", context)
 
 
+@login_required()
 @require_http_methods(["DELETE"])  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
 def delete_sub_batch(request, pk):
     """
@@ -413,13 +407,13 @@ def delete_sub_batch(request, pk):
         return JsonResponse({"message": "Error while deleting Sub-Batch!"}, status=500)
 
 
-class SubBatchDetail(DetailView):
+class SubBatchDetail(LoginRequiredMixin, DetailView):
     model = SubBatch
     extra_context = {"form": AddInternForm()}
     template_name = "batch/sub_batch_detail.html"
 
 
-class SubBatchTrainiesDataTable(CustomDatatable):
+class SubBatchTrainiesDataTable(LoginRequiredMixin, CustomDatatable):
     """
     Sub-Batch-Trainies Datatable
     """
@@ -458,13 +452,12 @@ class SubBatchTrainiesDataTable(CustomDatatable):
         return data
 
 
+@login_required()
 def add_trainies(request):
     """
     Create Timeline Template
     """
     if request.method == "POST":
-        user = User.objects.get(id=58)
-        # TODO : Need to remove the user after adding the authentication
         form = AddInternForm(request.POST)
         sub_batch_id = request.POST.get("sub_batch")
         if request.POST.get("user"):
@@ -478,7 +471,7 @@ def add_trainies(request):
             trainie = form.save(commit=False)
             trainie.primary_mentor = sub_batch_detail.primary_mentor
             trainie.secondary_mentor = sub_batch_detail.secondary_mentor
-            trainie.created_by = user
+            trainie.created_by = request.user
             trainie.save()
             sub_batch.intern.add(trainie.id)
             return JsonResponse({"status": "success"})
