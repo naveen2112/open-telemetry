@@ -65,7 +65,7 @@ def callback(request):
     user = User.objects.get(email=user_crendentials)
     if user is not None: #Checks whether the authenticated member is form Mallow or no, by checking with Database
         auth_login(request, user)
-        return redirect("index")
+        return redirect(settings.LOGIN_REDIRECT_URL)
     else:
         messages.add_message(
             request,
