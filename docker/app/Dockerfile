@@ -31,7 +31,7 @@ RUN poetry install --no-interaction --no-ansi --no-root
 
 # Adding project files
 ADD . .
-
+RUN mkdir -p /var/app/static/training/pdf
 RUN mkdir -p /var/app/session_files
 RUN mkdir -p /var/app/staticfiles
 RUN python manage.py collectstatic
