@@ -125,7 +125,7 @@ class TimesheetCustomQuerySet(models.QuerySet):
             )
             .values("day", "team__name")
             .annotate(
-                gap=Case(
+                gap=Coalesce(Case(
                     When(a_sum=0, then=0),
                     default=Round(
                         100
@@ -145,7 +145,7 @@ class TimesheetCustomQuerySet(models.QuerySet):
                         2,
                     ),
                     output_field=FloatField(),
-                ),
+                ), 0, output_field= FloatField()),
                 efficiency_capacity=Sum(F("authorized_hours")),
                 monetization_capacity=Sum(
                     F("user__expected_user_efficiencies__expected_efficiency")
