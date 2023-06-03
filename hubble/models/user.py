@@ -3,9 +3,10 @@ from django.db import models
 from .team import Team
 from .designation import Designation
 from datetime import datetime
+from core import db
 
 
-class User(AbstractBaseUser):
+class User(AbstractBaseUser, db.SoftDeleteWithBaseModel):
     id = models.BigAutoField(primary_key=True)
     employee_id = models.CharField(max_length=255, blank=True, null=True)
     email = models.CharField(unique=True, max_length=255)
@@ -19,9 +20,6 @@ class User(AbstractBaseUser):
     team = models.ForeignKey(Team, models.CASCADE, blank=True, null=True)
     branch_id = models.BigIntegerField(blank=True, null=True)
     designation = models.ForeignKey(Designation, models.CASCADE, blank=True, null=True)
-    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
-    updated_at = models.DateTimeField(blank=True, null=True, auto_now=True)
-    deleted_at = models.DateTimeField(blank=True, null=True)
     team_owner = models.BooleanField(blank=True, null=True)
     first_name = models.CharField(max_length=255, blank=True, null=True)
     last_name = models.CharField(max_length=255, blank=True, null=True)

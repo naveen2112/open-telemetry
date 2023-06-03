@@ -31,6 +31,6 @@ class Task_Timeline(db.SoftDeleteWithBaseModel):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
-        db_table = "task_timeline"
+        db_table = "sub_batch_timeline_tasks"
         ordering = ["order"]
 

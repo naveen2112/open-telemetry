@@ -1,9 +1,10 @@
 from django.db import models
 from hubble.models import User
 from . import Currency, Client
+from core import db
 
 
-class Project(models.Model):
+class Project(db.SoftDeleteWithBaseModel):
     id = models.BigAutoField(primary_key=True)
     project_id = models.FloatField()
     name = models.CharField(max_length=255)
@@ -13,32 +14,29 @@ class Project(models.Model):
     version = models.CharField(max_length=255, blank=True, null=True)
     billing_frequency = models.CharField(max_length=255, blank=True, null=True)
     client = models.ForeignKey(
-        Client, models.CASCADE, blank=True, null=True, related_name="Projects_client"
+        Client, models.CASCADE, blank=True, null=True, related_name="project_clients"
     )
     currency = models.ForeignKey(
         Currency,
         models.CASCADE,
         blank=True,
         null=True,
-        related_name="Projects_currency",
+        related_name="project_currencies",
     )
     project_owner = models.ForeignKey(
         User,
         models.CASCADE,
         blank=True,
         null=True,
-        related_name="Projects_project_owner",
+        related_name="project_owner",
     )
     project_manager = models.ForeignKey(
         User,
         models.CASCADE,
         blank=True,
         null=True,
-        related_name="Projects_project_manager",
+        related_name="project_managers",
     )
-    created_at = models.DateTimeField(blank=True, null=True)
-    updated_at = models.DateTimeField(blank=True, null=True)
-    deleted_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         managed = False
