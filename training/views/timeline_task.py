@@ -17,6 +17,7 @@ class TimelineTemplateTaskDataTable(LoginRequiredMixin, CustomDatatable):
     Timeline Template Task Datatable
     """
     model = TimelineTask
+    
     column_defs = [
         {"name": "id", "visible": False, "searchable": False},
         {"name": "name", "visible": True, "searchable": False},
@@ -27,6 +28,9 @@ class TimelineTemplateTaskDataTable(LoginRequiredMixin, CustomDatatable):
         {"name": "action", "title": "Action", "visible": True, "searchable": False, "orderable": False, "className": "text-center"},
     ]
 
+    def get_initial_queryset(self, request=None):
+        return self.model.objects.filter(timeline=request.POST.get("timeline_id"))
+
     def customize_row(self, row, obj):
         buttons = (
             template_utils.edit_button(reverse("timeline-task.show", args=[obj.id]))
@@ -36,9 +40,6 @@ class TimelineTemplateTaskDataTable(LoginRequiredMixin, CustomDatatable):
         ] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
         row["name"] = f"<span data-id='{obj.id}'>{obj.name}</span>"
         return
-
-    def get_initial_queryset(self, request=None):
-        return TimelineTask.objects.filter(timeline=request.POST.get("timeline_id"))
 
 
 @login_required()

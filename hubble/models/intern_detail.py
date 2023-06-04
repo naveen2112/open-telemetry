@@ -9,7 +9,7 @@ class InternDetail(db.SoftDeleteWithBaseModel):
     expected_completion = models.DateField(null=True)
     actual_completion = models.DateField(null=True)
     comment = models.TextField(null=True)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="trainie_created_by")
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="created_intern_details")
 
     class Meta:
         db_table = "intern_details"

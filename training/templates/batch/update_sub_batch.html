@@ -91,7 +91,7 @@
             $("#id_secondary_mentor").siblings().first().find("#show-value").text('{{ sub_batch.secondary_mentor.name }}');
         })
 
-        $("#id_team").change(function () {
+        $("#id_team").change(function() {
             $('.page-loader').show();
             $("#id_timeline").val("")
             $.ajax({
@@ -101,18 +101,18 @@
                 data: {
                     team: $("#id_team").val()
                 },
-                success: function (data) {
+                success: function(data) {
                     $('.page-loader').hide();
                     $("#id_timeline").val(data.timeline.id)
                 },
-                error: function (xhr, status, error) {
+                error: function(xhr, status, error) {
                     $('.page-loader').hide();
                     alert(xhr.responseJSON.message)
                 }
             });
         })
 
-        $(document).ready(function () {
+        $(document).ready(function() {
             function readURL(input) {
                 if (input.files && input.files[0]) {
                     let fileName = input.files[0].name;
@@ -121,25 +121,25 @@
                 }
             }
 
-            $("#file_upload").change(function () {
+            $("#file_upload").change(function() {
                 readURL(this);
             });
 
-            $(".remove-file").on("click", function () {
+            $(".remove-file").on("click", function() {
                 $("#file_upload").val(null);
                 $('.file_input_name').hide();
                 $('.file_input_text').show();
             });
         });
 
-        $(document).ready(function () {
-            $('#update_sub_batch').click(function (e) {
+        $(document).ready(function() {
+            $('#update_sub_batch').click(function(e) {
                 e.preventDefault();
                 $('#sub_batch_form').submit();
             })
         });
 
-        $(function () {
+        $(function() {
             var startDate = new Date('{{ sub_batch.start_date }}');
             $('input[name="start_date"]').daterangepicker({
                 singleDatePicker: true,

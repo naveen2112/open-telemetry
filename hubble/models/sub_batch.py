@@ -6,11 +6,10 @@ from .team import Team
 from .timeline import Timeline
 from .batch import Batch
 
-
 class SubBatch(db.SoftDeleteWithBaseModel):
     name = models.CharField(max_length=250)
     batch = models.ForeignKey(
-        Batch, on_delete=models.CASCADE, related_name="batch_id"
+        Batch, on_delete=models.CASCADE, related_name="sub_batches"
     )
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     primary_mentor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="intern_primary_mentor", null=True)

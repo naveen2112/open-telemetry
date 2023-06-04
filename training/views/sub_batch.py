@@ -28,6 +28,7 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
     Sub-Batch Datatable
     """
     model = SubBatch
+
     column_defs = [
         {"name": "id", "visible": False, "searchable": False},
         {"name": "name", "visible": True, "searchable": False},
@@ -38,12 +39,16 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
     ]
 
     def get_initial_queryset(self, request=None):
-        return SubBatch.objects.filter(batch=request.POST.get("batch_id"))
+        return self.model.objects.filter(batch=request.POST.get("batch_id"))
+        # return self.model.objects.filter(batch=request.POST.get("batch_id")).annotate(
+        #     traines=Count("intern")
+        # )
 
     def customize_row(self, row, obj):
         buttons = (
             template_utils.show_button(reverse("sub-batch.detail", args=[obj.id]))
-            + template_utils.edit_button(f"/batch/{self.request.POST.get('batch_id')}/sub-batch/{obj.id}")
+            + template_utils.edit_button(reverse("sub-batch.edit", args = [self.request.POST.get('batch_id'), obj.id]))
+            # + template_utils.edit_button(f"/batch/{self.request.POST.get('batch_id')}/sub-batch/{obj.id}")
             + template_utils.delete_button("deleteSubBatch('" + reverse("sub-batch.delete", args=[obj.id]) + "')")
         )
         row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
@@ -240,8 +245,7 @@ def create_sub_batch(request, pk):
                     created_by=request.user,
                 )
             
-
-            return redirect(f"/batch/{pk}")
+            return redirect(reverse('batch.detail', args=[pk]))
     context = {
         "form": sub_batch_form,
         "sub_batch_id": pk,
@@ -327,7 +331,8 @@ class SubBatchTrainiesDataTable(LoginRequiredMixin, CustomDatatable):
     """
     Sub-Batch-Trainies Datatable
     """
-    model = SubBatch
+    model = InternDetail
+
     column_defs = [
         {"name": "pk", "visible": False, "searchable": False},
         {"name": "user", "title": "User", "visible": True, "searchable": False},
@@ -338,16 +343,16 @@ class SubBatchTrainiesDataTable(LoginRequiredMixin, CustomDatatable):
 
     def customize_row(self, row, obj):
         buttons = (template_utils.show_button(reverse("sub-batch.detail", args=[obj.user.id])) 
-                   + template_utils.edit_button(f"/batch",))
+                   + template_utils.edit_button(reverse('batch')))
         row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         return
 
     def get_initial_queryset(self, request=None):
-        return InternDetail.objects.filter(sub_batch__id = request.POST.get("sub_batch"))
+        return self.model.objects.filter(sub_batch__id = request.POST.get("sub_batch"))
 
 
 @login_required()
-def add_trainies(request):
+def add_trainee(request):
     """
     Create Timeline Template
     """

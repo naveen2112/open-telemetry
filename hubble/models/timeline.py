@@ -4,6 +4,7 @@ from .team import Team
 from .user import User
 from django.core.exceptions import ValidationError
 
+
 class Timeline(db.SoftDeleteWithBaseModel):
     name = models.CharField(max_length=255)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
