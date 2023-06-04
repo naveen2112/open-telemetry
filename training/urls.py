@@ -1,6 +1,7 @@
 from django.urls import path, include
 from training.views import induction_kit, timeline, timeline_task, batch, sub_batch
 from training import view
+from django.conf.urls import handler404, handler500
  
 urlpatterns = [
     path("", include('hubble.urls')),
@@ -46,3 +47,6 @@ urlpatterns = [
     path("sub-batch/trainies-datatable", sub_batch.SubBatchTrainiesDataTable.as_view(), name="sub-batch.trainies-datatable"),
     path("sub-batch/trainies/add", sub_batch.add_trainee, name="trainies.add"),
 ]
+
+handler404='training.view.error_404'
+handler500='training.view.error_500'
