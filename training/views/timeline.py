@@ -1,16 +1,14 @@
 from django.forms.models import model_to_dict
-from django.shortcuts import redirect, render, get_object_or_404
-from django.http import JsonResponse, QueryDict
-from hubble.models import Timeline, TimelineTask, User
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from hubble.models import Timeline, TimelineTask
 from training.forms import TimelineForm, TimelineTaskForm
-from django.views.generic import TemplateView, FormView, DetailView
+from django.views.generic import FormView, DetailView
 from core.utils import CustomDatatable
 from core import template_utils
-from django.db.models import Q, Sum, F, Count, FloatField
-from django.db.models.functions import Coalesce
+from django.db.models import Sum, F
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
-from datetime import datetime
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 

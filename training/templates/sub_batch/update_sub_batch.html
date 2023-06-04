@@ -84,7 +84,7 @@
 
 {% block script %}
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             $('#timeline-name').html('{{ sub_batch.timeline.name }}');
             $("#id_team").siblings().first().find("#show-value").text('{{ sub_batch.team.name }}');
             $("#id_primary_mentor").siblings().first().find("#show-value").text('{{ sub_batch.primary_mentor.name }}');

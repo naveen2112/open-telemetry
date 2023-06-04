@@ -2,6 +2,7 @@ from django.db import models
 from hubble.models import User
 from core import db
 
+
 class Holiday(db.SoftDeleteWithBaseModel):
     id = models.BigAutoField(primary_key=True)
     date_of_holiday = models.DateField()

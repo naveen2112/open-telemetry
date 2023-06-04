@@ -39,8 +39,8 @@
 
 {% block script %}
     <script>
-        $(document).ready(function () {
-            $(document).ready(function () {
+        $(document).ready(function() {
+            $(document).ready(function() {
                 AjaxDatatableViewUtils.initialize_table(
                     $('#sub-batch-table'),
                     "{% url 'sub-batch-datatable' %}",
@@ -63,7 +63,7 @@
                 $.ajax({
                     type: "DELETE",
                     url: url,
-                    success: function (data) {
+                    success: function(data) {
                         $('.page-loader').hide();
                         $('#sub-batch-table').DataTable().ajax.reload();
                     }

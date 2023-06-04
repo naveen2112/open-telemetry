@@ -29,16 +29,14 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
         {"name": "id", "visible": False, "searchable": False},
         {"name": "name", "visible": True, "searchable": False},
         {"name": "team", "visible": True, "searchable": False},
+        {"name": "trainee_count","title": "No. of Trainees", "visible": True, "searchable": False},
         {"name": "start_date", "visible": True, "searchable": False},
         {"name": "timeline", "title": "Assigned Timeline Template", "visible": True, "searchable": False, "foreign_field": "timeline__name"},
         {"name": "action", "title": "Action", "visible": True, "searchable": False, "orderable": False, "className": "text-center",},
     ]
 
     def get_initial_queryset(self, request=None):
-        return self.model.objects.filter(batch=request.POST.get("batch_id"))
-        # return self.model.objects.filter(batch=request.POST.get("batch_id")).annotate(
-        #     traines=Count("intern")
-        # )
+        return self.model.objects.filter(batch=request.POST.get("batch_id")).annotate(trainee_count=Count("intern_sub_batch_details")) #TODO:what if the intern was deleted?
 
     def customize_row(self, row, obj):
         buttons = (
@@ -210,11 +208,11 @@ def create_sub_batch(request, pk):
         # Checking the trainie is already added in the other batch or not
         if "users_list_file" in request.FILES:
             excel_file = request.FILES["users_list_file"]
-            df = pd.read_excel(excel_file, skiprows=0)
+            df = pd.read_excel(excel_file)
+            if InternDetail.objects.filter(user__in=df['user_id']).exists():
+                sub_batch_form.add_error(None, "Some of the Users are already added in another sub-batch")  # Adding the non-field-error if the user aalready exists
         else:
-            sub_batch_form.add_error(
-                None, "Please upload the file"
-            )  # Adding the non-field-error if the file was not uploaded while submission
+            sub_batch_form.add_error(None, "Please upload the file")  # Adding the non-field-error if the file was not uploaded while submission
 
         if sub_batch_form.is_valid():  # Check if both the forms are valid or not
             sub_batch = sub_batch_form.save(commit=False)
@@ -223,14 +221,12 @@ def create_sub_batch(request, pk):
             sub_batch.save()
 
             create_sub_batch_timeline_task(sub_batch, request.user)
-            for index, row in df.iterrows():  # Iterating over pandas dataframe
-                data = list(row)
-                user = User.objects.get(id=data[0])
+            for row in range(len(df)): # Iterating over pandas dataframe
                 InternDetail.objects.create(
                     sub_batch=sub_batch,
-                    user=user,
+                    user=df['user_id'][row],
                     expected_completion=timeline_task_end_date,
-                    college=data[1],
+                    college=df['college'][row],
                     created_by=request.user,
                 )
 
@@ -248,7 +244,7 @@ def get_timeline(request):
     This function retrieves an active timeline template for a given team and returns it as a JSON
     response, or returns an error message if no active template is found.
     """
-    team_id = request.POST.get("team_id")
+    team_id = request.POST.get("team")
     try:
         timeline = Timeline.objects.get(team=team_id, is_active=True)
         return JsonResponse(
@@ -314,7 +310,7 @@ def delete_sub_batch(request, pk):
 class SubBatchDetail(LoginRequiredMixin, DetailView):
     model = SubBatch
     extra_context = {"form": AddInternForm()}
-    template_name = "batch/sub_batch_detail.html"
+    template_name = "sub_batch/sub_batch_detail.html"
 
 
 class SubBatchTrainiesDataTable(LoginRequiredMixin, CustomDatatable):
@@ -348,7 +344,7 @@ def add_trainee(request):
     """
     if request.method == "POST":
         form = AddInternForm(request.POST)
-        if request.POST.get("user"):
+        if request.POST.get("user_id"):
             if InternDetail.objects.filter(user=request.POST.get("user_id")).exists():
                 form.add_error(
                     "user", "Trainie already added in the another sub-batch"

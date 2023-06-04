@@ -1,6 +1,5 @@
 from django.db import models
-from .module import Module
-from hubble.models import User
+from hubble.models import User, Module
 from core import db
 
 

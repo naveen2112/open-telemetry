@@ -106,8 +106,8 @@
 
 {% block script %}
     <script>
-        $(document).ready(function () {
-            $(document).ready(function () {
+        $(document).ready(function() {
+            $(document).ready(function() {
                 AjaxDatatableViewUtils.initialize_table(
                     $('#sub-batch-trainies-table'),
                     "{% url 'sub-batch.trainies-datatable' %}",
@@ -144,15 +144,15 @@
                     college: $('#id_college').val(),
                     sub_batch_id: '{{ object.id }}'
                 },
-                success: function (data) {
-                    $('.form_errors').remove()
+                success: function(data) {
+                    $('.form_errors').remove();
                     $('.page-loader').hide();
                     if (data.status === 'success') {
                         $('#sub-batch-trainies-table').DataTable().ajax.reload();
                         closeModal('modal');
                     }
                     else {
-                        renderFormError(data)
+                        renderFormError(data);
                     }
                 }
             });

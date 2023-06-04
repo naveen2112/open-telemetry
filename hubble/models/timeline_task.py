@@ -1,7 +1,7 @@
 from django.db import models
-from .user import User
+from hubble.models import User, Timeline
 from core import db
-from .timeline import Timeline
+
 
 class TimelineTask(db.SoftDeleteWithBaseModel):
     PRESENT_TYPE_REMOTE = "Remote"

@@ -120,14 +120,14 @@
                 data: {
                     data: data,
                 },
-                success: function (data) {
+                success: function(data) {
                     if (data.status === 'success') {
                         $('.page-loader').hide();
                         $('#timeline-table').DataTable().ajax.reload();
                         closeModal('modal');
                     }
                 },
-                error: function () {
+                error: function() {
                     $('.page-loader').hide();
                     alert("Something went wrong");
                 },
@@ -159,17 +159,17 @@
                     task_type: $('input[name="task_type"]:checked').val(),
                     timeline_id: $('#timeline_id').val(),
                 },
-                success: function (data) {
-                    $('.form_errors').remove()
+                success: function(data) {
+                    $('.form_errors').remove();
                     $('.page-loader').hide();
                     if (data.status === 'success') {
-                        $('#timeline-table').DataTable().ajax.reload()
+                        $('#timeline-table').DataTable().ajax.reload();
                         closeModal('modal');
                     } else {
                         renderFormError(data);
                     }
                 },
-                error: function () {
+                error: function() {
                     $('.page-loader').hide();
                     alert("Something went wrong");
                 },
@@ -178,11 +178,11 @@
 
         function openUpdateModel(url) {
             $('.page-loader').show();
-            $('.update-form-fields-container').empty()
+            $('.update-form-fields-container').empty();
             $.ajax({
                 type: "GET",
                 url: url,
-                success: function (data) {
+                success: function(data) {
                     $('.page-loader').hide();
                     $('input[name="id_present_type"]').attr('checked', false);
                     $('input[name="id_task_type"]').attr('checked', false);
@@ -193,7 +193,7 @@
                     $('input[name="id_task_type"][value="' + data.timeline_task.task_type + '"]').attr('checked', true);
                     $('#submit-btn').attr("onclick", "updateTimeline()");
                 },
-                error: function (jqXHR, textStatus, errorThrown) {
+                error: function(jqXHR, textStatus, errorThrown) {
                     alert(jqXHR.responseJSON.message);
                     $('.page-loader').hide();
                 },
@@ -206,14 +206,14 @@
             $('.page-loader').show();
             $.ajax({
                 type: "POST",
-                url: "/timeline-task/"+ $("#timeline-task").val() +"/edit",
+                url: "/timeline-task/"+ $("#timeline-task").val() +"/edit", //TODO
                 data: {
                     name: $('#id_name').val(),
                     days: $('#id_days').val(),
                     present_type: $('input[name="present_type"]:checked').val(),
                     task_type: $('input[name="task_type"]:checked').val(),
                 },
-                success: function (data) {
+                success: function(data) {
                     $('.form_errors').remove();
                     $('.page-loader').hide();
                     if (data.status === 'success') {
@@ -223,7 +223,7 @@
                         renderFormError(data);
                     }
                 },
-                error: function () {
+                error: function() {
                     $('.page-loader').hide();
                     alert("Something went wrong");
                 },
@@ -237,11 +237,11 @@
                 $.ajax({
                     type: "DELETE",
                     url: url,
-                    success: function (data) {
-                        $('#timeline-table').DataTable().ajax.reload()
+                    success: function(data) {
+                        $('#timeline-table').DataTable().ajax.reload();
                         $('.page-loader').hide();
                     },
-                    error: function (jqXHR, textStatus, errorThrown) {
+                    error: function(jqXHR, textStatus, errorThrown) {
                         alert(jqXHR.responseJSON.message);
                         $('.page-loader').hide();
                     },

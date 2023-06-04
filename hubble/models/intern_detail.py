@@ -2,9 +2,10 @@ from django.db import models
 from .user import User
 from core import db
 
+
 class InternDetail(db.SoftDeleteWithBaseModel):
-    sub_batch = models.ForeignKey('SubBatch', on_delete=models.CASCADE, related_name="sub_batch_data")
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="intern_user")
+    sub_batch = models.ForeignKey('SubBatch', on_delete=models.CASCADE, related_name="intern_sub_batch_details")
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="intern_details")
     college = models.CharField(max_length=250)
     expected_completion = models.DateField(null=True)
     actual_completion = models.DateField(null=True)

@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Count, F
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -44,13 +45,13 @@ class BatchDataTable(LoginRequiredMixin, CustomDatatable):
             + template_utils.delete_button("deleteBatch('" + reverse("batch.delete", args=[obj.id]) + "')")
         )
 
-        # trainies_count = Batch.objects.filter(id= obj.id).values('sub_batches__intern__user__team__name').annotate(total_trainies=Count("sub_batches__intern"))
-        # traines = ''
-        # for item in trainies_count:
-        #     traines += f"{item['sub_batches__intern__user__team__name']} - {item['total_trainies']}<br>"
+        trainee_count = self.model.objects.prefetch_related('sub_batches').filter(id= obj.id).values('sub_batches__team__name').annotate(total_trainee_count=Count('sub_batches__intern_sub_batch_details'))
+        traines = ''
+        for item in trainee_count:
+            traines += f"{item['sub_batches__team__name']} - {item['total_trainee_count']}<br>"
 
         row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
-        # TODO : Need to update the info icon
+        # TODO : Need to update and add the info icon
         return
 
 

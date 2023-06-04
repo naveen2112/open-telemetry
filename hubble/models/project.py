@@ -1,6 +1,5 @@
 from django.db import models
-from hubble.models import User
-from . import Currency, Client
+from hubble.models import User, Currency, Client
 from core import db
 
 

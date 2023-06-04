@@ -1,10 +1,7 @@
 from django.db import models
 from core import db
-from .user import User
-from .intern_detail import InternDetail
-from .team import Team
-from .timeline import Timeline
-from .batch import Batch
+from hubble.models import User, Team, Timeline, Batch
+
 
 class SubBatch(db.SoftDeleteWithBaseModel):
     name = models.CharField(max_length=250)

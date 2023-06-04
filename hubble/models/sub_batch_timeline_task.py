@@ -1,7 +1,7 @@
 from django.db import models
 from core import db
-from .sub_batch import SubBatch
-from .user import User
+from hubble.models import SubBatch, User
+
 
 class SubBatchTaskTimeline(db.SoftDeleteWithBaseModel):
     PRESENT_TYPE_REMOTE = "Remote"
@@ -25,8 +25,8 @@ class SubBatchTaskTimeline(db.SoftDeleteWithBaseModel):
     sub_batch = models.ForeignKey(SubBatch, on_delete=models.CASCADE)
     present_type = models.CharField(max_length=255, choices=PRESENT_TYPES, default=PRESENT_TYPE_REMOTE)
     task_type = models.CharField(max_length=255, choices=TASK_TYPES, default=TASK_TYPE_TASK)
-    start_date = models.DateTimeField(null=True, blank=True, auto_now_add=False, auto_now=False)
-    end_date = models.DateTimeField(null=True, blank=True, auto_now_add=False, auto_now=False)
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
     order = models.IntegerField(blank=True) 
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
 

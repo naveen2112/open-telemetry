@@ -1,7 +1,6 @@
 from django.db import models
-from hubble.models import User
+from hubble.models import User, ProjectResourcePosition
 from .project import Project
-from . import ProjectResourcePosition
 from core import db
 
 

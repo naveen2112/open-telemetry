@@ -148,17 +148,22 @@ class SubBatchForm(forms.ModelForm):
 
 
 class AddInternForm(forms.ModelForm):
+    user= forms.ChoiceField(
+                choices= (
+                    (user.id, user.name)
+                    for user in models.User.objects.exclude(intern_details__isnull = False)),
+                widget=forms.Select(
+                    attrs={
+                        "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
+                        "placeholder": "Trainee...",
+                    }
+                )
+            )
     class Meta:
         model = models.InternDetail
         fields = ("user", "college")
 
         widgets = {
-            "user": forms.Select(
-                attrs={
-                    "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
-                    "placeholder": "Trainie...",
-                }
-            ),
             "college": forms.TextInput(
                 attrs={
                     "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
