@@ -140,9 +140,9 @@
                 type: "POST",
                 url: "{% url 'trainies.add' %}",
                 data: {
-                    user: $('#id_user').val(),
+                    user_id: $('#id_user').val(),
                     college: $('#id_college').val(),
-                    sub_batch: '{{ object.id }}'
+                    sub_batch_id: '{{ object.id }}'
                 },
                 success: function (data) {
                     $('.form_errors').remove()

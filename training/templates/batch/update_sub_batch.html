@@ -93,21 +93,21 @@
 
         $("#id_team").change(function() {
             $('.page-loader').show();
-            $("#id_timeline").val("")
+            $("#id_timeline").val("");
             $.ajax({
                 type: "POST",
                 url: "{% url 'sub-batch.get_timeline' %}",
                 headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
                 data: {
-                    team: $("#id_team").val()
+                    team_id: $("#id_team").val(),
                 },
                 success: function(data) {
                     $('.page-loader').hide();
-                    $("#id_timeline").val(data.timeline.id)
+                    $("#id_timeline").val(data.timeline.id);
                 },
                 error: function(xhr, status, error) {
                     $('.page-loader').hide();
-                    alert(xhr.responseJSON.message)
+                    alert(xhr.responseJSON.message);
                 }
             });
         })

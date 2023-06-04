@@ -259,9 +259,9 @@ def get_timeline(request):
     This function retrieves an active timeline template for a given team and returns it as a JSON
     response, or returns an error message if no active template is found.
     """
-    team = request.POST.get("team")
+    team_id = request.POST.get("team_id")
     try:
-        timeline = Timeline.objects.get(team=team, is_active=True)
+        timeline = Timeline.objects.get(team=team_id, is_active=True)
         return JsonResponse(
             {"timeline": model_to_dict(timeline)}
         )  # Return the response with active template for a team
@@ -279,21 +279,21 @@ def update_sub_batch(request, batch, pk):
     """
     Update Sub-batch View
     """
-    sub_batch_1 = SubBatch.objects.get(id=pk)
-    batch_start_date = sub_batch_1.start_date
+    sub_batch_data = SubBatch.objects.get(id=pk)
+    batch_start_date = sub_batch_data.start_date
     if request.method == "POST":
-        sub_batch_form = SubBatchForm(request.POST, instance=sub_batch_1)
+        sub_batch_form = SubBatchForm(request.POST, instance=sub_batch_data)
         if sub_batch_form.is_valid():
             sub_batch = sub_batch_form.save()
             
-            if sub_batch.timeline.id != sub_batch_1.timeline.id:
+            if sub_batch.timeline.id != sub_batch_data.timeline.id:
                 create_sub_batch_timeline_task(sub_batch, request.user)
             else:
                 print(sub_batch.start_date)
                 update_sub_batch_task(sub_batch)
 
             for trainee in InternDetail.objects.filter(sub_batch=sub_batch):
-                if sub_batch.start_date != sub_batch_1.start_date:
+                if sub_batch.start_date != sub_batch_data.start_date:
                     trainee.expected_completion = timeline_task_end_date
                     trainee.save()
             return redirect(reverse("batch.detail", args=[batch]))
@@ -354,17 +354,17 @@ class SubBatchTrainiesDataTable(LoginRequiredMixin, CustomDatatable):
 @login_required()
 def add_trainee(request):
     """
-    Create Timeline Template
+    Add tranie to sub batch
     """
     if request.method == "POST":
         form = AddInternForm(request.POST)
         if request.POST.get("user"):
-            if InternDetail.objects.filter(user=request.POST.get("user")).exists():
+            if InternDetail.objects.filter(user=request.POST.get("user_id")).exists():
                 form.add_error(
                     "user", "Trainie already added in the another sub-batch"
                 )  # Adding form error if the trainies is already added in another
         if form.is_valid():  # Check if form is valid or not
-            sub_batch = SubBatch.objects.get(id=request.POST.get("sub_batch"))
+            sub_batch = SubBatch.objects.get(id=request.POST.get("sub_batch_id"))
             date = Task_Timeline.objects.filter(sub_batch = sub_batch).last()
             trainie = form.save(commit=False)
             trainie.sub_batch = sub_batch
