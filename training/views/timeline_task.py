@@ -1,16 +1,16 @@
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms import model_to_dict
-from django.http import JsonResponse, QueryDict
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.views.decorators.http import require_http_methods
+
 from core import template_utils
 from core.utils import CustomDatatable
-from hubble.models.timeline import Timeline
-from hubble.models.timeline_task import TimelineTask
-from hubble.models.user import User
+from hubble.models import Timeline, TimelineTask
 from training.forms import TimelineTaskForm
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required
-from django.urls import reverse
+
 
 class TimelineTemplateTaskDataTable(LoginRequiredMixin, CustomDatatable):
     """
@@ -35,9 +35,7 @@ class TimelineTemplateTaskDataTable(LoginRequiredMixin, CustomDatatable):
         buttons = (
             template_utils.edit_button(reverse("timeline-task.show", args=[obj.id]))
             + template_utils.delete_button("deleteTimeline('" + reverse("timeline-task.delete", args=[obj.id]) + "')"))
-        row[
-            "action"
-        ] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
+        row["action"] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
         row["name"] = f"<span data-id='{obj.id}'>{obj.name}</span>"
         return
 

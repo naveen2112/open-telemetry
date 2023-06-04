@@ -61,8 +61,6 @@ class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
         return super().render_column(row, column)
 
 
-
-
 @login_required()
 def create_timeline_template(request):
     """

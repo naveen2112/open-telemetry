@@ -16,3 +16,5 @@ from .project_resource import ProjectResource
 from .project import Project
 from .task import Task
 from .timesheet_entry import TimesheetEntry
+from .holiday import Holiday
+from .sub_batch_timeline_task import SubBatchTaskTimeline

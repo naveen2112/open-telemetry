@@ -1,32 +1,28 @@
-
 import datetime
-from django.forms import model_to_dict
-from django.http import JsonResponse, QueryDict
+
 import pandas as pd
-import pytz
-from core.utils import CustomDatatable
-from hubble.models.batch import Batch
-from hubble.models.holiday import Holiday
-from hubble.models.intern_detail import InternDetail
-from hubble.models.sub_batch import SubBatch
-from core import template_utils
-from django.db.models import Count, F
-from django.urls import reverse
-from django.shortcuts import redirect, render, get_object_or_404
-from hubble.models.task_timeline import Task_Timeline
-from hubble.models.timeline import Timeline
-from hubble.models.timeline_task import TimelineTask
-from hubble.models.user import User
-from training.forms import AddInternForm, SubBatchForm
-from django.views.decorators.http import require_http_methods
-from django.views.generic import TemplateView, FormView, DetailView
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Count, F
+from django.forms import model_to_dict
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.views.decorators.http import require_http_methods
+from django.views.generic import DetailView
+
+from core import template_utils
+from core.utils import CustomDatatable
+from hubble.models import (Batch, Holiday, InternDetail, SubBatch,
+                           SubBatchTaskTimeline, Timeline, TimelineTask, User)
+from training.forms import AddInternForm, SubBatchForm
+
 
 class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
     """
     Sub-Batch Datatable
     """
+
     model = SubBatch
 
     column_defs = [
@@ -35,7 +31,7 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
         {"name": "team", "visible": True, "searchable": False},
         {"name": "start_date", "visible": True, "searchable": False},
         {"name": "timeline", "title": "Assigned Timeline Template", "visible": True, "searchable": False, "foreign_field": "timeline__name"},
-        {"name": "action", "title": "Action", "visible": True, "searchable": False, "orderable": False, "className": "text-center"},
+        {"name": "action", "title": "Action", "visible": True, "searchable": False, "orderable": False, "className": "text-center",},
     ]
 
     def get_initial_queryset(self, request=None):
@@ -47,8 +43,7 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
     def customize_row(self, row, obj):
         buttons = (
             template_utils.show_button(reverse("sub-batch.detail", args=[obj.id]))
-            + template_utils.edit_button(reverse("sub-batch.edit", args = [self.request.POST.get('batch_id'), obj.id]))
-            # + template_utils.edit_button(f"/batch/{self.request.POST.get('batch_id')}/sub-batch/{obj.id}")
+            + template_utils.edit_button(reverse("sub-batch.edit", args=[self.request.POST.get("batch_id"), obj.id]))
             + template_utils.delete_button("deleteSubBatch('" + reverse("sub-batch.delete", args=[obj.id]) + "')")
         )
         row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
@@ -58,6 +53,8 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
 
 holidays = Holiday.objects.values_list("date_of_holiday")
 timeline_task_end_date = None
+
+
 def create_sub_batch_timeline_task(sub_batch, user):
     start_date = datetime.datetime.strptime(str(sub_batch.start_date), "%Y-%m-%d")
     start_time = datetime.time(hour=9, minute=0)  # Day start time
@@ -69,15 +66,12 @@ def create_sub_batch_timeline_task(sub_batch, user):
         task_start_date = None
         task_end_date = None
 
-        duration = datetime.timedelta(
-            hours=task.days * 8
-        )  # Working hours for a day
+        duration = datetime.timedelta(hours=task.days * 8)  # Working hours for a day
 
         while duration != datetime.timedelta(0):
             temp_duration = datetime.timedelta(hours=4)
             end_datetime = (
-                datetime.datetime.combine(start_date, start_time)
-                + temp_duration
+                datetime.datetime.combine(start_date, start_time) + temp_duration
             )
             start_datetime = datetime.datetime.combine(start_date, start_time)
 
@@ -124,7 +118,7 @@ def create_sub_batch_timeline_task(sub_batch, user):
                 start_time = datetime.time(hour=9, minute=0)
 
         order += 1
-        Task_Timeline.objects.create(
+        SubBatchTaskTimeline.objects.create(
             name=task.name,
             days=task.days,
             sub_batch=sub_batch,
@@ -135,32 +129,27 @@ def create_sub_batch_timeline_task(sub_batch, user):
             created_by=user,
             order=order,
         )
-    
+
     global timeline_task_end_date
     timeline_task_end_date = task_end_date
 
 
 def update_sub_batch_task(sub_batch):
-    start_date = datetime.datetime.strptime(
-        str(sub_batch.start_date), "%Y-%m-%d"
-    )
+    start_date = datetime.datetime.strptime(str(sub_batch.start_date), "%Y-%m-%d")
     start_time = datetime.time(hour=9, minute=0)  # Day start time
     end_time = datetime.time(hour=18, minute=0)  # Day end time
     break_time = datetime.time(hour=13, minute=0)  # Day break time
     break_end_time = datetime.time(hour=14, minute=0)  # Da break end time
 
-    for task in Task_Timeline.objects.filter(sub_batch=sub_batch):
+    for task in SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch):
         task_start_date = None
         task_end_date = None
-        duration = datetime.timedelta(
-            hours=task.days * 8
-        )  # Working hours for a day
+        duration = datetime.timedelta(hours=task.days * 8)  # Working hours for a day
 
         while duration != datetime.timedelta(0):
             temp_duration = datetime.timedelta(hours=4)
             end_datetime = (
-                datetime.datetime.combine(start_date, start_time)
-                + temp_duration
+                datetime.datetime.combine(start_date, start_time) + temp_duration
             )
             start_datetime = datetime.datetime.combine(start_date, start_time)
 
@@ -210,14 +199,12 @@ def update_sub_batch_task(sub_batch):
 
 
 @login_required()
-def create_sub_batch(request, pk):  
+def create_sub_batch(request, pk):
     """
     Create Sub-batch View
     """
     sub_batch_form = SubBatchForm()
-    print(request.POST)
-    print(request.FILES)
-    
+
     if request.method == "POST":
         sub_batch_form = SubBatchForm(request.POST)
         # Checking the trainie is already added in the other batch or not
@@ -225,9 +212,11 @@ def create_sub_batch(request, pk):
             excel_file = request.FILES["users_list_file"]
             df = pd.read_excel(excel_file, skiprows=0)
         else:
-            sub_batch_form.add_error( None, "Please upload the file")  # Adding the non-field-error if the file was not uploaded while submission
+            sub_batch_form.add_error(
+                None, "Please upload the file"
+            )  # Adding the non-field-error if the file was not uploaded while submission
 
-        if (sub_batch_form.is_valid()):  # Check if both the forms are valid or not
+        if sub_batch_form.is_valid():  # Check if both the forms are valid or not
             sub_batch = sub_batch_form.save(commit=False)
             sub_batch.batch = Batch.objects.get(id=pk)
             sub_batch.created_by = request.user
@@ -240,17 +229,17 @@ def create_sub_batch(request, pk):
                 InternDetail.objects.create(
                     sub_batch=sub_batch,
                     user=user,
-                    expected_completion= timeline_task_end_date,
+                    expected_completion=timeline_task_end_date,
                     college=data[1],
                     created_by=request.user,
                 )
-            
-            return redirect(reverse('batch.detail', args=[pk]))
+
+            return redirect(reverse("batch.detail", args=[pk]))
     context = {
         "form": sub_batch_form,
         "sub_batch_id": pk,
     }
-    return render(request, "batch/create_sub_batch.html", context)
+    return render(request, "sub_batch/create_sub_batch.html", context)
 
 
 @login_required()
@@ -285,11 +274,10 @@ def update_sub_batch(request, batch, pk):
         sub_batch_form = SubBatchForm(request.POST, instance=sub_batch_data)
         if sub_batch_form.is_valid():
             sub_batch = sub_batch_form.save()
-            
+
             if sub_batch.timeline.id != sub_batch_data.timeline.id:
                 create_sub_batch_timeline_task(sub_batch, request.user)
             else:
-                print(sub_batch.start_date)
                 update_sub_batch_task(sub_batch)
 
             for trainee in InternDetail.objects.filter(sub_batch=sub_batch):
@@ -303,11 +291,13 @@ def update_sub_batch(request, batch, pk):
         "form": SubBatchForm(instance=SubBatch.objects.get(id=pk)),
         "sub_batch": SubBatch.objects.get(id=pk),
     }
-    return render(request, "batch/update_sub_batch.html", context)
+    return render(request, "sub_batch/update_sub_batch.html", context)
 
 
 @login_required()
-@require_http_methods(["DELETE"])  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
+@require_http_methods(
+    ["DELETE"]
+)  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
 def delete_sub_batch(request, pk):
     """
     Delete Batch
@@ -331,6 +321,7 @@ class SubBatchTrainiesDataTable(LoginRequiredMixin, CustomDatatable):
     """
     Sub-Batch-Trainies Datatable
     """
+
     model = InternDetail
 
     column_defs = [
@@ -338,17 +329,16 @@ class SubBatchTrainiesDataTable(LoginRequiredMixin, CustomDatatable):
         {"name": "user", "title": "User", "visible": True, "searchable": False},
         {"name": "college", "title": "College", "visible": True, "searchable": False},
         {"name": "expected_completion", "title": "Expected Completion", "visible": True, "searchable": False},
-        {"name": "action", "title": "Action", "visible": True, "searchable": False, "orderable": False, "className": "text-center"},
+        {"name": "action", "title": "Action", "visible": True, "searchable": False, "orderable": False, "className": "text-center",},
     ]
 
+    def get_initial_queryset(self, request=None):
+        return self.model.objects.filter(sub_batch__id=request.POST.get("sub_batch"))
+
     def customize_row(self, row, obj):
-        buttons = (template_utils.show_button(reverse("sub-batch.detail", args=[obj.user.id])) 
-                   + template_utils.edit_button(reverse('batch')))
+        buttons = template_utils.show_button(reverse("sub-batch.detail", args=[obj.user.id])) + template_utils.edit_button(reverse("batch"))
         row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         return
-
-    def get_initial_queryset(self, request=None):
-        return self.model.objects.filter(sub_batch__id = request.POST.get("sub_batch"))
 
 
 @login_required()
@@ -365,7 +355,7 @@ def add_trainee(request):
                 )  # Adding form error if the trainies is already added in another
         if form.is_valid():  # Check if form is valid or not
             sub_batch = SubBatch.objects.get(id=request.POST.get("sub_batch_id"))
-            date = Task_Timeline.objects.filter(sub_batch = sub_batch).last()
+            date = SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch).last()
             trainie = form.save(commit=False)
             trainie.sub_batch = sub_batch
             trainie.expected_completion = date.start_date

@@ -1,18 +1,17 @@
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms.models import model_to_dict
-from django.http import JsonResponse, QueryDict
-from django.shortcuts import get_object_or_404, render
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from django.views.decorators.http import require_http_methods
+from django.views.generic import DetailView, FormView
+
 from core import template_utils
 from core.utils import CustomDatatable
-from hubble.models.sub_batch import SubBatch
-from hubble.models.batch import Batch
-from hubble.models.user import User
+from hubble.models import Batch
 from training.forms import BatchForm
-from django.db.models import F, Count
-from django.views.decorators.http import require_http_methods
-from django.views.generic import TemplateView, FormView, DetailView
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required
+
 
 class BatchList(LoginRequiredMixin, FormView):
     """
@@ -132,4 +131,4 @@ def delete_batch(request, pk):
 
 class BatchDetails(LoginRequiredMixin, DetailView):
     model = Batch
-    template_name = "batch/sub_batch.html"
+    template_name = "sub_batch/sub_batch.html"
