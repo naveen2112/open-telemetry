@@ -15,7 +15,7 @@
             </div>
         </div>
         <div class=" w-full flex justify-end items-center batch-btn">
-            <a href="{% url 'batch.detail' batch_id %}"
+            <a href="{% url 'batch.detail' sub_batch.batch.id %}"
                 class="text-white bg-gray-500 rounded inline-flex items-center px-3 py-1 mr-6 text-base font-normal">
                 <span class="text-xl mr-2">x</span>
                 Cancel
@@ -64,18 +64,18 @@
                 {{ form.timeline|show_field_errors }}
             </div>
             <div class="work-basic-dropdown form-field">
-                {{ intern_detail.primary_mentor|show_label }}
+                {{ form.primary_mentor|show_label }}
                 <div class="relative mt-2.5">
-                    {{ intern_detail.primary_mentor }}
+                    {{ form.primary_mentor }}
                 </div>
-                {{ intern_detail.primary_mentor|show_field_errors }}
+                {{ form.primary_mentor|show_field_errors }}
             </div>
             <div class="work-basic-dropdown form-field">
-                {{ intern_detail.secondary_mentor|show_label }}
+                {{ form.secondary_mentor|show_label }}
                 <div class="relative mt-2.5">
-                    {{ intern_detail.secondary_mentor }}
+                    {{ form.secondary_mentor }}
                 </div>
-                {{ intern_detail.secondary_mentor|show_field_errors }}
+                {{ form.secondary_mentor|show_field_errors }}
             </div>
         </div>
 
@@ -85,12 +85,10 @@
 {% block script %}
     <script>
         $(document).ready(function () {
-            $('#timeline-name').html('{{ sub_batch.timeline.name }}')
-            $('#id_primary_mentor').val('{{ sub_batch_detail.primary_mentor.id }}')
-            $('#id_secondary_mentor').val('{{ sub_batch_detail.secondary_mentor.id }}')
-            $("#id_team").siblings().first().find("#show-value").text('{{ sub_batch.team.name }}')
-            $("#id_primary_mentor").siblings().first().find("#show-value").text('{{ sub_batch_detail.primary_mentor.name }}')
-            $("#id_secondary_mentor").siblings().first().find("#show-value").text('{{ sub_batch_detail.secondary_mentor.name }}')
+            $('#timeline-name').html('{{ sub_batch.timeline.name }}');
+            $("#id_team").siblings().first().find("#show-value").text('{{ sub_batch.team.name }}');
+            $("#id_primary_mentor").siblings().first().find("#show-value").text('{{ sub_batch.primary_mentor.name }}');
+            $("#id_secondary_mentor").siblings().first().find("#show-value").text('{{ sub_batch.secondary_mentor.name }}');
         })
 
         $("#id_team").change(function () {
@@ -98,7 +96,7 @@
             $("#id_timeline").val("")
             $.ajax({
                 type: "POST",
-                url: "{% url 'sub-batch.team' %}",
+                url: "{% url 'sub-batch.get_timeline' %}",
                 headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
                 data: {
                     team: $("#id_team").val()

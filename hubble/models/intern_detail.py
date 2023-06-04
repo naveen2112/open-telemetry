@@ -3,9 +3,8 @@ from .user import User
 from core import db
 
 class InternDetail(db.SoftDeleteWithBaseModel):
+    sub_batch = models.ForeignKey('SubBatch', on_delete=models.CASCADE, related_name="sub_batch_data")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="intern_user")
-    primary_mentor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="intern_primary_mentor")
-    secondary_mentor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="intern_secondary_mentor")
     college = models.CharField(max_length=250)
     expected_completion = models.DateField(null=True)
     actual_completion = models.DateField(null=True)
@@ -15,8 +14,5 @@ class InternDetail(db.SoftDeleteWithBaseModel):
     class Meta:
         db_table = "intern_details"
 
-
     def __str__(self):
         return self.user.name
-    
-    

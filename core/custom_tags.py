@@ -38,7 +38,7 @@ def show_field_errors(field):
         for error in field.errors:
             error_message = strip_tags(error)
         return mark_safe(
-            '<span id="reason_error" class="ajax-error text-red-600">{}</span>'.format(
+            '<span id="reason-error" class="ajax-error text-red-600">{}</span>'.format(
                 error_message
             )
         )
@@ -50,7 +50,7 @@ def show_field_errors(field):
 def show_non_field_errors(error):
     if error:
         return mark_safe(
-            '<span id="reason_error" class="ajax-error text-red-600">{}</span>'.format(
+            '<span id="reason-error" class="ajax-error text-red-600">{}</span>'.format(
                 error
             )
         )

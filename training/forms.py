@@ -10,9 +10,10 @@ class TimelineForm(forms.ModelForm):
         it does.
         """
         if (
-            self.cleaned_data['is_active']
-            and  models.Timeline.objects.filter(team=self.cleaned_data['team'], is_active=True)
-            .exists()
+            self.cleaned_data["is_active"]
+            and models.Timeline.objects.filter(
+                team=self.cleaned_data["team"], is_active=True
+            ).exists()
         ):
             raise ValidationError("Team already has an active template.")
 
@@ -94,8 +95,6 @@ class BatchForm(forms.ModelForm):
 
 
 class SubBatchForm(forms.ModelForm):
-    # team = forms.ModelChoiceField(queryset=models.Team.objects, empty_label=None)
-
     class Meta:
         model = models.SubBatch
         fields = (
@@ -103,6 +102,8 @@ class SubBatchForm(forms.ModelForm):
             "team",
             "start_date",
             "timeline",
+            "primary_mentor",
+            "secondary_mentor",
         )
 
         widgets = {
@@ -121,7 +122,7 @@ class SubBatchForm(forms.ModelForm):
             "start_date": forms.DateInput(
                 attrs={
                     "class": "block border border-primary-dark-30 rounded-md mt-2.5 w-64 focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 bg-transparent w-250 start_date_input",
-                    "placeholder": "Select Start Date",
+                    "placeholder": "Start Date...",
                 }
             ),
             "timeline": forms.TextInput(
@@ -129,30 +130,16 @@ class SubBatchForm(forms.ModelForm):
                     "class": "w-full block border border-primary-dark-30 mt-2.5 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 bg-transparent w-250 timeline-input",
                 }
             ),
-        }
-
-
-class InternDetailForm(forms.ModelForm):
-    # primary_mentor = forms.ModelChoiceField(queryset=models.Users.objects, empty_label=None)
-    # secondary_mentor = forms.ModelChoiceField(queryset=models.Users.objects, empty_label=None)
-    class Meta:
-        model = models.InternDetail
-        fields = (
-            "primary_mentor",
-            "secondary_mentor",
-        )
-
-        widgets = {
             "primary_mentor": forms.Select(
                 attrs={
                     "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
-                    "placeholder": "Select Primary Mentor...",
+                    "placeholder": "Primary Mentor...",
                 }
             ),
             "secondary_mentor": forms.Select(
                 attrs={
                     "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
-                    "placeholder": "Select Secondary Mentor...",
+                    "placeholder": "Secondary Mentor...",
                 }
             ),
         }
@@ -167,7 +154,7 @@ class AddInternForm(forms.ModelForm):
             "user": forms.Select(
                 attrs={
                     "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
-                    "placeholder": "Select Trainie...",
+                    "placeholder": "Trainie...",
                 }
             ),
             "college": forms.TextInput(

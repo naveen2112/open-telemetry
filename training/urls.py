@@ -1,5 +1,4 @@
 from django.urls import path, include
-
 from training.views import induction_kit, timeline, timeline_task, batch, sub_batch
 from training import view
  
@@ -40,10 +39,10 @@ urlpatterns = [
     # Sub Batch
     path("sub-batch-datatable", sub_batch.SubBatchDataTable.as_view(), name="sub-batch-datatable"),
     path("batch/<int:pk>/sub-batch/create", sub_batch.create_sub_batch, name="sub-batch.create"),
-    path("sub-batch/get-team", sub_batch.get_team, name="sub-batch.team"),
+    path("sub-batch/get_timeline", sub_batch.get_timeline, name="sub-batch.get_timeline"),
     path("batch/<int:batch>/sub-batch/<int:pk>", sub_batch.update_sub_batch, name="sub-batch.edit"),
     path("sub-batch/<int:pk>", sub_batch.SubBatchDetail.as_view(), name="sub-batch.detail"),
     path("sub-batch/<int:pk>/delete", sub_batch.delete_sub_batch, name="sub-batch.delete"),
     path("sub-batch/trainies-datatable", sub_batch.SubBatchTrainiesDataTable.as_view(), name="sub-batch.trainies-datatable"),
-    path("sub-batch/trainies/create", sub_batch.add_trainies, name="trainies.create"),
+    path("sub-batch/trainies/add", sub_batch.add_trainies, name="trainies.add"),
 ]

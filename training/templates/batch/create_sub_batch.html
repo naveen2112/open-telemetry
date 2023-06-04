@@ -63,18 +63,18 @@
                 {{ form.timeline|show_field_errors }}
             </div>
             <div class="work-basic-dropdown form-field" id="primary-mentor-container">
-                {{ intern_detail.primary_mentor|show_label }}
+                {{ form.primary_mentor|show_label }}
                 <div class="relative mt-2.5">
-                    {{ intern_detail.primary_mentor }}
+                    {{ form.primary_mentor }}
                 </div>
-                {{ intern_detail.primary_mentor|show_field_errors }}
+                {{ form.primary_mentor|show_field_errors }}
             </div>
             <div class="work-basic-dropdown form-field">
-                {{ intern_detail.secondary_mentor|show_label }}
+                {{ form.secondary_mentor|show_label }}
                 <div class="relative">
-                    {{ intern_detail.secondary_mentor }}
+                    {{ form.secondary_mentor }}
                 </div>
-                {{ intern_detail.secondary_mentor|show_field_errors }}
+                {{ form.secondary_mentor|show_field_errors }}
             </div>
             <div class="col-span-2">
                 <div class="dark-black">Upload Excel</div>
@@ -96,8 +96,8 @@
                         Remove File
                     </div>
                 </div>
-                {% if intern_detail.errors %}
-                    {{ intern_detail.non_field_errors|show_non_field_errors }}
+                {% if sub_batch_form.errors %}
+                    {{ sub_batch_form.non_field_errors|show_non_field_errors }}
                 {% endif %}
 
                 <div class="mt-2">
@@ -129,7 +129,7 @@
             $("#id_timeline").val("");
             $.ajax({
                 type: "POST",
-                url: "{% url 'sub-batch.team' %}",
+                url: "{% url 'sub-batch.get_timeline' %}",
                 data: {
                     team: $("#id_team").val()
                 },
