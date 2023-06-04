@@ -15,7 +15,6 @@ class InternDetail(db.SoftDeleteWithBaseModel):
     class Meta:
         db_table = "intern_details"
 
-
     def __str__(self):
         return self.user.name
     

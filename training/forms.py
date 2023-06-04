@@ -94,7 +94,6 @@ class BatchForm(forms.ModelForm):
 
 
 class SubBatchForm(forms.ModelForm):
-    # team = forms.ModelChoiceField(queryset=models.Team.objects, empty_label=None)
 
     class Meta:
         model = models.SubBatch
@@ -121,7 +120,7 @@ class SubBatchForm(forms.ModelForm):
             "start_date": forms.DateInput(
                 attrs={
                     "class": "block border border-primary-dark-30 rounded-md mt-2.5 w-64 focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 bg-transparent w-250 start_date_input",
-                    "placeholder": "Select Start Date",
+                    "placeholder": "Start Date",
                 }
             ),
             "timeline": forms.TextInput(
@@ -133,8 +132,7 @@ class SubBatchForm(forms.ModelForm):
 
 
 class InternDetailForm(forms.ModelForm):
-    # primary_mentor = forms.ModelChoiceField(queryset=models.Users.objects, empty_label=None)
-    # secondary_mentor = forms.ModelChoiceField(queryset=models.Users.objects, empty_label=None)
+
     class Meta:
         model = models.InternDetail
         fields = (
@@ -146,13 +144,13 @@ class InternDetailForm(forms.ModelForm):
             "primary_mentor": forms.Select(
                 attrs={
                     "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
-                    "placeholder": "Select Primary Mentor...",
+                    "placeholder": "Primary Mentor...",
                 }
             ),
             "secondary_mentor": forms.Select(
                 attrs={
                     "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
-                    "placeholder": "Select Secondary Mentor...",
+                    "placeholder": "Secondary Mentor...",
                 }
             ),
         }
@@ -167,7 +165,7 @@ class AddInternForm(forms.ModelForm):
             "user": forms.Select(
                 attrs={
                     "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
-                    "placeholder": "Select Trainie...",
+                    "placeholder": "Trainee...",
                 }
             ),
             "college": forms.TextInput(

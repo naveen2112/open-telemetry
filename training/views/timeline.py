@@ -29,7 +29,7 @@ class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
     Timeline Template Datatable
     """
     model = Timeline
-    show_column_filters = False
+
     column_defs = [
         {"name": "id", "visible": False, "searchable": False},
         {"name": "name", "visible": True, "searchable": True},
@@ -38,6 +38,9 @@ class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
         {"name": "team", "visible": True, "searchable": True, "foreign_field": "team__name"},
         {"name": "action", "title": "Action", "visible": True, "searchable": False, "orderable": False, "className": "text-center"},
     ]
+
+    def get_initial_queryset(self, request=None):
+        return self.model.objects.all().annotate(Days=Sum(F("task_timeline__days")))
 
     def customize_row(self, row, obj):
         buttons = (
@@ -57,9 +60,7 @@ class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
                 return "<span class='bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm'>In Active</span>"
         return super().render_column(row, column)
 
-    def get_initial_queryset(self, request=None):
-        data = Timeline.objects.all().annotate(Days=Sum(F("task_timeline__days")))
-        return data
+
 
 
 @login_required()

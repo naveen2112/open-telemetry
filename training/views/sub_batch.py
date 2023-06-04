@@ -27,6 +27,7 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
     Sub-Batch Datatable
     """
     model = SubBatch
+
     column_defs = [
         {"name": "id", "visible": False, "searchable": False},
         {"name": "name", "visible": True, "searchable": False},
@@ -38,14 +39,15 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
     ]
 
     def get_initial_queryset(self, request=None):
-        return SubBatch.objects.filter(batch=request.POST.get("batch_id")).annotate(
+        return self.model.objects.filter(batch=request.POST.get("batch_id")).annotate(
             traines=Count("intern")
         )
 
     def customize_row(self, row, obj):
         buttons = (
             template_utils.show_button(reverse("sub-batch.detail", args=[obj.id]))
-            + template_utils.edit_button(f"/batch/{self.request.POST.get('batch_id')}/sub-batch/{obj.id}")
+            + template_utils.edit_button(reverse("sub-batch.edit", args = [self.request.POST.get('batch_id'), obj.id]))
+            # + template_utils.edit_button(f"/batch/{self.request.POST.get('batch_id')}/sub-batch/{obj.id}")
             + template_utils.delete_button("deleteSubBatch('" + reverse("sub-batch.delete", args=[obj.id]) + "')")
         )
         row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
@@ -66,16 +68,20 @@ def create_sub_batch(request, pk):
         # Checking the trainie is already added in the other batch or not
         if "users_list_file" in request.FILES:
             excel_file = request.FILES["users_list_file"]
-            df = pd.read_excel(excel_file, skiprows=1)
-            for index, row in df.iterrows():
-                data = list(row)
-                user = User.objects.get(id=data[0])
-                if InternDetail.objects.filter(id=user.id).exists():
-                    intern_detail.add_error(None, f"{user.name} is already added in the another sub-batch.")  # Adding the non-form-field error if the trainie is already is added in another branch
+            df = pd.read_excel(excel_file)
+            users = [i[0] for i in df[['user_id']].values]
+            print(InternDetail.objects.filter(user__in = users).exists()) #user_id or user, need to remove print
+            if InternDetail.objects.filter(user__in = users).exists(): #need to check
+                intern_detail.add_error(None, "some of the users are already added in another sub-batch.")  # Adding the non-form-field error if the trainie is already is added in another branch
+            # for index, row in df.iterrows():
+            #     data = list(row)
+            #     user = User.objects.get(id=data[0])
+            #     if InternDetail.objects.filter(id=user.id).exists():
+            #         intern_detail.add_error(None, f"{user.name} is already added in the another sub-batch.")  # Adding the non-form-field error if the trainie is already is added in another branch
         else:
-            intern_detail.add_error( None, "Please upload the file")  # Adding the non-field-error if the file was not uploaded while submission
+            intern_detail.add_error(None, "Please upload the file")  # Adding the non-field-error if the file was not uploaded while submission
 
-        if (sub_batch_form.is_valid() or intern_detail.is_valid()):  # Check if both the forms are valid or not
+        if (sub_batch_form.is_valid() and intern_detail.is_valid()):  # Check if both the forms are valid or not
             primary_mentor = request.POST.get("primary_mentor")
             secondary_mentor = request.POST.get("secondary_mentor")
             sub_batch = sub_batch_form.save(commit=False)
@@ -176,8 +182,7 @@ def create_sub_batch(request, pk):
                 sub_batch_intern.intern.add(
                     trainie_detail.id
                 )  # Adding the trainies to sub-batch
-
-            return redirect(f"/batch/{pk}")
+            return redirect(reverse('batch.detail', args=[pk]))
     context = {
         "form": sub_batch_form,
         "sub_batch_id": pk,
@@ -377,14 +382,14 @@ def update_sub_batch(request, batch, pk):
                 if sub_batch.start_date != sub_batch_1.start_date:
                     trainie.expected_completion = expected_date.date()
                 trainie.save()
-        return redirect(f"/batch/{batch}")
+        return redirect(reverse('batch.detail', args=[batch]))
 
     sub_batch = SubBatch.objects.get(id=pk)
     sub_batch_detail = sub_batch.intern.all().first()
     context = {
         "form": SubBatchForm(instance=SubBatch.objects.get(id=pk)),
         "mentor_form": InternDetailForm(),
-        "sub_batch": SubBatch.objects.get(id=pk),
+        "sub_batches": SubBatch.objects.get(id=pk),
         "intern_detail": InternDetailForm(),
         "sub_batch_detail": sub_batch_detail,
         "batch_id": batch,
@@ -418,6 +423,7 @@ class SubBatchTrainiesDataTable(LoginRequiredMixin, CustomDatatable):
     Sub-Batch-Trainies Datatable
     """
     model = SubBatch
+
     column_defs = [
         {"name": "pk", "visible": False, "searchable": False},
         {"name": "intern__user__name", "title": "User", "visible": True, "searchable": False},
@@ -428,16 +434,9 @@ class SubBatchTrainiesDataTable(LoginRequiredMixin, CustomDatatable):
         {"name": "action", "title": "Action", "visible": True, "searchable": False, "orderable": False, "className": "text-center"},
     ]
 
-    def customize_row(self, row, obj):
-        buttons = (template_utils.show_button(reverse("sub-batch.detail", args=[obj["intern__user_id"]])) 
-                   + template_utils.edit_button(f"/batch",))
-        row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
-        return
-
     def get_initial_queryset(self, request=None):
-        print(f'kbbjb {request.POST.get("sub_batch")}')
-        data = (
-            SubBatch.objects.filter(id=request.POST.get("sub_batch"))
+        return (
+            self.model.objects.filter(id=request.POST.get("sub_batch"))
             .prefetch_related("intern")
             .values(
                 "id",
@@ -447,13 +446,18 @@ class SubBatchTrainiesDataTable(LoginRequiredMixin, CustomDatatable):
                 "intern__secondary_mentor__name",
                 "intern__college",
             )
-            .annotate(action=F("intern__user__name"), pk=F("id"))
+            .annotate(action=F("intern__user__name"), pk=F("id")) #need to check, should work without action
         )
-        return data
+
+    def customize_row(self, row, obj):
+        buttons = (template_utils.show_button(reverse("sub-batch.detail", args=[obj["intern__user_id"]])) 
+                   + template_utils.edit_button(f"/batch",)) #correct url
+        row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        return
 
 
 @login_required()
-def add_trainies(request):
+def add_trainee(request):
     """
     Create Timeline Template
     """

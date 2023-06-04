@@ -63,12 +63,12 @@
     <div>
         <div class="flex justify-end items-center py-4">
             <a href="" class="text-dark-blue mr-4">Survey</a>
-            <a href="/batch/sub-batch/{{ object.id }}/timeline"
+            <a href=""
                 class="p-tb6 mr-4 text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal">Timeline</a>
             <button class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal"
                 onclick="openModal()">
                 <div class="inline mr-1"><span class="hbl hbl-plus text-2xl text-white"></span></div>
-                <span>Add Trainie</span>
+                <span>Add Trainee</span>
             </button>
 
             <div class="jquery-modal current hidden" id="modal">
@@ -92,7 +92,7 @@
                             <a class="cursor-pointer inline-block align-middle border border-grey px-8 py-2 rounded mr-6"
                                 onclick="closeModal('modal')">Close</a>
                             <a class="cursor-pointer inline-block align-middle text-white bg-dark-blue rounded inline-flex items-center rounded px-8 py-2 text-base font-normal"
-                                onclick="AddIntern()">Submit</a>
+                                onclick="addIntern()">Submit</a>
                         </div>
                     </form>
                 </div>
@@ -135,7 +135,7 @@
             document.getElementById(name).classList.add("hidden");
         }
 
-        function AddIntern() {
+        function addIntern() {
             $('.page-loader').show();
             $.ajax({
                 type: "POST",

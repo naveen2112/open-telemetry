@@ -27,12 +27,16 @@ class BatchDataTable(LoginRequiredMixin, CustomDatatable):
     Batch Datatable
     """
     model = Batch
+    
     column_defs = [
         {"name": "id", "visible": False, "searchable": False},
         {"name": "name", "visible": True, "searchable": False},
         {"name": "total_trainies", "title": "Total Trainies", "visible": True, "searchable": False},
         {"name": "action","title": "Action","visible": True,"searchable": False,"orderable": False,"className": "text-center"},
     ]
+
+    def get_initial_queryset(self, request=None):
+        return self.model.objects.annotate(total_trainies=Count(F("sub_batches__intern")))
 
     def customize_row(self, row, obj):
         buttons = (
@@ -50,10 +54,6 @@ class BatchDataTable(LoginRequiredMixin, CustomDatatable):
         row["total_trainies"] = f'<div class="flex items-center"><p class="mr-2">{obj.total_trainies}</p><div class="tooltip">ⓘ<span class="tooltiptext">{traines}</span></div></div>'
         # TODO : Need to update the info icon
         return
-
-    def get_initial_queryset(self, request=None):
-        data = Batch.objects.annotate(total_trainies=Count(F("sub_batches__intern")))
-        return data
 
 
 @login_required()
