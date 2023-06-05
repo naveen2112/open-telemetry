@@ -1,7 +1,6 @@
 from django.db import models
 from core import db
 from hubble.models import User, Team
-from django.core.exceptions import ValidationError
 
 
 class Timeline(db.SoftDeleteWithBaseModel):

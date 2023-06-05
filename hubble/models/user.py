@@ -1,7 +1,5 @@
 from django.contrib.auth.models import AbstractBaseUser
 from django.db import models
-from .team import Team
-from .designation import Designation
 from datetime import datetime
 from core import db
 
@@ -17,9 +15,9 @@ class User(AbstractBaseUser, db.SoftDeleteWithBaseModel):
     is_employed = models.BooleanField(blank=True, null=True)
     remember_token = models.CharField(max_length=100, blank=True, null=True)
     status = models.CharField(max_length=255)
-    team = models.ForeignKey(Team, models.CASCADE, blank=True, null=True)
+    team = models.ForeignKey("hubble.Team", models.CASCADE, blank=True, null=True)
     branch_id = models.BigIntegerField(blank=True, null=True)
-    designation = models.ForeignKey(Designation, models.CASCADE, blank=True, null=True)
+    designation = models.ForeignKey("hubble.Designation", models.CASCADE, blank=True, null=True)
     team_owner = models.BooleanField(blank=True, null=True)
     first_name = models.CharField(max_length=255, blank=True, null=True)
     last_name = models.CharField(max_length=255, blank=True, null=True)

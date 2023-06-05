@@ -1,6 +1,5 @@
 from django.db import models
 from hubble.models import User, ProjectResourcePosition
-from .project import Project
 from core import db
 
 
@@ -10,7 +9,7 @@ class ProjectResource(db.SoftDeleteWithBaseModel):
         User, models.CASCADE, blank=True, null=True, related_name="project_resource"
     )
     project = models.ForeignKey(
-        Project, models.CASCADE, blank=True, null=True, related_name="project_resources"
+        "hubble.Project", models.CASCADE, blank=True, null=True, related_name="project_resources"
     )
     reporting_person = models.ForeignKey(
         User, models.CASCADE, blank=True, null=True, related_name="resource_reporting_persons"
