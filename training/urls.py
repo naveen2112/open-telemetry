@@ -3,14 +3,17 @@ from training.views import induction_kit, timeline, timeline_task, batch, sub_ba
 from training import view
 from django.conf.urls import handler404, handler500
  
+from hubble import views as sso_view
+
 urlpatterns = [
     path("", include('hubble.urls')),
     path("", view.home, name="training.home"),
-    
+    path("hubble-sso-callback", sso_view.callback, name="callback"),
+
     # Induction kit
     path("induction-kit", induction_kit.InductionKit.as_view(), name="induction-kit"),
     path("induction-kit/<text>", induction_kit.induction_kit_detail, name="induction-kit.detail"),
-    
+
     # Timeline Template
     path("timeline-template", timeline.TimelineTemplate.as_view(), name="timeline-template"),
     path("timeline-datatable", timeline.TimelineTemplateDataTable.as_view(), name="timeline-template.datatable"),
