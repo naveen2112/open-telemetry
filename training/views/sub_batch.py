@@ -3,7 +3,7 @@ import datetime
 import pandas as pd
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count, F
+from django.db.models import Count, F, Q
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -36,12 +36,12 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
     ]
 
     def get_initial_queryset(self, request=None):
-        return self.model.objects.filter(batch=request.POST.get("batch_id")).annotate(trainee_count=Count("intern_sub_batch_details")) #TODO:what if the intern was deleted?
+        return self.model.objects.filter(batch=request.POST.get("batch_id")).annotate(trainee_count=Count("intern_sub_batch_details", filter=Q(intern_sub_batch_details__deleted_at__isnull= True))) 
 
     def customize_row(self, row, obj):
         buttons = (
             template_utils.show_button(reverse("sub-batch.detail", args=[obj.id]))
-            + template_utils.edit_button(reverse("sub-batch.edit", args=[self.request.POST.get("batch_id"), obj.id]))
+            + template_utils.edit_button_new_page(reverse("sub-batch.edit", args=[obj.id]))
             + template_utils.delete_button("deleteSubBatch('" + reverse("sub-batch.delete", args=[obj.id]) + "')")
         )
         row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
@@ -52,148 +52,94 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
 holidays = Holiday.objects.values_list("date_of_holiday")
 timeline_task_end_date = None
 
+def calculate_duration(holidays, start_date, start_time, end_time, break_time, break_end_time, duration, task):
+    task_start_date = None
+    task_end_date = None
+    while duration != datetime.timedelta(0):
+        temp_duration = datetime.timedelta(hours=4)
+        end_datetime = (
+            datetime.datetime.combine(start_date, start_time) + temp_duration
+        )
+        start_datetime = datetime.datetime.combine(start_date, start_time)
 
-def create_sub_batch_timeline_task(sub_batch, user):
+        # While the end date falls on a Sunday or holiday then it will increament the date 1
+        while (
+            end_datetime.date().weekday() == 6
+        ) or end_datetime.date() in holidays:
+            end_datetime += datetime.timedelta(days=1)
+
+        total_start_hours = (duration.days * 24) + (
+            duration.seconds / 3600
+        )  # Calculating the hours required to complete the task
+
+        # Check if total hours and hours required are the same
+        if total_start_hours == task.days * 8:
+            # While the end date falls on a Sunday or holiday then it will increament the date 1
+            while (
+                start_datetime.date().weekday() == 6
+            ) or start_datetime.date() in holidays: #need to check
+                start_datetime += datetime.timedelta(days=1)
+            task_start_date = start_datetime.date()
+
+        duration = duration - temp_duration
+        total_hours = (duration.days * 24) + (
+            duration.seconds / 3600
+        )  # Calculating the remaining hours
+        if total_hours == 0:
+            task_end_date = end_datetime.date()
+
+        # Check if the end_datetime.time() is equal to day end time
+        if end_datetime.time() == end_time:
+            end_datetime += datetime.timedelta(days=1)
+
+        start_date = end_datetime
+        start_time = end_datetime.time()
+
+        # Check the end_datetime.time() is equal to break time
+        # Exclide the 1hr breaktime
+        if end_datetime.time() == break_time:
+            start_time = break_end_time
+
+        if end_datetime.time() == end_time:
+            start_time = datetime.time(hour=9, minute=0)
+
+    return ([task_start_date, task_end_date, start_date])
+
+
+
+
+def create_and_update_sub_batch(sub_batch, user=None, is_create=True):
+    holidays = Holiday.objects.values_list("date_of_holiday")
     start_date = datetime.datetime.strptime(str(sub_batch.start_date), "%Y-%m-%d")
     start_time = datetime.time(hour=9, minute=0)  # Day start time
     end_time = datetime.time(hour=18, minute=0)  # Day end time
     break_time = datetime.time(hour=13, minute=0)  # Day break time
     break_end_time = datetime.time(hour=14, minute=0)  # Day break end time
     order = 0
-    for task in TimelineTask.objects.filter(timeline=sub_batch.timeline.id):
-        task_start_date = None
-        task_end_date = None
-
-        duration = datetime.timedelta(hours=task.days * 8)  # Working hours for a day
-
-        while duration != datetime.timedelta(0):
-            temp_duration = datetime.timedelta(hours=4)
-            end_datetime = (
-                datetime.datetime.combine(start_date, start_time) + temp_duration
+    if is_create:
+        for task in TimelineTask.objects.filter(timeline=sub_batch.timeline.id):
+            duration = datetime.timedelta(hours=task.days * 8)  # Working hours for a day
+            values = calculate_duration(holidays, start_date, start_time, end_time, break_time, break_end_time, duration, task)
+    
+            order += 1
+            SubBatchTaskTimeline.objects.create(
+                name=task.name,
+                days=task.days,
+                sub_batch=sub_batch,
+                present_type=task.present_type,
+                task_type=task.task_type,
+                start_date=values[0],
+                end_date=values[1],
+                created_by=user,
+                order=order,
             )
-            start_datetime = datetime.datetime.combine(start_date, start_time)
+            start_date = values[2]
 
-            # While the end date falls on a Sunday or holiday then it will increament the date 1
-            while (
-                end_datetime.date().weekday() == 6
-            ) or end_datetime.date() in holidays:
-                end_datetime += datetime.timedelta(days=1)
-
-            total_start_hours = (duration.days * 24) + (
-                duration.seconds / 3600
-            )  # Calculating the hours required to complete the task
-
-            # Check if total hours and hours required are the same
-            if total_start_hours == task.days * 8:
-                # While the end date falls on a Sunday or holiday then it will increament the date 1
-                while (
-                    start_datetime.date().weekday() == 6
-                ) or end_datetime.date() in holidays:
-                    start_datetime += datetime.timedelta(days=1)
-                task_start_date = start_datetime.date()
-
-            duration = duration - temp_duration
-            total_hours = (duration.days * 24) + (
-                duration.seconds / 3600
-            )  # Calculating the remaining hours
-
-            if total_hours == 0:
-                task_end_date = end_datetime.date()
-
-            # Check if the end_datetime.time() is equal to day end time
-            if end_datetime.time() == end_time:
-                end_datetime += datetime.timedelta(days=1)
-
-            start_date = end_datetime
-            start_time = end_datetime.time()
-
-            # Check the end_datetime.time() is equal to break time
-            # Exclide the 1hr breaktime
-            if end_datetime.time() == break_time:
-                start_time = break_end_time
-
-            if end_datetime.time() == end_time:
-                start_time = datetime.time(hour=9, minute=0)
-
-        order += 1
-        SubBatchTaskTimeline.objects.create(
-            name=task.name,
-            days=task.days,
-            sub_batch=sub_batch,
-            present_type=task.present_type,
-            task_type=task.task_type,
-            start_date=task_start_date,
-            end_date=task_end_date,
-            created_by=user,
-            order=order,
-        )
-
-    global timeline_task_end_date
-    timeline_task_end_date = task_end_date
-
-
-def update_sub_batch_task(sub_batch):
-    start_date = datetime.datetime.strptime(str(sub_batch.start_date), "%Y-%m-%d")
-    start_time = datetime.time(hour=9, minute=0)  # Day start time
-    end_time = datetime.time(hour=18, minute=0)  # Day end time
-    break_time = datetime.time(hour=13, minute=0)  # Day break time
-    break_end_time = datetime.time(hour=14, minute=0)  # Da break end time
-
-    for task in SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch):
-        task_start_date = None
-        task_end_date = None
-        duration = datetime.timedelta(hours=task.days * 8)  # Working hours for a day
-
-        while duration != datetime.timedelta(0):
-            temp_duration = datetime.timedelta(hours=4)
-            end_datetime = (
-                datetime.datetime.combine(start_date, start_time) + temp_duration
-            )
-            start_datetime = datetime.datetime.combine(start_date, start_time)
-
-            # While the end date falls on a Sunday or holiday then it will increament the date 1
-            while (
-                end_datetime.date().weekday() == 6
-            ) or end_datetime.date() in holidays:
-                end_datetime += datetime.timedelta(days=1)
-
-            total_start_hours = (duration.days * 24) + (
-                duration.seconds / 3600
-            )  # Calculating the hours required to complete the task
-
-            # Check if total hours and hours required are the same
-            if total_start_hours == task.days * 8:
-                # While the end date falls on a Sunday or holiday then it will increament the date 1
-                while (
-                    start_datetime.date().weekday() == 6
-                ) or end_datetime.date() in holidays:
-                    start_datetime += datetime.timedelta(days=1)
-                task_start_date = start_datetime.date()
-
-            duration = duration - temp_duration
-            total_hours = (duration.days * 24) + (
-                duration.seconds / 3600
-            )  # Calculating the remaining hours
-
-            if total_hours == 0:
-                task_end_date = end_datetime.date()
-
-            # Check if the end_datetime.time() is equal to day end time
-            if end_datetime.time() == end_time:
-                end_datetime += datetime.timedelta(days=1)
-
-            start_date = end_datetime
-            start_time = end_datetime.time()
-
-            # Check the end_datetime.time() is equal to break time
-            # Exclide the 1hr breaktime
-            if end_datetime.time() == break_time:
-                start_time = break_end_time
-
-            if end_datetime.time() == end_time:
-                start_time = datetime.time(hour=9, minute=0)
-    global timeline_task_end_date
-    timeline_task_end_date = task_end_date
+    else:
+        for task in SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch):
+            duration = datetime.timedelta(hours=task.days * 8)
+            values = calculate_duration(holidays, start_date, start_time, end_time, break_time, break_end_time, duration, task)
+            return values[1]
 
 
 @login_required()
@@ -219,8 +165,7 @@ def create_sub_batch(request, pk):
             sub_batch.batch = Batch.objects.get(id=pk)
             sub_batch.created_by = request.user
             sub_batch.save()
-
-            create_sub_batch_timeline_task(sub_batch, request.user)
+            create_and_update_sub_batch(sub_batch = sub_batch, user = request.user)
             for row in range(len(df)): # Iterating over pandas dataframe
                 InternDetail.objects.create(
                     sub_batch=sub_batch,
@@ -260,32 +205,33 @@ def get_timeline(request):
 
 
 @login_required()
-def update_sub_batch(request, batch, pk):
+def update_sub_batch(request, pk):
     """
     Update Sub-batch View
     """
     sub_batch_data = SubBatch.objects.get(id=pk)
-    batch_start_date = sub_batch_data.start_date
+    batch_start_date = sub_batch_data.start_date #do we need this
     if request.method == "POST":
         sub_batch_form = SubBatchForm(request.POST, instance=sub_batch_data)
         if sub_batch_form.is_valid():
+            # validation start date
+
             sub_batch = sub_batch_form.save()
 
             if sub_batch.timeline.id != sub_batch_data.timeline.id:
-                create_sub_batch_timeline_task(sub_batch, request.user)
+                create_and_update_sub_batch(sub_batch, request.user) #TODO need to delete old one before new one
             else:
-                update_sub_batch_task(sub_batch)
+                timeline_task_end_date = create_and_update_sub_batch(sub_batch, is_create=False)
 
             for trainee in InternDetail.objects.filter(sub_batch=sub_batch):
                 if sub_batch.start_date != sub_batch_data.start_date:
                     trainee.expected_completion = timeline_task_end_date
                     trainee.save()
-            return redirect(reverse("batch.detail", args=[batch]))
+            return redirect(reverse("batch.detail", args=[sub_batch.batch.id]))
 
-    sub_batch = SubBatch.objects.get(id=pk)
     context = {
-        "form": SubBatchForm(instance=SubBatch.objects.get(id=pk)),
-        "sub_batch": SubBatch.objects.get(id=pk),
+        "form": SubBatchForm(instance=sub_batch_data),
+        "sub_batch": sub_batch_data,
     }
     return render(request, "sub_batch/update_sub_batch.html", context)
 
@@ -332,7 +278,10 @@ class SubBatchTrainiesDataTable(LoginRequiredMixin, CustomDatatable):
         return self.model.objects.filter(sub_batch__id=request.POST.get("sub_batch"))
 
     def customize_row(self, row, obj):
-        buttons = template_utils.show_button(reverse("sub-batch.detail", args=[obj.user.id])) + template_utils.edit_button(reverse("batch"))
+        buttons = (
+            template_utils.show_button(reverse("sub-batch.detail", args=[obj.user.id])) + 
+            template_utils.edit_button_new_page(reverse("batch")) #need to change in next PR
+        )
         row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         return
 
@@ -343,7 +292,9 @@ def add_trainee(request):
     Add tranie to sub batch
     """
     if request.method == "POST":
-        form = AddInternForm(request.POST)
+        modify_data = request.POST.copy()
+        modify_data["user"] = modify_data["user_id"]
+        form = AddInternForm(modify_data)
         if request.POST.get("user_id"):
             if InternDetail.objects.filter(user=request.POST.get("user_id")).exists():
                 form.add_error(
@@ -351,10 +302,10 @@ def add_trainee(request):
                 )  # Adding form error if the trainies is already added in another
         if form.is_valid():  # Check if form is valid or not
             sub_batch = SubBatch.objects.get(id=request.POST.get("sub_batch_id"))
-            date = SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch).last()
+            timeline_data = SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch).last()
             trainie = form.save(commit=False)
             trainie.sub_batch = sub_batch
-            trainie.expected_completion = date.start_date
+            trainie.expected_completion = timeline_data.end_date
             trainie.created_by = request.user
             trainie.save()
             return JsonResponse({"status": "success"})
