@@ -103,7 +103,7 @@ def calculate_duration(holidays, start_date, start_time, end_time, break_time, b
     return ([task_start_date, task_end_date, start_date, start_time])
 
 
-def create_and_update_sub_batch(sub_batch, user=None, is_create=True):
+def create_and_update_sub_batch(sub_batch, user=None, is_create=True, update_date=None):
     holidays = Holiday.objects.values_list("date_of_holiday")
     start_date = datetime.datetime.strptime(str(sub_batch.start_date), "%Y-%m-%d")
     start_time = datetime.time(hour=9, minute=0)  # Day start time
@@ -128,12 +128,16 @@ def create_and_update_sub_batch(sub_batch, user=None, is_create=True):
                 created_by=user,
                 order=order,
             )
-            start_date = datetime.datetime.combine(values[2] + values[3])
+            start_date = datetime.datetime.combine(values[2], values[3])
     else:
+        start_date = update_date
         for task in SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch):
             duration = datetime.timedelta(hours=task.days * 8)
             values = calculate_duration(holidays, start_date, start_time, end_time, break_time, break_end_time, duration, task)
-            start_date = datetime.datetime.combine(values[2] + values[3])
+            start_date = datetime.datetime.combine(values[2], values[3])
+            task.start_date = values[0]
+            task.end_date = values[1]
+            task.save()
 
     return values[1]
 
@@ -211,12 +215,12 @@ def update_sub_batch(request, pk):
         if sub_batch_form.is_valid():
             # validation start date
 
-            sub_batch = sub_batch_form.save()
+            sub_batch_form1 = sub_batch_form.save()
 
             if sub_batch.timeline.id != sub_batch.timeline.id:
                 create_and_update_sub_batch(sub_batch, request.user) #TODO need to delete old one before new one
             else:
-                timeline_task_end_date = create_and_update_sub_batch(sub_batch, is_create=False)
+                timeline_task_end_date = create_and_update_sub_batch(sub_batch, is_create=False, update_date = sub_batch_form1.start_date)
 
             for trainee in InternDetail.objects.filter(sub_batch=sub_batch):
                 if sub_batch.start_date != sub_batch.start_date:
@@ -243,8 +247,8 @@ def delete_sub_batch(request, pk):
     """
     try:
         sub_batch = get_object_or_404(SubBatch, id=pk)
-        sub_batch.intern_sub_batch_details.delete()
-        sub_batch.task_timelines.delete()
+        sub_batch.intern_sub_batch_details.all().delete()
+        sub_batch.task_timelines.all().delete()
         sub_batch.delete()
         return JsonResponse({"message": "Sub-Batch deleted succcessfully"})
     except Exception as e:
