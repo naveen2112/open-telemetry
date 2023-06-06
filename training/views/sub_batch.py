@@ -49,9 +49,6 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
         return
 
 
-holidays = Holiday.objects.values_list("date_of_holiday")
-timeline_task_end_date = None
-
 def calculate_duration(holidays, start_date, start_time, end_time, break_time, break_end_time, duration, task):
     task_start_date = None
     task_end_date = None
@@ -103,9 +100,7 @@ def calculate_duration(holidays, start_date, start_time, end_time, break_time, b
         if end_datetime.time() == end_time:
             start_time = datetime.time(hour=9, minute=0)
 
-    return ([task_start_date, task_end_date, start_date])
-
-
+    return ([task_start_date, task_end_date, start_date, start_time])
 
 
 def create_and_update_sub_batch(sub_batch, user=None, is_create=True):
@@ -133,13 +128,14 @@ def create_and_update_sub_batch(sub_batch, user=None, is_create=True):
                 created_by=user,
                 order=order,
             )
-            start_date = values[2]
-
+            start_date = datetime.datetime.combine(values[2] + values[3])
     else:
         for task in SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch):
             duration = datetime.timedelta(hours=task.days * 8)
             values = calculate_duration(holidays, start_date, start_time, end_time, break_time, break_end_time, duration, task)
-            return values[1]
+            start_date = datetime.datetime.combine(values[2] + values[3])
+
+    return values[1]
 
 
 @login_required()
@@ -165,7 +161,7 @@ def create_sub_batch(request, pk):
             sub_batch.batch = Batch.objects.get(id=pk)
             sub_batch.created_by = request.user
             sub_batch.save()
-            create_and_update_sub_batch(sub_batch = sub_batch, user = request.user)
+            timeline_task_end_date = create_and_update_sub_batch(sub_batch = sub_batch, user = request.user)
             for row in range(len(df)): # Iterating over pandas dataframe
                 InternDetail.objects.create(
                     sub_batch=sub_batch,
@@ -209,29 +205,29 @@ def update_sub_batch(request, pk):
     """
     Update Sub-batch View
     """
-    sub_batch_data = SubBatch.objects.get(id=pk)
-    batch_start_date = sub_batch_data.start_date #do we need this
+    sub_batch = SubBatch.objects.get(id=pk)
     if request.method == "POST":
-        sub_batch_form = SubBatchForm(request.POST, instance=sub_batch_data)
+        sub_batch_form = SubBatchForm(request.POST, instance=sub_batch)
         if sub_batch_form.is_valid():
             # validation start date
 
             sub_batch = sub_batch_form.save()
 
-            if sub_batch.timeline.id != sub_batch_data.timeline.id:
+            if sub_batch.timeline.id != sub_batch.timeline.id:
                 create_and_update_sub_batch(sub_batch, request.user) #TODO need to delete old one before new one
             else:
                 timeline_task_end_date = create_and_update_sub_batch(sub_batch, is_create=False)
 
             for trainee in InternDetail.objects.filter(sub_batch=sub_batch):
-                if sub_batch.start_date != sub_batch_data.start_date:
+                if sub_batch.start_date != sub_batch.start_date:
                     trainee.expected_completion = timeline_task_end_date
                     trainee.save()
             return redirect(reverse("batch.detail", args=[sub_batch.batch.id]))
 
+    sub_batch = SubBatch.objects.get(id=pk)
     context = {
-        "form": SubBatchForm(instance=sub_batch_data),
-        "sub_batch": sub_batch_data,
+        "form": SubBatchForm(instance=sub_batch),
+        "sub_batch": sub_batch,
     }
     return render(request, "sub_batch/update_sub_batch.html", context)
 
@@ -247,6 +243,8 @@ def delete_sub_batch(request, pk):
     """
     try:
         sub_batch = get_object_or_404(SubBatch, id=pk)
+        sub_batch.intern_sub_batch_details.delete()
+        sub_batch.task_timelines.delete()
         sub_batch.delete()
         return JsonResponse({"message": "Sub-Batch deleted succcessfully"})
     except Exception as e:

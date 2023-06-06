@@ -147,7 +147,7 @@ class SubBatchForm(forms.ModelForm):
 
 class AddInternForm(forms.ModelForm):
     user = forms.ChoiceField(
-                choices = tuple(models.User.objects.exclude(intern_details__isnull = False).distinct('id').values_list('id', 'name')),
+                choices = tuple(models.User.objects.exclude(intern_details__isnull=False).distinct('id').values_list('id', 'name')),
                 widget = forms.Select(
                     attrs = {
                         "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",

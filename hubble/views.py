@@ -80,4 +80,4 @@ def health_check(request):
     return JsonResponse(data="", status=200, safe=False)
 
 def error_404(request, exception=None):
-    return render(request, "layouts/error_handler.html")
+    return render(request, "errors/404.html")
