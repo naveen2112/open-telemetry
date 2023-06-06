@@ -1,17 +1,18 @@
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Count, F, Q
 from django.forms.models import model_to_dict
-from django.http import JsonResponse, QueryDict
-from django.shortcuts import get_object_or_404, render
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from django.views.decorators.http import require_http_methods
+from django.views.generic import DetailView, FormView
+
 from core import template_utils
 from core.utils import CustomDatatable
-from hubble.models.batch import Batch
-from hubble.models.user import User
+from hubble.models import Batch
 from training.forms import BatchForm
-from django.db.models import F, Count
-from django.views.decorators.http import require_http_methods
-from django.views.generic import TemplateView, FormView, DetailView
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required
+
 
 class BatchList(LoginRequiredMixin, FormView):
     """
@@ -26,11 +27,16 @@ class BatchDataTable(LoginRequiredMixin, CustomDatatable):
     Batch Datatable
     """
     model = Batch
+    
     column_defs = [
         {"name": "id", "visible": False, "searchable": False},
         {"name": "name", "visible": True, "searchable": False},
-        {"name": "action","title": "Action", "visible": True, "searchable": False, "orderable": False, "className": "text-center"},
+        {"name": "total_trainee", "title": "No. of Trainee", "visible": True, "searchable": False},
+        {"name": "action", "title": "Action", "visible": True, "searchable": False, "orderable": False, "className": "text-center"},
     ]
+
+    def get_initial_queryset(self, request=None):
+        return self.model.objects.all().annotate(total_trainee=Count("sub_batches__intern_sub_batch_details", filter=Q(sub_batches__intern_sub_batch_details__deleted_at__isnull=True)))
 
     def customize_row(self, row, obj):
         buttons = (
@@ -119,4 +125,4 @@ def delete_batch(request, pk):
 
 class BatchDetails(LoginRequiredMixin, DetailView):
     model = Batch
-    template_name = "batch/sub_batch.html"
+    template_name = "sub_batch/sub_batch.html"

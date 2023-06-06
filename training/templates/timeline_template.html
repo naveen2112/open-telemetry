@@ -74,39 +74,9 @@
 
 {% block script %}
     <script>
-        $(document).ready(function () {
-            var selectTemplate = `
-                        <div id="drop-btn" class="cus-dropdown-icon block border border-primary-dark-30 rounded-md mt-2.5 w-full focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 py-1 px-2">
-                            <div class="cursor-pointer text-truncate w-11/12 dropdown_selected_value" id="show-value">
-                            </div>
-                        </div>`;
+        $(document).ready(function() {
 
-            $('.work-basic-dropdown').each(function () {
-                if ($(this).find('.multi-select').length == 0) {
-                    var elemId = $(this).find("select").attr("id");
-                    $("#" + elemId).customSearch({
-                        closeOnCheck: true,
-                        clickBtnTemplate: selectTemplate,
-                        listStyle: "p-3",
-                        hideClearIcon: true,
-                        targetId: "#show-value",
-                        popupStyles: "z-20 absolute rounded-md bg-white text-dark-black block shadow-md w-64 top-10 left-0 max-h-96 overflow-hidden",
-                        onItemCheck: function (values) {
-                            if (elemId == "work_schedule") {
-                                hideShowDays();
-                            }
-                        },
-                        onSelectOpen: function () {
-                            $('.content-page').css("overflow-y", "hidden");
-                        },
-                        onSelectClose: function () {
-                            $('.content-page').css("overflow-y", "auto");
-                        }
-                    })
-                }
-            })
-
-            $(document).ready(function () {
+            $(document).ready(function() {
                 AjaxDatatableViewUtils.initialize_table(
                     $('#timeline-table'),
                     "{% url 'timeline-template.datatable' %}",
@@ -119,7 +89,7 @@
                     },
                 );
             });
-            $("#search_project").on('input', function () {
+            $("#search_project").on('input', function() {
                 var searchvalue = $(this).val();
                 var table = $("#timeline-table").DataTable();
                 table.search(searchvalue).draw();
@@ -137,11 +107,6 @@
             $('#form_heading').html("Create Timeline");
         }
 
-        function closeModal(name) {
-            document.getElementById(name).classList.remove("blocker");
-            document.getElementById(name).classList.add("hidden");
-        }
-
         function createTimeline() {
             $('.page-loader').show();
             $.ajax({
@@ -153,17 +118,17 @@
                     team: $('#id_team').val(),
                     is_active: $('.checkbox_active').is(":checked"),
                 },
-                success: function (data) {
+                success: function(data) {
                     $('.form_errors').remove();
                     $('.page-loader').hide();
                     if (data.status === 'success') {
-                        $('#timeline-table').DataTable().ajax.reload()
+                        $('#timeline-table').DataTable().ajax.reload();
                         closeModal('modal');
                     } else {
                         renderFormError(data);
                     }
                 },
-                error: function () {
+                error: function() {
                     $('.page-loader').hide();
                     alert("Something went wrong"); 
                 },
@@ -177,7 +142,7 @@
             $.ajax({
                 type: "GET",
                 url: url,
-                success: function (data) {
+                success: function(data) {
                     $('.page-loader').hide();
                     $('#form_heading').html("Update Timeline");
                     $('#id_name').val(data.timeline.name);
@@ -204,14 +169,14 @@
             $('.page-loader').show();
             $.ajax({
                 type: "POST",
-                url: "timeline-template/"+ $("#timeline_id").val() +"/edit",
+                url: "timeline-template/"+ $("#timeline_id").val() +"/edit", //TODO
                 data: {
                     name: $('#id_name').val(),
                     team: $("#id_team").val(),
                     is_active: $('#id_is_active').is(":checked"),
                 },
-                success: function (data) {
-                    $('.form_errors').remove()
+                success: function(data) {
+                    $('.form_errors').remove();
                     $('.page-loader').hide();
                     if (data.status === 'success') {
                         $('#timeline-table').DataTable().ajax.reload();
@@ -220,7 +185,7 @@
                         renderFormError(data);
                     }
                 },
-                error: function () {
+                error: function() {
                     $('.page-loader').hide();
                     alert("Something went wrong");
                 },
@@ -234,11 +199,11 @@
                 $.ajax({
                     type: "DELETE",
                     url: url,
-                    success: function (data) {
+                    success: function(data) {
                         $('.page-loader').hide();
                         $('#timeline-table').DataTable().ajax.reload();
                     },
-                    error: function () {
+                    error: function() {
                         $('.page-loader').hide();
                         alert("Something went wrong");
                     },
@@ -253,12 +218,12 @@
             $.ajax({
                 type: "GET",
                 url: url,
-                success: function (data) {
+                success: function(data) {
                     $('.page-loader').hide();
                     $('#id_name').val('Copy_' + data.timeline.name);
                     $('#timeline_id').val(data.timeline.id);
                 },
-                error: function () {
+                error: function() {
                     $('.page-loader').hide();
                     alert("Something went wrong");
                 },

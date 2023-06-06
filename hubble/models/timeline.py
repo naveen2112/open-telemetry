@@ -1,8 +1,7 @@
 from django.db import models
 from core import db
-from .team import Team
-from .user import User
-from django.core.exceptions import ValidationError
+from hubble.models import User, Team
+
 
 class Timeline(db.SoftDeleteWithBaseModel):
     name = models.CharField(max_length=255)

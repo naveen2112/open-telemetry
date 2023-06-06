@@ -51,13 +51,13 @@
 
 {% block script %}
     <script>
-        $(document).ready(function () {
-            $(document).ready(function () {
+        $(document).ready(function() {
+            $(document).ready(function() {
                 AjaxDatatableViewUtils.initialize_table(
                     $('#batch-table'),
                     "{% url 'batch.datatable' %}",
                     {
-                        serverSide: true,
+                        serverSide: true, 
                         processing: true,
                         autoWidth: false,
                         scrollX: false,
@@ -73,11 +73,6 @@
             $('#submit-btn').attr("onclick", "createBatch()");
         }
 
-        function closeModal(name) {
-            document.getElementById(name).classList.remove("blocker");
-            document.getElementById(name).classList.add("hidden");
-        }
-
         function createBatch() {
             $('.page-loader').show();
             $.ajax({
@@ -86,7 +81,7 @@
                 data: {
                     name: $('#id_name').val(),
                 },
-                success: function (data) {
+                success: function(data) {
                     $('.page-loader').hide();
                     if (data.status === 'success') {
                         $('#batch-table').DataTable().ajax.reload();
@@ -95,7 +90,7 @@
                         renderFormError(data);
                     }
                 },
-                error: function () {
+                error: function() {
                     $('.page-loader').hide();
                     alert("Something went wrong");
                 },
@@ -107,13 +102,13 @@
             $.ajax({
                 type: "GET",
                 url: url,
-                success: function (data) {
+                success: function(data) {
                     $('.page-loader').hide();
                     $('#id_name').val(data.batch.name);
                     $('#batch_id').val(data.batch.id);
-                    $('#submit-btn').attr("onclick", "updateBatch("+ data.batch.id +")");
+                    $('#submit-btn').attr("onclick", "updateBatch(" + data.batch.id + ")");
                 },
-                error: function (jqXHR, textStatus, errorThrown) {
+                error: function(jqXHR, textStatus, errorThrown) {
                     alert(jqXHR.responseJSON.message);
                     $('.page-loader').hide();
                 },
@@ -126,11 +121,11 @@
             $('.page-loader').show();
             $.ajax({
                 type: "POST",
-                url: "batch/"+ id +"/edit",
+                url: "batch/"+ id +"/edit", //TODO
                 data: {
                     name: $('#id_name').val(),
                 },
-                success: function (data) {
+                success: function(data) {
                     $('.page-loader').hide();
                     if (data.status === 'success') {
                         $('#batch-table').DataTable().ajax.reload();
@@ -139,7 +134,7 @@
                         renderFormError(data);
                     }
                 },
-                error: function () {
+                error: function() {
                     $('.page-loader').hide();
                     alert("Something went wrong");
                 },
@@ -153,11 +148,11 @@
                 $.ajax({
                     type: "DELETE",
                     url: url,
-                    success: function (data) {
+                    success: function(data) {
                         $('.page-loader').hide();
                         $('#batch-table').DataTable().ajax.reload();
                     },
-                    error: function (jqXHR, textStatus, errorThrown) {
+                    error: function(jqXHR, textStatus, errorThrown) {
                         alert(jqXHR.responseJSON.message);
                         $('.page-loader').hide();
                     },

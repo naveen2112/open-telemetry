@@ -6,3 +6,5 @@ urlpatterns = [
     path("signin", views.signin, name="signin"),
     path("signout", views.signout, name="signout"),
 ]
+
+handler404 = views.error_404

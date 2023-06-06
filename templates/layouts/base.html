@@ -120,6 +120,39 @@
                 headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
             });
 
+            
+            $(document).ready(function() {
+                var selectTemplate = `
+                        <div id="drop-btn" class="cus-dropdown-icon block border border-primary-dark-30 rounded-md mt-2.5 w-full focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 py-1 px-2">
+                            <div class="cursor-pointer text-truncate w-11/12 dropdown_selected_value" id="show-value">
+                            </div>
+                        </div>`;
+
+                $('.work-basic-dropdown').each(function() {
+                    if ($(this).find('.multi-select').length == 0) {
+                        var elemId = $(this).find("select").attr("id");
+                        $("#" + elemId).customSearch({
+                            closeOnCheck: true,
+                            clickBtnTemplate: selectTemplate,
+                            listStyle: "p-3",
+                            hideClearIcon: true,
+                            targetId: "#show-value",
+                            popupStyles: "z-20 absolute rounded-md bg-white text-dark-black block shadow-md w-64 top-10 left-0 max-h-96 overflow-hidden",
+                            onItemCheck: function (values) {
+                                if (elemId == "work_schedule") {
+                                    hideShowDays();
+                                }
+                            },
+                            onSelectOpen: function () {
+                                $('.content-page').css("overflow-y", "hidden");
+                            },
+                            onSelectClose: function () {
+                                $('.content-page').css("overflow-y", "auto");
+                            }
+                        })
+                    }
+                })
+            })
             function renderFormError(data) {
                 if (Object.keys(JSON.parse(data.non_field_errors)).length > 0) {
                     $('#non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + JSON.parse(data.non_field_errors)[0]['message'] + '</span>')
@@ -127,6 +160,10 @@
                 for (field in JSON.parse(data.field_errors)) {
                     $('#' + field + '_group').append('<span id="reason_error" class="form_errors ajax-error text-red-600">' + JSON.parse(data.field_errors)[field][0].message + '</span>');
                 }
+            }
+            function closeModal(name) {
+                document.getElementById(name).classList.remove("blocker");
+                document.getElementById(name).classList.add("hidden");
             }
         </script>
 

@@ -3,6 +3,7 @@ from hubble.models import User, Team
 from . import Project, Module, Task
 from django.utils import timezone
 from django.db.models.functions import Coalesce, Round
+from core import db
 from django.db.models import (
     F,
     Q,
@@ -172,7 +173,7 @@ class TimesheetManager(models.Manager):
         return self.get_queryset.kpi_fields()
 
 
-class TimesheetEntry(models.Model):
+class TimesheetEntry(db.BaseModel):
     id = models.BigAutoField(primary_key=True)
     user = models.ForeignKey(
         User, models.CASCADE, related_name="timesheet_entries", db_column="user_id"
@@ -192,8 +193,6 @@ class TimesheetEntry(models.Model):
     authorized_hours = models.FloatField()
     billed_hours = models.FloatField()
     admin_comments = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(blank=True, null=True)
-    updated_at = models.DateTimeField(blank=True, null=True)
     objects = TimesheetManager()
 
     class Meta:
