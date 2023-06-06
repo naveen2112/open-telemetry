@@ -167,3 +167,49 @@ class AddInternForm(forms.ModelForm):
                 }
             ),
         }
+
+
+class SubBatchTimelineForm(forms.ModelForm):
+    def validate_days(value):
+        """
+        The function validates that a given value is greater than 0 and a multiple of 0.5, otherwise it
+        raises a validation error.
+        """
+        if value <= 0:
+            raise ValidationError("Value must be greater than 0")
+        if value % 0.5 != 0:
+            raise ValidationError("Value must be a multiple of 0.5")
+
+    days = forms.FloatField(
+        widget=forms.NumberInput(
+            attrs={
+                "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
+                "placeholder": "Days...",
+            }
+        ),
+        validators=[validate_days],
+    )
+    order = forms.IntegerField(
+        widget=forms.NumberInput(
+            attrs={
+                "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
+                "placeholder": "Order...",
+                "required": False,
+            }
+        ),
+    )
+
+    class Meta:
+        model = models.SubBatchTaskTimeline
+        fields = ("name", "days", "present_type", "task_type", "order")
+
+        widgets = {
+            "name": forms.TextInput(
+                attrs={
+                    "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
+                    "placeholder": "Task Name...",
+                }
+            ),
+            "present_type": forms.RadioSelect(),
+            "task_type": forms.RadioSelect(),
+        }
