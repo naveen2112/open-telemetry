@@ -107,11 +107,6 @@
             $('#form_heading').html("Create Timeline");
         }
 
-        function closeModal(name) {
-            document.getElementById(name).classList.remove("blocker");
-            document.getElementById(name).classList.add("hidden");
-        }
-
         function createTimeline() {
             $('.page-loader').show();
             $.ajax({

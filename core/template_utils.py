@@ -21,3 +21,9 @@ def duplicate_button(url):
     return f"""<a href="javascript:void(0)" onclick="duplicateTimelineModal(\'{url}\')">
                 <div class="inline mr-1"> <span class="hbl hbl-description text-2xl text-dark-black/50"></span></div>
             </a>"""
+
+
+def edit_button_new_page(url):
+    return f"""<a href={url}>
+                <div class="inline mr-1"> <span class="hbl hbl-edit text-2xl text-dark-black/50"></span></div>
+            </a>"""

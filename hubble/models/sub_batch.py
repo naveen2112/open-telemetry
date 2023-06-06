@@ -9,8 +9,8 @@ class SubBatch(db.SoftDeleteWithBaseModel):
         Batch, on_delete=models.CASCADE, related_name="sub_batches"
     )
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    primary_mentor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="intern_primary_mentor", null=True)
-    secondary_mentor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="intern_secondary_mentor", null=True)
+    primary_mentor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sub_batch_primary_mentor")
+    secondary_mentor = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sub_batch_secondary_mentor")
     start_date = models.DateField()
     timeline = models.ForeignKey(Timeline, on_delete=models.CASCADE)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)

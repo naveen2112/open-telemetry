@@ -43,13 +43,10 @@ urlpatterns = [
     # Sub Batch
     path("sub-batch-datatable", sub_batch.SubBatchDataTable.as_view(), name="sub-batch-datatable"),
     path("batch/<int:pk>/sub-batch/create", sub_batch.create_sub_batch, name="sub-batch.create"),
-    path("sub-batch/get_timeline", sub_batch.get_timeline, name="sub-batch.get_timeline"),
-    path("batch/<int:batch>/sub-batch/<int:pk>", sub_batch.update_sub_batch, name="sub-batch.edit"),
+    path("sub-batch/get-timeline", sub_batch.get_timeline, name="sub-batch.get_timeline"),
+    path("sub-batch/<int:pk>/edit", sub_batch.update_sub_batch, name="sub-batch.edit"),
     path("sub-batch/<int:pk>", sub_batch.SubBatchDetail.as_view(), name="sub-batch.detail"),
     path("sub-batch/<int:pk>/delete", sub_batch.delete_sub_batch, name="sub-batch.delete"),
     path("sub-batch/trainies-datatable", sub_batch.SubBatchTrainiesDataTable.as_view(), name="sub-batch.trainies-datatable"),
     path("sub-batch/trainies/add", sub_batch.add_trainee, name="trainies.add"),
 ]
-
-handler404='training.view.error_404'
-handler500='training.view.error_500'

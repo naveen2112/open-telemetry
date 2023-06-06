@@ -142,11 +142,6 @@
             $('#submit-btn').attr("onclick", "createTimelineTask()");
         }
 
-        function closeModal(name) {
-            document.getElementById(name).classList.remove("blocker");
-            document.getElementById(name).classList.add("hidden");
-        }
-
         function createTimelineTask() {
             $('.page-loader').show();
             $.ajax({

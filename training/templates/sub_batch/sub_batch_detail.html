@@ -7,6 +7,10 @@
 {% block header %}
     <div class="flex justify-between items-center">
         <div>
+            <a href="{% url 'batch.detail' object.batch.id %}" class="flex items-center text-sm text-dark-blue pb-2">
+                <div class="inline mr-1"> <span class="hbl hbl-left text-2xl text-dark-black/50"></span></div>
+                Back to {{ object.batch }}
+            </a>
             <div class="text-dark-black text-lg mb-1 leading-none">
                 {{ object.name }}
             </div>
@@ -123,17 +127,10 @@
                 );
             });
         });
-
         function openModal() {
             document.getElementById("modal").classList.remove("hidden");
             document.getElementById("modal").classList.add("blocker");
         }
-
-        function closeModal(name) {
-            document.getElementById(name).classList.remove("blocker");
-            document.getElementById(name).classList.add("hidden");
-        }
-
         function addIntern() {
             $('.page-loader').show();
             $.ajax({
@@ -150,8 +147,7 @@
                     if (data.status === 'success') {
                         $('#sub-batch-trainies-table').DataTable().ajax.reload();
                         closeModal('modal');
-                    }
-                    else {
+                    }else {
                         renderFormError(data);
                     }
                 }

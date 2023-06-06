@@ -12,7 +12,7 @@
             <div class="text-dark-black text-lg mb-1 leading-none">
                 <a href="{% url 'batch' %}" class="flex items-center text-sm text-dark-blue">
                     <div class="inline mr-1"> <span class="hbl hbl-left text-2xl text-dark-black/50"></span></div>
-                    Back to {{ batch.name|title }}
+                    Back to Batch List
                 </a>
                 <h4 class="text-lg text-black ">{{ timeline.name|title }}</h3>
             </div>
@@ -66,6 +66,10 @@
                     success: function(data) {
                         $('.page-loader').hide();
                         $('#sub-batch-table').DataTable().ajax.reload();
+                    },
+                    error: function() {
+                        $('.page-loader').hide();
+                        alert("Something went wrong, please reload the page");
                     }
                 });
             }

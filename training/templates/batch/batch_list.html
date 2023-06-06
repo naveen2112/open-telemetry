@@ -57,7 +57,7 @@
                     $('#batch-table'),
                     "{% url 'batch.datatable' %}",
                     {
-                        serverSide: true,
+                        serverSide: true, 
                         processing: true,
                         autoWidth: false,
                         scrollX: false,
@@ -71,11 +71,6 @@
             document.getElementById("modal").classList.add("blocker");
             $('#id_name').val('');
             $('#submit-btn').attr("onclick", "createBatch()");
-        }
-
-        function closeModal(name) {
-            document.getElementById(name).classList.remove("blocker");
-            document.getElementById(name).classList.add("hidden");
         }
 
         function createBatch() {
@@ -111,7 +106,7 @@
                     $('.page-loader').hide();
                     $('#id_name').val(data.batch.name);
                     $('#batch_id').val(data.batch.id);
-                    $('#submit-btn').attr("onclick", "updateBatch("+ data.batch.id +")");
+                    $('#submit-btn').attr("onclick", "updateBatch(" + data.batch.id + ")");
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     alert(jqXHR.responseJSON.message);
