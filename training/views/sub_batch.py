@@ -103,7 +103,7 @@ def calculate_duration(holidays, start_date, start_time, end_time, break_time, b
     return ([task_start_date, task_end_date, start_date, start_time])
 
 
-def create_and_update_sub_batch(sub_batch, user=None, is_create=True, update_date=None):
+def create_and_update_sub_batch(sub_batch, user=None, is_create=True, desired_start_date=None):
     holidays = Holiday.objects.values_list("date_of_holiday")
     start_date = datetime.datetime.strptime(str(sub_batch.start_date), "%Y-%m-%d")
     start_time = datetime.time(hour=9, minute=0)  # Day start time
@@ -130,7 +130,7 @@ def create_and_update_sub_batch(sub_batch, user=None, is_create=True, update_dat
             )
             start_date = datetime.datetime.combine(values[2], values[3])
     else:
-        start_date = update_date
+        start_date = desired_start_date
         for task in SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch):
             duration = datetime.timedelta(hours=task.days * 8)
             values = calculate_duration(holidays, start_date, start_time, end_time, break_time, break_end_time, duration, task)
@@ -215,12 +215,12 @@ def update_sub_batch(request, pk):
         if sub_batch_form.is_valid():
             # validation start date
 
-            sub_batch_form1 = sub_batch_form.save()
+            active_form = sub_batch_form.save()
 
             if sub_batch.timeline.id != sub_batch.timeline.id:
                 create_and_update_sub_batch(sub_batch, request.user) #TODO need to delete old one before new one
             else:
-                timeline_task_end_date = create_and_update_sub_batch(sub_batch, is_create=False, update_date = sub_batch_form1.start_date)
+                timeline_task_end_date = create_and_update_sub_batch(sub_batch, is_create=False, desired_start_date=active_form.start_date)
 
             for trainee in InternDetail.objects.filter(sub_batch=sub_batch):
                 if sub_batch.start_date != sub_batch.start_date:
