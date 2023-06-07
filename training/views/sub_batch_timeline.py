@@ -55,13 +55,13 @@ class SubBatchTimelineDataTable(LoginRequiredMixin, CustomDatatable):
 
     def customize_row(self, row, obj):
         if obj.can_editable():
-            row["action"] = f"<div class='form-inline justify-content-center'>-</div>"
-        else:
             buttons = (
                 template_utils.edit_button(reverse("sub_batch.timeline.show", args=[obj.id])) + 
                 template_utils.delete_button("deleteTimeline('"+ reverse("sub_batch.timeline.delete", args=[obj.id])+ "')")
             )
             row["action"] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
+        else:
+            row["action"] = f"<div class='form-inline justify-content-center'>-</div>"
         row["start_date"] = obj.start_date.strftime("%d %b %Y")
         row["end_date"] = obj.end_date.strftime("%d %b %Y")
         row["order"] = f"<span data-id='{obj.id}'>{obj.order}</span>"

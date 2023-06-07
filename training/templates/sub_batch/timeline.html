@@ -7,11 +7,15 @@
 {% block header %}
     <div class="flex justify-between items-center">
         <div>
+            <a href="{% url 'sub-batch.detail' object.id %}" class="flex items-center text-sm text-dark-blue pb-2">
+                <div class="inline mr-1"> <span class="hbl hbl-left text-2xl text-dark-black/50"></span></div>
+                Back to {{ object.name }}
+            </a>
             <div class="text-dark-black text-lg mb-1 leading-none">
-                Sub Batch Timeline
+                {{ object.team.name }}
             </div>
             <div class="text-dark-black-50 text-sm">
-                Currently You are viewing the Task Timeline Template
+                Currently You are viewing {{ object.timeline.name }}
             </div>
         </div>
         <button class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal"

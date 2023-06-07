@@ -94,7 +94,7 @@ def create_sub_batch(request, pk):
 
     if request.method == "POST":
         sub_batch_form = SubBatchForm(request.POST)
-        # Checking the trainie is already added in the other batch or not
+        # Checking the trainee is already added in the other batch or not
         if "users_list_file" in request.FILES:
             excel_file = request.FILES["users_list_file"]
             df = pd.read_excel(excel_file)
@@ -204,9 +204,9 @@ class SubBatchDetail(LoginRequiredMixin, DetailView):
     template_name = "sub_batch/sub_batch_detail.html"
 
 
-class SubBatchTrainiesDataTable(LoginRequiredMixin, CustomDatatable):
+class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
     """
-    Sub-Batch-Trainies Datatable
+    Sub-Batch-Trainees Datatable
     """
 
     model = InternDetail
@@ -243,16 +243,16 @@ def add_trainee(request):
         if request.POST.get("user_id"):
             if InternDetail.objects.filter(user=request.POST.get("user_id")).exists():
                 form.add_error(
-                    "user", "Trainie already added in the another sub-batch"
-                )  # Adding form error if the trainies is already added in another
+                    "user", "Trainee already added in the another sub-batch"
+                )  # Adding form error if the trainees is already added in another
         if form.is_valid():  # Check if form is valid or not
             sub_batch = SubBatch.objects.get(id=request.POST.get("sub_batch_id"))
             timeline_data = SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch).last()
-            trainie = form.save(commit=False)
-            trainie.sub_batch = sub_batch
-            trainie.expected_completion = timeline_data.end_date
-            trainie.created_by = request.user
-            trainie.save()
+            trainee = form.save(commit=False)
+            trainee.sub_batch = sub_batch
+            trainee.expected_completion = timeline_data.end_date
+            trainee.created_by = request.user
+            trainee.save()
             return JsonResponse({"status": "success"})
         else:
             field_errors = form.errors.as_json()
