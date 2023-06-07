@@ -51,7 +51,7 @@ urlpatterns = [
     # sub_batch_timeline
     path("sub-batch/<int:pk>/timeline", sub_batch_timeline.SubBatchTimeline.as_view(), name="sub-batch.timeline"),
     path("sub-batch/timeline-datatable", sub_batch_timeline.SubBatchTimelineDataTable.as_view(), name="sub-batch.datatable"),
-    path("sub-batch-timeline/create/<int:pk>", sub_batch_timeline.create_sub_batch_timeline, name="sub_batch.timeline.create"),
+    path("batch/<int:pk>/sub-batch-timeline/create", sub_batch_timeline.create_sub_batch_timeline, name="sub_batch.timeline.create"),
     path("sub-batch-timeline/<int:pk>/show", sub_batch_timeline.sub_batch_timeline_data, name="sub_batch.timeline.show"),
     path("sub-batch-timeline/<int:pk>/edit", sub_batch_timeline.update_sub_batch_timeline, name="sub_batch.timeline.edit"),
     path("sub-batch-timeline/reorder", sub_batch_timeline.update_task_sequence, name="sub_batch.timeline.reorder"),

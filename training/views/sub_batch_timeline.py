@@ -73,7 +73,6 @@ def create_sub_batch_timeline(request, pk):
     """
     Create Task Timeline
     """
-    holidays = Holiday.objects.values_list("date_of_holiday")
     if request.method == "POST":
         form = SubBatchTimelineForm(request.POST)
         sub_batch = SubBatch.objects.get(id=pk)
@@ -98,6 +97,7 @@ def create_sub_batch_timeline(request, pk):
                 hours=float(request.POST.get("days")) * 8
             )  # Working hours for a day
 
+            holidays = Holiday.objects.values_list("date_of_holiday")
             values = calculate_duration(holidays, start_date, duration, number_of_days=float(request.POST.get("days")))
 
             timeline_task.start_date = values[0]
@@ -146,13 +146,13 @@ def sub_batch_timeline_data(request, pk):
 
 @login_required()
 def update_sub_batch_timeline(request, pk):
-    holidays = Holiday.objects.values_list("date_of_holiday")
     current_task = SubBatchTaskTimeline.objects.get(id=pk)
     timeline_task = SubBatchTaskTimeline.objects.get(
         order=request.POST.get("order"), sub_batch=current_task.sub_batch
     )
     form = SubBatchTimelineForm(request.POST, instance=current_task)
     if form.is_valid():
+        holidays = Holiday.objects.values_list("date_of_holiday")
         if int(request.POST.get("past_order")) > int(request.POST.get("order")):
             tasks = SubBatchTaskTimeline.objects.filter(
                 Q(order__lt=request.POST.get("past_order"))| Q(order__gte=request.POST.get("order")),

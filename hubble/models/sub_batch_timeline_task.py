@@ -22,7 +22,4 @@ class SubBatchTaskTimeline(db.SoftDeleteWithBaseModel):
         ordering = ["order"]
 
     def can_editable(self):
-        if self.start_date.date() > timezone.now().date():
-            return False
-        else:
-            return True
+        return self.start_date.date() > timezone.now().date()

@@ -100,7 +100,6 @@
                     var selectedData = [];
                     $("#sortable > tr").each(function() {
                         selectedData.push($(this).children(':first').children(':first').attr('data-id'));
-
                     })
                     if (copy_seleted.toString() !== selectedData.toString()) {
                         copy_seleted = selectedData;
