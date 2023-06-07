@@ -1,8 +1,6 @@
 from django.urls import path, include
-from training.views import induction_kit, timeline, timeline_task, batch, sub_batch
-from training import view
-from django.conf.urls import handler404, handler500
- 
+from training.views import induction_kit, timeline, timeline_task, batch, sub_batch, sub_batch_timeline
+from training import view 
 from hubble import views as sso_view
 
 urlpatterns = [
@@ -47,6 +45,15 @@ urlpatterns = [
     path("sub-batch/<int:pk>/edit", sub_batch.update_sub_batch, name="sub-batch.edit"),
     path("sub-batch/<int:pk>", sub_batch.SubBatchDetail.as_view(), name="sub-batch.detail"),
     path("sub-batch/<int:pk>/delete", sub_batch.delete_sub_batch, name="sub-batch.delete"),
-    path("sub-batch/trainies-datatable", sub_batch.SubBatchTrainiesDataTable.as_view(), name="sub-batch.trainies-datatable"),
-    path("sub-batch/trainies/add", sub_batch.add_trainee, name="trainies.add"),
+    path("sub-batch/trainees-datatable", sub_batch.SubBatchTraineesDataTable.as_view(), name="sub-batch.trainees-datatable"),
+    path("sub-batch/trainees/add", sub_batch.add_trainee, name="trainees.add"),
+
+    # sub_batch_timeline
+    path("sub-batch/<int:pk>/timeline", sub_batch_timeline.SubBatchTimeline.as_view(), name="sub-batch.timeline"),
+    path("sub-batch/timeline-datatable", sub_batch_timeline.SubBatchTimelineDataTable.as_view(), name="sub-batch.datatable"),
+    path("batch/<int:pk>/sub-batch-timeline/create", sub_batch_timeline.create_sub_batch_timeline, name="sub_batch.timeline.create"),
+    path("sub-batch-timeline/<int:pk>/show", sub_batch_timeline.sub_batch_timeline_data, name="sub_batch.timeline.show"),
+    path("sub-batch-timeline/<int:pk>/edit", sub_batch_timeline.update_sub_batch_timeline, name="sub_batch.timeline.edit"),
+    path("sub-batch-timeline/reorder", sub_batch_timeline.update_task_sequence, name="sub_batch.timeline.reorder"),
+    path("sub-batch-timeline/<int:pk>/delete", sub_batch_timeline.delete_sub_batch_timeline, name="sub_batch.timeline.delete"),
 ]

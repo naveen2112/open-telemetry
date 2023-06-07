@@ -2,6 +2,7 @@ from django.db import models
 from core import db
 from hubble.models import SubBatch, User
 from core import constants
+from django.utils import timezone
 
 
 class SubBatchTaskTimeline(db.SoftDeleteWithBaseModel):
@@ -20,3 +21,5 @@ class SubBatchTaskTimeline(db.SoftDeleteWithBaseModel):
         db_table = "sub_batch_timeline_tasks"
         ordering = ["order"]
 
+    def can_editable(self):
+        return self.start_date.date() > timezone.now().date()

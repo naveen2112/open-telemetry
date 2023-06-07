@@ -66,7 +66,7 @@
     <div>
         <div class="flex justify-end items-center py-4">
             <a href="" class="text-dark-blue mr-4">Survey</a>
-            <a href=""
+            <a href="{% url 'sub-batch.timeline' object.id %}"
                 class="p-tb6 mr-4 text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal">Timeline</a>
             <button class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal"
                 onclick="openModal()">
@@ -102,7 +102,7 @@
             </div>
         </div>
 
-        <table id="sub-batch-trainies-table" class="display border-0 table-with-no-border dataTable no-footer"
+        <table id="sub-batch-trainees-table" class="display border-0 table-with-no-border dataTable no-footer"
             style="width: 100%;" role="grid" aria-describedby="sub-batch-table_info">
         </table>
     </div>
@@ -113,8 +113,8 @@
         $(document).ready(function() {
             $(document).ready(function() {
                 AjaxDatatableViewUtils.initialize_table(
-                    $('#sub-batch-trainies-table'),
-                    "{% url 'sub-batch.trainies-datatable' %}",
+                    $('#sub-batch-trainees-table'),
+                    "{% url 'sub-batch.trainees-datatable' %}",
                     {
                         serverSide: true,
                         processing: true,
@@ -135,7 +135,7 @@
             $('.page-loader').show();
             $.ajax({
                 type: "POST",
-                url: "{% url 'trainies.add' %}",
+                url: "{% url 'trainees.add' %}",
                 data: {
                     user_id: $('#id_user').val(),
                     college: $('#id_college').val(),
@@ -145,7 +145,7 @@
                     $('.form_errors').remove();
                     $('.page-loader').hide();
                     if (data.status === 'success') {
-                        $('#sub-batch-trainies-table').DataTable().ajax.reload();
+                        $('#sub-batch-trainees-table').DataTable().ajax.reload();
                         closeModal('modal');
                     }else {
                         renderFormError(data);

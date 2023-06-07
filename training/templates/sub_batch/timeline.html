@@ -1,0 +1,259 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}
+    Sub Batch timeline
+{% endblock title %}
+
+{% block header %}
+    <div class="flex justify-between items-center">
+        <div>
+            <a href="{% url 'sub-batch.detail' object.id %}" class="flex items-center text-sm text-dark-blue pb-2">
+                <div class="inline mr-1"> <span class="hbl hbl-left text-2xl text-dark-black/50"></span></div>
+                Back to {{ object.name }}
+            </a>
+            <div class="text-dark-black text-lg mb-1 leading-none">
+                {{ object.team.name }}
+            </div>
+            <div class="text-dark-black-50 text-sm">
+                Currently You are viewing {{ object.timeline.name }}
+            </div>
+        </div>
+        <button class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal"
+            onclick="openTaskCreateModal()">
+            <span class="text-xl mr-2">+</span>
+            Create Task
+        </button>
+    </div>
+{% endblock %}
+
+
+{% block body %}
+    <div class="jquery-modal current hidden" id="modal">
+        <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
+            <p class="font-semibold text-lg mb-10">Create Task</p>
+            <form method="post" class="timeline-task-form" id="timeline-task-create-form">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <input type="hidden" name="timeline_id" value="{{ timeline_id }}" id="timeline_id">
+                    <input type="hidden" name="past_order" id="past_order">
+                    <div class="mb-7" id="{{ form.name.label|lower }}_group">
+                        {{ form.name|show_label }}
+                        {{ form.name }}
+                    </div>
+                    <div class="grid grid-cols-2 gap-cols-1">
+                        <div class="mb-7" id="{{ form.days.label|lower }}_group">
+                            {{ form.days|show_label }}
+                            {{ form.days }}
+                        </div>
+                        <div class="mb-7" id="{{ form.order.label|lower }}_group">
+                            {{ form.order|show_label }}
+                            {{ form.order }}
+                        </div>
+                    </div>
+                    <div class="mb-7" id="{{ form.present_type.label|lower }}_group">
+                        {{ form.present_type|show_label }}
+                        {{ form.present_type }}
+                    </div>
+                    <div class="mb-7" id="{{ form.task_type.label|lower }}_group">
+                        {{ form.task_type|show_label }}
+                        {{ form.task_type }}
+                    </div>
+                </div>
+                <div class="text-center mt-10">
+                    <a class="cursor-pointer inline-block align-middle border border-grey px-8 py-2 rounded mr-6"
+                        onclick="closeModal('modal')">Close</a>
+                    <a class="cursor-pointer inline-block align-middle text-white bg-dark-blue rounded inline-flex items-center rounded px-8 py-2 text-base font-normal" id="submit-btn">Submit</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <table id="sub-batch-timeline-table" class="display border-0 table-with-no-border dataTable no-footer"
+        style="width: 100%;" role="grid" aria-describedby="sub-batch-table_info">
+        <tbody id="sortable"></tbody>
+    </table>
+{% endblock %}
+
+
+{% block script %}
+    <script>
+        let copy_seleted = [];
+        $(document).ready(function() {
+            $(document).ready(function() {
+                AjaxDatatableViewUtils.initialize_table(
+                    $('#sub-batch-timeline-table'),
+                    "{% url 'sub-batch.datatable' %}",
+                    {
+                        serverSide: true,
+                        processing: true,
+                        autoWidth: false,
+                        scrollX: false,
+                        order: [],
+                    }, {
+                    "sub_batch_id": "{{ object.id }}"
+                });
+            });
+            $("#sortable > tr").each(function() {
+                copy_selected.push($(this).children(':first').text());
+            })
+        });
+
+        $(function() {
+            $("#sortable").sortable({
+                stop: function() {
+                    var selectedData = [];
+                    $("#sortable > tr").each(function() {
+                        selectedData.push($(this).children(':first').children(':first').attr('data-id'));
+                    })
+                    if (copy_seleted.toString() !== selectedData.toString()) {
+                        copy_seleted = selectedData;
+                        updateTimelineTaskByOrder(copy_seleted);
+                    }
+                }
+            });
+        });
+
+        function openTaskCreateModal() {
+            document.getElementById("modal").classList.remove("hidden");
+            document.getElementById("modal").classList.add("blocker");
+            $('#id_name').val('');
+            $('#id_days').val('');
+            $('#submit-btn').attr("onclick", "createTimelineTask()");
+        }
+
+        function createTimelineTask() {
+            $('.page-loader').show();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'sub_batch.timeline.create' object.id %}",
+                headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
+                data: {
+                    name: $('#id_name').val(),
+                    days: $('#id_days').val(),
+                    order: $('#id_order').val(),
+                    present_type: $('input[name="present_type"]:checked').val(),
+                    task_type: $('input[name="task_type"]:checked').val(),
+                    start_date: $("#date_range").attr('start-date'),
+                    end_date: $("#date_range").attr('end-date')
+                },
+                success: function(data) {
+                    $('.form_errors').remove();
+                    $('.page-loader').hide();
+                    if (data.status === 'success') {
+                        $('#sub-batch-timeline-table').DataTable().ajax.reload();
+                        closeModal('modal');
+                    }else {
+                        renderFormError(data);
+                    }
+                }
+            });
+        }
+
+        function openUpdateModel(url) {
+            $('.page-loader').show();
+            $('#update_team').val('');
+            $('.dropdown_selected_value').html('');
+            $.ajax({
+                type: "GET",
+                url: url,
+                success: function(data) {
+                    $('.page-loader').hide();
+                    $('#timeline_id').val(data.timeline.id);
+                    $('#id_name').val(data.timeline.name);
+                    $('#id_days').val(data.timeline.days);
+                    $('#id_order').val(data.timeline.order);
+                    $('#id_present_type').val(data.timeline.present_type);
+                    $('#id_task_type').val(data.timeline.task_type);
+                    $('#past_order').val(data.timeline.order);
+                }
+            });
+            document.getElementById("modal").classList.remove("hidden");
+            document.getElementById("modal").classList.add("blocker");
+            $('#submit-btn').attr("onclick", "updateTimelineTask()");
+        }
+
+        function updateTimelineTaskByOrder(data) {
+            $('.page-loader').show();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'sub_batch.timeline.reorder' %}",
+                data: {
+                    data: data,
+                },
+                success: function(data) {
+                    $('#sub-batch-timeline-table').DataTable().ajax.reload();
+                    $('.page-loader').hide();
+                },
+                error: function() {
+                    $('.page-loader').hide();
+                    alert("Something went wrong");
+                }
+            });
+        }
+
+        function updateTimelineTask() {
+            $('.page-loader').show();
+            $.ajax({
+                type: "POST",
+                url: "/sub-batch-timeline/"+ $('#timeline_id').val() +"/edit",
+                headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
+                data: {
+                    id: $('#timeline_id').val(),
+                    name: $('#id_name').val(),
+                    days: $('#id_days').val(),
+                    order: $('#id_order').val(),
+                    past_order: $('#past_order').val(),
+                    present_type: $('input[name="present_type"]:checked').val(),
+                    task_type: $('input[name="task_type"]:checked').val(),
+                },
+                success: function(data) {
+                    $('.form_errors').remove();
+                    $('.page-loader').hide();
+                    if (data.status === 'success') {
+                        $('#sub-batch-timeline-table').DataTable().ajax.reload();
+                        closeModal('modal');
+                    }else {
+                        renderFormError(data);
+                    }
+                }
+            });
+        }
+
+        function deleteTimeline(url) {
+            let text = 'Are you sure do you want to delete';
+            if (confirm(text) == true) {
+                $('.page-loader').show();
+                $.ajax({
+                    type: "DELETE",
+                    url: url,
+                    success: function(data) {
+                        $('.page-loader').hide();
+                        $('#sub-batch-timeline-table').DataTable().ajax.reload();
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        alert(jqXHR.responseJSON.message);
+                        $('.page-loader').hide();
+                    },
+                });
+            }
+        }
+
+        var date = new Date()
+        $('#date_range').daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true,
+            startDate: moment(date),
+            endDate: moment(date),
+            maxSpan: { months: 1 },
+            alwaysShowCalendars: true
+        }).on('apply.daterangepicker', function(ev, picker) {
+            $('.date_range')
+                .text(`${picker.startDate.format('DD MMM Y')}`)
+                .attr('start-date', `${picker.startDate.format('YYYY-MM-DD')}`)
+        });
+
+        $('#date_range')
+            .text(`${moment(date).format('DD MMM Y')}`)
+            .attr('start-date', `${moment(date).format('YYYY-MM-DD')}`)
+    </script>
+{% endblock %}
