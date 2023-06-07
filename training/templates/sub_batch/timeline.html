@@ -116,7 +116,9 @@
         function openTaskCreateModal() {
             document.getElementById("modal").classList.remove("hidden");
             document.getElementById("modal").classList.add("blocker");
+            $("#order_group").show();
             $('#id_name').val('');
+            $('#id_order').val('');
             $('#id_days').val('');
             $('#submit-btn').attr("onclick", "createTimelineTask()");
         }
@@ -153,6 +155,7 @@
             $('.page-loader').show();
             $('#update_team').val('');
             $('.dropdown_selected_value').html('');
+            $("#order_group").hide()
             $.ajax({
                 type: "GET",
                 url: url,
@@ -202,7 +205,6 @@
                     name: $('#id_name').val(),
                     days: $('#id_days').val(),
                     order: $('#id_order').val(),
-                    past_order: $('#past_order').val(),
                     present_type: $('input[name="present_type"]:checked').val(),
                     task_type: $('input[name="task_type"]:checked').val(),
                 },
