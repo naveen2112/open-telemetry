@@ -224,7 +224,7 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
 
     def customize_row(self, row, obj):
         buttons = (
-            template_utils.show_button(reverse("sub-batch.detail", args=[obj.user.id])) + 
+            template_utils.show_button(reverse("user_reports", args=[obj.user.id])) + 
             template_utils.edit_button_new_page(reverse("batch")) #need to change in next PR
         )
         row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'

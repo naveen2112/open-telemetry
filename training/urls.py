@@ -1,5 +1,5 @@
 from django.urls import path, include
-from training.views import induction_kit, timeline, timeline_task, batch, sub_batch, sub_batch_timeline, trainie_report
+from training.views import induction_kit, timeline, timeline_task, batch, sub_batch, sub_batch_timeline, trainee_report
 from training import view 
 from hubble import views as sso_view
 
@@ -58,8 +58,8 @@ urlpatterns = [
     path("sub-batch-timeline/<int:pk>/delete", sub_batch_timeline.delete_sub_batch_timeline, name="sub_batch.timeline.delete"),
 
     #user_reports_crud
-    path("sub-batch/<int:sub_batch>/user/<int:pk>", trainie_report.user_profile, name="user.reports"),
-    path("user/<int:pk>/create", trainie_report.create_user_report, name="user.create"),
-    path("user/<int:pk>/sub_batch/<int:sub_batch>", trainie_report.add_extension, name="extension.create"),
-    path("extension/<int:pk>/delete", trainie_report.delete_extension, name="extension.delete"),
+    path("user/<int:pk>", trainee_report.UserProfile.as_view(), name="user_reports"),
+    path("user/<int:pk>/create", trainee_report.user_journey_page, name="user.create"),
+    path("add-extension/<int:pk>", trainee_report.add_extension, name="extension.create"),
+    path("extension/<int:pk>/delete", trainee_report.delete_extension, name="extension.delete"),
     ]
