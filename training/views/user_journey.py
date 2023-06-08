@@ -71,7 +71,7 @@ def update_task_score(request, pk):
             report = form.save(commit=False)
             report.user_id = pk 
             report.task_id = request.POST.get("task")
-            report.week_extension_id = request.POST.get("extension")
+            report.extension_id = request.POST.get("extension")
             report.sub_batch = SubBatch.objects.filter(intern_sub_batch_details__user = pk).first()
             report.is_retry = True if request.POST.get("status") == "true" else False
             report.created_by = request.user
