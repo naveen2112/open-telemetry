@@ -8,6 +8,7 @@ COPY_RIGHTS_TEXT = (
 COMPANY_NAME = "Mallow Technologies Pvt Ltd."
 
 ENVIRONMENT_DEVELOPMENT = 'Development'
+ENVIRONMENT_TESTING = 'Testing'
 ENVIRONMENT_PRODUCTION = 'Production'
 
 PRESENT_TYPE_REMOTE = "Remote"
