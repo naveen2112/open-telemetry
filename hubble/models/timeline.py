@@ -6,7 +6,7 @@ from hubble.models import User, Team
 class Timeline(db.SoftDeleteWithBaseModel):
     name = models.CharField(max_length=255)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    is_active = models.BooleanField(default=False, blank=True)
+    is_active = models.BooleanField(default=False, blank=True, verbose_name="is_active")
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:

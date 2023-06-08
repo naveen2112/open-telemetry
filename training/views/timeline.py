@@ -38,7 +38,7 @@ class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
     ]
 
     def get_initial_queryset(self, request=None):
-        return self.model.objects.all().annotate(Days=Sum(F("task_timeline__days")))
+        return self.model.objects.filter(task_timeline__deleted_at__isnull=True).annotate(Days=Sum(F("task_timeline__days")))
 
     def customize_row(self, row, obj):
         buttons = (
