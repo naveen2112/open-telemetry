@@ -22,7 +22,7 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         
         latest_task_report = Assessment.objects.filter(task=OuterRef("id"),user_id=self.object.id).order_by("-id")[:1]
-        latest_extended_task_report = Assessment.objects.filter(week_extension=OuterRef("id")).order_by("-id")[:1]
+        latest_extended_task_report = Assessment.objects.filter(extension=OuterRef("id")).order_by("-id")[:1]
         sub_batch_id = SubBatch.objects.filter(intern_sub_batch_details__user=self.object.id).first()
 
         task_summary = (
@@ -106,7 +106,7 @@ def delete_extension(request, pk):
     try:
         extension = get_object_or_404(Extension, id=pk)
         extension.delete()
-        Assessment.objects.filter(week_extension=extension).all().delete()
+        Assessment.objects.filter(extension=extension).all().delete()
         return JsonResponse(
             {"message": "Week extension deleted succcessfully", "status": "success"}
         )
