@@ -22,7 +22,7 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         
         latest_task_report = Assessment.objects.filter(task=OuterRef("id"),user_id=self.object.id).order_by("-id")[:1]
-        latest_extended_task_report = Assessment.objects.filter(week_extension=OuterRef("id")).order_by("-id")[:1]
+        latest_extended_task_report = Assessment.objects.filter(extension=OuterRef("id")).order_by("-id")[:1]
         sub_batch_id = SubBatch.objects.filter(intern_sub_batch_details__user=self.object.id).first()
 
         task_summary = (
@@ -71,7 +71,7 @@ def update_task_score(request, pk):
             report = form.save(commit=False)
             report.user_id = pk 
             report.task_id = request.POST.get("task")
-            report.week_extension_id = request.POST.get("extension")
+            report.extension_id = request.POST.get("extension")
             report.sub_batch = SubBatch.objects.filter(intern_sub_batch_details__user = pk).first()
             report.is_retry = True if request.POST.get("status") == "true" else False
             report.created_by = request.user
@@ -106,7 +106,7 @@ def delete_extension(request, pk):
     try:
         extension = get_object_or_404(Extension, id=pk)
         extension.delete()
-        Assessment.objects.filter(week_extension=extension).all().delete()
+        Assessment.objects.filter(extension=extension).all().delete()
         return JsonResponse(
             {"message": "Week extension deleted succcessfully", "status": "success"}
         )
