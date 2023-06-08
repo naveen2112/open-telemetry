@@ -6,35 +6,35 @@ from hubble.models import (
     User,
     SubBatch,
     Assessment,
-    WeekExtension,
+    Extension,
 )
-from training.forms import AddReportForm
+from training.forms import InternScoreForm
 from django.http import JsonResponse
 from django.db.models import Count, Subquery, OuterRef
 from django.db.models import BooleanField, Case, When, Value, Q
 from django.utils import timezone
 from core.constants import TASK_TYPE_ASSESSMENT
 
-class UserProfile(LoginRequiredMixin, DetailView):
+class TraineeJourneyView(LoginRequiredMixin, DetailView):
     model = User
-    template_name = "sub_batch/user_report.html"
+    template_name = "sub_batch/user_journey_page.html"
 
     def get_context_data(self, **kwargs):
         
         latest_task_report = Assessment.objects.filter(task=OuterRef("id"),user_id=self.object.id).order_by("-id")[:1]
         latest_extended_task_report = Assessment.objects.filter(week_extension=OuterRef("id")).order_by("-id")[:1]
-        subBatchId = SubBatch.objects.filter(intern_sub_batch_details__user = self.object.id).first()
+        sub_batch_id = SubBatch.objects.filter(intern_sub_batch_details__user=self.object.id).first()
 
         task_summary = (
             SubBatchTaskTimeline.objects.filter(
-                sub_batch=subBatchId, task_type=TASK_TYPE_ASSESSMENT
+                sub_batch=sub_batch_id, task_type=TASK_TYPE_ASSESSMENT
             )
             .annotate(
-                retries=Count("assessments__is_retry", filter=Q(assessments__user = self.object.id)) - 1,
+                retries=Count("assessments__is_retry", filter=Q(assessments__user=self.object)) - 1,
                 last_entry=Subquery(latest_task_report.values("score")),
                 comment=Subquery(latest_task_report.values("comment")),
                 is_retry=Subquery(latest_task_report.values("is_retry")),
-                inactive_tasks = Case(
+                inactive_tasks=Case(
                     When(start_date__gt=timezone.now(), then=Value(True)),
                     default=Value(False),
                     output_field=BooleanField(),
@@ -44,7 +44,7 @@ class UserProfile(LoginRequiredMixin, DetailView):
             )
         
         extended_task_summary = (
-            WeekExtension.objects.filter(sub_batch=subBatchId, user=self.object.id).annotate(
+            Extension.objects.filter(sub_batch=sub_batch_id, user=self.object).annotate(
                 retries=Count("assessment__is_retry") - 1,
                 last_entry=Subquery(latest_extended_task_report.values("score")),
                 comment=Subquery(latest_extended_task_report.values("comment")),
@@ -55,18 +55,18 @@ class UserProfile(LoginRequiredMixin, DetailView):
         
         context = super().get_context_data(**kwargs)
         context["assessment_scores"] = task_summary
-        context["sub_batch"] = subBatchId
-        context["form"] = AddReportForm()
+        context["sub_batch"] = sub_batch_id
+        context["form"] = InternScoreForm()
         context["extension_tasks"] = extended_task_summary
         return context
 
 
-def user_journey_page(request, pk):
+def update_task_score(request, pk):
     """
     Create User report
     """
     if request.method == "POST":
-        form = AddReportForm(request.POST)
+        form = InternScoreForm(request.POST)
         if form.is_valid():  # Check if form is valid or not
             report = form.save(commit=False)
             report.user_id = pk 
@@ -90,9 +90,9 @@ def user_journey_page(request, pk):
 
 
 def add_extension(request, pk):
-    extension = WeekExtension.objects.create(
+    Extension.objects.create(
             sub_batch=SubBatch.objects.filter(intern_sub_batch_details__user = pk).first(),
-            user=User.objects.get(id=pk),
+            user_id=pk,
             created_by=request.user,
         )
     return JsonResponse({"status": "success"})
@@ -104,8 +104,9 @@ def delete_extension(request, pk):
     Soft delete the template and record the deletion time in deleted_at field
     """
     try:
-        extension = get_object_or_404(WeekExtension, id=pk)
+        extension = get_object_or_404(Extension, id=pk)
         extension.delete()
+        Assessment.objects.filter(week_extension=extension).all().delete()
         return JsonResponse(
             {"message": "Week extension deleted succcessfully", "status": "success"}
         )

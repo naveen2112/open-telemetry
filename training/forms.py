@@ -215,7 +215,7 @@ class SubBatchTimelineForm(forms.ModelForm):
         }
 
 
-class AddReportForm(forms.ModelForm):
+class InternScoreForm(forms.ModelForm):
     class Meta:
         model = models.Assessment
         fields = ("score", "is_retry", "comment")

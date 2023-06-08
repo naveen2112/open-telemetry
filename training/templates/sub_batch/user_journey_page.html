@@ -1,5 +1,7 @@
 {% extends 'layouts/base.html' %}
 
+{% load static %}
+
 {% block title %} {{ object.name }} {% endblock %}
 
 {% block header %}
@@ -11,7 +13,7 @@
         <div class="flex items-center my-5">
             <div class="flex items-center mr-10">
                 <div class="pr-4">
-                    <img src="https://hubble-dev.mallow-tech.com/assets/svgs/user-profile.svg" class="w-24 h-24 rounded-full" alt="Profile Icon">
+                    <img src="{% static 'images/user-profile.svg' %}" class="w-24 h-24 rounded-full" alt="Profile Icon">
                 </div>
                 <div>
                     <p class="text-base text-dark-black mb-1">{{ object.name }} | {{ object.employee_id }}</p>
@@ -84,7 +86,7 @@
 
         <div class="card-container grid grid-cols-3 gap-40" id="card_container">
             {% for task in assessment_scores %}
-                <div id="assessment-reports" {% if task.inactive_tasks %} style="width: 420px; background-color: #D3D3D3; height: auto; opacity:0.5;" {% else %} style="width: 420px; background-color: white; height: auto;" {% endif%} class=" rounded-xl flex justify-between items-center flex-col p-4 mt-5">
+                <div id="assessment-reports" class="{% if task.inactive_tasks %}disabled-container{% else %}enabled-container{% endif %} rounded-xl flex justify-between items-center flex-col p-4 mt-5">
                     <div class="w-full flex justify-between items-center mb-5">
                         <h4>{{ task.name }}</h4>
                         <div class="flex">
@@ -112,7 +114,7 @@
                             <p>Retries</p>
                         </div>
                         <div class="div flex flex-col justify-center items-center">
-                            <h3 class="font-bold mb-1">Yes</h3>
+                            <h3 class="font-bold mb-1">{% if task.inactive_tasks %} - {% else %} {% if task.retries == -1 %} No {% else%} Yes {% endif %} {% endif %}</h3>
                             <p>Present Status</p>
                         </div>
                     </div>
@@ -153,7 +155,7 @@
                             <p>Retries</p>
                         </div>
                         <div class="div flex flex-col justify-center items-center">
-                            <h3 class="font-bold mb-1">Yes</h3>
+                            <h3 class="font-bold mb-1">{% if assessment.retries == -1 %} No {% else%} Yes {% endif %}</h3>
                             <p>Present Status</p>
                         </div>
                     </div>
@@ -178,15 +180,15 @@
         $('#id_score').val("");
         $('#id_comment').val("");
         $(".form-group").find("span").remove();
-        $("#submit-btn").attr("onclick", "createReport("+ task +"," + extension +", '{{ object.id }}')");
+        $("#submit-btn").attr("onclick", "UpdateScore(" + task + ", " + extension + ")");
         $('.page-loader').hide();
     }
 
-    function createReport(task, extension, user) {
+    function UpdateScore(task, extension) {
         $('.page-loader').show();
         $.ajax({
             type: "POST",
-            url: "/user/"+ user +"/create",
+            url: "{% url 'user.update-score' object.id %}",
             data: {
                 score: $('#id_score').val(),
                 status: $('.checkbox_active').is(":checked"),
@@ -200,17 +202,8 @@
                 if (data.status === 'success') {
                     closeModal('modal');
                     location.reload();
-                }
-                else {
-                    const fieldErrors = JSON.parse(data.field_errors);
-                    const nonFieldErrors = JSON.parse(data.non_field_errors);
-                    if (Object.keys(nonFieldErrors).length > 0) { 
-                        let non_field_error = nonFieldErrors[0]['message']
-                        $('#non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + non_field_error + '</span>')
-                    }
-                    for (field in fieldErrors) {
-                        $('#' + field + '_group').append('<span id="reason_error" class="form_errors ajax-error text-red-600">' + fieldErrors[field][0].message + '</span>');
-                    }
+                }else {
+                    renderFormError(data);
                 }
             }
         });

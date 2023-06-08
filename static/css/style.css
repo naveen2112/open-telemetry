@@ -11,6 +11,19 @@
     height: 9.5rem;
 }
 
+.disabled-container{
+    width: 420px;
+    background-color: #D3D3D3;
+    height: auto;
+    opacity:0.5;
+}
+
+.enabled-container{
+    width: 420px;
+    background-color: white;
+    height: auto;
+}
+
 .dataTables_filter {
     display: none;
 }
