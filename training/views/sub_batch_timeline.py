@@ -86,7 +86,7 @@ def create_sub_batch_timeline(request, pk):
             timeline_task.created_by = request.user
             if len(task_list)>0 and task_list[0]:
                 start_date = datetime.datetime.strptime(
-                    str(task_list[0].start_date), "%Y-%m-%d"
+                    str(task_list[0].start_date.date()), "%Y-%m-%d"
                 )
             else:
                 start_date = datetime.datetime.strptime(
@@ -148,51 +148,20 @@ def sub_batch_timeline_data(request, pk):
 def update_sub_batch_timeline(request, pk):
     current_task = get_object_or_404(SubBatchTaskTimeline, id=pk)
     if current_task.can_editable():
-        timeline_task = SubBatchTaskTimeline.objects.get(
-            order=request.POST.get("order"), sub_batch=current_task.sub_batch
-        )
         form = SubBatchTimelineForm(request.POST, instance=current_task)
         if form.is_valid():
-            holidays = Holiday.objects.values_list("date_of_holiday")
-            if int(request.POST.get("past_order")) > int(request.POST.get("order")):
-                tasks = SubBatchTaskTimeline.objects.filter(
-                    Q(order__lt=request.POST.get("past_order"))| Q(order__gte=request.POST.get("order")),
-                    Q(sub_batch=current_task.sub_batch))
-            elif int(request.POST.get("past_order")) < int(request.POST.get("order")):
-                tasks = SubBatchTaskTimeline.objects.filter(
-                    Q(order__gt=request.POST.get("past_order")),
-                    sub_batch=current_task.sub_batch,
-                )
-
-            start_date = datetime.datetime.strptime(
-                str(timeline_task.start_date.date()), "%Y-%m-%d"
-            )
-            duration = datetime.timedelta(hours=float(request.POST.get("days")) * 8)
-            values = calculate_duration(holidays, start_date, duration, number_of_days=float(request.POST.get("days")))
-
-            timeline_task.start_date = values[0]
-            timeline_task.end_date = values[1]
-            timeline_task.order = int(request.POST.get("order"))
-            timeline_task.save()
-
-            start_date = datetime.datetime.combine(values[2], values[3])
-            order = int(request.POST.get("order"))
-            for task in tasks:
-                if task.id != timeline_task.id:
-                    order += 1
-                    task.order = order
-
-                    duration = datetime.timedelta(
-                        hours=task.days * 8
-                    )  # Working hours for a day
-                    values = calculate_duration(holidays, start_date, duration, number_of_days=task.days)
-                    task.start_date = values[0]
-                    task.end_date = values[1]
-                    task.save()
-                    start_date = datetime.datetime.combine(values[2], values[3])
-
-        return JsonResponse({"status": "success"})
-    return JsonResponse({"message": "This task has been already started", "status": "success"})
+            form.save()            
+            return JsonResponse({"status": "success"})
+        field_errors = form.errors.as_json()
+        non_field_errors = form.non_field_errors().as_json()
+        return JsonResponse(
+            {
+                "status": "error",
+                "field_errors": field_errors,
+                "non_field_errors": non_field_errors,
+            }
+        )
+    return JsonResponse({"message": "This task has been already started", "status": "error"})
 
 
 @login_required()

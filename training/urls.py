@@ -1,5 +1,5 @@
 from django.urls import path, include
-from training.views import induction_kit, timeline, timeline_task, batch, sub_batch, sub_batch_timeline
+from training.views import induction_kit, timeline, timeline_task, batch, sub_batch, sub_batch_timeline, user_journey
 from training import view 
 from hubble import views as sso_view
 
@@ -56,4 +56,10 @@ urlpatterns = [
     path("sub-batch-timeline/<int:pk>/edit", sub_batch_timeline.update_sub_batch_timeline, name="sub_batch.timeline.edit"),
     path("sub-batch-timeline/reorder", sub_batch_timeline.update_task_sequence, name="sub_batch.timeline.reorder"),
     path("sub-batch-timeline/<int:pk>/delete", sub_batch_timeline.delete_sub_batch_timeline, name="sub_batch.timeline.delete"),
-]
+
+    #user_reports_crud
+    path("user/<int:pk>", user_journey.TraineeJourneyView.as_view(), name="user_reports"),
+    path("user/<int:pk>/update-score", user_journey.update_task_score, name="user.update-score"),
+    path("add-extension/<int:pk>", user_journey.add_extension, name="extension.create"),
+    path("extension/<int:pk>/delete", user_journey.delete_extension, name="extension.delete"),
+    ]

@@ -18,3 +18,5 @@ from .task import Task
 from .timesheet_entry import TimesheetEntry
 from .holiday import Holiday
 from .sub_batch_timeline_task import SubBatchTaskTimeline
+from .assessment import Assessment
+from .extension import Extension

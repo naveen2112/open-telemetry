@@ -213,3 +213,29 @@ class SubBatchTimelineForm(forms.ModelForm):
             "present_type": forms.RadioSelect(),
             "task_type": forms.RadioSelect(),
         }
+
+
+class InternScoreForm(forms.ModelForm):
+    class Meta:
+        model = models.Assessment
+        fields = ("score", "is_retry", "comment")
+
+        widgets = {
+            "score": forms.NumberInput(
+                attrs={
+                    "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
+                    "placeholder": "Enter score...",
+                }
+            ),
+            "is_retry": forms.CheckboxInput(
+                attrs={
+                    "class": "checkbox_active cursor-pointer block border border-primary-dark-30 rounded-md w-4 mr-3 focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
+                }
+            ),
+            "comment": forms.Textarea(
+                attrs={
+                    "class": "w-full block border border-primary-dark-30 rounded-md mt-2.5 w-64 focus:outline-none focus:ring-transparent focus:ring-offset-0 h-20 p-2 ",
+                    "placeholder": "Enter comment...",
+                }
+            ),
+        }
