@@ -1,5 +1,6 @@
 from django import forms
 from hubble import models
+from hubble.models import Assessment
 from django.core.exceptions import ValidationError
 
 
@@ -9,7 +10,8 @@ class TimelineForm(forms.ModelForm):
         This function checks if a team already has an active template and raises a validation error if
         it does.
         """
-        if (
+            
+        if self.cleaned_data.get("team", None) and(
             self.cleaned_data["is_active"]
             and models.Timeline.objects.filter(
                 team=self.cleaned_data["team"], is_active=True
@@ -147,14 +149,19 @@ class SubBatchForm(forms.ModelForm):
 
 class AddInternForm(forms.ModelForm):
     user = forms.ChoiceField(
-                choices = tuple(models.User.objects.exclude(intern_details__isnull=False).distinct('id').values_list('id', 'name')),
-                widget = forms.Select(
-                    attrs = {
-                        "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
-                        "placeholder": "Trainee...",
-                    }
-                )
-            )
+        choices=tuple(
+            models.User.objects.exclude(intern_details__isnull=False)
+            .distinct("id")
+            .values_list("id", "name")
+        ),
+        widget=forms.Select(
+            attrs={
+                "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
+                "placeholder": "Trainee...",
+            }
+        ),
+    )
+
     class Meta:
         model = models.InternDetail
         fields = ("user", "college")
@@ -217,7 +224,7 @@ class SubBatchTimelineForm(forms.ModelForm):
 
 class InternScoreForm(forms.ModelForm):
     class Meta:
-        model = models.Assessment
+        model = Assessment
         fields = ("score", "is_retry", "comment")
 
         widgets = {

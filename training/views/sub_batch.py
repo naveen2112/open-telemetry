@@ -101,8 +101,7 @@ def create_sub_batch(request, pk):
             if InternDetail.objects.filter(user__in=df['user_id']).exists():
                 sub_batch_form.add_error(None, "Some of the Users are already added in another sub-batch")  # Adding the non-field-error if the user aalready exists
         else:
-            sub_batch_form.add_error(None, "Please upload the file")  # Adding the non-field-error if the file was not uploaded while submission
-
+            sub_batch_form.add_error(None, "Please upload a file")  # Adding the non-field-error if the file was not uploaded while submission
         if sub_batch_form.is_valid():  # Check if both the forms are valid or not
             sub_batch = sub_batch_form.save(commit=False)
             sub_batch.batch = Batch.objects.get(id=pk)
