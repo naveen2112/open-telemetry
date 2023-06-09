@@ -47,6 +47,7 @@ urlpatterns = [
     path("sub-batch/<int:pk>/delete", sub_batch.delete_sub_batch, name="sub-batch.delete"),
     path("sub-batch/trainees-datatable", sub_batch.SubBatchTraineesDataTable.as_view(), name="sub-batch.trainees-datatable"),
     path("sub-batch/trainees/add", sub_batch.add_trainee, name="trainees.add"),
+    path("sub-batch/trainee/<int:pk>/delete", sub_batch.delete_trainee, name="trainee.delete"),
 
     # sub_batch_timeline
     path("sub-batch/<int:pk>/timeline", sub_batch_timeline.SubBatchTimeline.as_view(), name="sub-batch.timeline"),

@@ -233,7 +233,9 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
     def customize_row(self, row, obj):
         buttons = (
             template_utils.show_button(reverse("user_reports", args=[obj.user.id])) + 
-            template_utils.edit_button_new_page(reverse("batch")) #need to change in next PR
+            template_utils.edit_button_new_page(reverse("batch")) + #need to change in next PR
+            template_utils.delete_button("deleteIntern('" + reverse("trainee.delete", args=[obj.id]) + "')")
+
         )
         row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         return
@@ -272,3 +274,17 @@ def add_trainee(request):
                     "non_field_errors": non_field_errors,
                 }
             )
+        
+
+@login_required
+@require_http_methods(
+    ["DELETE"]
+) 
+def delete_trainee(request, pk):
+    try:
+        intern_detail = get_object_or_404(InternDetail, id=pk)
+        intern_detail.delete()
+        return JsonResponse({"message" : "Intern has been deleted succssfully"})
+    except Exception as e:
+        return JsonResponse({"message": "Error while deleting Timeline Template!"}, status=500)
+
