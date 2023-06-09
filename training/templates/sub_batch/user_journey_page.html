@@ -175,8 +175,7 @@
 <script>
     function openCreateModal(task, extension) {
         $('.page-loader').show();
-        document.getElementById("modal").classList.remove("hidden");
-        document.getElementById("modal").classList.add("blocker");
+        openBaseModal();
         $('#id_score').val("");
         $('#id_comment').val("");
         $(".form-group").find("span").remove();

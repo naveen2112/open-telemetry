@@ -135,8 +135,7 @@
         }
 
         function openTaskCreateModal() {
-            document.getElementById("modal").classList.remove("hidden");
-            document.getElementById("modal").classList.add("blocker");
+            openBaseModal();
             $('#id_name').val('');
             $('#id_days').val('');
             $('#submit-btn').attr("onclick", "createTimelineTask()");
@@ -172,6 +171,7 @@
         }
 
         function openUpdateModel(url) {
+            removeErrors();
             $('.page-loader').show();
             $('.update-form-fields-container').empty();
             $.ajax({

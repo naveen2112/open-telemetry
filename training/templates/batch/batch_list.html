@@ -25,7 +25,7 @@
 {% block body %}
     <div class="jquery-modal current hidden batch-model" id="modal">
         <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
-            <p class="font-semibold text-lg mb-10">Create Batch</p>
+            <p class="font-semibold text-lg mb-10" id="open_modal">Create Batch</p>
             <form method="post" class="timeline-form" id="timeline-create-form">
                 <div class="modal-body">
                     {% csrf_token %}
@@ -67,8 +67,8 @@
         });
 
         function openModal() {
-            document.getElementById("modal").classList.remove("hidden");
-            document.getElementById("modal").classList.add("blocker");
+            openBaseModal();
+            $("#open_modal").text("Create Batch");
             $('#id_name').val('');
             $('#submit-btn').attr("onclick", "createBatch()");
         }
@@ -87,6 +87,7 @@
                         $('#batch-table').DataTable().ajax.reload();
                         closeModal('modal');
                     } else {
+                        removeErrors();
                         renderFormError(data);
                     }
                 },
@@ -99,6 +100,8 @@
 
         function openUpdateModel(url) {
             $('.page-loader').show();
+            removeErrors();
+            $("#open_modal").text("Update Batch");
             $.ajax({
                 type: "GET",
                 url: url,
@@ -130,7 +133,8 @@
                     if (data.status === 'success') {
                         $('#batch-table').DataTable().ajax.reload();
                         closeModal('modal');
-                    } else {
+                    }else {
+                        removeErrors();
                         renderFormError(data);
                     }
                 },
