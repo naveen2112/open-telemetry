@@ -159,20 +159,20 @@ def update_sub_batch(request, pk):
         sub_batch_form = SubBatchForm(request.POST, instance=sub_batch)
         if sub_batch_form.is_valid():
             # validation start date
-
-            active_form = sub_batch_form.save()
-
-            if sub_batch.timeline.id != sub_batch.timeline.id:
-                create_and_update_sub_batch(sub_batch, request.user) #TODO need to delete old one before new one
+            active_form = sub_batch_form.save(commit=False)
+            if TimelineTask.objects.filter(timeline=active_form.timeline.id):
+                active_form = sub_batch_form.save()
+                if sub_batch.timeline.id != sub_batch.timeline.id:
+                    create_and_update_sub_batch(sub_batch, request.user) #TODO need to delete old one before new one
+                else:
+                    timeline_task_end_date = create_and_update_sub_batch(sub_batch, is_create=False, desired_start_date=active_form.start_date)
+                for trainee in InternDetail.objects.filter(sub_batch=sub_batch):
+                    if sub_batch.start_date != sub_batch.start_date:
+                        trainee.expected_completion = timeline_task_end_date
+                        trainee.save()
+                return redirect(reverse("batch.detail", args=[sub_batch.batch.id]))
             else:
-                timeline_task_end_date = create_and_update_sub_batch(sub_batch, is_create=False, desired_start_date=active_form.start_date)
-
-            for trainee in InternDetail.objects.filter(sub_batch=sub_batch):
-                if sub_batch.start_date != sub_batch.start_date:
-                    trainee.expected_completion = timeline_task_end_date
-                    trainee.save()
-            return redirect(reverse("batch.detail", args=[sub_batch.batch.id]))
-
+                sub_batch_form.add_error(None, "The Selected Team's Active Timeline doesn't have any tasks")
     sub_batch = SubBatch.objects.get(id=pk)
     context = {
         "form": SubBatchForm(instance=sub_batch),
