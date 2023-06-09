@@ -14,7 +14,7 @@ from django.views.generic import DetailView
 from core import template_utils
 from core.utils import CustomDatatable
 from hubble.models import (Batch, Holiday, InternDetail, SubBatch,
-                           SubBatchTaskTimeline, Timeline, TimelineTask)
+                           SubBatchTaskTimeline, Timeline, TimelineTask, User)
 from training.forms import AddInternForm, SubBatchForm
 from core.utils import calculate_duration
 
@@ -98,7 +98,7 @@ def create_sub_batch(request, pk):
         if "users_list_file" in request.FILES:
             excel_file = request.FILES["users_list_file"]
             df = pd.read_excel(excel_file)
-            if InternDetail.objects.filter(user__in=df['user_id']).exists():
+            if InternDetail.objects.filter(user__employee_id__in=df['employee_id']).exists():
                 sub_batch_form.add_error(None, "Some of the Users are already added in another sub-batch")  # Adding the non-field-error if the user aalready exists
         else:
             sub_batch_form.add_error(None, "Please upload a file")  # Adding the non-field-error if the file was not uploaded while submission
@@ -109,10 +109,11 @@ def create_sub_batch(request, pk):
                 sub_batch.created_by = request.user
                 sub_batch.save()
                 timeline_task_end_date = create_and_update_sub_batch(sub_batch = sub_batch, user = request.user)
+                user_details = dict(User.objects.filter(employee_id__in=df['employee_id']).values_list('employee_id', 'id'))
                 for row in range(len(df)): # Iterating over pandas dataframe
                     InternDetail.objects.create(
                         sub_batch=sub_batch,
-                        user_id=df['user_id'][row],
+                        user_id=user_details[df['employee_id'][row]],
                         expected_completion=timeline_task_end_date,
                         college=df['college'][row],
                         created_by=request.user,
@@ -134,7 +135,7 @@ def get_timeline(request):
     This function retrieves an active timeline template for a given team and returns it as a JSON
     response, or returns an error message if no active template is found.
     """
-    team_id = request.POST.get("team")
+    team_id = request.POST.get("team_id")
     try:
         timeline = Timeline.objects.get(team=team_id, is_active=True)
         return JsonResponse(
@@ -173,6 +174,11 @@ def update_sub_batch(request, pk):
                 return redirect(reverse("batch.detail", args=[sub_batch.batch.id]))
             else:
                 sub_batch_form.add_error(None, "The Selected Team's Active Timeline doesn't have any tasks")
+        context = {
+            "form": sub_batch_form,
+            "sub_batch": sub_batch
+        }
+        return render(request, "sub_batch/update_sub_batch.html", context)
     sub_batch = SubBatch.objects.get(id=pk)
     context = {
         "form": SubBatchForm(instance=sub_batch),
@@ -201,6 +207,7 @@ def delete_sub_batch(request, pk):
 
 
 class SubBatchDetail(LoginRequiredMixin, DetailView):
+    print()
     model = SubBatch
     extra_context = {"form": AddInternForm()}
     template_name = "sub_batch/sub_batch_detail.html"
