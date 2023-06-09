@@ -207,7 +207,6 @@ def delete_sub_batch(request, pk):
 
 
 class SubBatchDetail(LoginRequiredMixin, DetailView):
-    print()
     model = SubBatch
     extra_context = {"form": AddInternForm()}
     template_name = "sub_batch/sub_batch_detail.html"
