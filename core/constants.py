@@ -9,6 +9,7 @@ COMPANY_NAME = "Mallow Technologies Pvt Ltd."
 
 ENVIRONMENT_DEVELOPMENT = 'Development'
 ENVIRONMENT_PRODUCTION = 'Production'
+ENVIRONMENT_TESTING = 'Testing'
 
 PRESENT_TYPE_REMOTE = "Remote"
 PRESENT_TYPE_IN_PERSON = "In-Person"
