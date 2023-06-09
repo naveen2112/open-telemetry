@@ -43,7 +43,7 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
         buttons = (
             template_utils.show_button(reverse("sub-batch.detail", args=[obj.id]))
             + template_utils.edit_button_new_page(reverse("sub-batch.edit", args=[obj.id]))
-            + template_utils.delete_button("deleteSubBatch('" + reverse("sub-batch.delete", args=[obj.id]) + "')")
+            + template_utils.delete_button("removeSubBatch('" + reverse("sub-batch.remove", args=[obj.id]) + "')")
         )
         row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         row["start_date"] = obj.start_date.strftime("%d %b %Y")
@@ -191,7 +191,7 @@ def update_sub_batch(request, pk):
 @require_http_methods(
     ["DELETE"]
 )  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
-def delete_sub_batch(request, pk):
+def remove_sub_batch(request, pk):
     """
     Delete Batch
     Soft delete the batch and record the deletion time in deleted_at field
@@ -233,8 +233,8 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
     def customize_row(self, row, obj):
         buttons = (
             template_utils.show_button(reverse("user_reports", args=[obj.user.id])) + 
-            template_utils.edit_button_new_page(reverse("batch")) + #need to change in next PR
-            template_utils.delete_button("deleteIntern('" + reverse("trainee.delete", args=[obj.id]) + "')")
+            # template_utils.edit_button_new_page(reverse("batch")) + #need to change in next PR
+            template_utils.delete_button("removeIntern('" + reverse("trainee.remove", args=[obj.id]) + "')")
 
         )
         row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
@@ -280,7 +280,7 @@ def add_trainee(request):
 @require_http_methods(
     ["DELETE"]
 ) 
-def delete_trainee(request, pk):
+def remove_trainee(request, pk):
     try:
         intern_detail = get_object_or_404(InternDetail, id=pk)
         intern_detail.delete()

@@ -57,7 +57,7 @@ class SubBatchTimelineDataTable(LoginRequiredMixin, CustomDatatable):
         if obj.can_editable():
             buttons = (
                 template_utils.edit_button(reverse("sub_batch.timeline.show", args=[obj.id])) + 
-                template_utils.delete_button("deleteTimeline('"+ reverse("sub_batch.timeline.delete", args=[obj.id])+ "')")
+                template_utils.delete_button("removeTimeline('"+ reverse("sub_batch.timeline.remove", args=[obj.id])+ "')")
             )
             row["action"] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
         else:
@@ -194,7 +194,7 @@ def update_task_sequence(request):
 @require_http_methods(
     ["DELETE"]
 )  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
-def delete_sub_batch_timeline(request, pk):
+def remove_sub_batch_timeline(request, pk):
     """
     Delete Sub Batch Task
     Soft delete the Sub Batch Task and record the deletion time in deleted_at field
