@@ -87,11 +87,6 @@ class TeamsExceptionHandler(AdminEmailHandler):
                                 "value": request.path if request else 'No Request'
                             },
                             {
-                                "name": "User:",
-                                "value": ((request.user.username if request.user.is_authenticated else 'Anonymous')
-                                          if request else 'No Request')
-                            },
-                            {
                                 "name": "Status Code:",
                                 "value": record.status_code if hasattr(record, 'status_code') else 'None'
                             },
