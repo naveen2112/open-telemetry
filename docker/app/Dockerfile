@@ -16,6 +16,7 @@ ARG ENV_NAME
 ARG REDIRECT_PATH
 ARG SECRET_KEY
 ARG SESSION_TYPE
+ARG TEAMS_LOGGING_WEBHOOK_URL
 
 # Set working directory, where the commands will be ran:
 RUN mkdir -p $HUBBLE_ROOT
@@ -31,7 +32,6 @@ RUN poetry install --no-interaction --no-ansi --no-root
 
 # Adding project files
 ADD . .
-RUN mkdir -p /var/app/static/training/pdf
 RUN mkdir -p /var/app/session_files
 RUN mkdir -p /var/app/staticfiles
 RUN python manage.py collectstatic
