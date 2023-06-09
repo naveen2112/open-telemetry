@@ -154,9 +154,9 @@
                 })
             })
             function renderFormError(data) {
-                if (Object.keys(JSON.parse(data.non_field_errors)).length > 0) {
+                if (Object.keys(JSON.parse(data.non_field_errors)).length > 0) { 
                     $('#non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + JSON.parse(data.non_field_errors)[0]['message'] + '</span>')
-                }
+                } 
                 for (field in JSON.parse(data.field_errors)) {
                     $('#' + field + '_group').append('<span id="reason_error" class="form_errors ajax-error text-red-600">' + JSON.parse(data.field_errors)[field][0].message + '</span>');
                 }
@@ -164,6 +164,14 @@
             function closeModal(name) {
                 document.getElementById(name).classList.remove("blocker");
                 document.getElementById(name).classList.add("hidden");
+            }
+            function openBaseModal() {
+                document.getElementById("modal").classList.remove("hidden");
+                document.getElementById("modal").classList.add("blocker");
+                $(".form_errors").text("");
+            }
+            function removeErrors() {
+                $(".form_errors").text("");
             }
         </script>
 
