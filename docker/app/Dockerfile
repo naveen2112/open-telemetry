@@ -1,6 +1,6 @@
 # Base image: python version python/3.10.9
-# FROM public.ecr.aws/docker/library/python:3.10.9
-FROM python:3.10.9
+FROM public.ecr.aws/docker/library/python:3.10.9
+# FROM python:3.10.9
 
 # Declared Environment Variables
 ENV HUBBLE_ROOT=/var/app
