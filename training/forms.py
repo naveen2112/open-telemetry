@@ -14,13 +14,7 @@ class TimelineForm(forms.ModelForm):
         This function checks if a team already has an active template and raises a validation error if
         it does.
         """
-            
-        if self.cleaned_data.get("team", None) and(
-            self.cleaned_data["is_active"]
-            and models.Timeline.objects.filter(
-                team=self.cleaned_data["team"], is_active=True
-            ).exists()
-        ):
+        if (self.cleaned_data.get("team", None) and(self.cleaned_data["is_active"])) and (models.Timeline.objects.filter(team=self.cleaned_data["team"], is_active=True)[0].id) != (self.instance.id):
             raise ValidationError("Team already has an active template.")
 
     class Meta:
@@ -158,8 +152,13 @@ class SubBatchForm(forms.ModelForm):
 
 
 class AddInternForm(forms.ModelForm):
+    def clean_college(self):
+        if not self.cleaned_data.get("college", None).isalpha():
+            raise ValidationError("College name should be in alphabets")
+        return self.cleaned_data.get["college"]
+
     user = forms.ChoiceField(
-        choices=tuple(
+        choices=(('', 'Select an Intern'),) + tuple(
             models.User.objects.exclude(intern_details__isnull=False)
             .distinct("id")
             .values_list("id", "name")

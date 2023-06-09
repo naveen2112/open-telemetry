@@ -9,7 +9,7 @@
 {% block header %}
     <div class="flex justify-between items-center">
         <div>
-            <div class="text-dark-black text-lg mb-1 leading-none">
+            <div class="text-dark-black text-lg mb-1 leading-none" style="white-space: nowrap">
                 Create Sub-Batch
             </div>
             <div class="text-dark-black-50 text-sm">
@@ -106,9 +106,8 @@
             </div>
         </div>
     </form>
-    <div class="dark-black">Download Sample File</div>
     
-    <div class="mt-5 mb-9 flex">
+    <div class="mt mb-9 flex">
         <div class="mr-9">
             <a href="{% static 'training/pdf/Sample_Intern_Upload.xlsx' %}" download>
                 <button
@@ -153,7 +152,7 @@
                 type: "POST",
                 url: "{% url 'sub-batch.get_timeline' %}",
                 data: {
-                    team: $("#id_team").val()
+                    team_id: $("#id_team").val()
                 },
                 success: function(data) {
                     $('.page-loader').hide();
