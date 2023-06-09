@@ -88,8 +88,7 @@ class TeamsExceptionHandler(AdminEmailHandler):
                             },
                             {
                                 "name": "User:",
-                                "value": ((request.user.username + ' (' + str(request.user.pk) + ')'
-                                           if request.user.is_authenticated else 'Anonymous')
+                                "value": ((request.user.username if request.user.is_authenticated else 'Anonymous')
                                           if request else 'No Request')
                             },
                             {
