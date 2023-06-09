@@ -104,20 +104,23 @@ def create_sub_batch(request, pk):
             sub_batch_form.add_error(None, "Please upload a file")  # Adding the non-field-error if the file was not uploaded while submission
         if sub_batch_form.is_valid():  # Check if both the forms are valid or not
             sub_batch = sub_batch_form.save(commit=False)
-            sub_batch.batch = Batch.objects.get(id=pk)
-            sub_batch.created_by = request.user
-            sub_batch.save()
-            timeline_task_end_date = create_and_update_sub_batch(sub_batch = sub_batch, user = request.user)
-            for row in range(len(df)): # Iterating over pandas dataframe
-                InternDetail.objects.create(
-                    sub_batch=sub_batch,
-                    user_id=df['user_id'][row],
-                    expected_completion=timeline_task_end_date,
-                    college=df['college'][row],
-                    created_by=request.user,
-                )
+            if TimelineTask.objects.filter(timeline=sub_batch.timeline.id):
+                sub_batch.batch = Batch.objects.get(id=pk)
+                sub_batch.created_by = request.user
+                sub_batch.save()
+                timeline_task_end_date = create_and_update_sub_batch(sub_batch = sub_batch, user = request.user)
+                for row in range(len(df)): # Iterating over pandas dataframe
+                    InternDetail.objects.create(
+                        sub_batch=sub_batch,
+                        user_id=df['user_id'][row],
+                        expected_completion=timeline_task_end_date,
+                        college=df['college'][row],
+                        created_by=request.user,
+                    )
 
-            return redirect(reverse("batch.detail", args=[pk]))
+                return redirect(reverse("batch.detail", args=[pk]))
+            else:
+                sub_batch_form.add_error(None, "The Selected Team's Active Timeline doesn't have any tasks")
     context = {
         "form": sub_batch_form,
         "sub_batch_id": pk,

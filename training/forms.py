@@ -5,6 +5,10 @@ from django.core.exceptions import ValidationError
 
 
 class TimelineForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)         
+        self.fields['team'].empty_label = 'Select a Team'
+
     def clean_is_active(self):
         """
         This function checks if a team already has an active template and raises a validation error if
@@ -97,6 +101,12 @@ class BatchForm(forms.ModelForm):
 
 
 class SubBatchForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)         
+        self.fields['team'].empty_label = 'Select a Team'
+        self.fields['primary_mentor'].empty_label = 'Select a Primary Mentor'
+        self.fields['secondary_mentor'].empty_label = 'Select a Secondary Mentor'
+
     class Meta:
         model = models.SubBatch
         fields = (
