@@ -128,20 +128,20 @@
                         </div>
                     </div>
                     {% elif login_method == ENVIRONMENT_DEVELOPMENT %}
-                        <form method="POST" action="{% url 'signin' %}">
-                            {% csrf_token %}
-                            <label for="email">Email</label>
-                            <input type="email" type="email" name="email">
-                            <button type="submit">Login</button>
-                        </form> 
+                    <form method="POST" action="{% url 'signin' %}">
+                        {% csrf_token %}
+                        <label for="email">Email</label>
+                        <input type="email" type="email" name="email">
+                        <button type="submit">Login</button>
+                    </form>
                     {% endif %}
                     <div style="width: 100%;font-size: 14px;opacity: 0.5; margin-top: 15px;">Note: Official Mallow Tech
                         ID only works with SSO(for example, username@mallow-tech.com)
                     </div>
                     {% if messages %}
-                        {% for message in messages %}
-                            <p {% if message.tags %} class = "{{ message.tags }}" {% endif %}>{{ message }}</p>
-                        {% endfor %}
+                    {% for message in messages %}
+                    <p {% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</p>
+                    {% endfor %}
                     {% endif %}
                 </div>
             </div>

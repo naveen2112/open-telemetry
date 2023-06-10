@@ -1,247 +1,247 @@
 {% extends 'layouts/base.html' %}
 
 {% block title %}
-    Timeline Template Detail
+Timeline Template Detail
 {% endblock title %}
 
 {% block header %}
-    <div class="flex justify-between items-center">
-        <div>
-            <div class="text-dark-black text-lg mb-1 leading-none">
-                <a href="{% url 'timeline-template' %}" class="flex items-center text-sm text-dark-blue">
-                    <div class="inline mr-1"> <span class="hbl hbl-left text-2xl text-dark-black/50"></span></div>
-                    Back to Timeline template
-                </a>
-                <h4 class="text-lg text-black ">{{ timeline.name|title }}</h3>
-            </div>
-            <div class="text-dark-black-50 text-sm">
-                <p class="text-sm">Current you are viewing {{ timeline.name }} timeline template</p>
-            </div>
+<div class="flex justify-between items-center">
+    <div>
+        <div class="text-dark-black text-lg mb-1 leading-none">
+            <a href="{% url 'timeline-template' %}" class="flex items-center text-sm text-dark-blue">
+                <div class="inline mr-1"> <span class="hbl hbl-left text-2xl text-dark-black/50"></span></div>
+                Back to Timeline template
+            </a>
+            <h4 class="text-lg text-black ">{{ timeline.name|title }}</h3>
         </div>
-        <button class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal"
-            onclick="openTaskCreateModal()">
-            <span class="text-xl mr-2">+</span>
-            Create Task
-        </button>
+        <div class="text-dark-black-50 text-sm">
+            <p class="text-sm">Current you are viewing {{ timeline.name }} timeline template</p>
+        </div>
     </div>
+    <button class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal"
+        onclick="openTaskCreateModal()">
+        <span class="text-xl mr-2">+</span>
+        Create Task
+    </button>
+</div>
 {% endblock %}
 
 {% block body %}
-    <div class="jquery-modal current hidden" id="modal">
-        <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
-            <p class="font-semibold text-lg mb-10">Create Task</p>
-            <form method="post" class="timeline-task-form" id="timeline-task-create-form">
-                <input type="hidden" name="timeline-task" id="timeline-task">
-                <div class="modal-body">
-                    {% csrf_token %}
-                    <input type="hidden" name="timeline_id" value="{{ timeline.id }}" id="timeline_id">
-                    <div class="mb-7" id="{{ form.name.label|lower }}_group">
-                        {{ form.name|show_label }}
-                        {{ form.name }}
-                    </div>
-                    <div class="mb-7" id="{{ form.days.label|lower }}_group">
-                        {{ form.days|show_label }}
-                        {{ form.days }}
-                    </div>
-                    <div class="mb-7" id="{{ form.present_type.label|lower }}_group">
-                        {{ form.present_type|show_label }}
-                        {{ form.present_type }}
-                    </div>
-                    <div class="mb-7" id="{{ form.task_type.label|lower }}_group">
-                        {{ form.task_type|show_label }}
-                        {{ form.task_type }}
-                    </div>
+<div class="jquery-modal current hidden" id="modal">
+    <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
+        <p class="font-semibold text-lg mb-10">Create Task</p>
+        <form method="post" class="timeline-task-form" id="timeline-task-create-form">
+            <input type="hidden" name="timeline-task" id="timeline-task">
+            <div class="modal-body">
+                {% csrf_token %}
+                <input type="hidden" name="timeline_id" value="{{ timeline.id }}" id="timeline_id">
+                <div class="mb-7" id="{{ form.name.label|lower }}_group">
+                    {{ form.name|show_label }}
+                    {{ form.name }}
                 </div>
-                <div class="text-center mt-10">
-                    <a class="cursor-pointer inline-block align-middle border border-grey px-8 py-2 rounded mr-6"
-                        onclick="closeModal('modal')">Close</a>
-                    <a class="cursor-pointer inline-block align-middle text-white bg-dark-blue rounded inline-flex items-center rounded px-8 py-2 text-base font-normal"
-                        id="submit-btn">Submit</a>
+                <div class="mb-7" id="{{ form.days.label|lower }}_group">
+                    {{ form.days|show_label }}
+                    {{ form.days }}
                 </div>
-            </form>
-        </div>
+                <div class="mb-7" id="{{ form.present_type.label|lower }}_group">
+                    {{ form.present_type|show_label }}
+                    {{ form.present_type }}
+                </div>
+                <div class="mb-7" id="{{ form.task_type.label|lower }}_group">
+                    {{ form.task_type|show_label }}
+                    {{ form.task_type }}
+                </div>
+            </div>
+            <div class="text-center mt-10">
+                <a class="cursor-pointer inline-block align-middle border border-grey px-8 py-2 rounded mr-6"
+                    onclick="closeModal('modal')">Close</a>
+                <a class="cursor-pointer inline-block align-middle text-white bg-dark-blue rounded inline-flex items-center rounded px-8 py-2 text-base font-normal"
+                    id="submit-btn">Submit</a>
+            </div>
+        </form>
     </div>
+</div>
 
-    <table id="timeline-table" class="display border-0 table-with-no-border dataTable no-footer" style="width: 100%;"
-        role="grid" aria-describedby="timeline-table_info">
-        <tbody id="sortable"></tbody>
-    </table>
+<table id="timeline-table" class="display border-0 table-with-no-border dataTable no-footer" style="width: 100%;"
+    role="grid" aria-describedby="timeline-table_info">
+    <tbody id="sortable"></tbody>
+</table>
 {% endblock %}
 
 {% block script %}
-    <script>
-        let copy_seleted = [];
-        $(document).ready(function () {
-            AjaxDatatableViewUtils.initialize_table(
-                $('#timeline-table'),
-                "{% url 'timeline-task.datatable' %}",
-                {
-                    serverSide: true,
-                    processing: true,
-                    autoWidth: false,
-                    scrollX: false,
-                    order: [],
-                    dom: 't',
-                    pageLength: 50
-                }, {
-                'timeline_id': '{{ timeline.id }}',
+<script>
+    let copy_seleted = [];
+    $(document).ready(function() {
+        AjaxDatatableViewUtils.initialize_table(
+            $('#timeline-table'),
+            "{% url 'timeline-task.datatable' %}",
+            {
+                serverSide: true,
+                processing: true,
+                autoWidth: false,
+                scrollX: false,
+                order: [],
+                dom: 't',
+                pageLength: 50
+            }, {
+            'timeline_id': '{{ timeline.id }}',
+        }
+        );
+        $("#sortable > tr").each(function() {
+            copy_selected.push($(this).children(':first').text());
+        })
+    });
+
+    $(function() {
+        $("#sortable").sortable({
+            stop: function() {
+                var selectedData = [];
+                $("#sortable > tr").each(function() {
+                    selectedData.push($(this).children(':first').children(':first').attr('data-id'));
+                })
+                if (copy_seleted.toString() !== selectedData.toString()) {
+                    copy_seleted = selectedData;
+                    updateOrder(copy_seleted);
                 }
-            );
-            $("#sortable > tr").each(function () {
-                copy_selected.push($(this).children(':first').text());
-            })
+            }
         });
+    });
 
-        $(function () {
-            $("#sortable").sortable({
-                stop: function () {
-                    var selectedData = [];
-                    $("#sortable > tr").each(function () {
-                        selectedData.push($(this).children(':first').children(':first').attr('data-id'));
-                    })
-                    if (copy_seleted.toString() !== selectedData.toString()) {
-                        copy_seleted = selectedData;
-                        updateOrder(copy_seleted);
-                    }
+    function updateOrder(data) {
+        /**
+        * Updates an order using AJAX                     
+        *
+        * @param {Object} data - The data containing the updated order information.
+        */
+        $('.page-loader').show();
+        $.ajax({
+            type: "POST",
+            url: "{% url 'timeline-task.reorder' %}",
+            data: {
+                data: data,
+            },
+            success: function(data) {
+                if (data.status === 'success') {
+                    $('.page-loader').hide();
+                    $('#timeline-table').DataTable().ajax.reload();
+                    closeModal('modal');
                 }
-            });
+            },
+            error: function() {
+                $('.page-loader').hide();
+                alert("Something went wrong");
+            },
         });
+    }
 
-        function updateOrder(data) {
-            /**
-            * Updates an order using AJAX                     
-            *
-            * @param {Object} data - The data containing the updated order information.
-            */
+    function openTaskCreateModal() {
+        openBaseModal();
+        $('#id_name').val('');
+        $('#id_days').val('');
+        $('#submit-btn').attr("onclick", "createTimelineTask()");
+    }
+
+    function createTimelineTask() {
+        $('.page-loader').show();
+        $.ajax({
+            type: "POST",
+            url: "{% url 'timeline-task.create' %}",
+            data: {
+                name: $('#id_name').val(),
+                days: $('#id_days').val(),
+                present_type: $('input[name="present_type"]:checked').val(),
+                task_type: $('input[name="task_type"]:checked').val(),
+                timeline_id: $('#timeline_id').val(),
+            },
+            success: function(data) {
+                $('.form_errors').remove();
+                $('.page-loader').hide();
+                if (data.status === 'success') {
+                    $('#timeline-table').DataTable().ajax.reload();
+                    closeModal('modal');
+                } else {
+                    renderFormError(data);
+                }
+            },
+            error: function() {
+                $('.page-loader').hide();
+                alert("Something went wrong");
+            },
+        });
+    }
+
+    function openUpdateModel(url) {
+        removeErrors();
+        $('.page-loader').show();
+        $('.update-form-fields-container').empty();
+        $.ajax({
+            type: "GET",
+            url: url,
+            success: function(data) {
+                $('.page-loader').hide();
+                $('input[name="id_present_type"]').attr('checked', false);
+                $('input[name="id_task_type"]').attr('checked', false);
+                $('#timeline-task').val(data.timeline_task.id);
+                $('#id_name').val(data.timeline_task.name);
+                $('#id_days').val(data.timeline_task.days);
+                $('input[name="id_present_type"][value=' + data.timeline_task.present_type + ']').attr('checked', 'checked');
+                $('input[name="id_task_type"][value="' + data.timeline_task.task_type + '"]').attr('checked', true);
+                $('#submit-btn').attr("onclick", "updateTimeline()");
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                alert(jqXHR.responseJSON.message);
+                $('.page-loader').hide();
+            },
+        });
+        document.getElementById("modal").classList.remove("hidden");
+        document.getElementById("modal").classList.add("blocker");
+    }
+
+    function updateTimeline() {
+        $('.page-loader').show();
+        $.ajax({
+            type: "POST",
+            url: "/timeline-task/" + $("#timeline-task").val() + "/edit", //TODO
+            data: {
+                name: $('#id_name').val(),
+                days: $('#id_days').val(),
+                present_type: $('input[name="present_type"]:checked').val(),
+                task_type: $('input[name="task_type"]:checked').val(),
+            },
+            success: function(data) {
+                $('.form_errors').remove();
+                $('.page-loader').hide();
+                if (data.status === 'success') {
+                    $('#timeline-table').DataTable().ajax.reload();
+                    closeModal('modal');
+                } else {
+                    renderFormError(data);
+                }
+            },
+            error: function() {
+                $('.page-loader').hide();
+                alert("Something went wrong");
+            },
+        });
+    }
+
+    function removeTimeline(url) {
+        let text = 'Are you sure do you want to delete';
+        if (confirm(text) == true) {
             $('.page-loader').show();
             $.ajax({
-                type: "POST",
-                url: "{% url 'timeline-task.reorder' %}",
-                data: {
-                    data: data,
-                },
-                success: function(data) {
-                    if (data.status === 'success') {
-                        $('.page-loader').hide();
-                        $('#timeline-table').DataTable().ajax.reload();
-                        closeModal('modal');
-                    }
-                },
-                error: function() {
-                    $('.page-loader').hide();
-                    alert("Something went wrong");
-                },
-            });
-        }
-
-        function openTaskCreateModal() {
-            openBaseModal();
-            $('#id_name').val('');
-            $('#id_days').val('');
-            $('#submit-btn').attr("onclick", "createTimelineTask()");
-        }
-
-        function createTimelineTask() {
-            $('.page-loader').show();
-            $.ajax({
-                type: "POST",
-                url: "{% url 'timeline-task.create' %}",
-                data: {
-                    name: $('#id_name').val(),
-                    days: $('#id_days').val(),
-                    present_type: $('input[name="present_type"]:checked').val(),
-                    task_type: $('input[name="task_type"]:checked').val(),
-                    timeline_id: $('#timeline_id').val(),
-                },
-                success: function(data) {
-                    $('.form_errors').remove();
-                    $('.page-loader').hide();
-                    if (data.status === 'success') {
-                        $('#timeline-table').DataTable().ajax.reload();
-                        closeModal('modal');
-                    } else {
-                        renderFormError(data);
-                    }
-                },
-                error: function() {
-                    $('.page-loader').hide();
-                    alert("Something went wrong");
-                },
-            });
-        }
-
-        function openUpdateModel(url) {
-            removeErrors();
-            $('.page-loader').show();
-            $('.update-form-fields-container').empty();
-            $.ajax({
-                type: "GET",
+                type: "DELETE",
                 url: url,
                 success: function(data) {
+                    $('#timeline-table').DataTable().ajax.reload();
                     $('.page-loader').hide();
-                    $('input[name="id_present_type"]').attr('checked', false);
-                    $('input[name="id_task_type"]').attr('checked', false);
-                    $('#timeline-task').val(data.timeline_task.id);
-                    $('#id_name').val(data.timeline_task.name);
-                    $('#id_days').val(data.timeline_task.days);
-                    $('input[name="id_present_type"][value=' + data.timeline_task.present_type + ']').attr('checked', 'checked');
-                    $('input[name="id_task_type"][value="' + data.timeline_task.task_type + '"]').attr('checked', true);
-                    $('#submit-btn').attr("onclick", "updateTimeline()");
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     alert(jqXHR.responseJSON.message);
                     $('.page-loader').hide();
                 },
             });
-            document.getElementById("modal").classList.remove("hidden");
-            document.getElementById("modal").classList.add("blocker");
         }
-
-        function updateTimeline() {
-            $('.page-loader').show();
-            $.ajax({
-                type: "POST",
-                url: "/timeline-task/"+ $("#timeline-task").val() +"/edit", //TODO
-                data: {
-                    name: $('#id_name').val(),
-                    days: $('#id_days').val(),
-                    present_type: $('input[name="present_type"]:checked').val(),
-                    task_type: $('input[name="task_type"]:checked').val(),
-                },
-                success: function(data) {
-                    $('.form_errors').remove();
-                    $('.page-loader').hide();
-                    if (data.status === 'success') {
-                        $('#timeline-table').DataTable().ajax.reload();
-                        closeModal('modal');
-                    } else {
-                        renderFormError(data);
-                    }
-                },
-                error: function() {
-                    $('.page-loader').hide();
-                    alert("Something went wrong");
-                },
-            });
-        }
-
-        function removeTimeline(url) {
-            let text = 'Are you sure do you want to delete';
-            if (confirm(text) == true) {
-                $('.page-loader').show();
-                $.ajax({
-                    type: "DELETE",
-                    url: url,
-                    success: function(data) {
-                        $('#timeline-table').DataTable().ajax.reload();
-                        $('.page-loader').hide();
-                    },
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        alert(jqXHR.responseJSON.message);
-                        $('.page-loader').hide();
-                    },
-                });
-            }
-        }
-    </script>
+    }
+</script>
 {% endblock %}

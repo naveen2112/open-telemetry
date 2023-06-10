@@ -82,7 +82,7 @@
 
 {% block script %}
 <script>
-    $(document).ready(function () {
+    $(document).ready(function() {
         AjaxDatatableViewUtils.initialize_table(
             $('#reports-table'),
             "{% url 'monetization_datatable' %}",
@@ -98,21 +98,21 @@
                 dom: 'ltip',
             },
             {
-                'year_filter': function () {
+                'year_filter': function() {
                     return $("#years").val();
                 },
-                'month_filter': function () {
+                'month_filter': function() {
                     return $("[name='month']:checked").val();
                 },
             }
         );
     });
-    $("#search_project").on('input', function () {
+    $("#search_project").on('input', function() {
         var searchvalue = $(this).val();
         var table = $("#reports-table").DataTable();
         table.search(searchvalue).draw();
     });
-    $("#months, #years").change(function () {
+    $("#months, #years").change(function() {
         var table = $("#reports-table").DataTable();
         table.ajax.reload();
     });

@@ -15,8 +15,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
-from hubble import views
 
+from hubble import views
 
 urlpatterns = [
     path("health-check", views.health_check)

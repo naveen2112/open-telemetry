@@ -1,7 +1,10 @@
-from django.urls import path, include
-from training.views import induction_kit, timeline, timeline_task, batch, sub_batch, sub_batch_timeline, user_journey
-from training import view 
+from django.urls import include, path
+
 from hubble import views as sso_view
+from training import view
+from training.views import (batch, induction_kit, sub_batch,
+                            sub_batch_timeline, timeline, timeline_task,
+                            user_journey)
 
 urlpatterns = [
     path("", include('hubble.urls')),

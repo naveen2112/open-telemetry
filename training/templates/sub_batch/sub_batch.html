@@ -2,77 +2,77 @@
 
 
 {% block title %}
-    Sub Batch
+Sub Batch
 {% endblock title %}
 
 
 {% block header %}
-    <div class="flex justify-between items-center">
-        <div>
-            <div class="text-dark-black text-lg mb-1 leading-none">
-                <a href="{% url 'batch' %}" class="flex items-center text-sm text-dark-blue">
-                    <div class="inline mr-1"> <span class="hbl hbl-left text-2xl text-dark-black/50"></span></div>
-                    Back to Batch List
-                </a>
-                <h4 class="text-lg text-black ">{{ timeline.name|title }}</h3>
-            </div>
-            <div class="text-dark-black-50 text-sm">
-                <p class="text-sm">Current you are viewing {{ batch.name }} batch</p>
-            </div>
+<div class="flex justify-between items-center">
+    <div>
+        <div class="text-dark-black text-lg mb-1 leading-none">
+            <a href="{% url 'batch' %}" class="flex items-center text-sm text-dark-blue">
+                <div class="inline mr-1"> <span class="hbl hbl-left text-2xl text-dark-black/50"></span></div>
+                Back to Batch List
+            </a>
+            <h4 class="text-lg text-black ">{{ timeline.name|title }}</h3>
         </div>
-        <a href="{% url 'sub-batch.create' batch.id %}"
-            class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal">
-            <span class="text-xl mr-2">+</span>
-            Create Sub Batch
-        </a>
+        <div class="text-dark-black-50 text-sm">
+            <p class="text-sm">Current you are viewing {{ batch.name }} batch</p>
+        </div>
     </div>
+    <a href="{% url 'sub-batch.create' batch.id %}"
+        class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal">
+        <span class="text-xl mr-2">+</span>
+        Create Sub Batch
+    </a>
+</div>
 {% endblock %}
 
 
 {% block body %}
-    <table id="sub-batch-table" class="display border-0 table-with-no-border dataTable no-footer" style="width: 100%;"
-        role="grid" aria-describedby="sub-batch-table_info">
-        {% csrf_token %}
-    </table>
+<table id="sub-batch-table" class="display border-0 table-with-no-border dataTable no-footer" style="width: 100%;"
+    role="grid" aria-describedby="sub-batch-table_info">
+    {% csrf_token %}
+</table>
 {% endblock %}
 
 
 {% block script %}
-    <script>
+<script>
+    $(document).ready(function() {
         $(document).ready(function() {
-            $(document).ready(function() {
-                AjaxDatatableViewUtils.initialize_table(
-                    $('#sub-batch-table'),
-                    "{% url 'sub-batch-datatable' %}",
-                    {
-                        serverSide: true,
-                        processing: true,
-                        autoWidth: false,
-                        scrollX: false,
-                    }, {
-                    "batch_id": "{{ object.id }}"
-                }
-                );
-            });
-        });
-
-        function removeSubBatch(url) {
-            let text = 'Are you sure do you want to delete';
-            if (confirm(text) == true) {
-                $('.page-loader').show();
-                $.ajax({
-                    type: "DELETE",
-                    url: url,
-                    success: function(data) {
-                        $('.page-loader').hide();
-                        $('#sub-batch-table').DataTable().ajax.reload();
-                    },
-                    error: function() {
-                        $('.page-loader').hide();
-                        alert("Something went wrong, please reload the page");
-                    }
-                });
+            AjaxDatatableViewUtils.initialize_table(
+                $('#sub-batch-table'),
+                "{% url 'sub-batch-datatable' %}",
+                {
+                    serverSide: true,
+                    processing: true,
+                    autoWidth: false,
+                    scrollX: false,
+                }, {
+                "batch_id": "{{ object.id }}"
             }
+            );
+        });
+    });
+
+    function removeSubBatch(url) {
+        let text = 'Are you sure do you want to delete';
+        if (confirm(text) == true) {
+            $('.page-loader').show();
+            $.ajax({
+                type: "DELETE",
+                url: url,
+                success: function(data) {
+                    $('.page-loader').hide();
+                    $('#sub-batch-table').DataTable().ajax.reload();
+                },
+                error: function() {
+                    $('.page-loader').hide();
+                    alert("Something went wrong, please reload the page");
+                }
+            });
         }
-    </script>
+    }
+</script>
 {% endblock %}

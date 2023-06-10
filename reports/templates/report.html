@@ -91,7 +91,7 @@
     var end = $('#date_range').data('daterangepicker').endDate.format('DD MMM Y');
     $('#date_range_display').text(start + ' - ' + end);
 
-    $('#date_range').on('apply.daterangepicker', function (ev, picker) {
+    $('#date_range').on('apply.daterangepicker', function(ev, picker) {
         var start = picker.startDate.format('DD MMM Y');
         var end = picker.endDate.format('DD MMM Y');
         $('#date_range_display').text(start + ' - ' + end);
@@ -99,13 +99,13 @@
         table.ajax.reload();
     });
 
-    $("#search_project").on('input', function () {
+    $("#search_project").on('input', function() {
         var searchvalue = $(this).val();
         var table = $("#reports-table").DataTable();
         table.search(searchvalue).draw();
     });
 
-    $(document).ready(function () {
+    $(document).ready(function() {
         AjaxDatatableViewUtils.initialize_table(
             $('#reports-table'),
             "{% url 'efficiency_datatable' %}",
@@ -121,10 +121,10 @@
                 dom: 'ltip',
             },
             {
-                from_date: function () {
+                from_date: function() {
                     return $('#date_range').data('daterangepicker').startDate.format('YYYY-MM-DD');
                 },
-                to_date: function () {
+                to_date: function() {
                     return $('#date_range').data('daterangepicker').endDate.format('YYYY-MM-DD');
                 },
             }
