@@ -160,8 +160,7 @@
                     <p>Score</p>
                 </div>
                 <div class="div flex flex-col justify-center items-center">
-                    <h3 class="font-bold mb-1">{% if assessment.retries == -1 %} - {% else%} {{
-                        assessment.retries|default:"-" }} {% endif %}</h3>
+                    <h3 class="font-bold mb-1">{% if assessment.retries == -1 %} - {% else%} {{ assessment.retries|default:"-" }} {% endif %}</h3>
                     <p>Retries</p>
                 </div>
                 <div class="div flex flex-col justify-center items-center">
