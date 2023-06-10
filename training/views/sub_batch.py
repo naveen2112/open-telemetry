@@ -113,7 +113,7 @@ def create_sub_batch(request, pk):
                 for row in range(len(df)): # Iterating over pandas dataframe
                     InternDetail.objects.create(
                         sub_batch=sub_batch,
-                        user_id=user_details[df['employee_id'][row]],
+                        user_id=user_details[str(df['employee_id'][row])],
                         expected_completion=timeline_task_end_date,
                         college=df['college'][row],
                         created_by=request.user,
