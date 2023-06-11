@@ -79,22 +79,7 @@ class TeamsExceptionHandler(AdminEmailHandler):
                             },
                             {
                                 "name": "Path:",
-                                "value": request.path if request else "No Request",
-                            },
-                            {
-                                "name": "User:",
-                                "value": (
-                                    (
-                                        request.user.username
-                                        + " ("
-                                        + str(request.user.pk)
-                                        + ")"
-                                        if request.user.is_authenticated
-                                        else "Anonymous"
-                                    )
-                                    if request
-                                    else "No Request"
-                                ),
+                                "value": request.path if request else 'No Request'
                             },
                             {
                                 "name": "Status Code:",
