@@ -52,9 +52,9 @@ class BatchDataTable(LoginRequiredMixin, CustomDatatable):
     def get_initial_queryset(self, request=None):
         return self.model.objects.all().annotate(
             total_trainee=Count(
-                "sub_batches__intern_sub_batch_details",
+                "sub_batches__intern_details",
                 filter=Q(
-                    sub_batches__intern_sub_batch_details__deleted_at__isnull=True
+                    sub_batches__intern_details__deleted_at__isnull=True
                 ),
             )
         )
@@ -140,6 +140,8 @@ def delete_batch(request, pk):
     """
     try:
         batch = get_object_or_404(Batch, id=pk)
+        # TODO :: Need to delete the intern_details of sub_batch here!
+        batch.sub_batches.all().delete()
         batch.delete()
         return JsonResponse({"message": "Batch deleted succcessfully"})
     except Exception as e:

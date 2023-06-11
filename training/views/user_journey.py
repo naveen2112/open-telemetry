@@ -24,7 +24,7 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
             extension=OuterRef("id")
         ).order_by("-id")[:1]
         sub_batch_id = SubBatch.objects.filter(
-            intern_sub_batch_details__user=self.object.id
+            intern_details__user=self.object.id
         ).first()
 
         task_summary = (
@@ -87,7 +87,7 @@ def update_task_score(request, pk):
             report.task_id = request.POST.get("task")
             report.extension_id = request.POST.get("extension")
             report.sub_batch = SubBatch.objects.filter(
-                intern_sub_batch_details__user=pk
+                intern_details__user=pk
             ).first()
             report.is_retry = True if request.POST.get("status") == "true" else False
             report.created_by = request.user
@@ -107,7 +107,7 @@ def update_task_score(request, pk):
 
 def add_extension(request, pk):
     Extension.objects.create(
-        sub_batch=SubBatch.objects.filter(intern_sub_batch_details__user=pk).first(),
+        sub_batch=SubBatch.objects.filter(intern_details__user=pk).first(),
         user_id=pk,
         created_by=request.user,
     )

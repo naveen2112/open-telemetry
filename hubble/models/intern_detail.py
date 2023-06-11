@@ -4,7 +4,7 @@ from core import db
 
 
 class InternDetail(db.SoftDeleteWithBaseModel):
-    sub_batch = models.ForeignKey('SubBatch', on_delete=models.CASCADE, related_name="intern_sub_batch_details")
+    sub_batch = models.ForeignKey('SubBatch', on_delete=models.CASCADE, related_name="intern_details")
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="intern_details")
     college = models.CharField(max_length=250)
     expected_completion = models.DateField(null=True)
