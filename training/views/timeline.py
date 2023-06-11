@@ -58,20 +58,10 @@ class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
 
     def customize_row(self, row, obj):
         buttons = (
-            template_utils.show_button(
-                reverse("timeline-template.detail", args=[obj.id])
-            )
-            + template_utils.edit_button(
-                reverse("timeline-template.show", args=[obj.id])
-            )
-            + template_utils.delete_button(
-                "removeTimeline('"
-                + reverse("timeline-template.remove", args=[obj.id])
-                + "')"
-            )
-            + template_utils.duplicate_button(
-                reverse("timeline-template.show", args=[obj.id])
-            )
+            template_utils.show_button(reverse("timeline-template.detail", args=[obj.id]))
+            + template_utils.edit_button(reverse("timeline-template.show", args=[obj.id]))
+            + template_utils.delete_button("deleteTimeline('" + reverse("timeline-template.delete", args=[obj.id]) + "')")
+            + template_utils.duplicate_button(reverse("timeline-template.show", args=[obj.id]))
         )
         row[
             "action"
@@ -170,10 +160,8 @@ def update_timeline_template(request, pk):
         )
 
 
-@require_http_methods(
-    ["DELETE"]
-)  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
-def remove_timeline_template(request, pk):
+@require_http_methods(["DELETE"])  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
+def delete_timeline_template(request, pk):
     """
     Delete Timeline Template
     Soft delete the template and record the deletion time in deleted_at field

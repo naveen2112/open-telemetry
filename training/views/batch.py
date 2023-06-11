@@ -63,9 +63,7 @@ class BatchDataTable(LoginRequiredMixin, CustomDatatable):
         buttons = (
             template_utils.show_button(reverse("batch.detail", args=[obj.id]))
             + template_utils.edit_button(reverse("batch.show", args=[obj.id]))
-            + template_utils.delete_button(
-                "removeBatch('" + reverse("batch.remove", args=[obj.id]) + "')"
-            )
+            + template_utils.delete_button("deleteBatch('" + reverse("batch.delete", args=[obj.id]) + "')")
         )
         row[
             "action"
@@ -134,10 +132,8 @@ def update_batch(request, pk):
 
 
 @login_required()
-@require_http_methods(
-    ["DELETE"]
-)  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
-def remove_batch(request, pk):
+@require_http_methods(["DELETE"])  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
+def delete_batch(request, pk):
     """
     Delete Batch
     Soft delete the batch and record the deletion time in deleted_at field

@@ -160,6 +160,7 @@ Sub Batch details
                 type: "DELETE",
                 url: url,
                 success: function(data) {
+                    removeErrors();
                     $('.page-loader').hide();
                     $('#sub-batch-trainees-table').DataTable().ajax.reload();
                 },

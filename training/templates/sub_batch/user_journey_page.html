@@ -204,8 +204,8 @@
                 task: task,
                 extension: extension,
             },
-            success: function(data) {
-                $('.form_errors').remove();
+            success: function (data) {
+                removeErrors();
                 $('.page-loader').hide();
                 if (data.status === 'success') {
                     closeModal('modal');

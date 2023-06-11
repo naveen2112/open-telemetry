@@ -114,7 +114,7 @@ def add_extension(request, pk):
     return JsonResponse({"status": "success"})
 
 
-def remove_extension(request, pk):
+def delete_extension(request, pk):
     """
     Delete Timeline Template
     Soft delete the template and record the deletion time in deleted_at field
