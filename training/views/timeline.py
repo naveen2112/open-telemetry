@@ -150,6 +150,7 @@ def delete_timeline_template(request, pk):
     """
     try:
         timeline = get_object_or_404(Timeline, id=pk)
+        timeline.task_timeline.all().delete()
         timeline.delete()
         return JsonResponse({"message": "Timeline Template deleted succcessfully"})
     except Exception as e:

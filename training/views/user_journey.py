@@ -23,7 +23,7 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
         
         latest_task_report = Assessment.objects.filter(task=OuterRef("id"),user_id=self.object.id).order_by("-id")[:1]
         latest_extended_task_report = Assessment.objects.filter(extension=OuterRef("id")).order_by("-id")[:1]
-        sub_batch_id = SubBatch.objects.filter(intern_sub_batch_details__user=self.object.id).first()
+        sub_batch_id = SubBatch.objects.filter(intern_details__user=self.object.id).first()
 
         task_summary = (
             SubBatchTaskTimeline.objects.filter(
@@ -72,7 +72,7 @@ def update_task_score(request, pk):
             report.user_id = pk 
             report.task_id = request.POST.get("task")
             report.extension_id = request.POST.get("extension")
-            report.sub_batch = SubBatch.objects.filter(intern_sub_batch_details__user = pk).first()
+            report.sub_batch = SubBatch.objects.filter(intern_details__user = pk).first()
             report.is_retry = True if request.POST.get("status") == "true" else False
             report.created_by = request.user
             report.save()
@@ -91,7 +91,7 @@ def update_task_score(request, pk):
 
 def add_extension(request, pk):
     Extension.objects.create(
-            sub_batch=SubBatch.objects.filter(intern_sub_batch_details__user = pk).first(),
+            sub_batch=SubBatch.objects.filter(intern_details__user = pk).first(),
             user_id=pk,
             created_by=request.user,
         )

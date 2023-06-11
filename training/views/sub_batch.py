@@ -37,7 +37,7 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
     ]
 
     def get_initial_queryset(self, request=None):
-        return self.model.objects.filter(batch=request.POST.get("batch_id")).annotate(trainee_count=Count("intern_sub_batch_details", filter=Q(intern_sub_batch_details__deleted_at__isnull= True))) 
+        return self.model.objects.filter(batch=request.POST.get("batch_id")).annotate(trainee_count=Count("intern_details", filter=Q(intern_details__deleted_at__isnull= True)))
 
     def customize_row(self, row, obj):
         buttons = (
@@ -192,7 +192,7 @@ def delete_sub_batch(request, pk):
     """
     try:
         sub_batch = get_object_or_404(SubBatch, id=pk)
-        sub_batch.intern_sub_batch_details.all().delete()
+        sub_batch.intern_details.all().delete()
         sub_batch.task_timelines.all().delete()
         sub_batch.delete()
         return JsonResponse({"message": "Sub-Batch deleted succcessfully"})
