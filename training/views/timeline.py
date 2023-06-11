@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import F, Sum
+from django.db.models import F, Sum, FloatField
+from django.db.models.functions import Coalesce
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -34,7 +35,7 @@ class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
         {"name": "id", "visible": False, "searchable": False},
         {"name": "name", "visible": True, "searchable": True},
         {"name": "Days", "visible": True, "searchable": True},
-        {"name": "is_active", "visible": True, "searchable": True},
+        {"name": "is_active", "title": "Is Active", "visible": True, "searchable": True},
         {
             "name": "team",
             "visible": True,
@@ -54,8 +55,8 @@ class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
     def get_initial_queryset(self, request=None):
         return self.model.objects.filter(
             task_timeline__deleted_at__isnull=True
-        ).annotate(Days=Sum(F("task_timeline__days")))
-
+        ).annotate(Days=Coalesce(Sum(F("task_timeline__days")), 0, output_field=FloatField())) # TODO :: should we need '-' incase we need to CAST here
+     
     def customize_row(self, row, obj):
         buttons = (
             template_utils.show_button(reverse("timeline-template.detail", args=[obj.id]))

@@ -74,28 +74,24 @@ Timeline Template
 
 {% block script %}
 <script>
-    $(document).ready(function() {
-
-        $(document).ready(function() {
-            AjaxDatatableViewUtils.initialize_table(
-                $('#timeline-table'),
-                "{% url 'timeline-template.datatable' %}",
-                {
-                    serverSide: true,
-                    processing: true,
-                    autoWidth: false,
-                    scrollX: false,
-                    order: [],
-                },
-            );
-        });
-        $("#search_project").on('input', function() {
-            var searchvalue = $(this).val();
-            var table = $("#timeline-table").DataTable();
-            table.search(searchvalue).draw();
-        });
+    $(document).ready(function () {
+        AjaxDatatableViewUtils.initialize_table(
+            $('#timeline-table'),
+            "{% url 'timeline-template.datatable' %}",
+            {
+                serverSide: true,
+                processing: true,
+                autoWidth: false,
+                scrollX: false,
+                order: [],
+            },
+        );
     });
-
+    $("#search_project").on('input', function () {
+        var searchvalue = $(this).val();
+        var table = $("#timeline-table").DataTable();
+        table.search(searchvalue).draw();
+    });
     function openModal() {
         openBaseModal();
         $('#id_team').val('');
@@ -106,34 +102,34 @@ Timeline Template
         $('#form_heading').html("Create Timeline");
     }
 
-        function createTimeline() {
-            removeErrors();
-            $('.page-loader').show();
-            $.ajax({
-                type: "POST",
-                url: "{% url 'timeline-template.create' %}",
-                data: {
-                    id: $("#timeline_id").val(),
-                    name: $('#id_name').val(),
-                    team: $('#id_team').val(),
-                    is_active: $('.checkbox_active').is(":checked"),
-                },
-                success: function(data) {
-                    removeErrors();
-                    $('.page-loader').hide();
-                    if (data.status === 'success') {
-                        $('#timeline-table').DataTable().ajax.reload();
-                        closeModal('modal');
-                    } else {
-                        renderFormError(data);
-                    }
-                },
-                error: function() {
-                    $('.page-loader').hide();
-                    alert("Something went wrong"); 
-                },
-            });
-        }
+    function createTimeline() {
+        removeErrors();
+        $('.page-loader').show();
+        $.ajax({
+            type: "POST",
+            url: "{% url 'timeline-template.create' %}",
+            data: {
+                id: $("#timeline_id").val(),
+                name: $('#id_name').val(),
+                team: $('#id_team').val(),
+                is_active: $('.checkbox_active').is(":checked"),
+            },
+            success: function (data) {
+                removeErrors();
+                $('.page-loader').hide();
+                if (data.status === 'success') {
+                    $('#timeline-table').DataTable().ajax.reload();
+                    closeModal('modal');
+                } else {
+                    renderFormError(data);
+                }
+            },
+            error: function () {
+                $('.page-loader').hide();
+                alert("Something went wrong");
+            },
+        });
+    }
 
     function openUpdateModel(url) {
         removeErrors();
@@ -143,7 +139,7 @@ Timeline Template
         $.ajax({
             type: "GET",
             url: url,
-            success: function(data) {
+            success: function (data) {
                 $('.page-loader').hide();
                 $('#form_heading').html("Update Timeline");
                 $('#id_name').val(data.timeline.name);
@@ -156,7 +152,7 @@ Timeline Template
                 }
                 $('.dropdown_selected_value').html($("#id_team option[value='" + data.timeline.team + "']").text());
             },
-            error: function(jqXHR, textStatus, errorThrown) {
+            error: function (jqXHR, textStatus, errorThrown) {
                 alert(jqXHR.responseJSON.message);
                 $('.page-loader').hide();
             },
@@ -166,73 +162,73 @@ Timeline Template
         $('#submit-btn').attr("onclick", "updateTimeline()");
     }
 
-        function updateTimeline() {
-            $('.page-loader').show();
-            $.ajax({
-                type: "POST",
-                url: "timeline-template/"+ $("#timeline_id").val() +"/edit", //TODO
-                data: {
-                    name: $('#id_name').val(),
-                    team: $("#id_team").val(),
-                    is_active: $('#id_is_active').is(":checked"),
-                },
-                success: function(data) {
-                    removeErrors();
-                    $('.page-loader').hide();
-                    if (data.status === 'success') {
-                        $('#timeline-table').DataTable().ajax.reload();
-                        closeModal('modal');
-                    } else {
-                        renderFormError(data);
-                    }
-                },
-                error: function() {
-                    $('.page-loader').hide();
-                    alert("Something went wrong");
-                },
-            });
-        }
+    function updateTimeline() {
+        $('.page-loader').show();
+        $.ajax({
+            type: "POST",
+            url: "timeline-template/" + $("#timeline_id").val() + "/edit", //TODO
+            data: {
+                name: $('#id_name').val(),
+                team: $("#id_team").val(),
+                is_active: $('#id_is_active').is(":checked"),
+            },
+            success: function (data) {
+                removeErrors();
+                $('.page-loader').hide();
+                if (data.status === 'success') {
+                    $('#timeline-table').DataTable().ajax.reload();
+                    closeModal('modal');
+                } else {
+                    renderFormError(data);
+                }
+            },
+            error: function () {
+                $('.page-loader').hide();
+                alert("Something went wrong");
+            },
+        });
+    }
 
-        function deleteTimeline(url) {
-            let text = 'Are you sure do you want to delete';
-            if (confirm(text) == true) {
-                $('.page-loader').show();
-                $.ajax({
-                    type: "DELETE",
-                    url: url,
-                    success: function(data) {
-                        $('.page-loader').hide();
-                        $('#timeline-table').DataTable().ajax.reload();
-                    },
-                    error: function() {
-                        $('.page-loader').hide();
-                        alert("Something went wrong");
-                    },
-                });
-            }
-        }
-        
-        function duplicateTimelineModal(url) {
-            removeErrors();
+    function deleteTimeline(url) {
+        let text = 'Are you sure do you want to delete';
+        if (confirm(text) == true) {
             $('.page-loader').show();
-            $('#duplicate_team').val('');
-            $('.dropdown_selected_value').html('');
             $.ajax({
-                type: "GET",
+                type: "DELETE",
                 url: url,
-                success: function(data) {
+                success: function (data) {
                     $('.page-loader').hide();
-                    $('#id_name').val('Copy_' + data.timeline.name);
-                    $('#timeline_id').val(data.timeline.id);
+                    $('#timeline-table').DataTable().ajax.reload();
                 },
-                error: function() {
+                error: function () {
                     $('.page-loader').hide();
                     alert("Something went wrong");
                 },
             });
-            document.getElementById("modal").classList.remove("hidden");
-            document.getElementById("modal").classList.add("blocker");
-            $('#submit-btn').attr("onclick", "createTimeline()");
         }
-    </script>
+    }
+
+    function duplicateTimelineModal(url) {
+        removeErrors();
+        $('.page-loader').show();
+        $('#duplicate_team').val('');
+        $('.dropdown_selected_value').html('');
+        $.ajax({
+            type: "GET",
+            url: url,
+            success: function (data) {
+                $('.page-loader').hide();
+                $('#id_name').val('Copy_' + data.timeline.name);
+                $('#timeline_id').val(data.timeline.id);
+            },
+            error: function () {
+                $('.page-loader').hide();
+                alert("Something went wrong");
+            },
+        });
+        document.getElementById("modal").classList.remove("hidden");
+        document.getElementById("modal").classList.add("blocker");
+        $('#submit-btn').attr("onclick", "createTimeline()");
+    }
+</script>
 {% endblock %}
