@@ -5,15 +5,20 @@ from django.http import FileResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 
+
 class InductionKit(LoginRequiredMixin, TemplateView):
     """
     Induction Kit
     """
+
     template_name = "induction_kit.html"
     # Getting the list of pdf files in the static folder.
     static_path = list(settings.STATICFILES_DIRS)
     extra_context = {
-        "pdf_files": [file for file in os.listdir(f"{static_path[0]}/training/pdf") if os.path.splitext(file)[1] == ".pdf"
+        "pdf_files": [
+            file
+            for file in os.listdir(f"{static_path[0]}/training/pdf")
+            if os.path.splitext(file)[1] == ".pdf"
         ],
     }
 

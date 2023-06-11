@@ -1,5 +1,6 @@
-from ajax_datatable import AjaxDatatableView
 import datetime
+
+from ajax_datatable import AjaxDatatableView
 
 
 class CustomDatatable(AjaxDatatableView):
@@ -63,7 +64,7 @@ class CustomDatatable(AjaxDatatableView):
 
             json_data.append(retdict)
         return json_data
-    
+
 
 def calculate_duration(holidays, start_date, duration, number_of_days):
     start_time = datetime.time(hour=9, minute=0)  # Day start time
@@ -75,15 +76,11 @@ def calculate_duration(holidays, start_date, duration, number_of_days):
     task_end_date = None
     while duration != datetime.timedelta(0):
         temp_duration = datetime.timedelta(hours=4)
-        end_datetime = (
-            datetime.datetime.combine(start_date, start_time) + temp_duration
-        )
+        end_datetime = datetime.datetime.combine(start_date, start_time) + temp_duration
         start_datetime = datetime.datetime.combine(start_date, start_time)
 
         # While the end date falls on a Sunday or holiday then it will increament the date 1
-        while (
-            end_datetime.date().weekday() == 6
-        ) or end_datetime.date() in holidays:
+        while (end_datetime.date().weekday() == 6) or end_datetime.date() in holidays:
             end_datetime += datetime.timedelta(days=1)
 
         total_start_hours = (duration.days * 24) + (
@@ -95,7 +92,7 @@ def calculate_duration(holidays, start_date, duration, number_of_days):
             # While the end date falls on a Sunday or holiday then it will increament the date 1
             while (
                 start_datetime.date().weekday() == 6
-            ) or start_datetime.date() in holidays: #need to check
+            ) or start_datetime.date() in holidays:  # need to check
                 start_datetime += datetime.timedelta(days=1)
             task_start_date = start_datetime.date()
 
@@ -121,4 +118,4 @@ def calculate_duration(holidays, start_date, duration, number_of_days):
         if end_datetime.time() == end_time:
             start_time = datetime.time(hour=9, minute=0)
 
-    return ([task_start_date, task_end_date, start_date, start_time])
+    return [task_start_date, task_end_date, start_date, start_time]

@@ -12,11 +12,10 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView
 
 from core import template_utils
-from core.utils import CustomDatatable
+from core.utils import CustomDatatable, calculate_duration
 from hubble.models import (Batch, Holiday, InternDetail, SubBatch,
                            SubBatchTaskTimeline, Timeline, TimelineTask, User)
 from training.forms import AddInternForm, SubBatchForm
-from core.utils import calculate_duration
 
 
 class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
@@ -30,14 +29,37 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
         {"name": "id", "visible": False, "searchable": False},
         {"name": "name", "visible": True, "searchable": False},
         {"name": "team", "visible": True, "searchable": False},
-        {"name": "trainee_count","title": "No. of Trainees", "visible": True, "searchable": False},
+        {
+            "name": "trainee_count",
+            "title": "No. of Trainees",
+            "visible": True,
+            "searchable": False,
+        },
         {"name": "start_date", "visible": True, "searchable": False},
-        {"name": "timeline", "title": "Assigned Timeline Template", "visible": True, "searchable": False, "foreign_field": "timeline__name"},
-        {"name": "action", "title": "Action", "visible": True, "searchable": False, "orderable": False, "className": "text-center",},
+        {
+            "name": "timeline",
+            "title": "Assigned Timeline Template",
+            "visible": True,
+            "searchable": False,
+            "foreign_field": "timeline__name",
+        },
+        {
+            "name": "action",
+            "title": "Action",
+            "visible": True,
+            "searchable": False,
+            "orderable": False,
+            "className": "text-center",
+        },
     ]
 
     def get_initial_queryset(self, request=None):
-        return self.model.objects.filter(batch=request.POST.get("batch_id")).annotate(trainee_count=Count("intern_sub_batch_details", filter=Q(intern_sub_batch_details__deleted_at__isnull= True))) 
+        return self.model.objects.filter(batch=request.POST.get("batch_id")).annotate(
+            trainee_count=Count(
+                "intern_sub_batch_details",
+                filter=Q(intern_sub_batch_details__deleted_at__isnull=True),
+            )
+        )
 
     def customize_row(self, row, obj):
         buttons = (
@@ -45,20 +67,28 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
             + template_utils.edit_button_new_page(reverse("sub-batch.edit", args=[obj.id]))
             + template_utils.delete_button("deleteSubBatch('" + reverse("sub-batch.delete", args=[obj.id]) + "')")
         )
-        row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        row[
+            "action"
+        ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         row["start_date"] = obj.start_date.strftime("%d %b %Y")
         return
 
 
-def create_and_update_sub_batch(sub_batch, user=None, is_create=True, desired_start_date=None):
+def create_and_update_sub_batch(
+    sub_batch, user=None, is_create=True, desired_start_date=None
+):
     holidays = Holiday.objects.values_list("date_of_holiday")
     start_date = datetime.datetime.strptime(str(sub_batch.start_date), "%Y-%m-%d")
     order = 0
     if is_create:
         for task in TimelineTask.objects.filter(timeline=sub_batch.timeline.id):
-            duration = datetime.timedelta(hours=task.days * 8)  # Working hours for a day
-            values = calculate_duration(holidays, start_date, duration, number_of_days=task.days)
-    
+            duration = datetime.timedelta(
+                hours=task.days * 8
+            )  # Working hours for a day
+            values = calculate_duration(
+                holidays, start_date, duration, number_of_days=task.days
+            )
+
             order += 1
             SubBatchTaskTimeline.objects.create(
                 name=task.name,
@@ -76,7 +106,9 @@ def create_and_update_sub_batch(sub_batch, user=None, is_create=True, desired_st
         start_date = desired_start_date
         for task in SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch):
             duration = datetime.timedelta(hours=task.days * 8)
-            values = calculate_duration(holidays, start_date, duration, number_of_days=task.days)
+            values = calculate_duration(
+                holidays, start_date, duration, number_of_days=task.days
+            )
             start_date = datetime.datetime.combine(values[2], values[3])
             task.start_date = values[0]
             task.end_date = values[1]
@@ -98,30 +130,44 @@ def create_sub_batch(request, pk):
         if "users_list_file" in request.FILES:
             excel_file = request.FILES["users_list_file"]
             df = pd.read_excel(excel_file)
-            if InternDetail.objects.filter(user__employee_id__in=df['employee_id']).exists():
-                sub_batch_form.add_error(None, "Some of the Users are already added in another sub-batch")  # Adding the non-field-error if the user aalready exists
+            if InternDetail.objects.filter(
+                user__employee_id__in=df["employee_id"]
+            ).exists():
+                sub_batch_form.add_error(
+                    None, "Some of the Users are already added in another sub-batch"
+                )  # Adding the non-field-error if the user aalready exists
         else:
-            sub_batch_form.add_error(None, "Please upload a file")  # Adding the non-field-error if the file was not uploaded while submission
+            sub_batch_form.add_error(
+                None, "Please upload a file"
+            )  # Adding the non-field-error if the file was not uploaded while submission
         if sub_batch_form.is_valid():  # Check if both the forms are valid or not
             sub_batch = sub_batch_form.save(commit=False)
             if TimelineTask.objects.filter(timeline=sub_batch.timeline.id):
                 sub_batch.batch = Batch.objects.get(id=pk)
                 sub_batch.created_by = request.user
                 sub_batch.save()
-                timeline_task_end_date = create_and_update_sub_batch(sub_batch = sub_batch, user = request.user)
-                user_details = dict(User.objects.filter(employee_id__in=df['employee_id']).values_list('employee_id', 'id'))
-                for row in range(len(df)): # Iterating over pandas dataframe
+                timeline_task_end_date = create_and_update_sub_batch(
+                    sub_batch=sub_batch, user=request.user
+                )
+                user_details = dict(
+                    User.objects.filter(employee_id__in=df["employee_id"]).values_list(
+                        "employee_id", "id"
+                    )
+                )
+                for row in range(len(df)):  # Iterating over pandas dataframe
                     InternDetail.objects.create(
                         sub_batch=sub_batch,
-                        user_id=user_details[str(df['employee_id'][row])],
+                        user_id=user_details[str(df["employee_id"][row])],
                         expected_completion=timeline_task_end_date,
-                        college=df['college'][row],
+                        college=df["college"][row],
                         created_by=request.user,
                     )
 
                 return redirect(reverse("batch.detail", args=[pk]))
             else:
-                sub_batch_form.add_error(None, "The Selected Team's Active Timeline doesn't have any tasks")
+                sub_batch_form.add_error(
+                    None, "The Selected Team's Active Timeline doesn't have any tasks"
+                )
     context = {
         "form": sub_batch_form,
         "sub_batch_id": pk,
@@ -164,20 +210,25 @@ def update_sub_batch(request, pk):
             if TimelineTask.objects.filter(timeline=active_form.timeline.id):
                 active_form = sub_batch_form.save()
                 if sub_batch.timeline.id != sub_batch.timeline.id:
-                    create_and_update_sub_batch(sub_batch, request.user) #TODO need to delete old one before new one
+                    create_and_update_sub_batch(
+                        sub_batch, request.user
+                    )  # TODO need to delete old one before new one
                 else:
-                    timeline_task_end_date = create_and_update_sub_batch(sub_batch, is_create=False, desired_start_date=active_form.start_date)
+                    timeline_task_end_date = create_and_update_sub_batch(
+                        sub_batch,
+                        is_create=False,
+                        desired_start_date=active_form.start_date,
+                    )
                 for trainee in InternDetail.objects.filter(sub_batch=sub_batch):
                     if sub_batch.start_date != sub_batch.start_date:
                         trainee.expected_completion = timeline_task_end_date
                         trainee.save()
                 return redirect(reverse("batch.detail", args=[sub_batch.batch.id]))
             else:
-                sub_batch_form.add_error(None, "The Selected Team's Active Timeline doesn't have any tasks")
-        context = {
-            "form": sub_batch_form,
-            "sub_batch": sub_batch
-        }
+                sub_batch_form.add_error(
+                    None, "The Selected Team's Active Timeline doesn't have any tasks"
+                )
+        context = {"form": sub_batch_form, "sub_batch": sub_batch}
         return render(request, "sub_batch/update_sub_batch.html", context)
     sub_batch = SubBatch.objects.get(id=pk)
     context = {
@@ -223,8 +274,20 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
         {"name": "pk", "visible": False, "searchable": False},
         {"name": "user", "title": "User", "visible": True, "searchable": False},
         {"name": "college", "title": "College", "visible": True, "searchable": False},
-        {"name": "expected_completion", "title": "Expected Completion", "visible": True, "searchable": False},
-        {"name": "action", "title": "Action", "visible": True, "searchable": False, "orderable": False, "className": "text-center",},
+        {
+            "name": "expected_completion",
+            "title": "Expected Completion",
+            "visible": True,
+            "searchable": False,
+        },
+        {
+            "name": "action",
+            "title": "Action",
+            "visible": True,
+            "searchable": False,
+            "orderable": False,
+            "className": "text-center",
+        },
     ]
 
     def get_initial_queryset(self, request=None):
@@ -232,12 +295,16 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
 
     def customize_row(self, row, obj):
         buttons = (
-            template_utils.show_button(reverse("user_reports", args=[obj.user.id])) + 
+            template_utils.show_button(reverse("user_reports", args=[obj.user.id]))
+            +
             # template_utils.edit_button_new_page(reverse("batch")) + #need to change in next PR
-            template_utils.delete_button("removeIntern('" + reverse("trainee.remove", args=[obj.id]) + "')")
-
+            template_utils.delete_button(
+                "removeIntern('" + reverse("trainee.remove", args=[obj.id]) + "')"
+            )
         )
-        row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        row[
+            "action"
+        ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         return
 
 
@@ -257,7 +324,9 @@ def add_trainee(request):
                 )  # Adding form error if the trainees is already added in another
         if form.is_valid():  # Check if form is valid or not
             sub_batch = SubBatch.objects.get(id=request.POST.get("sub_batch_id"))
-            timeline_data = SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch).last()
+            timeline_data = SubBatchTaskTimeline.objects.filter(
+                sub_batch=sub_batch
+            ).last()
             trainee = form.save(commit=False)
             trainee.sub_batch = sub_batch
             trainee.expected_completion = timeline_data.end_date
@@ -274,17 +343,16 @@ def add_trainee(request):
                     "non_field_errors": non_field_errors,
                 }
             )
-        
+
 
 @login_required
-@require_http_methods(
-    ["DELETE"]
-) 
+@require_http_methods(["DELETE"])
 def remove_trainee(request, pk):
     try:
         intern_detail = get_object_or_404(InternDetail, id=pk)
         intern_detail.delete()
-        return JsonResponse({"message" : "Intern has been deleted succssfully"})
+        return JsonResponse({"message": "Intern has been deleted succssfully"})
     except Exception as e:
-        return JsonResponse({"message": "Error while deleting Timeline Template!"}, status=500)
-
+        return JsonResponse(
+            {"message": "Error while deleting Timeline Template!"}, status=500
+        )

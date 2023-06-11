@@ -1,22 +1,25 @@
 from django import forms
+from django.core.exceptions import ValidationError
+
 from hubble import models
 from hubble.models import Assessment
-from django.core.exceptions import ValidationError
 
 
 class TimelineForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)         
-        self.fields['team'].empty_label = 'Select a Team'
+        super().__init__(*args, **kwargs)
+        self.fields["team"].empty_label = "Select a Team"
 
     def clean_is_active(self):
         """
         This function checks if a team already has an active template and raises a validation error if
         it does.
         """
-        if (self.cleaned_data.get("team", None) and(self.cleaned_data["is_active"])):
-            query = models.Timeline.objects.filter(team=self.cleaned_data["team"], is_active=True).values("id")
-            if (len(query)) and (query[0]['id'] != (self.instance.id)):
+        if self.cleaned_data.get("team", None) and (self.cleaned_data["is_active"]):
+            query = models.Timeline.objects.filter(
+                team=self.cleaned_data["team"], is_active=True
+            ).values("id")
+            if (len(query)) and (query[0]["id"] != (self.instance.id)):
                 raise ValidationError("Team already has an active template.")
 
     class Meta:
@@ -98,10 +101,10 @@ class BatchForm(forms.ModelForm):
 
 class SubBatchForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)         
-        self.fields['team'].empty_label = 'Select a Team'
-        self.fields['primary_mentor'].empty_label = 'Select a Primary Mentor'
-        self.fields['secondary_mentor'].empty_label = 'Select a Secondary Mentor'
+        super().__init__(*args, **kwargs)
+        self.fields["team"].empty_label = "Select a Team"
+        self.fields["primary_mentor"].empty_label = "Select a Primary Mentor"
+        self.fields["secondary_mentor"].empty_label = "Select a Secondary Mentor"
 
     class Meta:
         model = models.SubBatch
@@ -160,7 +163,8 @@ class AddInternForm(forms.ModelForm):
         return self.cleaned_data["college"]
 
     user = forms.ChoiceField(
-        choices=(('', 'Select an Intern'),) + tuple(
+        choices=(("", "Select an Intern"),)
+        + tuple(
             models.User.objects.exclude(intern_details__isnull=False)
             .distinct("id")
             .values_list("id", "name")
