@@ -43,7 +43,7 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
         buttons = (
             template_utils.show_button(reverse("sub-batch.detail", args=[obj.id]))
             + template_utils.edit_button_new_page(reverse("sub-batch.edit", args=[obj.id]))
-            + template_utils.delete_button("removeSubBatch('" + reverse("sub-batch.remove", args=[obj.id]) + "')")
+            + template_utils.delete_button("deleteSubBatch('" + reverse("sub-batch.delete", args=[obj.id]) + "')")
         )
         row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         row["start_date"] = obj.start_date.strftime("%d %b %Y")
@@ -191,7 +191,7 @@ def update_sub_batch(request, pk):
 @require_http_methods(
     ["DELETE"]
 )  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
-def remove_sub_batch(request, pk):
+def delete_sub_batch(request, pk):
     """
     Delete Batch
     Soft delete the batch and record the deletion time in deleted_at field

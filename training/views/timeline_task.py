@@ -34,7 +34,7 @@ class TimelineTemplateTaskDataTable(LoginRequiredMixin, CustomDatatable):
     def customize_row(self, row, obj):
         buttons = (
             template_utils.edit_button(reverse("timeline-task.show", args=[obj.id]))
-            + template_utils.delete_button("removeTimeline('" + reverse("timeline-task.remove", args=[obj.id]) + "')"))
+            + template_utils.delete_button("deleteTimeline('" + reverse("timeline-task.delete", args=[obj.id]) + "')"))
         row["action"] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
         row["name"] = f"<span data-id='{obj.id}'>{obj.name}</span>"
         return
@@ -117,7 +117,7 @@ def update_timeline_task(request, pk):
 
 @login_required()
 @require_http_methods(["DELETE"])  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
-def remove_timeline_task(request, pk):
+def delete_timeline_task(request, pk):
     """
     Delete Timeline Template Task
     Soft delete the template and record the deletion time in deleted_at field

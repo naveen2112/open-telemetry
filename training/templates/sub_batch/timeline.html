@@ -139,7 +139,7 @@
                     end_date: $("#date_range").attr('end-date')
                 },
                 success: function(data) {
-                    $('.form_errors').remove();
+                    removeErrors();
                     $('.page-loader').hide();
                     if (data.status === 'success') {
                         $('#sub-batch-timeline-table').DataTable().ajax.reload();
@@ -211,7 +211,7 @@
                     task_type: $('input[name="task_type"]:checked').val(),
                 },
                 success: function(data) {
-                    $('.form_errors').remove();
+                    removeErrors();
                     $('.page-loader').hide();
                     if (data.status === 'success') {
                         $('#sub-batch-timeline-table').DataTable().ajax.reload();
@@ -223,7 +223,7 @@
             });
         }
 
-        function removeTimeline(url) {
+        function deleteTimeline(url) {
             let text = 'Are you sure do you want to delete';
             if (confirm(text) == true) {
                 $('.page-loader').show();

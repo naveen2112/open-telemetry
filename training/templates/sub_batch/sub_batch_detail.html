@@ -141,7 +141,7 @@
                     sub_batch_id: '{{ object.id }}'
                 },
                 success: function(data) {
-                    $('.form_errors').remove();
+                    removeErrors();
                     $('.page-loader').hide();
                     if (data.status === 'success') {
                         $('#sub-batch-trainees-table').DataTable().ajax.reload();
