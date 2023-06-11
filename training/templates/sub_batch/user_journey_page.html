@@ -196,7 +196,7 @@
                 extension: extension,           
             },
             success: function (data) {
-                $('.form_errors').remove();
+                removeErrors();
                 $('.page-loader').hide();
                 if (data.status === 'success') {
                     closeModal('modal');

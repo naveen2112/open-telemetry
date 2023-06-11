@@ -113,7 +113,7 @@ def create_sub_batch(request, pk):
                 for row in range(len(df)): # Iterating over pandas dataframe
                     InternDetail.objects.create(
                         sub_batch=sub_batch,
-                        user_id=user_details[df['employee_id'][row]],
+                        user_id=user_details[str(df['employee_id'][row])],
                         expected_completion=timeline_task_end_date,
                         college=df['college'][row],
                         created_by=request.user,
@@ -233,7 +233,9 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
     def customize_row(self, row, obj):
         buttons = (
             template_utils.show_button(reverse("user_reports", args=[obj.user.id])) + 
-            template_utils.edit_button_new_page(reverse("batch")) #need to change in next PR
+            # template_utils.edit_button_new_page(reverse("batch")) + #need to change in next PR
+            template_utils.delete_button("removeIntern('" + reverse("trainee.remove", args=[obj.id]) + "')")
+
         )
         row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         return
@@ -272,3 +274,17 @@ def add_trainee(request):
                     "non_field_errors": non_field_errors,
                 }
             )
+        
+
+@login_required
+@require_http_methods(
+    ["DELETE"]
+) 
+def remove_trainee(request, pk):
+    try:
+        intern_detail = get_object_or_404(InternDetail, id=pk)
+        intern_detail.delete()
+        return JsonResponse({"message" : "Intern has been deleted succssfully"})
+    except Exception as e:
+        return JsonResponse({"message": "Error while deleting Timeline Template!"}, status=500)
+

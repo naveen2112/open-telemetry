@@ -154,7 +154,7 @@
                     timeline_id: $('#timeline_id').val(),
                 },
                 success: function(data) {
-                    $('.form_errors').remove();
+                    removeErrors();
                     $('.page-loader').hide();
                     if (data.status === 'success') {
                         $('#timeline-table').DataTable().ajax.reload();
@@ -209,7 +209,7 @@
                     task_type: $('input[name="task_type"]:checked').val(),
                 },
                 success: function(data) {
-                    $('.form_errors').remove();
+                    removeErrors();
                     $('.page-loader').hide();
                     if (data.status === 'success') {
                         $('#timeline-table').DataTable().ajax.reload();

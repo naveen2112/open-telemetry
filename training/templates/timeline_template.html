@@ -119,7 +119,7 @@
                     is_active: $('.checkbox_active').is(":checked"),
                 },
                 success: function(data) {
-                    $('.form_errors').remove();
+                    removeErrors();
                     $('.page-loader').hide();
                     if (data.status === 'success') {
                         $('#timeline-table').DataTable().ajax.reload();
@@ -177,7 +177,7 @@
                     is_active: $('#id_is_active').is(":checked"),
                 },
                 success: function(data) {
-                    $('.form_errors').remove();
+                    removeErrors();
                     $('.page-loader').hide();
                     if (data.status === 'success') {
                         $('#timeline-table').DataTable().ajax.reload();
