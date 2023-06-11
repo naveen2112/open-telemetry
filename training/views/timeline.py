@@ -1,16 +1,17 @@
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import F, Sum
 from django.forms.models import model_to_dict
-from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
-from hubble.models import Timeline, TimelineTask
-from training.forms import TimelineForm, TimelineTaskForm
-from django.views.generic import FormView, DetailView
-from core.utils import CustomDatatable
-from core import template_utils
-from django.db.models import Sum, F
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.decorators import login_required
+from django.views.generic import DetailView, FormView
+
+from core import template_utils
+from core.utils import CustomDatatable
+from hubble.models import Timeline, TimelineTask
+from training.forms import TimelineForm, TimelineTaskForm
 
 
 class TimelineTemplate(LoginRequiredMixin, FormView):
@@ -26,6 +27,7 @@ class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
     """
     Timeline Template Datatable
     """
+
     model = Timeline
 
     column_defs = [
@@ -33,12 +35,26 @@ class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
         {"name": "name", "visible": True, "searchable": True},
         {"name": "Days", "visible": True, "searchable": True},
         {"name": "is_active", "visible": True, "searchable": True},
-        {"name": "team", "visible": True, "searchable": True, "foreign_field": "team__name"},
-        {"name": "action", "title": "Action", "visible": True, "searchable": False, "orderable": False, "className": "text-center"},
+        {
+            "name": "team",
+            "visible": True,
+            "searchable": True,
+            "foreign_field": "team__name",
+        },
+        {
+            "name": "action",
+            "title": "Action",
+            "visible": True,
+            "searchable": False,
+            "orderable": False,
+            "className": "text-center",
+        },
     ]
 
     def get_initial_queryset(self, request=None):
-        return self.model.objects.filter(task_timeline__deleted_at__isnull=True).annotate(Days=Sum(F("task_timeline__days")))
+        return self.model.objects.filter(
+            task_timeline__deleted_at__isnull=True
+        ).annotate(Days=Sum(F("task_timeline__days")))
 
     def customize_row(self, row, obj):
         buttons = (
@@ -47,7 +63,9 @@ class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
             + template_utils.delete_button("deleteTimeline('" + reverse("timeline-template.delete", args=[obj.id]) + "')")
             + template_utils.duplicate_button(reverse("timeline-template.show", args=[obj.id]))
         )
-        row["action"] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
+        row[
+            "action"
+        ] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
         return
 
     def render_column(self, row, column):
@@ -75,7 +93,9 @@ def create_timeline_template(request):
             timeline.save()
 
             if request.POST.get("id"):
-                timeline_task = TimelineTask.objects.filter(timeline=request.POST.get("id"))
+                timeline_task = TimelineTask.objects.filter(
+                    timeline=request.POST.get("id")
+                )
                 order = 0
                 for task in timeline_task:
                     order += 1
@@ -112,9 +132,7 @@ def timeline_template_data(request, pk):
         }  # Covert django queryset object to dict,which can be easily serialized and sent as a JSON response
         return JsonResponse(data, safe=False)
     except Exception as e:
-        return JsonResponse(
-            {"message": "No timeline template found"}, status=500
-        )
+        return JsonResponse({"message": "No timeline template found"}, status=500)
 
 
 @login_required()
@@ -154,7 +172,9 @@ def delete_timeline_template(request, pk):
         timeline.delete()
         return JsonResponse({"message": "Timeline Template deleted succcessfully"})
     except Exception as e:
-        return JsonResponse({"message": "Error while deleting Timeline Template!"}, status=500)
+        return JsonResponse(
+            {"message": "Error while deleting Timeline Template!"}, status=500
+        )
 
 
 class TimelineTemplateDetails(LoginRequiredMixin, DetailView):
@@ -162,6 +182,7 @@ class TimelineTemplateDetails(LoginRequiredMixin, DetailView):
     Timeline Template Detail
     Display the timeline template tasks for the current template
     """
+
     model = Timeline
     extra_context = {"form": TimelineTaskForm()}
     template_name = "timeline_template_detail.html"

@@ -16,8 +16,9 @@ class TimelineTemplateTaskDataTable(LoginRequiredMixin, CustomDatatable):
     """
     Timeline Template Task Datatable
     """
+
     model = TimelineTask
-    
+
     column_defs = [
         {"name": "id", "visible": False, "searchable": False},
         {"name": "name", "visible": True, "searchable": False},
@@ -25,7 +26,14 @@ class TimelineTemplateTaskDataTable(LoginRequiredMixin, CustomDatatable):
         {"name": "present_type", "visible": True, "searchable": False},
         {"name": "task_type", "visible": True, "searchable": False},
         {"name": "created_at", "visible": False, "searchable": False},
-        {"name": "action", "title": "Action", "visible": True, "searchable": False, "orderable": False, "className": "text-center"},
+        {
+            "name": "action",
+            "title": "Action",
+            "visible": True,
+            "searchable": False,
+            "orderable": False,
+            "className": "text-center",
+        },
     ]
 
     def get_initial_queryset(self, request=None):
@@ -89,9 +97,7 @@ def timeline_task_data(request, pk):
         }  # Covert django queryset object to dict,which can be easily serialized and sent as a JSON response
         return JsonResponse(data, safe=False)
     except Exception as e:
-        return JsonResponse(
-            {"message": "No timeline template task found"}, status=500
-        )
+        return JsonResponse({"message": "No timeline template task found"}, status=500)
 
 
 @login_required()
@@ -99,7 +105,9 @@ def update_timeline_task(request, pk):
     """
     Update Timeline Template Task
     """
-    form = TimelineTaskForm(request.POST, instance=get_object_or_404(TimelineTask, id=pk))
+    form = TimelineTaskForm(
+        request.POST, instance=get_object_or_404(TimelineTask, id=pk)
+    )
     if form.is_valid():  # Check if the valid or not
         form.save()
         return JsonResponse({"status": "success"})

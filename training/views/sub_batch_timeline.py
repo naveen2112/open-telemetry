@@ -2,7 +2,6 @@ import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -11,13 +10,11 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView
 
 from core import template_utils
-from core.utils import CustomDatatable
+from core.utils import CustomDatatable, calculate_duration
 from hubble.models.holiday import Holiday
 from hubble.models.sub_batch import SubBatch
 from hubble.models.sub_batch_timeline_task import SubBatchTaskTimeline
-from hubble.models.user import User
 from training.forms import SubBatchTimelineForm
-from core.utils import calculate_duration
 
 
 class SubBatchTimeline(LoginRequiredMixin, DetailView):
@@ -47,7 +44,14 @@ class SubBatchTimelineDataTable(LoginRequiredMixin, CustomDatatable):
         {"name": "start_date", "visible": True, "searchable": False},
         {"name": "end_date", "visible": True, "searchable": False},
         {"name": "created_at", "visible": False, "searchable": False},
-        {"name": "action", "title": "Action", "visible": True, "searchable": False, "orderable": False, "className": "text-center"},
+        {
+            "name": "action",
+            "title": "Action",
+            "visible": True,
+            "searchable": False,
+            "orderable": False,
+            "className": "text-center",
+        },
     ]
 
     def get_initial_queryset(self, request=None):
@@ -59,7 +63,9 @@ class SubBatchTimelineDataTable(LoginRequiredMixin, CustomDatatable):
                 template_utils.edit_button(reverse("sub_batch.timeline.show", args=[obj.id])) + 
                 template_utils.delete_button("deleteTimeline('"+ reverse("sub_batch.timeline.delete", args=[obj.id])+ "')")
             )
-            row["action"] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
+            row[
+                "action"
+            ] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
         else:
             row["action"] = f"<div class='form-inline justify-content-center'>-</div>"
         row["start_date"] = obj.start_date.strftime("%d %b %Y")
@@ -84,7 +90,7 @@ def create_sub_batch_timeline(request, pk):
             timeline_task = form.save(commit=False)
             timeline_task.sub_batch = sub_batch
             timeline_task.created_by = request.user
-            if len(task_list)>0 and task_list[0]:
+            if len(task_list) > 0 and task_list[0]:
                 start_date = datetime.datetime.strptime(
                     str(task_list[0].start_date.date()), "%Y-%m-%d"
                 )
@@ -92,13 +98,18 @@ def create_sub_batch_timeline(request, pk):
                 start_date = datetime.datetime.strptime(
                     str(sub_batch.start_date), "%Y-%m-%d"
                 )
-            
+
             duration = datetime.timedelta(
                 hours=float(request.POST.get("days")) * 8
             )  # Working hours for a day
 
             holidays = Holiday.objects.values_list("date_of_holiday")
-            values = calculate_duration(holidays, start_date, duration, number_of_days=float(request.POST.get("days")))
+            values = calculate_duration(
+                holidays,
+                start_date,
+                duration,
+                number_of_days=float(request.POST.get("days")),
+            )
 
             timeline_task.start_date = values[0]
             timeline_task.end_date = values[1]
@@ -114,7 +125,9 @@ def create_sub_batch_timeline(request, pk):
                     duration = datetime.timedelta(
                         hours=task.days * 8
                     )  # Working hours for a day
-                    values = calculate_duration(holidays, start_date, duration, number_of_days=task.days)
+                    values = calculate_duration(
+                        holidays, start_date, duration, number_of_days=task.days
+                    )
                     task.start_date = values[0]
                     task.end_date = values[1]
                     task.save()
@@ -147,9 +160,54 @@ def sub_batch_timeline_data(request, pk):
 @login_required()
 def update_sub_batch_timeline(request, pk):
     current_task = get_object_or_404(SubBatchTaskTimeline, id=pk)
+    previous_duration = current_task.days
+    sub_batch = SubBatch.objects.get(id = current_task.sub_batch_id)
     if current_task.can_editable():
         form = SubBatchTimelineForm(request.POST, instance=current_task)
         if form.is_valid():
+            if (form.cleaned_data["days"] != previous_duration):
+                task_list = SubBatchTaskTimeline.objects.filter(
+                sub_batch=sub_batch.id,
+                order__gte=current_task.order,
+            )  # Remaining task after the updating the number of days in the current task
+                timeline_task = form.save(commit=False)
+                timeline_task.sub_batch = sub_batch
+                timeline_task.created_by = request.user
+                if len(task_list)>0 and task_list[0]:
+                    start_date = datetime.datetime.strptime(
+                        str(task_list[0].start_date.date()), "%Y-%m-%d"
+                    )
+                else:
+                    start_date = datetime.datetime.strptime(
+                        str(sub_batch.start_date), "%Y-%m-%d"
+                    )
+                
+                duration = datetime.timedelta(
+                    hours=float(request.POST.get("days")) * 8
+                )  # Working hours for a day
+
+                holidays = Holiday.objects.values_list("date_of_holiday")
+                values = calculate_duration(holidays, start_date, duration, number_of_days=float(request.POST.get("days")))
+
+                timeline_task.start_date = values[0]
+                timeline_task.end_date = values[1]
+                timeline_task.save()
+
+                start_date = datetime.datetime.combine(values[2], values[3])
+                order = int(request.POST.get("order"))
+                for task in task_list:
+                    if task.id != timeline_task.id:
+                        order += 1
+                        task.order = order
+                        duration = datetime.timedelta(
+                            hours=task.days * 8
+                        )  # Working hours for a day
+                        values = calculate_duration(holidays, start_date, duration, number_of_days=task.days)
+                        task.start_date = values[0]
+                        task.end_date = values[1]
+                        task.save()
+                        start_date = datetime.datetime.combine(values[2], values[3])
+
             form.save()            
             return JsonResponse({"status": "success"})
         field_errors = form.errors.as_json()
@@ -161,7 +219,9 @@ def update_sub_batch_timeline(request, pk):
                 "non_field_errors": non_field_errors,
             }
         )
-    return JsonResponse({"message": "This task has been already started", "status": "error"})
+    return JsonResponse(
+        {"message": "This task has been already started", "status": "error"}
+    )
 
 
 @login_required()
@@ -170,7 +230,7 @@ def update_task_sequence(request):
     sub_batch_task = SubBatchTaskTimeline.objects.get(id=task_order[0])
     first_task = SubBatchTaskTimeline.objects.filter(
         sub_batch=sub_batch_task.sub_batch
-    ).first() #need to check
+    ).first()  # need to check
     start_date = datetime.datetime.strptime(
         str(first_task.start_date.date()), "%Y-%m-%d"
     )
@@ -182,7 +242,9 @@ def update_task_sequence(request):
         duration = datetime.timedelta(hours=task.days * 8)
         order += 1
         task.order = order
-        values = calculate_duration(holidays, start_date, duration, number_of_days=task.days )
+        values = calculate_duration(
+            holidays, start_date, duration, number_of_days=task.days
+        )
         task.start_date = values[0]
         task.end_date = values[1]
         task.save()
@@ -202,9 +264,36 @@ def delete_sub_batch_timeline(request, pk):
     try:
         timeline = get_object_or_404(SubBatchTaskTimeline, id=pk)
         if timeline.can_editable():
+            sub_batch = SubBatch.objects.get(id = timeline.sub_batch_id)
+            task_list = SubBatchTaskTimeline.objects.filter(
+                sub_batch=sub_batch.id,
+                order__gte=timeline.order,
+            )  # Remaining task after the deletion of the task
+            start_date = datetime.datetime.strptime(
+                str(timeline.start_date.date()), "%Y-%m-%d"
+            )
+            duration = datetime.timedelta(
+                hours=float(timeline.days) * 8
+            )
+            order = timeline.order - 1 
             timeline.delete()
+            holidays = Holiday.objects.values_list("date_of_holiday")
+            for task in task_list:
+                if task.id != timeline.id:
+                    order += 1
+                    task.order = order
+                    duration = datetime.timedelta(
+                        hours=task.days * 8
+                    )  # Working hours for a day
+                    values = calculate_duration(holidays, start_date, duration, number_of_days=task.days)
+                    task.start_date = values[0]
+                    task.end_date = values[1]
+                    task.save()
+                    start_date = datetime.datetime.combine(values[2], values[3])
             return JsonResponse({"message": "Task deleted succcessfully"})
         else:
-            return JsonResponse({"message": "This task has been already started!"}, status=500)
+            return JsonResponse(
+                {"message": "This task has been already started!"}, status=500
+            )
     except Exception as e:
         return JsonResponse({"message": "Error while deleting Task!"}, status=500)

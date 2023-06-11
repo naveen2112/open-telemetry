@@ -10,7 +10,9 @@ register = template.Library()
 
 @register.simple_tag(takes_context=True)
 def set_active(context, names):
-    current_route_name = resolve(context["request"].path_info).route # Get the url of the current request
+    current_route_name = resolve(
+        context["request"].path_info
+    ).route  # Get the url of the current request
     names = names.split(", ")
     for name in names:
         if (
@@ -59,7 +61,7 @@ def show_non_field_errors(error):
 
 @register.filter()
 def show_label(field):
-    if field.field.required: # Check the field is required or not
+    if field.field.required:  # Check the field is required or not
         required = '<span class="text-red-600">*</span>'
     else:
         required = ""
