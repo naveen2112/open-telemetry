@@ -74,7 +74,7 @@ Timeline Template
 
 {% block script %}
 <script>
-    $(document).ready(function () {
+    $(document).ready(function() {
         AjaxDatatableViewUtils.initialize_table(
             $('#timeline-table'),
             "{% url 'timeline-template.datatable' %}",
@@ -87,7 +87,7 @@ Timeline Template
             },
         );
     });
-    $("#search_project").on('input', function () {
+    $("#search_project").on('input', function() {
         var searchvalue = $(this).val();
         var table = $("#timeline-table").DataTable();
         table.search(searchvalue).draw();
@@ -114,7 +114,7 @@ Timeline Template
                 team: $('#id_team').val(),
                 is_active: $('.checkbox_active').is(":checked"),
             },
-            success: function (data) {
+            success: function(data) {
                 removeErrors();
                 $('.page-loader').hide();
                 if (data.status === 'success') {
@@ -124,7 +124,7 @@ Timeline Template
                     renderFormError(data);
                 }
             },
-            error: function () {
+            error: function() {
                 $('.page-loader').hide();
                 alert("Something went wrong");
             },
@@ -139,7 +139,7 @@ Timeline Template
         $.ajax({
             type: "GET",
             url: url,
-            success: function (data) {
+            success: function(data) {
                 $('.page-loader').hide();
                 $('#form_heading').html("Update Timeline");
                 $('#id_name').val(data.timeline.name);
@@ -152,7 +152,7 @@ Timeline Template
                 }
                 $('.dropdown_selected_value').html($("#id_team option[value='" + data.timeline.team + "']").text());
             },
-            error: function (jqXHR, textStatus, errorThrown) {
+            error: function(jqXHR, textStatus, errorThrown) {
                 alert(jqXHR.responseJSON.message);
                 $('.page-loader').hide();
             },
@@ -172,7 +172,7 @@ Timeline Template
                 team: $("#id_team").val(),
                 is_active: $('#id_is_active').is(":checked"),
             },
-            success: function (data) {
+            success: function(data) {
                 removeErrors();
                 $('.page-loader').hide();
                 if (data.status === 'success') {
@@ -182,7 +182,7 @@ Timeline Template
                     renderFormError(data);
                 }
             },
-            error: function () {
+            error: function() {
                 $('.page-loader').hide();
                 alert("Something went wrong");
             },
@@ -196,11 +196,11 @@ Timeline Template
             $.ajax({
                 type: "DELETE",
                 url: url,
-                success: function (data) {
+                success: function(data) {
                     $('.page-loader').hide();
                     $('#timeline-table').DataTable().ajax.reload();
                 },
-                error: function () {
+                error: function() {
                     $('.page-loader').hide();
                     alert("Something went wrong");
                 },
@@ -216,12 +216,12 @@ Timeline Template
         $.ajax({
             type: "GET",
             url: url,
-            success: function (data) {
+            success: function(data) {
                 $('.page-loader').hide();
                 $('#id_name').val('Copy_' + data.timeline.name);
                 $('#timeline_id').val(data.timeline.id);
             },
-            error: function () {
+            error: function() {
                 $('.page-loader').hide();
                 alert("Something went wrong");
             },
