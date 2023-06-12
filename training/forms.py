@@ -112,9 +112,19 @@ class BatchForm(forms.ModelForm):
 class SubBatchForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         self.fields["team"].empty_label = "Select a Team"
+        if self.data.get("team", None):
+            self.fields["team"].widget.attrs['initialValue'] = self.data.get("team", None)
+
         self.fields["primary_mentor"].empty_label = "Select a Primary Mentor"
+        if self.data.get("primary_mentor", None):
+            self.fields["primary_mentor"].widget.attrs['initialValue'] = self.data.get("primary_mentor", None)
+
         self.fields["secondary_mentor"].empty_label = "Select a Secondary Mentor"
+        if self.data.get("secondary_mentor", None):
+            self.fields["secondary_mentor"].widget.attrs['initialValue'] = self.data.get("secondary_mentor", None)
+
         self.fields["name"].validators.append(MinLengthValidator(3))
 
     class Meta:
