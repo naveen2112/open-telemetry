@@ -178,10 +178,9 @@ class SubBatchForm(forms.ModelForm):
 
 
 class AddInternForm(forms.ModelForm):
-    def clean_college(self):
-        if not self.cleaned_data.get("college", None).isalpha():
-            raise ValidationError("College name should be in alphabets")
-        return self.cleaned_data["college"]
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["college"].validators.append(MinLengthValidator(3))
 
     user = forms.ChoiceField(
         choices=(("", "Select an Intern"),)

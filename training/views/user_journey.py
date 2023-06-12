@@ -122,7 +122,7 @@ def delete_extension(request, pk):
     try:
         extension = get_object_or_404(Extension, id=pk)
         extension.delete()
-        Assessment.objects.filter(extension=extension).all().delete()
+        Assessment.bulk_delete({"extension":extension})
         return JsonResponse(
             {"message": "Week extension deleted succcessfully", "status": "success"}
         )

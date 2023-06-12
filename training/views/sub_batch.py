@@ -131,6 +131,7 @@ def create_sub_batch(request, pk):
             excel_file = request.FILES["users_list_file"]
             df = pd.read_excel(excel_file)
             if User.objects.filter(employee_id__in=df["employee_id"]).count()==len(df["employee_id"]):
+                #User.objects.filter(employee_id__in=df["employee_id"], deleted_at__isnull=False).restore() or bulk_restore() #TODO
                 if InternDetail.objects.filter(
                     user__employee_id__in=df["employee_id"]
                 ).exists():
@@ -252,8 +253,8 @@ def delete_sub_batch(request, pk):
     """
     try:
         sub_batch = get_object_or_404(SubBatch, id=pk)
-        sub_batch.intern_details.all().delete()
-        sub_batch.task_timelines.all().delete()
+        InternDetail.bulk_delete({"sub_batch_id":pk})
+        SubBatchTaskTimeline.bulk_delete({"sub_batch_id":pk})
         sub_batch.delete()
         return JsonResponse({"message": "Sub-Batch deleted succcessfully"})
     except Exception as e:
@@ -308,6 +309,7 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
         row[
             "action"
         ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        row["expected_completion"] = obj.expected_completion.strftime("%d %b %Y")
         return
 
 
