@@ -125,7 +125,8 @@ Sub Batch details
         );
     });
     function openModal() {
-        $("#id_college").val("");
+        $("#timeline-task-create-form").trigger("reset");
+        $(".dropdown_selected_value").text("");
         openBaseModal();
     }
     function addIntern() {
