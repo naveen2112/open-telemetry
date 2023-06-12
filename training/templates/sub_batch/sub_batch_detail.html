@@ -110,23 +110,22 @@ Sub Batch details
 {% block script %}
 <script>
     $(document).ready(function() {
-        $(document).ready(function() {
-            AjaxDatatableViewUtils.initialize_table(
-                $('#sub-batch-trainees-table'),
-                "{% url 'sub-batch.trainees-datatable' %}",
-                {
-                    serverSide: true,
-                    processing: true,
-                    autoWidth: false,
-                    scrollX: false,
-                    order: [],
-                }, {
-                "sub_batch": "{{ object.id }}"
-            }
-            );
-        });
+        AjaxDatatableViewUtils.initialize_table(
+            $('#sub-batch-trainees-table'),
+            "{% url 'sub-batch.trainees-datatable' %}",
+            {
+                serverSide: true,
+                processing: true,
+                autoWidth: false,
+                scrollX: false,
+                order: [],
+            }, {
+            "sub_batch": "{{ object.id }}"
+        }
+        );
     });
     function openModal() {
+        $("#id_college").val("");
         openBaseModal();
     }
     function addIntern() {

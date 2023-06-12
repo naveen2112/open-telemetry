@@ -1,5 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
+from django.core.validators import MinLengthValidator
 
 from hubble import models
 from hubble.models import Assessment
@@ -9,6 +10,7 @@ class TimelineForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["team"].empty_label = "Select a Team"
+        self.fields["name"].validators.append(MinLengthValidator(3))
 
     def clean_is_active(self):
         """
@@ -48,6 +50,10 @@ class TimelineForm(forms.ModelForm):
 
 
 class TimelineTaskForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["name"].validators.append(MinLengthValidator(3))
+
     def validate_days(value):
         """
         The function validates that a given value is greater than 0 and a multiple of 0.5, otherwise it
@@ -85,6 +91,10 @@ class TimelineTaskForm(forms.ModelForm):
 
 
 class BatchForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["name"].validators.append(MinLengthValidator(3))
+
     class Meta:
         model = models.Batch
         fields = ("name",)
@@ -105,6 +115,7 @@ class SubBatchForm(forms.ModelForm):
         self.fields["team"].empty_label = "Select a Team"
         self.fields["primary_mentor"].empty_label = "Select a Primary Mentor"
         self.fields["secondary_mentor"].empty_label = "Select a Secondary Mentor"
+        self.fields["name"].validators.append(MinLengthValidator(3))
 
     class Meta:
         model = models.SubBatch
@@ -192,6 +203,10 @@ class AddInternForm(forms.ModelForm):
 
 
 class SubBatchTimelineForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["name"].validators.append(MinLengthValidator(3))
+
     def validate_days(value):
         """
         The function validates that a given value is greater than 0 and a multiple of 0.5, otherwise it

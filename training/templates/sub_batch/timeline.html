@@ -168,8 +168,8 @@ Sub Batch timeline
                 $('#id_name').val(data.timeline.name);
                 $('#id_days').val(data.timeline.days);
                 $('#id_order').val(data.timeline.order);
-                $('#id_present_type').val(data.timeline.present_type);
-                $('#id_task_type').val(data.timeline.task_type);
+                $('input[name="present_type"][value="' + data.timeline.present_type + '"]').prop('checked', true);
+                $('input[name="task_type"][value="' + data.timeline.task_type + '"]').prop('checked', true);
                 $('#past_order').val(data.timeline.order);
             }
         });
