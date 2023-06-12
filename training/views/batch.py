@@ -10,7 +10,7 @@ from django.views.generic import DetailView, FormView
 
 from core import template_utils
 from core.utils import CustomDatatable
-from hubble.models import Batch
+from hubble.models import Batch, InternDetail, SubBatch
 from training.forms import BatchForm
 
 
@@ -140,8 +140,13 @@ def delete_batch(request, pk):
     """
     try:
         batch = get_object_or_404(Batch, id=pk)
-        # TODO :: Need to delete the intern_details of sub_batch here!
-        batch.sub_batches.all().delete()
+        # TODO :: Need to change the delete method here, will update in next PR
+        intern_details = [i[0] for i in batch.sub_batches.all().values_list('id')]
+        # SubBatch.bulk_delete({"batch_id": pk})
+        for intern in InternDetail.objects.filter(sub_batch_id__in=intern_details):
+            intern.delete()
+        for sub_batch in SubBatch.objects.filter(id__in=intern_details):
+            sub_batch.delete()
         batch.delete()
         return JsonResponse({"message": "Batch deleted succcessfully"})
     except Exception as e:

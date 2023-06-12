@@ -184,8 +184,8 @@ Timeline Template Detail
                 $('#timeline-task').val(data.timeline_task.id);
                 $('#id_name').val(data.timeline_task.name);
                 $('#id_days').val(data.timeline_task.days);
-                $('input[name="id_present_type"][value=' + data.timeline_task.present_type + ']').attr('checked', 'checked');
-                $('input[name="id_task_type"][value="' + data.timeline_task.task_type + '"]').attr('checked', true);
+                $('input[name="present_type"][value="' + data.timeline_task.present_type + '"]').prop('checked', true);
+                $('input[name="task_type"][value="' + data.timeline_task.task_type + '"]').prop('checked', true);
                 $('#submit-btn').attr("onclick", "updateTimeline()");
             },
             error: function(jqXHR, textStatus, errorThrown) {

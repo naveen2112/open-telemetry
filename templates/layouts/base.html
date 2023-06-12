@@ -168,7 +168,7 @@
             function openBaseModal() {
                 document.getElementById("modal").classList.remove("hidden");
                 document.getElementById("modal").classList.add("blocker");
-                $(".form_errors").text("");
+                removeErrors();
             }
             function removeErrors() {
                 $(".form_errors").text("");
