@@ -48,4 +48,4 @@ class SoftDeleteWithBaseModel(BaseModel):
 
     @classmethod
     def bulk_delete(cls, filters):
-        cls.objects.filter(**filters).update("deleted_at", datetime.datetime.now()) 
+        cls.objects.filter(**filters).update(deleted_at=datetime.datetime.now()) 
