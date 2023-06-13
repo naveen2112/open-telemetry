@@ -10,7 +10,7 @@
             <div class="py-3  flex-wrap rounded-bl-lg flex w-full justify-start {% set_active 'induction-kit/*' %}">
                 <a href="{% url 'induction-kit' %}" tabindex="-1" class="flex px-2.5 justify-start items-center w-full">
                     <div class="flex justify-center mr-4">
-                        <img src="{% static 'images/time-sheet.svg' %}" alt="timesheet icon">
+                        <span class="hbl hbl-project text-2xl"></span>
                     </div>
                     <div>Induction Kit</div>
                 </a>
@@ -19,7 +19,7 @@
                 <a href="{% url 'timeline-template' %}" tabindex="-1"
                     class="flex px-2.5 justify-start items-center w-full">
                     <div class="flex justify-center mr-4">
-                        <img src="{% static 'images/time-sheet.svg' %}" alt="timesheet icon">
+                        <span class="hbl hbl-appointment text-2xl"></span>
                     </div>
                     <div>Timeline</div>
                 </a>
@@ -27,7 +27,7 @@
             <div class="py-3  flex-wrap rounded-bl-lg flex w-full justify-start {% set_active 'batch/*' %}">
                 <a href="{% url 'batch' %}" tabindex="-1" class="flex px-2.5 justify-start items-center w-full">
                     <div class="flex justify-center mr-4">
-                        <img src="{% static 'images/time-sheet.svg' %}" alt="timesheet icon">
+                        <span class="hbl hbl-team text-2xl"></span>
                     </div>
                     <div>Batch</div>
                 </a>
