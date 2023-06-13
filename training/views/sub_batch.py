@@ -131,7 +131,6 @@ def create_sub_batch(request, pk):
             excel_file = request.FILES["users_list_file"]
             df = pd.read_excel(excel_file)
             if User.objects.filter(employee_id__in=df["employee_id"]).count()==len(df["employee_id"]):
-                #User.objects.filter(employee_id__in=df["employee_id"], deleted_at__isnull=False).restore() or bulk_restore() #TODO
                 if InternDetail.objects.filter(
                     user__employee_id__in=df["employee_id"]
                 ).exists():

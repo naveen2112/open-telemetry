@@ -130,7 +130,7 @@ def create_sub_batch_timeline(request, pk):
                     task.end_date = values[1]
                     task.save()
                     start_date = datetime.datetime.combine(values[2], values[3])
-                    calculate_expected_end_date(pk)
+                    update_expected_end_date_of_intern_details(pk)
 
             return JsonResponse({"status": "success"})
         else:
@@ -208,7 +208,7 @@ def update_sub_batch_timeline(request, pk):
                         start_date = datetime.datetime.combine(values[2], values[3])
 
             form.save()      
-            calculate_expected_end_date(sub_batch.id)
+            update_expected_end_date_of_intern_details(sub_batch.id)
             return JsonResponse({"status": "success"})
         field_errors = form.errors.as_json()
         non_field_errors = form.non_field_errors().as_json()
@@ -290,7 +290,7 @@ def delete_sub_batch_timeline(request, pk):
                     task.end_date = values[1]
                     task.save()
                     start_date = datetime.datetime.combine(values[2], values[3])
-            calculate_expected_end_date(sub_batch.id)
+            update_expected_end_date_of_intern_details(sub_batch.id)
             return JsonResponse({"message": "Task deleted succcessfully"})
         else:
             return JsonResponse(
@@ -300,6 +300,6 @@ def delete_sub_batch_timeline(request, pk):
         return JsonResponse({"message": "Error while deleting Task!"}, status=500)
     
 
-def calculate_expected_end_date(sub_batch):
+def update_expected_end_date_of_intern_details(sub_batch):
     expected_completion_day = SubBatchTaskTimeline.objects.filter(sub_batch_id=sub_batch).order_by("-order").first()
     InternDetail.objects.filter(sub_batch_id=sub_batch).update(expected_completion=expected_completion_day.end_date)
