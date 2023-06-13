@@ -252,8 +252,8 @@ def delete_sub_batch(request, pk):
     """
     try:
         sub_batch = get_object_or_404(SubBatch, id=pk)
-        sub_batch.intern_details.all().delete()
-        sub_batch.task_timelines.all().delete()
+        InternDetail.bulk_delete({"sub_batch_id":pk})
+        SubBatchTaskTimeline.bulk_delete({"sub_batch_id":pk})
         sub_batch.delete()
         return JsonResponse({"message": "Sub-Batch deleted succcessfully"})
     except Exception as e:
@@ -308,6 +308,7 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
         row[
             "action"
         ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        row["expected_completion"] = obj.expected_completion.strftime("%d %b %Y")
         return
 
 
