@@ -164,10 +164,7 @@ class SubBatchForm(forms.ModelForm):
             self.fields["team"].widget.attrs['initialValue'] = instance.team
             self.fields["primary_mentor_id"].widget.attrs['initialValue'] = instance.primary_mentor_id
             self.fields["secondary_mentor_id"].widget.attrs['initialValue'] = instance.secondary_mentor_id
-
-
-
-
+            
     class Meta:
         model = models.SubBatch
         fields = (
