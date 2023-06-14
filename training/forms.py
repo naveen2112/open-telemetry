@@ -207,6 +207,7 @@ class AddInternForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["college"].validators.append(MinLengthValidator(3))
+        self.fields["user_id"].empty_label = "Select a Trainee"
 
     user_id = forms.ModelChoiceField(
         queryset=(
