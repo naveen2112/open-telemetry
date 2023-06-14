@@ -181,7 +181,7 @@ def update_sub_batch(request, pk):
                         sub_batch, request.user
                     )  # TODO need to delete old one before new one
                 else:
-                    timeline_task_end_date = create_and_update_sub_batch(
+                    create_and_update_sub_batch(
                         sub_batch,
                         is_create=False,
                     )
