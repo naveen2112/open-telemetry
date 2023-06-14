@@ -86,13 +86,17 @@ def validate_authorization(test_func):
 
 
 def calculate_duration_for_task(holidays, start_date, is_half_day, number_of_days):
+    if start_date.time() == datetime.time(hour=18, minute=0):
+        start_date += datetime.timedelta(1)
+        start_date = start_date.replace(hour=9, minute=0)
+
+    if (start_date.date() in holidays) or (start_date.date().weekday() == 6 ) or ((start_date.date().day <= 7) and (start_date.date().weekday() == 5)):
+            start_date += datetime.timedelta(1) 
+
     if is_half_day:
         start_date_time = datetime.datetime.combine(start_date, datetime.time(hour=14, minute=0))
     else:
         start_date_time = datetime.datetime.combine(start_date, datetime.time(hour=9, minute=0))
-
-    if start_date.time() == datetime.time(hour=18, minute=0):
-        start_date += datetime.timedelta(1)
 
     having_half_day_at_end = False
     end_time = datetime.time(hour=18, minute=0)
@@ -118,9 +122,8 @@ def calculate_duration_for_task(holidays, start_date, is_half_day, number_of_day
             continue
 
         total_num_days+=1
-        end_date = start_date
         start_date += datetime.timedelta(1)
-
+        end_date = start_date
     return {"start_date_time": start_date_time, "end_date_time": datetime.datetime.combine(end_date, end_time), "ends_afternoon": having_half_day_at_end}
 
   
