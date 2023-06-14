@@ -154,7 +154,6 @@ def schedule_timeline_for_sub_batch(
         return values["end_date_time"]
 
     else:
-        is_half_day = False
         for task in SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch).order_by("order"):
             values = calculate_duration_for_task(
                 holidays, start_date, is_half_day, task.days
