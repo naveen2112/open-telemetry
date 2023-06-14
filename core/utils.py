@@ -68,61 +68,6 @@ class CustomDatatable(AjaxDatatableView):
         return json_data
 
 
-def calculate_duration(holidays, start_date, duration, number_of_days):
-    start_time = datetime.time(hour=9, minute=0)  # Day start time
-    end_time = datetime.time(hour=18, minute=0)  # Day end time
-    break_time = datetime.time(hour=13, minute=0)  # Day break time
-    break_end_time = datetime.time(hour=14, minute=0)  # Day break end time\
-
-    task_start_date = None
-    task_end_date = None
-    while duration != datetime.timedelta(0):
-        temp_duration = datetime.timedelta(hours=4)
-        end_datetime = datetime.datetime.combine(start_date, start_time) + temp_duration
-        start_datetime = datetime.datetime.combine(start_date, start_time)
-
-        # While the end date falls on a Sunday or holiday then it will increament the date 1
-        while (end_datetime.date().weekday() == 6) or end_datetime.date() in holidays:
-            end_datetime += datetime.timedelta(days=1)
-
-        total_start_hours = (duration.days * 24) + (
-            duration.seconds / 3600
-        )  # Calculating the hours required to complete the task
-
-        # Check if total hours and hours required are the same
-        if total_start_hours == number_of_days * 8:
-            # While the end date falls on a Sunday or holiday then it will increament the date 1
-            while (
-                start_datetime.date().weekday() == 6
-            ) or start_datetime.date() in holidays:  # need to check
-                start_datetime += datetime.timedelta(days=1)
-            task_start_date = start_datetime.date()
-
-        duration = duration - temp_duration
-        total_hours = (duration.days * 24) + (
-            duration.seconds / 3600
-        )  # Calculating the remaining hours
-        if total_hours == 0:
-            task_end_date = end_datetime.date()
-
-        # Check if the end_datetime.time() is equal to day end time
-        if end_datetime.time() == end_time:
-            end_datetime += datetime.timedelta(days=1)
-
-        start_date = end_datetime
-        start_time = end_datetime.time()
-
-        # Check the end_datetime.time() is equal to break time
-        # Exclide the 1hr breaktime
-        if end_datetime.time() == break_time:
-            start_time = break_end_time
-
-        if end_datetime.time() == end_time:
-            start_time = datetime.time(hour=9, minute=0)
-
-    return [task_start_date, task_end_date, start_date, start_time]
-
-
 def admin_user(request):
     return request.id != 16 #Condition needs to be changed
 
@@ -140,7 +85,7 @@ def validate_authorization(test_func):
     return decorator
 
 
-def calculate_duration_updated(holidays, start_date, is_half_day, number_of_days):
+def calculate_duration_for_task(holidays, start_date, is_half_day, number_of_days):
     if is_half_day:
         start_date_time = datetime.datetime.combine(start_date, datetime.time(hour=14, minute=0))
     else:
@@ -179,7 +124,7 @@ def calculate_duration_updated(holidays, start_date, is_half_day, number_of_days
     return {"start_date_time": start_date_time, "end_date_time": datetime.datetime.combine(end_date, end_time), "ends_afternoon": having_half_day_at_end}
 
   
-def create_and_update_sub_batch(
+def schedule_timeline_for_sub_batch(
     sub_batch, user=None, is_create=True
 ):
     holidays = list(Holiday.objects.values_list("date_of_holiday", flat=True))
@@ -188,7 +133,7 @@ def create_and_update_sub_batch(
     order = 0
     if is_create:
         for task in TimelineTask.objects.filter(timeline=sub_batch.timeline.id):
-            values = calculate_duration_updated(
+            values = calculate_duration_for_task(
                 holidays, start_date, is_half_day, task.days
             )
 
@@ -211,7 +156,7 @@ def create_and_update_sub_batch(
     else:
         is_half_day = False
         for task in SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch).order_by("order"):
-            values = calculate_duration_updated(
+            values = calculate_duration_for_task(
                 holidays, start_date, is_half_day, task.days
             )
             start_date = values["end_date_time"]

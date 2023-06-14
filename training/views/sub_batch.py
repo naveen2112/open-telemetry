@@ -12,7 +12,7 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView
 
 from core import template_utils
-from core.utils import CustomDatatable, create_and_update_sub_batch, update_expected_end_date_of_intern_details
+from core.utils import CustomDatatable, schedule_timeline_for_sub_batch, update_expected_end_date_of_intern_details
 from hubble.models import (Batch, InternDetail, SubBatch,
                            SubBatchTaskTimeline, Timeline, TimelineTask, User)
 from training.forms import AddInternForm, SubBatchForm
@@ -111,7 +111,7 @@ def create_sub_batch(request, pk):
                 sub_batch.primary_mentor_id = request.POST.get("primary_mentor_id")
                 sub_batch.secondary_mentor_id = request.POST.get("secondary_mentor_id")
                 sub_batch.save()
-                timeline_task_end_date = create_and_update_sub_batch(
+                timeline_task_end_date = schedule_timeline_for_sub_batch(
                     sub_batch=sub_batch, user=request.user
                 )
                 user_details = dict(
@@ -177,11 +177,11 @@ def update_sub_batch(request, pk):
                 sub_batch.secondary_mentor_id = request.POST.get("secondary_mentor_id")
                 active_form = sub_batch_form.save()
                 if request.POST.get("timeline") != sub_batch.timeline.id:
-                    create_and_update_sub_batch(
+                    schedule_timeline_for_sub_batch(
                         sub_batch, request.user
                     )  # TODO need to delete old one before new one
                 else:
-                    create_and_update_sub_batch(
+                    schedule_timeline_for_sub_batch(
                         sub_batch,
                         is_create=False,
                     )

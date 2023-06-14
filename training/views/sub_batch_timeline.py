@@ -10,7 +10,7 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView
 
 from core import template_utils
-from core.utils import CustomDatatable, create_and_update_sub_batch, update_expected_end_date_of_intern_details
+from core.utils import CustomDatatable, schedule_timeline_for_sub_batch, update_expected_end_date_of_intern_details
 from hubble.models import SubBatch, SubBatchTaskTimeline
 from training.forms import SubBatchTimelineForm
 
@@ -96,7 +96,7 @@ def create_sub_batch_timeline(request, pk):
                     order += 1
                     task.order = order
                     task.save()
-            create_and_update_sub_batch(sub_batch, is_create=False)
+            schedule_timeline_for_sub_batch(sub_batch, is_create=False)
             update_expected_end_date_of_intern_details(pk)
 
             return JsonResponse({"status": "success"})
@@ -136,7 +136,7 @@ def update_sub_batch_timeline(request, pk):
                 timeline_task.sub_batch = sub_batch
                 timeline_task.created_by = request.user
             form.save()   
-            create_and_update_sub_batch(sub_batch=sub_batch, is_create=False)   
+            schedule_timeline_for_sub_batch(sub_batch=sub_batch, is_create=False)   
             update_expected_end_date_of_intern_details(sub_batch.id)
             return JsonResponse({"status": "success"})
         field_errors = form.errors.as_json()
@@ -163,7 +163,7 @@ def update_task_sequence(request):
         order += 1
         task.order = order
         task.save()
-    create_and_update_sub_batch(sub_batch_task.sub_batch, is_create=False)
+    schedule_timeline_for_sub_batch(sub_batch_task.sub_batch, is_create=False)
     return JsonResponse({"status": "success"})
 
 
@@ -189,7 +189,7 @@ def delete_sub_batch_timeline(request, pk):
             for task in task_list:
                 order += 1
                 task.order = order
-            create_and_update_sub_batch(sub_batch=sub_batch, is_create=False)
+            schedule_timeline_for_sub_batch(sub_batch=sub_batch, is_create=False)
             update_expected_end_date_of_intern_details(sub_batch.id)
             return JsonResponse({"message": "Task deleted succcessfully"})
         else:
