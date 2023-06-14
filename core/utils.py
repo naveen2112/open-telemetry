@@ -2,6 +2,7 @@ import datetime
 
 from ajax_datatable import AjaxDatatableView
 from django.http import HttpResponseForbidden
+from hubble.models import Holiday, SubBatchTaskTimeline, TimelineTask, InternDetail
 
 
 class CustomDatatable(AjaxDatatableView):
@@ -137,3 +138,89 @@ def validate_authorization(test_func):
         return wrapped_view
 
     return decorator
+
+
+def calculate_duration_updated(holidays, start_date, is_half_day, number_of_days):
+    if is_half_day:
+        start_date_time = datetime.datetime.combine(start_date, datetime.time(hour=14, minute=0))
+    else:
+        start_date_time = datetime.datetime.combine(start_date, datetime.time(hour=9, minute=0))
+
+    if start_date.time() == datetime.time(hour=18, minute=0):
+        start_date += datetime.timedelta(1)
+
+    having_half_day_at_end = False
+    end_time = datetime.time(hour=18, minute=0)
+
+    if (not is_half_day and (number_of_days % 1 == 0.5)) or (is_half_day and (number_of_days % 1 != 0.5)):
+        having_half_day_at_end = True
+        end_time = datetime.time(hour=13, minute=0)
+        
+    total_num_days = 0
+    if is_half_day:
+        total_num_days += 0.5
+        end_date = start_date
+        start_date += datetime.timedelta(1) 
+    
+    while total_num_days != number_of_days:
+        if (start_date.date() in holidays) or (start_date.date().weekday() == 6 ) or ((start_date.date().day <= 7) and (start_date.date().weekday() == 5)):
+            start_date += datetime.timedelta(1) 
+            continue
+
+        if number_of_days - total_num_days == 0.5:
+            total_num_days += 0.5
+            end_date = start_date
+            continue
+
+        total_num_days+=1
+        end_date = start_date
+        start_date += datetime.timedelta(1)
+
+    return {"start_date_time": start_date_time, "end_date_time": datetime.datetime.combine(end_date, end_time), "ends_afternoon": having_half_day_at_end}
+
+  
+def create_and_update_sub_batch(
+    sub_batch, user=None, is_create=True
+):
+    holidays = list(Holiday.objects.values_list("date_of_holiday", flat=True))
+    start_date = datetime.datetime.strptime(str(sub_batch.start_date), "%Y-%m-%d")
+    is_half_day = False
+    order = 0
+    if is_create:
+        for task in TimelineTask.objects.filter(timeline=sub_batch.timeline.id):
+            values = calculate_duration_updated(
+                holidays, start_date, is_half_day, task.days
+            )
+
+            order += 1
+            SubBatchTaskTimeline.objects.create(
+                name=task.name,
+                days=task.days,
+                sub_batch=sub_batch,
+                present_type=task.present_type,
+                task_type=task.task_type,
+                start_date=values["start_date_time"],
+                end_date=values["end_date_time"],
+                created_by=user,
+                order=order,
+            )
+            start_date = values["end_date_time"]
+            is_half_day = values["ends_afternoon"]
+        return values["end_date_time"]
+
+    else:
+        is_half_day = False
+        for task in SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch).order_by("order"):
+            values = calculate_duration_updated(
+                holidays, start_date, is_half_day, task.days
+            )
+            start_date = values["end_date_time"]
+            is_half_day = values["ends_afternoon"]
+            task.start_date = values["start_date_time"]
+            task.end_date = values["end_date_time"]
+            task.save()
+
+
+def update_expected_end_date_of_intern_details(sub_batch):
+    expected_completion_day = SubBatchTaskTimeline.objects.filter(sub_batch_id=sub_batch).order_by("-order").first()
+    InternDetail.objects.filter(sub_batch_id=sub_batch).update(expected_completion=expected_completion_day.end_date)
