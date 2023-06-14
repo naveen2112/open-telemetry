@@ -65,18 +65,18 @@ Create Sub Batch
             {{ form.timeline|show_field_errors }}
         </div>
         <div class="work-basic-dropdown form-field" id="primary-mentor-container">
-            {{ form.primary_mentor|show_label }}
+            {{ form.primary_mentor_id|show_label }}
             <div class="relative mt-2.5">
-                {{ form.primary_mentor }}
+                {{ form.primary_mentor_id }}
             </div>
-            {{ form.primary_mentor|show_field_errors }}
+            {{ form.primary_mentor_id|show_field_errors }}
         </div>
         <div class="work-basic-dropdown form-field">
-            {{ form.secondary_mentor|show_label }}
+            {{ form.secondary_mentor_id|show_label }}
             <div class="relative">
-                {{ form.secondary_mentor }}
+                {{ form.secondary_mentor_id }}
             </div>
-            {{ form.secondary_mentor|show_field_errors }}
+            {{ form.secondary_mentor_id|show_field_errors }}
         </div>
         <div class="col-span-2">
             <div class="mb-3.6 text-sm text-dark-black-50">Upload Excel<span class="text-red-600">*</span></div>

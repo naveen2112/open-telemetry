@@ -140,7 +140,7 @@ def delete_batch(request, pk):
     """
     try:
         batch = get_object_or_404(Batch, id=pk)
-        intern_details = [i[0] for i in batch.sub_batches.all().values_list('id')]
+        intern_details = list(batch.sub_batches.all().values_list('id', flat=True))
         SubBatch.bulk_delete({"batch_id": pk})
         InternDetail.bulk_delete({"sub_batch_id__in":intern_details})
         batch.delete()
