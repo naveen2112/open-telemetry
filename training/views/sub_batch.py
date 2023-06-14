@@ -180,10 +180,11 @@ def update_sub_batch(request, pk):
                 sub_batch.primary_mentor_id = request.POST.get("primary_mentor_id")
                 sub_batch.secondary_mentor_id = request.POST.get("secondary_mentor_id")
                 active_form = sub_batch_form.save()
-                if request.POST.get("timeline") != sub_batch.timeline.id:
+                if int(request.POST.get("timeline")) != sub_batch.timeline.id:
+                    SubBatchTaskTimeline.bulk_delete({"sub_batch_id": pk})
                     schedule_timeline_for_sub_batch(
                         sub_batch, request.user
-                    )  # TODO need to delete old one before new one
+                    )
                 else:
                     schedule_timeline_for_sub_batch(
                         sub_batch,
