@@ -130,15 +130,18 @@ def create_sub_batch(request, pk):
         if "users_list_file" in request.FILES:
             excel_file = request.FILES["users_list_file"]
             df = pd.read_excel(excel_file)
-            if User.objects.filter(employee_id__in=df["employee_id"]).count()==len(df["employee_id"]):
-                if InternDetail.objects.filter(
-                    user__employee_id__in=df["employee_id"]
-                ).exists():
-                    sub_batch_form.add_error(
-                        None, "Some of the Users are already added in another sub-batch"
-                    )  # Adding the non-field-error if the user aalready exists
+            if (df.iloc[0, 0] == "employee_id") and (df.iloc[0, 1] == "college"):
+                if User.objects.filter(employee_id__in=df["employee_id"]).count()==len(df["employee_id"]):
+                    if InternDetail.objects.filter(
+                        user__employee_id__in=df["employee_id"]
+                    ).exists():
+                        sub_batch_form.add_error(
+                            None, "Some of the Users are already added in another sub-batch"
+                        )  # Adding the non-field-error if the user aalready exists
+                else:
+                    sub_batch_form.add_error(None, "Some of the employee ids are not present in the database, please check again")
             else:
-                sub_batch_form.add_error(None, "Some of the employee_ids are not present in the database, please check again")
+                sub_batch_form.add_error(None, "Invalid keys are present in the file, please check the sample file")
         else:
             sub_batch_form.add_error(
                 None, "Please upload a file"

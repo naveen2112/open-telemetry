@@ -1,6 +1,7 @@
 import datetime
 
 from ajax_datatable import AjaxDatatableView
+from django.http import HttpResponseForbidden
 
 
 class CustomDatatable(AjaxDatatableView):
@@ -119,3 +120,20 @@ def calculate_duration(holidays, start_date, duration, number_of_days):
             start_time = datetime.time(hour=9, minute=0)
 
     return [task_start_date, task_end_date, start_date, start_time]
+
+
+def admin_user(request):
+    return request.id != 16 #Condition needs to be changed
+
+
+def validate_authorization(test_func):
+    def decorator(view_func):
+        def wrapped_view(request, *args, **kwargs):
+            if test_func(request.user):
+                return view_func(request, *args, **kwargs)
+            else:
+                return HttpResponseForbidden()
+
+        return wrapped_view
+
+    return decorator
