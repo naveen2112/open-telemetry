@@ -111,7 +111,7 @@ class BatchForm(forms.ModelForm):
 
 class SubBatchForm(forms.ModelForm):
     primary_mentor_id = forms.ChoiceField(
-        choices=(("", "Select an Intern"),)
+        choices=(("", "Select a Primary Mentor"),)
         + tuple(
             models.User.objects.filter(is_employed=True)
             .distinct("id")
@@ -126,7 +126,7 @@ class SubBatchForm(forms.ModelForm):
     )
 
     secondary_mentor_id = forms.ChoiceField(
-        choices=(("", "Select an Intern"),)
+        choices=(("", "Select a Secondary Mentor"),)
         + tuple(
             models.User.objects.filter(is_employed=True)
             .distinct("id")
@@ -159,6 +159,12 @@ class SubBatchForm(forms.ModelForm):
         self.fields["primary_mentor_id"].label = "Primary Mentor"
         self.fields["secondary_mentor_id"].label = "Secondary Mentor"
 
+        if kwargs.get('instance'):
+            instance = kwargs.get('instance')
+            self.fields["team"].widget.attrs['initialValue'] = instance.team
+            self.fields["primary_mentor_id"].widget.attrs['initialValue'] = instance.primary_mentor_id
+            self.fields["secondary_mentor_id"].widget.attrs['initialValue'] = instance.secondary_mentor_id
+            
     class Meta:
         model = models.SubBatch
         fields = (

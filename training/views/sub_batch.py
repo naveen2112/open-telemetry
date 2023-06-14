@@ -12,8 +12,8 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView
 
 from core import template_utils
-from core.utils import CustomDatatable, calculate_duration
-from hubble.models import (Batch, Holiday, InternDetail, SubBatch,
+from core.utils import CustomDatatable, schedule_timeline_for_sub_batch, update_expected_end_date_of_intern_details
+from hubble.models import (Batch, InternDetail, SubBatch,
                            SubBatchTaskTimeline, Timeline, TimelineTask, User)
 from training.forms import AddInternForm, SubBatchForm
 
@@ -74,49 +74,6 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
         return
 
 
-def create_and_update_sub_batch(
-    sub_batch, user=None, is_create=True, desired_start_date=None
-):
-    holidays = Holiday.objects.values_list("date_of_holiday")
-    start_date = datetime.datetime.strptime(str(sub_batch.start_date), "%Y-%m-%d")
-    order = 0
-    if is_create:
-        for task in TimelineTask.objects.filter(timeline=sub_batch.timeline.id):
-            duration = datetime.timedelta(
-                hours=task.days * 8
-            )  # Working hours for a day
-            values = calculate_duration(
-                holidays, start_date, duration, number_of_days=task.days
-            )
-
-            order += 1
-            SubBatchTaskTimeline.objects.create(
-                name=task.name,
-                days=task.days,
-                sub_batch=sub_batch,
-                present_type=task.present_type,
-                task_type=task.task_type,
-                start_date=values[0],
-                end_date=values[1],
-                created_by=user,
-                order=order,
-            )
-            start_date = datetime.datetime.combine(values[2], values[3])
-    else:
-        start_date = desired_start_date
-        for task in SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch):
-            duration = datetime.timedelta(hours=task.days * 8)
-            values = calculate_duration(
-                holidays, start_date, duration, number_of_days=task.days
-            )
-            start_date = datetime.datetime.combine(values[2], values[3])
-            task.start_date = values[0]
-            task.end_date = values[1]
-            task.save()
-
-    return values[1]
-
-
 @login_required()
 def create_sub_batch(request, pk):
     """
@@ -130,7 +87,7 @@ def create_sub_batch(request, pk):
         if "users_list_file" in request.FILES:
             excel_file = request.FILES["users_list_file"]
             df = pd.read_excel(excel_file)
-            if (df.iloc[0, 0] == "employee_id") and (df.iloc[0, 1] == "college"):
+            if (df.columns[0] == "employee_id") and (df.columns[1] == "college"):
                 if User.objects.filter(employee_id__in=df["employee_id"]).count()==len(df["employee_id"]):
                     if InternDetail.objects.filter(
                         user__employee_id__in=df["employee_id"]
@@ -151,8 +108,10 @@ def create_sub_batch(request, pk):
             if TimelineTask.objects.filter(timeline=sub_batch.timeline.id):
                 sub_batch.batch = Batch.objects.get(id=pk)
                 sub_batch.created_by = request.user
+                sub_batch.primary_mentor_id = request.POST.get("primary_mentor_id")
+                sub_batch.secondary_mentor_id = request.POST.get("secondary_mentor_id")
                 sub_batch.save()
-                timeline_task_end_date = create_and_update_sub_batch(
+                timeline_task_end_date = schedule_timeline_for_sub_batch(
                     sub_batch=sub_batch, user=request.user
                 )
                 user_details = dict(
@@ -214,21 +173,19 @@ def update_sub_batch(request, pk):
             # validation start date
             active_form = sub_batch_form.save(commit=False)
             if TimelineTask.objects.filter(timeline=active_form.timeline.id):
+                sub_batch.primary_mentor_id = request.POST.get("primary_mentor_id")
+                sub_batch.secondary_mentor_id = request.POST.get("secondary_mentor_id")
                 active_form = sub_batch_form.save()
-                if sub_batch.timeline.id != sub_batch.timeline.id:
-                    create_and_update_sub_batch(
+                if request.POST.get("timeline") != sub_batch.timeline.id:
+                    schedule_timeline_for_sub_batch(
                         sub_batch, request.user
                     )  # TODO need to delete old one before new one
                 else:
-                    timeline_task_end_date = create_and_update_sub_batch(
+                    schedule_timeline_for_sub_batch(
                         sub_batch,
                         is_create=False,
-                        desired_start_date=active_form.start_date,
                     )
-                for trainee in InternDetail.objects.filter(sub_batch=sub_batch):
-                    if sub_batch.start_date != sub_batch.start_date:
-                        trainee.expected_completion = timeline_task_end_date
-                        trainee.save()
+                update_expected_end_date_of_intern_details(sub_batch.id)
                 return redirect(reverse("batch.detail", args=[sub_batch.batch.id]))
             else:
                 sub_batch_form.add_error(
