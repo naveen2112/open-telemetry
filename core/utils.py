@@ -138,8 +138,8 @@ def calculate_duration_for_task(holidays, start_date, is_half_day, number_of_day
             continue
 
         total_num_days += 1
-        start_date += datetime.timedelta(1)
         end_date = start_date
+        start_date += datetime.timedelta(1)
     return {
         "start_date_time": start_date_time,
         "end_date_time": datetime.datetime.combine(end_date, end_time),
