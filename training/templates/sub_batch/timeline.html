@@ -116,6 +116,7 @@ Sub Batch timeline
 
     function openTaskCreateModal() {
         openBaseModal();
+        $("#timeline-task-create-form")[0].reset();
         $("#openModal").text("Create task");
         $("#order_group").show();
         $('#id_name').val('');
