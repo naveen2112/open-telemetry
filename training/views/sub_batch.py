@@ -12,9 +12,10 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView
 
 from core import template_utils
-from core.utils import CustomDatatable, schedule_timeline_for_sub_batch, update_expected_end_date_of_intern_details
-from hubble.models import (Batch, InternDetail, SubBatch,
-                           SubBatchTaskTimeline, Timeline, TimelineTask, User)
+from core.utils import (CustomDatatable, schedule_timeline_for_sub_batch,
+                        update_expected_end_date_of_intern_details)
+from hubble.models import (Batch, InternDetail, SubBatch, SubBatchTaskTimeline,
+                           Timeline, TimelineTask, User)
 from training.forms import AddInternForm, SubBatchForm
 
 
@@ -67,9 +68,7 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
             + template_utils.edit_button_new_page(reverse("sub-batch.edit", args=[obj.id]))
             + template_utils.delete_button("deleteSubBatch('" + reverse("sub-batch.delete", args=[obj.id]) + "')")
         )
-        row[
-            "action"
-        ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         row["start_date"] = obj.start_date.strftime("%d %b %Y")
         return
 
@@ -88,17 +87,22 @@ def create_sub_batch(request, pk):
             excel_file = request.FILES["users_list_file"]
             df = pd.read_excel(excel_file)
             if (df.columns[0] == "employee_id") and (df.columns[1] == "college"):
-                if User.objects.filter(employee_id__in=df["employee_id"]).count()==len(df["employee_id"]):
-                    if InternDetail.objects.filter(
-                        user__employee_id__in=df["employee_id"]
-                    ).exists():
+                if User.objects.filter(employee_id__in=df["employee_id"]).count() == len(df["employee_id"]):
+                    if InternDetail.objects.filter(user__employee_id__in=df["employee_id"]).exists():
                         sub_batch_form.add_error(
-                            None, "Some of the Users are already added in another sub-batch"
+                            None,
+                            "Some of the Users are already added in another sub-batch",
                         )  # Adding the non-field-error if the user aalready exists
                 else:
-                    sub_batch_form.add_error(None, "Some of the employee ids are not present in the database, please check again")
+                    sub_batch_form.add_error(
+                        None,
+                        "Some of the employee ids are not present in the database, please check again",
+                    )
             else:
-                sub_batch_form.add_error(None, "Invalid keys are present in the file, please check the sample file")
+                sub_batch_form.add_error(
+                    None,
+                    "Invalid keys are present in the file, please check the sample file",
+                )
         else:
             sub_batch_form.add_error(
                 None, "Please upload a file"
@@ -213,8 +217,8 @@ def delete_sub_batch(request, pk):
     """
     try:
         sub_batch = get_object_or_404(SubBatch, id=pk)
-        InternDetail.bulk_delete({"sub_batch_id":pk})
-        SubBatchTaskTimeline.bulk_delete({"sub_batch_id":pk})
+        InternDetail.bulk_delete({"sub_batch_id": pk})
+        SubBatchTaskTimeline.bulk_delete({"sub_batch_id": pk})
         sub_batch.delete()
         return JsonResponse({"message": "Sub-Batch deleted succcessfully"})
     except Exception as e:
@@ -279,13 +283,11 @@ def add_trainee(request):
     Add tranie to sub batch
     """
     if request.method == "POST":
-        modify_data = request.POST.copy()
-        modify_data["user"] = modify_data["user_id"]
-        form = AddInternForm(modify_data)
+        form = AddInternForm(request.POST)
         if request.POST.get("user_id"):
             if InternDetail.objects.filter(user=request.POST.get("user_id")).exists():
                 form.add_error(
-                    "user", "Trainee already added in the another sub-batch"
+                    "user_id", "Trainee already added in the another sub-batch"
                 )  # Adding form error if the trainees is already added in another
         if form.is_valid():  # Check if form is valid or not
             sub_batch = SubBatch.objects.get(id=request.POST.get("sub_batch_id"))
@@ -293,6 +295,7 @@ def add_trainee(request):
                 sub_batch=sub_batch
             ).last()
             trainee = form.save(commit=False)
+            trainee.user_id = request.POST.get("user_id")
             trainee.sub_batch = sub_batch
             trainee.expected_completion = timeline_data.end_date
             trainee.created_by = request.user

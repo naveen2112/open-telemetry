@@ -79,10 +79,10 @@ Sub Batch details
                 <form method="post" class="timeline-task-form" id="timeline-task-create-form">
                     <div class="modal-body">
                         {% csrf_token %}
-                        <div class="work-basic-dropdown mb-7" id="{{ form.user.label|lower }}_group">
-                            {{ form.user|show_label }}
+                        <div class="work-basic-dropdown mb-7" id="user_id_group">
+                            {{ form.user_id|show_label }}
                             <div class="relative">
-                                {{ form.user }}
+                                {{ form.user_id }}
                             </div>
                         </div>
                         <div class="mb-7" id="{{ form.college.label|lower }}_group">
@@ -131,11 +131,12 @@ Sub Batch details
     }
     function addIntern() {
         $('.page-loader').show();
+        console.log($("#id_user").val());
         $.ajax({
             type: "POST",
             url: "{% url 'trainees.add' %}",
             data: {
-                user_id: $('#id_user').val(),
+                user_id: $('#id_user_id').val(),
                 college: $('#id_college').val(),
                 sub_batch_id: '{{ object.id }}'
             },

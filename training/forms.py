@@ -110,34 +110,12 @@ class BatchForm(forms.ModelForm):
 
 
 class SubBatchForm(forms.ModelForm):
-    primary_mentor_id = forms.ChoiceField(
-        choices=(("", "Select a Primary Mentor"),)
-        + tuple(
-            models.User.objects.filter(is_employed=True)
-            .distinct("id")
-            .values_list("id", "name")
-        ),
-        widget=forms.Select(
-            attrs={
-                    "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
-                    "placeholder": "Primary Mentor...",
-                }
-        )
+    primary_mentor_id = forms.ModelChoiceField(
+        queryset=models.User.objects.filter(is_employed=True)
     )
 
-    secondary_mentor_id = forms.ChoiceField(
-        choices=(("", "Select a Secondary Mentor"),)
-        + tuple(
-            models.User.objects.filter(is_employed=True)
-            .distinct("id")
-            .values_list("id", "name")
-        ),
-        widget=forms.Select(
-            attrs={
-                    "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
-                    "placeholder": "Secondary Mentor...",
-                }
-        )
+    secondary_mentor_id = forms.ModelChoiceField(
+        queryset=models.User.objects.filter(is_employed=True)
     )
 
     def __init__(self, *args, **kwargs):
@@ -145,26 +123,36 @@ class SubBatchForm(forms.ModelForm):
 
         self.fields["team"].empty_label = "Select a Team"
         if self.data.get("team", None):
-            self.fields["team"].widget.attrs['initialValue'] = self.data.get("team", None)
+            self.fields["team"].widget.attrs["initialValue"] = self.data.get(
+                "team", None
+            )
 
         self.fields["primary_mentor_id"].empty_label = "Select a Primary Mentor"
         if self.data.get("primary_mentor_id", None):
-            self.fields["primary_mentor_id"].widget.attrs['initialValue'] = self.data.get("primary_mentor_id", None)
+            self.fields["primary_mentor_id"].widget.attrs[
+                "initialValue"
+            ] = self.data.get("primary_mentor_id", None)
 
         self.fields["secondary_mentor_id"].empty_label = "Select a Secondary Mentor"
         if self.data.get("secondary_mentor_id", None):
-            self.fields["secondary_mentor_id"].widget.attrs['initialValue'] = self.data.get("secondary_mentor_id", None)
+            self.fields["secondary_mentor_id"].widget.attrs[
+                "initialValue"
+            ] = self.data.get("secondary_mentor_id", None)
 
         self.fields["name"].validators.append(MinLengthValidator(3))
         self.fields["primary_mentor_id"].label = "Primary Mentor"
         self.fields["secondary_mentor_id"].label = "Secondary Mentor"
 
-        if kwargs.get('instance'):
-            instance = kwargs.get('instance')
-            self.fields["team"].widget.attrs['initialValue'] = instance.team
-            self.fields["primary_mentor_id"].widget.attrs['initialValue'] = instance.primary_mentor_id
-            self.fields["secondary_mentor_id"].widget.attrs['initialValue'] = instance.secondary_mentor_id
-            
+        if kwargs.get("instance"):
+            instance = kwargs.get("instance")
+            self.fields["team"].widget.attrs["initialValue"] = instance.team
+            self.fields["primary_mentor_id"].widget.attrs[
+                "initialValue"
+            ] = instance.primary_mentor_id
+            self.fields["secondary_mentor_id"].widget.attrs[
+                "initialValue"
+            ] = instance.secondary_mentor_id
+
     class Meta:
         model = models.SubBatch
         fields = (
@@ -200,6 +188,18 @@ class SubBatchForm(forms.ModelForm):
                     "class": "w-full block border border-primary-dark-30 mt-2.5 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 bg-transparent w-250 timeline-input",
                 }
             ),
+            "primary_mentor_id": forms.Select(
+                attrs={
+                    "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
+                    "placeholder": "Primary Mentor...",
+                }
+            ),
+            "secondary_mentor_id": forms.Select(
+                attrs={
+                    "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
+                    "placeholder": "Secondary Mentor...",
+                }
+            ),
         }
 
 
@@ -207,31 +207,32 @@ class AddInternForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["college"].validators.append(MinLengthValidator(3))
+        self.fields["user_id"].empty_label = "Select a Trainee"
 
-    user_id = forms.ChoiceField(
-        choices=(("", "Select an Intern"),)
-        + tuple(
-            models.User.objects.exclude(intern_details__isnull=False)
-            .distinct("id")
-            .values_list("id", "name")
+    user_id = forms.ModelChoiceField(
+        queryset=(
+            models.User.objects.exclude(intern_details__isnull=False).filter(
+                is_employed=False
+            )
         ),
-        widget=forms.Select(
-            attrs={
-                "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
-                "placeholder": "Trainee...",
-            }
-        ),
+        label="User",
     )
 
     class Meta:
         model = models.InternDetail
-        fields = ("user", "college")
+        fields = ("user_id", "college")
 
         widgets = {
             "college": forms.TextInput(
                 attrs={
                     "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
                     "placeholder": "College name...",
+                }
+            ),
+            "user_id": forms.Select(
+                attrs={
+                    "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
+                    "placeholder": "Trainee...",
                 }
             ),
         }
