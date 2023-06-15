@@ -15,6 +15,8 @@ from pathlib import Path
 
 import environ
 
+from core.constants import ENVIRONMENT_DEVELOPMENT
+
 env = environ.Env(
     DEBUG=(bool, False),
     TEAMS_LOGGING_WEBHOOK_URL=(str, None),
@@ -190,3 +192,19 @@ LOGGING = {
         },
     },
 }
+
+if ENV_NAME == ENVIRONMENT_DEVELOPMENT:
+    # Local development dependencies.
+    INSTALLED_APPS += [
+        "silk",
+    ]
+
+    MIDDLEWARE += [
+        "silk.middleware.SilkyMiddleware",
+    ]
+
+    SILKY_PYTHON_PROFILER = True
+    SILKY_META = True
+    SILKY_ANALYZE_QUERIES = True
+    SILKY_AUTHENTICATION = True
+    SILKY_AUTHORISATION = True

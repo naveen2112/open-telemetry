@@ -10,7 +10,7 @@ class User(AbstractBaseUser, db.SoftDeleteWithBaseModel):
     id = models.BigAutoField(primary_key=True)
     employee_id = models.CharField(max_length=255, blank=True, null=True)
     email = models.CharField(unique=True, max_length=255)
-    email_verified_at = models.DateTimeField(blank=True, null=True)
+    email_verified_at = db.DateTimeWithoutTZField(blank=True, null=True)
     password = models.CharField(max_length=255, blank=True, null=True)
     username = models.CharField(max_length=255, blank=True, null=True)
     name = models.CharField(max_length=255, blank=False, null=False)
