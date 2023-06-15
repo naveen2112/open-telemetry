@@ -8,13 +8,15 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView
+from django.utils.decorators import method_decorator
 
 from core import template_utils
-from core.utils import CustomDatatable, schedule_timeline_for_sub_batch, update_expected_end_date_of_intern_details
+from core.utils import CustomDatatable, schedule_timeline_for_sub_batch, validate_authorization
 from hubble.models import SubBatch, SubBatchTaskTimeline
 from training.forms import SubBatchTimelineForm
 
 
+@method_decorator(validate_authorization(), name="dispatch")
 class SubBatchTimeline(LoginRequiredMixin, DetailView):
     """
     Sub batch Timeline
@@ -25,6 +27,7 @@ class SubBatchTimeline(LoginRequiredMixin, DetailView):
     template_name = "sub_batch/timeline.html"
 
 
+@method_decorator(validate_authorization(), name="dispatch")
 class SubBatchTimelineDataTable(LoginRequiredMixin, CustomDatatable):
     """
     Timeline Template Task Datatable
@@ -56,16 +59,17 @@ class SubBatchTimelineDataTable(LoginRequiredMixin, CustomDatatable):
         return self.model.objects.filter(sub_batch=request.POST.get("sub_batch_id"))
 
     def customize_row(self, row, obj):
-        if obj.can_editable():
-            buttons = (
-                template_utils.edit_button(reverse("sub_batch.timeline.show", args=[obj.id])) + 
-                template_utils.delete_button("deleteTimeline('"+ reverse("sub_batch.timeline.delete", args=[obj.id])+ "')")
-            )
-            row[
-                "action"
-            ] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
-        else:
+        row["action"] = f"<div class='form-inline justify-content-center'>-</div>"
+        if self.request.user.is_admin_user:
             row["action"] = f"<div class='form-inline justify-content-center'>-</div>"
+            if obj.can_editable():
+                buttons = (
+                    template_utils.edit_button(reverse("sub_batch.timeline.show", args=[obj.id])) + 
+                    template_utils.delete_button("deleteTimeline('"+ reverse("sub_batch.timeline.delete", args=[obj.id])+ "')")
+                )
+                row[
+                    "action"
+                ] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
         row["start_date"] = obj.start_date.strftime("%d %b %Y")
         row["end_date"] = obj.end_date.strftime("%d %b %Y")
         row["order"] = f"<span data-id='{obj.id}'>{obj.order}</span>"
@@ -73,6 +77,7 @@ class SubBatchTimelineDataTable(LoginRequiredMixin, CustomDatatable):
 
 
 @login_required()
+@validate_authorization()
 def create_sub_batch_timeline(request, pk):
     """
     Create Task Timeline
@@ -97,7 +102,6 @@ def create_sub_batch_timeline(request, pk):
                     task.order = order
                     task.save()
             schedule_timeline_for_sub_batch(sub_batch, is_create=False)
-            update_expected_end_date_of_intern_details(pk)
 
             return JsonResponse({"status": "success"})
         else:
@@ -113,6 +117,7 @@ def create_sub_batch_timeline(request, pk):
 
 
 @login_required()
+@validate_authorization()
 def sub_batch_timeline_data(request, pk):
     """
     Sub batch timeline data
@@ -124,6 +129,7 @@ def sub_batch_timeline_data(request, pk):
 
 
 @login_required()
+@validate_authorization()
 def update_sub_batch_timeline(request, pk):
     current_task = get_object_or_404(SubBatchTaskTimeline, id=pk)
     previous_duration = current_task.days
@@ -137,7 +143,6 @@ def update_sub_batch_timeline(request, pk):
                 timeline_task.created_by = request.user
             form.save()   
             schedule_timeline_for_sub_batch(sub_batch=sub_batch, is_create=False)   
-            update_expected_end_date_of_intern_details(sub_batch.id)
             return JsonResponse({"status": "success"})
         field_errors = form.errors.as_json()
         non_field_errors = form.non_field_errors().as_json()
@@ -154,6 +159,7 @@ def update_sub_batch_timeline(request, pk):
 
 
 @login_required()
+@validate_authorization()
 def update_task_sequence(request):
     task_order = request.POST.getlist("data[]")
     sub_batch_task = SubBatchTaskTimeline.objects.get(id=task_order[0])
@@ -168,6 +174,7 @@ def update_task_sequence(request):
 
 
 @login_required()
+@validate_authorization()
 @require_http_methods(
     ["DELETE"]
 )  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
@@ -190,7 +197,6 @@ def delete_sub_batch_timeline(request, pk):
                 order += 1
                 task.order = order
             schedule_timeline_for_sub_batch(sub_batch=sub_batch, is_create=False)
-            update_expected_end_date_of_intern_details(sub_batch.id)
             return JsonResponse({"message": "Task deleted succcessfully"})
         else:
             return JsonResponse(

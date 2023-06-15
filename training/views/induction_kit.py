@@ -4,8 +4,11 @@ from django.views.generic import TemplateView
 from django.http import FileResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from core.utils import validate_authorization
 
 
+@method_decorator(validate_authorization(), name="dispatch")
 class InductionKit(LoginRequiredMixin, TemplateView):
     """
     Induction Kit
@@ -22,8 +25,8 @@ class InductionKit(LoginRequiredMixin, TemplateView):
         ],
     }
 
-
 @login_required()
+@validate_authorization()
 def induction_kit_detail(request, text):
     """
     Induction Kit Detail

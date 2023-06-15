@@ -5,13 +5,15 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
+from django.utils.decorators import method_decorator
 
 from core import template_utils
-from core.utils import CustomDatatable
+from core.utils import CustomDatatable, validate_authorization
 from hubble.models import Timeline, TimelineTask
 from training.forms import TimelineTaskForm
 
 
+@method_decorator(validate_authorization(), name="dispatch")
 class TimelineTemplateTaskDataTable(LoginRequiredMixin, CustomDatatable):
     """
     Timeline Template Task Datatable
@@ -40,15 +42,18 @@ class TimelineTemplateTaskDataTable(LoginRequiredMixin, CustomDatatable):
         return self.model.objects.filter(timeline=request.POST.get("timeline_id"))
 
     def customize_row(self, row, obj):
-        buttons = (
-            template_utils.edit_button(reverse("timeline-task.show", args=[obj.id]))
-            + template_utils.delete_button("deleteTimeline('" + reverse("timeline-task.delete", args=[obj.id]) + "')"))
-        row["action"] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
+        row["action"] = f"<div class='form-inline justify-content-center'>-</div>"
+        if self.request.user.is_admin_user:
+            buttons = (
+                template_utils.edit_button(reverse("timeline-task.show", args=[obj.id]))
+                + template_utils.delete_button("deleteTimeline('" + reverse("timeline-task.delete", args=[obj.id]) + "')"))
+            row["action"] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
         row["name"] = f"<span data-id='{obj.id}'>{obj.name}</span>"
         return
 
 
 @login_required()
+@validate_authorization()
 def update_order(request):
     data = request.POST.getlist("data[]")
     for order, id in enumerate(data):
@@ -59,6 +64,7 @@ def update_order(request):
 
 
 @login_required()
+@validate_authorization()
 def create_timeline_task(request):
     """
     Create Timeline Template Task
@@ -87,6 +93,7 @@ def create_timeline_task(request):
 
 
 @login_required()
+@validate_authorization()
 def timeline_task_data(request, pk):
     """
     Timeline Template Task Update Form Data
@@ -101,6 +108,7 @@ def timeline_task_data(request, pk):
 
 
 @login_required()
+@validate_authorization()
 def update_timeline_task(request, pk):
     """
     Update Timeline Template Task
@@ -124,6 +132,7 @@ def update_timeline_task(request, pk):
 
 
 @login_required()
+@validate_authorization()
 @require_http_methods(["DELETE"])  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
 def delete_timeline_task(request, pk):
     """

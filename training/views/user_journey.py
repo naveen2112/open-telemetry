@@ -1,17 +1,21 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 from django.db.models import (BooleanField, Case, Count, OuterRef, Q, Subquery,
                               Value, When)
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views.generic import DetailView
+from django.utils.decorators import method_decorator
 
 from core.constants import TASK_TYPE_ASSESSMENT
+from core.utils import validate_authorization
 from hubble.models import (Assessment, Extension, SubBatch,
                            SubBatchTaskTimeline, User)
 from training.forms import InternScoreForm
 
 
+@method_decorator(validate_authorization(), name="dispatch")
 class TraineeJourneyView(LoginRequiredMixin, DetailView):
     model = User
     template_name = "sub_batch/user_journey_page.html"
@@ -54,6 +58,9 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
                 "is_retry",
                 "inactive_tasks",
             )
+            .order_by(
+            "order"
+            )
         )
 
         extended_task_summary = (
@@ -75,6 +82,8 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
         return context
 
 
+@login_required()
+@validate_authorization()
 def update_task_score(request, pk):
     """
     Create User report
@@ -105,6 +114,8 @@ def update_task_score(request, pk):
             )
 
 
+@login_required()
+@validate_authorization()
 def add_extension(request, pk):
     Extension.objects.create(
         sub_batch=SubBatch.objects.filter(intern_details__user=pk).first(),
@@ -114,6 +125,8 @@ def add_extension(request, pk):
     return JsonResponse({"status": "success"})
 
 
+@login_required()
+@validate_authorization()
 def delete_extension(request, pk):
     """
     Delete Timeline Template

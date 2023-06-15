@@ -51,11 +51,13 @@
 <div>
     <div class="flex justify-between items-center my-6">
         <h3 class="font-semibold">Assignment Journey</h3>
-        <button onclick="addWeekExtensionCard('{{ object.id }}')"
-            class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal">
-            <div class="flex mr-1"><span class="hbl hbl-plus text-2xl text-white"></span></div>
-            Add Week Extention
-        </button>
+        {% if request.user.is_admin_user %}
+            <button onclick="addWeekExtensionCard('{{ object.id }}')"
+                class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal">
+                <div class="flex mr-1"><span class="hbl hbl-plus text-2xl text-white"></span></div>
+                Add Week Extention
+            </button>
+        {% endif %}
     </div>
 
     <div class="jquery-modal current hidden" id="modal">
@@ -96,9 +98,11 @@
                 <h4>{{ task.name }}</h4>
                 <div class="flex">
                     {% if not task.inactive_tasks %}
-                    <a href="javascript:void(0)" onclick="openCreateModal('{{ task.id }}', null)">
-                        <div class="inline mr-1"><span class="hbl hbl-edit text-2xl text-dark-black/50"></span></div>
-                    </a>
+                    {% if request.user.is_admin_user %}
+                        <a href="javascript:void(0)" onclick="openCreateModal('{{ task.id }}', null)">
+                            <div class="inline mr-1"><span class="hbl hbl-edit text-2xl text-dark-black/50"></span></div>
+                        </a>
+                    {% endif %}
                     <p>
                         {% if task.retries != -1 %}
                             {% if task.is_retry %}
@@ -113,13 +117,11 @@
             </div>
             <div class="w-full flex justify-between items-center mb-5">
                 <div class="div flex flex-col justify-center items-center">
-                    <h3 class="font-bold mb-1">{% if task.inactive_tasks %} - {% else %} {{ task.last_entry|default:"-"
-                        }} {% endif %}</h3>
+                    <h3 class="font-bold mb-1">{% if task.inactive_tasks %} - {% else %} {{ task.last_entry|default:"-"}} {% endif %}</h3>
                     <p>Score</p>
                 </div>
                 <div class="div flex flex-col justify-center items-center">
-                    <h3 class="font-bold mb-1">{% if task.inactive_tasks %} - {% else %} {% if task.retries == -1 %} -
-                        {% else%} {{ task.retries|default:"-" }} {% endif %} {% endif %}</h3>
+                    <h3 class="font-bold mb-1">{% if task.inactive_tasks %} - {% else %} {% if task.retries == -1 %} - {% else %} {{ task.retries|default:"-" }} {% endif %} {% endif %}</h3>
                     <p>Retries</p>
                 </div>
                 <div class="div flex flex-col justify-center items-center">
@@ -130,7 +132,7 @@
             </div>
             <div class="w-full flex flex-col justify-start bg-dark-blue-10 rounded-md p-2">
                 <h3 class="font-semibold">Comments</h3>
-                <p class="truncate">{% if task.inactive_tasks %} - {% else %} {{ task.comment }} {% endif %}</p>
+                <p class="truncate">{% if task.inactive_tasks %} - {% else %} {{ task.comment|truncatechars:10 }} {% endif %}</p>
                 <a href="javascript:void(0)" class="text-sm text-dark-blue cursor-pointer show-more-btn">Show more</a>
             </div>
         </div>
@@ -141,12 +143,14 @@
             <div class="w-full flex justify-between items-center mb-5">
                 <h4>Extension Week {{ forloop.counter }}</h4>
                 <div class="flex">
-                    <a href="javascript:void(0)" onclick="openCreateModal(null, '{{ assessment.id }}')">
-                        <div class="inline mr-1"><span class="hbl hbl-edit text-2xl text-dark-black/50"></span></div>
-                    </a>
-                    <a href="javascript:void(0)" onclick="deleteExtension('{{ assessment.id }}')">
-                        <div class="inline mr-1"><span class="hbl hbl-delete text-2xl text-dark-black/50"></span></div>
-                    </a>
+                    {% if request.user.is_admin_user %}
+                        <a href="javascript:void(0)" onclick="openCreateModal(null, '{{ assessment.id }}')">
+                            <div class="inline mr-1"><span class="hbl hbl-edit text-2xl text-dark-black/50"></span></div>
+                        </a>
+                        <a href="javascript:void(0)" onclick="deleteExtension('{{ assessment.id }}')">
+                            <div class="inline mr-1"><span class="hbl hbl-delete text-2xl text-dark-black/50"></span></div>
+                        </a>
+                    {% endif %}
                     <p>
                         {% if assessment.retries != -1 %} 
                             {% if assessment.is_retry %}
@@ -174,7 +178,7 @@
             </div>
             <div class="w-full flex flex-col justify-start bg-dark-blue-10 rounded-md p-2">
                 <h3 class="font-semibold">Comments</h3>
-                <p class="truncate">{{ assessment.comment }}</p>
+                <p class="truncate">{{ assessment.comment|truncatechars:10 }}</p>
                 <a href="javascript:void(0)" class="text-sm text-dark-blue cursor-pointer show-more-btn">Show more</a>
             </div>
         </div>
