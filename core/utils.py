@@ -87,7 +87,7 @@ def validate_authorization(test_func):
     return decorator
 
 
-def is_it_a_leave_day(holidays, start_date):
+def is_leave_day(holidays, start_date):
     return (
         (start_date.date() in holidays)
         or (start_date.date().weekday() == 6)
@@ -100,7 +100,7 @@ def calculate_duration_for_task(holidays, start_date, is_half_day, number_of_day
         start_date += datetime.timedelta(1)
         start_date = start_date.replace(hour=9, minute=0)
 
-    if is_it_a_leave_day(holidays, start_date):
+    if is_leave_day(holidays, start_date):
         start_date += datetime.timedelta(1)
 
     if is_half_day:
@@ -128,7 +128,7 @@ def calculate_duration_for_task(holidays, start_date, is_half_day, number_of_day
         start_date += datetime.timedelta(1)
 
     while total_num_days != number_of_days:
-        if is_it_a_leave_day(holidays, start_date):
+        if is_leave_day(holidays, start_date):
             start_date += datetime.timedelta(1)
             continue
 
