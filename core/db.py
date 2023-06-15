@@ -3,8 +3,21 @@ import datetime
 from django.db import models
 
 
+class DateTimeWithoutTZField(models.DateTimeField):
+    def db_type(self, connection):
+        # Use the appropriate database-specific column type
+        if connection.settings_dict['ENGINE'] == 'django.db.backends.postgresql':
+            return 'timestamp without time zone'
+        elif connection.settings_dict['ENGINE'] == 'django.db.backends.mysql':
+            return 'datetime'
+        elif connection.settings_dict['ENGINE'] == 'django.db.backends.sqlite3':
+            return 'datetime'
+        else:
+            return super().db_type(connection)
+
+
 class BaseModel(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = DateTimeWithoutTZField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -23,9 +36,9 @@ class SoftDeleteManager(models.Manager):
 
 
 class SoftDeleteWithBaseModel(BaseModel):
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    deleted_at = models.DateTimeField(null=True)
+    created_at = DateTimeWithoutTZField(auto_now_add=True)
+    updated_at = DateTimeWithoutTZField(auto_now=True)
+    deleted_at = DateTimeWithoutTZField(null=True)
 
     objects = SoftDeleteManager()
 

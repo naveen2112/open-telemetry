@@ -8,7 +8,7 @@ class Project(db.SoftDeleteWithBaseModel):
     project_id = models.FloatField()
     name = models.CharField(max_length=255)
     icon_path = models.CharField(max_length=255, blank=True, null=True)
-    icon_updated_at = models.DateTimeField(blank=True, null=True)
+    icon_updated_at = db.DateTimeWithoutTZField(blank=True, null=True)
     status = models.CharField(max_length=255)
     version = models.CharField(max_length=255, blank=True, null=True)
     billing_frequency = models.CharField(max_length=255, blank=True, null=True)

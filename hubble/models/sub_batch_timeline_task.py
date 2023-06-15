@@ -19,8 +19,8 @@ class SubBatchTaskTimeline(db.SoftDeleteWithBaseModel):
     task_type = models.CharField(
         max_length=255, choices=constants.TASK_TYPES, default=constants.TASK_TYPE_TASK
     )
-    start_date = models.DateTimeField(null=True)
-    end_date = models.DateTimeField(null=True)
+    start_date = db.DateTimeWithoutTZField(null=True)
+    end_date = db.DateTimeWithoutTZField(null=True)
     order = models.IntegerField(blank=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
