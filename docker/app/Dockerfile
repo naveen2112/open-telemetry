@@ -28,7 +28,7 @@ ADD pyproject.toml pyproject.toml
 # Adding Packages
 RUN pip install poetry==1.3.2
 RUN poetry config virtualenvs.create false
-RUN poetry install --no-interaction --no-ansi --no-root
+RUN poetry install --no-interaction --no-ansi --no-root --no-dev
 
 # Adding project files
 ADD . .
