@@ -33,6 +33,5 @@ ADMIN_EMAILS = [
     "poovarasu@mallow-tech.com",
     "kumaresan@mallow-tech.com",
     "satheesh@mallow-tech.com",
-    "gowtham.duraisamy@mallow-tech.com",
     "anandraj@mallow-tech.com",
 ]

@@ -100,20 +100,20 @@ Sub Batch timeline
     });
 
     $(function() {
-        if ("{{ request.user_is_admin_user }}"){
+        if ("{{ request.user.is_admin_user }}" == "True"){
             $("#sortable").sortable({
-            stop: function() {
-                var selectedData = [];
-                $("#sortable > tr").each(function() {
-                    selectedData.push($(this).children(':first').children(':first').attr('data-id'));
-                })
-                if (copy_seleted.toString() !== selectedData.toString()) {
-                    copy_seleted = selectedData;
-                    updateTimelineTaskByOrder(copy_seleted);
+                stop: function() {
+                    var selectedData = [];
+                    $("#sortable > tr").each(function() {
+                        selectedData.push($(this).children(':first').children(':first').attr('data-id'));
+                    })
+                    if (copy_seleted.toString() !== selectedData.toString()) {
+                        copy_seleted = selectedData;
+                        updateTimelineTaskByOrder(copy_seleted);
+                    }
                 }
-            }
-        });
-    }
+            });
+        }
     });
 
     function openTaskCreateModal() {
