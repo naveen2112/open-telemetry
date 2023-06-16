@@ -13,7 +13,7 @@ from django.views.generic import DetailView
 
 from core import template_utils
 from core.utils import (CustomDatatable, schedule_timeline_for_sub_batch,
-                        update_expected_end_date_of_intern_details)
+                        validate_authorization)
 from hubble.models import (Batch, InternDetail, SubBatch, SubBatchTaskTimeline,
                            Timeline, TimelineTask, User)
 from training.forms import AddInternForm, SubBatchForm
@@ -63,17 +63,19 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
         )
 
     def customize_row(self, row, obj):
-        buttons = (
-            template_utils.show_button(reverse("sub-batch.detail", args=[obj.id]))
-            + template_utils.edit_button_new_page(reverse("sub-batch.edit", args=[obj.id]))
-            + template_utils.delete_button("deleteSubBatch('" + reverse("sub-batch.delete", args=[obj.id]) + "')")
-        )
+        buttons = (template_utils.show_button(reverse("sub-batch.detail", args=[obj.id])))
+        if self.request.user.is_admin_user:
+            buttons += (
+                template_utils.edit_button_new_page(reverse("sub-batch.edit", args=[obj.id]))
+                + template_utils.delete_button("deleteSubBatch('" + reverse("sub-batch.delete", args=[obj.id]) + "')")
+            )
         row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         row["start_date"] = obj.start_date.strftime("%d %b %Y")
         return
 
 
 @login_required()
+@validate_authorization()
 def create_sub_batch(request, pk):
     """
     Create Sub-batch View
@@ -145,6 +147,7 @@ def create_sub_batch(request, pk):
 
 
 @login_required()
+@validate_authorization()
 def get_timeline(request):
     """
     This function retrieves an active timeline template for a given team and returns it as a JSON
@@ -166,6 +169,7 @@ def get_timeline(request):
 
 
 @login_required()
+@validate_authorization()
 def update_sub_batch(request, pk):
     """
     Update Sub-batch View
@@ -190,7 +194,6 @@ def update_sub_batch(request, pk):
                         sub_batch,
                         is_create=False,
                     )
-                update_expected_end_date_of_intern_details(sub_batch.id)
                 return redirect(reverse("batch.detail", args=[sub_batch.batch.id]))
             else:
                 sub_batch_form.add_error(
@@ -207,6 +210,7 @@ def update_sub_batch(request, pk):
 
 
 @login_required()
+@validate_authorization()
 @require_http_methods(
     ["DELETE"]
 )  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
@@ -262,22 +266,21 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
         return self.model.objects.filter(sub_batch__id=request.POST.get("sub_batch"))
 
     def customize_row(self, row, obj):
-        buttons = (
-            template_utils.show_button(reverse("user_reports", args=[obj.user.id]))
-            +
-            # template_utils.edit_button_new_page(reverse("batch")) + #need to change in next PR
-            template_utils.delete_button(
-                "removeIntern('" + reverse("trainee.remove", args=[obj.id]) + "')"
+        buttons = (template_utils.show_button(reverse("user_reports", args=[obj.user.id])))
+        if self.request.user.is_admin_user:
+            buttons += (
+                # template_utils.edit_button_new_page(reverse("batch")) + #need to change in next PR
+                template_utils.delete_button(
+                    "removeIntern('" + reverse("trainee.remove", args=[obj.id]) + "')"
+                )
             )
-        )
-        row[
-            "action"
-        ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         row["expected_completion"] = obj.expected_completion.strftime("%d %b %Y")
         return
 
 
 @login_required()
+@validate_authorization()
 def add_trainee(request):
     """
     Add tranie to sub batch
@@ -314,6 +317,7 @@ def add_trainee(request):
 
 
 @login_required
+@validate_authorization()
 @require_http_methods(["DELETE"])
 def remove_trainee(request, pk):
     try:

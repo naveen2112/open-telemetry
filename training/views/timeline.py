@@ -8,9 +8,10 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView, FormView
+from django.utils.decorators import method_decorator
 
 from core import template_utils
-from core.utils import CustomDatatable
+from core.utils import CustomDatatable, validate_authorization
 from hubble.models import Timeline, TimelineTask
 from training.forms import TimelineForm, TimelineTaskForm
 
@@ -58,15 +59,14 @@ class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
         ).annotate(Days=Coalesce(Sum(F("task_timeline__days")), 0, output_field=FloatField())) # TODO :: should we need '-' incase we need to CAST here
      
     def customize_row(self, row, obj):
-        buttons = (
-            template_utils.show_button(reverse("timeline-template.detail", args=[obj.id]))
-            + template_utils.edit_button(reverse("timeline-template.show", args=[obj.id]))
-            + template_utils.delete_button("deleteTimeline('" + reverse("timeline-template.delete", args=[obj.id]) + "')")
-            + template_utils.duplicate_button(reverse("timeline-template.show", args=[obj.id]))
-        )
-        row[
-            "action"
-        ] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
+        buttons = (template_utils.show_button(reverse("timeline-template.detail", args=[obj.id])))
+        if self.request.user.is_admin_user:
+            buttons += (
+                template_utils.edit_button(reverse("timeline-template.show", args=[obj.id]))
+                + template_utils.delete_button("deleteTimeline('" + reverse("timeline-template.delete", args=[obj.id]) + "')")
+                + template_utils.duplicate_button(reverse("timeline-template.show", args=[obj.id]))
+            )
+        row["action"] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
         return
 
     def render_column(self, row, column):
@@ -79,6 +79,7 @@ class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
 
 
 @login_required()
+@validate_authorization()
 def create_timeline_template(request):
     """
     Create Timeline Template
@@ -123,6 +124,7 @@ def create_timeline_template(request):
 
 
 @login_required()
+@validate_authorization()
 def timeline_template_data(request, pk):
     """
     Timeline Template Update Form Data
@@ -137,6 +139,7 @@ def timeline_template_data(request, pk):
 
 
 @login_required()
+@validate_authorization()
 def update_timeline_template(request, pk):
     """
     Update Timeline Template
@@ -161,6 +164,7 @@ def update_timeline_template(request, pk):
         )
 
 
+@validate_authorization()
 @require_http_methods(["DELETE"])  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
 def delete_timeline_template(request, pk):
     """

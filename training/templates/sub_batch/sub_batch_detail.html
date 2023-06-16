@@ -67,11 +67,13 @@ Sub Batch details
     <div class="flex justify-end items-center py-4">
         <a href="{% url 'sub-batch.timeline' object.id %}"
             class="p-tb6 mr-4 text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal">Timeline</a>
-        <button class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal"
-            onclick="openModal()">
-            <div class="inline mr-1"><span class="hbl hbl-plus text-2xl text-white"></span></div>
-            <span>Add Trainee</span>
-        </button>
+        {% if request.user.is_admin_user %}
+            <button class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal"
+                onclick="openModal()">
+                <div class="inline mr-1"><span class="hbl hbl-plus text-2xl text-white"></span></div>
+                <span>Add Trainee</span>
+            </button>
+        {% endif %}
 
         <div class="jquery-modal current hidden" id="modal">
             <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">

@@ -18,11 +18,13 @@ Timeline Template Detail
             <p class="text-sm">Current you are viewing {{ timeline.name }} timeline template</p>
         </div>
     </div>
-    <button class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal"
-        onclick="openTaskCreateModal()">
-        <span class="text-xl mr-2">+</span>
-        Create Task
-    </button>
+    {% if request.user.is_admin_user %}
+        <button class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal"
+            onclick="openTaskCreateModal()">
+            <span class="text-xl mr-2">+</span>
+            Create Task
+        </button>
+    {% endif %}
 </div>
 {% endblock %}
 
@@ -93,18 +95,20 @@ Timeline Template Detail
     });
 
     $(function() {
-        $("#sortable").sortable({
-            stop: function() {
-                var selectedData = [];
-                $("#sortable > tr").each(function() {
-                    selectedData.push($(this).children(':first').children(':first').attr('data-id'));
-                })
-                if (copy_seleted.toString() !== selectedData.toString()) {
-                    copy_seleted = selectedData;
-                    updateOrder(copy_seleted);
+        if ("{{ request.user_is_admin }}"){
+            $("#sortable").sortable({
+                stop: function() {
+                    var selectedData = [];
+                    $("#sortable > tr").each(function() {
+                        selectedData.push($(this).children(':first').children(':first').attr('data-id'));
+                    })
+                    if (copy_seleted.toString() !== selectedData.toString()) {
+                        copy_seleted = selectedData;
+                        updateOrder(copy_seleted);
+                    }
                 }
-            }
-        });
+            });
+        }
     });
 
     function updateOrder(data) {

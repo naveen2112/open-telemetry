@@ -3,8 +3,9 @@ import datetime
 from ajax_datatable import AjaxDatatableView
 from django.http import HttpResponseForbidden
 
+from core.constants import ADMIN_EMAILS
 from hubble.models import (Holiday, InternDetail, SubBatchTaskTimeline,
-                           TimelineTask)
+                           TimelineTask, User)
 
 
 class CustomDatatable(AjaxDatatableView):
@@ -70,21 +71,25 @@ class CustomDatatable(AjaxDatatableView):
         return json_data
 
 
-def admin_user(request):
-    return request.id != 16  # Condition needs to be changed
-
-
-def validate_authorization(test_func):
+def validate_authorization():
     def decorator(view_func):
         def wrapped_view(request, *args, **kwargs):
-            if test_func(request.user):
+            if request.user.is_admin_user:
                 return view_func(request, *args, **kwargs)
-            else:
-                return HttpResponseForbidden()
-
+            return HttpResponseForbidden()
         return wrapped_view
-
     return decorator
+
+
+def update_expected_end_date_of_intern_details(sub_batch):
+    expected_completion_day = (
+        SubBatchTaskTimeline.objects.filter(sub_batch_id=sub_batch)
+        .order_by("-order")
+        .first()
+    )
+    InternDetail.objects.filter(sub_batch_id=sub_batch).update(
+        expected_completion=expected_completion_day.end_date
+    )
 
 
 def is_leave_day(holidays, start_date):
@@ -184,14 +189,4 @@ def schedule_timeline_for_sub_batch(sub_batch, user=None, is_create=True):
             task.start_date = values["start_date_time"]
             task.end_date = values["end_date_time"]
             task.save()
-
-
-def update_expected_end_date_of_intern_details(sub_batch):
-    expected_completion_day = (
-        SubBatchTaskTimeline.objects.filter(sub_batch_id=sub_batch)
-        .order_by("-order")
-        .first()
-    )
-    InternDetail.objects.filter(sub_batch_id=sub_batch).update(
-        expected_completion=expected_completion_day.end_date
-    )
+    update_expected_end_date_of_intern_details(sub_batch.id)

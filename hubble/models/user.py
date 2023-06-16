@@ -1,8 +1,10 @@
+from datetime import datetime
+
 from django.contrib.auth.models import AbstractBaseUser
 from django.db import models
-from datetime import datetime
-from core import db
 
+from core import db
+from core.constants import ADMIN_EMAILS
 
 class User(AbstractBaseUser, db.SoftDeleteWithBaseModel):
     id = models.BigAutoField(primary_key=True)
@@ -34,6 +36,9 @@ class User(AbstractBaseUser, db.SoftDeleteWithBaseModel):
         managed = False
         db_table = "users"
 
-
     def __str__(self):
         return self.name
+    
+    @property
+    def is_admin_user(self):
+        return self.email in ADMIN_EMAILS

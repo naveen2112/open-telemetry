@@ -7,10 +7,9 @@ COPY_RIGHTS_TEXT = (
 )
 COMPANY_NAME = "Mallow Technologies Pvt Ltd."
 
-ENVIRONMENT_DEVELOPMENT = 'Development'
-ENVIRONMENT_TESTING = 'Testing'
-ENVIRONMENT_PRODUCTION = 'Production'
-ENVIRONMENT_TESTING = 'Testing'
+ENVIRONMENT_DEVELOPMENT = "Development"
+ENVIRONMENT_PRODUCTION = "Production"
+ENVIRONMENT_TESTING = "Testing"
 
 PRESENT_TYPE_REMOTE = "Remote"
 PRESENT_TYPE_IN_PERSON = "In-Person"
@@ -26,4 +25,14 @@ TASK_TYPES = [
     (TASK_TYPE_TASK, TASK_TYPE_TASK),
     (TASK_TYPE_ASSESSMENT, TASK_TYPE_ASSESSMENT),
     (TASK_TYPE_CULTURAL_MEET, TASK_TYPE_CULTURAL_MEET),
+]
+
+ADMIN_EMAILS = [
+    "saranya.sivanandham@mallow-tech.com",
+    "yogesh@mallow-tech.com",
+    "poovarasu@mallow-tech.com",
+    "kumaresan@mallow-tech.com",
+    "satheesh@mallow-tech.com",
+    "gowtham.duraisamy@mallow-tech.com",
+    "anandraj@mallow-tech.com",
 ]

@@ -14,11 +14,13 @@ Timeline Template
             List of Timeline Templates
         </div>
     </div>
-    <button class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal"
-        onclick="openModal()">
-        <span class="text-xl mr-2">+</span>
-        Create Timeline
-    </button>
+    {% if request.user.is_admin_user %}
+        <button class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal"
+            onclick="openModal()">
+            <span class="text-xl mr-2">+</span>
+            Create Timeline
+        </button>
+    {% endif %}
 </div>
 {% endblock %}
 
