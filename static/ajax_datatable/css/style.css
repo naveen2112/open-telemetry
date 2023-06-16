@@ -1,0 +1,22 @@
+.dataTables_wrapper .dataTables_filter input {
+    box-sizing: border-box;
+    border-radius: 0.75rem;
+    font-weight: 400;
+    height: 40px;
+    padding-top: 0.75rem;
+    padding-left:44px ;
+    padding-right:10px  ;
+    padding-bottom: 0.75rem;
+    color: RGBA(2, 12, 45, 0.5);
+    --tw-bg-opacity: 1;
+    background-color: rgb(251 252 255 / var(--tw-bg-opacity));
+}
+
+.datatable thead {
+    --tw-bg-opacity : 1;
+    background-color: rgb(205 211 229 / var(--tw-bg-opacity));
+}
+
+.dataTables_wrapper .dataTables_extraFooter {
+    border : 0px;
+}

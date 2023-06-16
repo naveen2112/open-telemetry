@@ -1,0 +1,131 @@
+.multi-select select {
+    display: none;
+}
+
+.multi-select .list-option {
+    position: relative;
+}
+
+.multi-select .list-option input {
+    pointer-events: none;
+}
+
+.multi-select .list-option.focused,
+.multi-select .list-option.selected {
+    background-color: rgb(243 246 255 / var(--tw-bg-opacity));
+}
+
+.multi-select #select-list {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.multi-select .no-data-available {
+    text-align: center;
+    padding: 20px 10px 10px;
+    opacity: 0.5;
+}
+
+.multi-select .place-holder {
+    opacity: 0.6;
+}
+
+.multi-select .multi-select-list-wrap {
+    display: none;
+    position: absolute;
+    top: 40px;
+    z-index: 5;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    flex-direction: column;
+}
+
+.multi-select #drop-btn * {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.multi-select .list-option {
+    cursor: pointer;
+}
+
+.multi-select select {
+    display: none;
+}
+
+.multi-select #cus-search-wrap {
+    position: relative;
+    margin: 12px;
+}
+
+.multi-select #cus-search-wrap .search-icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 6px;
+}
+
+.multi-select #select-search {
+    font-weight: 400;
+    font-size: 14px;
+    width: 100%;
+    height: 36px;
+    padding: 10px 10px 10px 44px;
+    border-radius: 16px;
+    color: #020C2D;
+    background-color: #F3F6FF;
+    cursor: pointer;
+}
+
+.multi-select #select-search:focus {
+    outline: none;
+}
+
+.multi-select #select-search::-moz-placeholder {
+    color: #020C2D;
+}
+
+.multi-select #select-search::placeholder {
+    color: #020C2D;
+}
+
+#id_present_type,
+#id_task_type,
+#update_present_type,
+#update_task_type,
+#id_status {
+    display: flex;
+    align-items: center;
+}
+
+#id_present_type>div:first-child,
+#id_task_type>div:first-child,
+#update_present_type>div:first-child,
+#update_task_type>div:first-child #id_status>div:first-child {
+    padding-right: 20px;
+}
+
+#id_present_type label,
+#id_task_type label,
+#update_present_type label,
+#id_status label,
+#update_task_type label {
+    display: flex;
+    align-items: center;
+    margin-top: 5px;
+}
+
+#id_present_type label input,
+#id_task_type label input,
+#id_status label input,
+#update_present_type label input,
+#update_task_type label input {
+    width: 24px;
+    height: 24px;
+    accent-color: #2248C3;
+    margin-right: 10px;
+}
+
+#id_task_type>div:nth-child(2) {
+    padding-right: 16px;
+}

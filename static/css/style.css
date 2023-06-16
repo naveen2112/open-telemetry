@@ -1,0 +1,142 @@
+.dataTable thead {
+    background-color: rgb(205 211 229);
+}
+
+#card-link {
+    margin: 15px 20px 15px 0px;
+}
+
+#card-container {
+    width: 18rem;
+    height: 9.5rem;
+}
+
+.disabled-container{
+    width: 420px;
+    background-color: #D3D3D3;
+    height: auto;
+    opacity:0.5;
+}
+
+.enabled-container{
+    width: 420px;
+    background-color: white;
+    height: auto;
+}
+
+.dataTables_filter {
+    display: none;
+}
+
+.custom-radio-btn .icon {
+    position: relative;
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: transparent;
+    border: 2px solid RGBA(2, 12, 45, 0.5);
+}
+
+.custom-radio-btn input {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    opacity: 0;
+}
+
+.custom-radio-btn .icon:before {
+    content: "";
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: #2248C3;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    visibility: hidden;
+}
+
+.custom-radio-btn input:checked+.icon {
+    border-color: #2248C3;
+}
+
+.custom-radio-btn input:checked+.icon:before {
+    visibility: visible;
+}
+
+.-top-24 {
+    top: -24px;
+}
+
+#timeline_template_link {
+    margin: 15px 0px;
+}
+
+#sortable:first-child {
+    cursor: grab;
+}
+
+.gap-205 {
+    row-gap: 2rem !important;
+    column-gap: 2.5rem !important;
+}
+
+.gap-cols-1 {
+    column-gap: 1rem;
+}
+
+.gap-210 {
+    row-gap: 2rem !important;
+    column-gap: 10rem !important;
+}
+
+.mr-6 {
+    margin-right: 30px;
+}
+
+#id_comment {
+    width: 100%;
+}
+
+.timeline-input {
+    visibility: hidden;
+}
+
+.start_date_input {
+    width: 100%;
+}
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 130px;
+    background-color: #fff;
+    color: #000;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+    padding: 10px;
+    left: 20px;
+    text-align: left;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+}
+
+.mr-2 {
+    margin-right: 0.5rem;
+}

@@ -10,13 +10,17 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
-import environ
 import os
-
 from pathlib import Path
 
+import environ
 
-env = environ.Env(DEBUG=(bool, False))
+from core.constants import ENVIRONMENT_DEVELOPMENT
+
+env = environ.Env(
+    DEBUG=(bool, False),
+    TEAMS_LOGGING_WEBHOOK_URL=(str, None),
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,20 +41,29 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = [env("SITE_HOST")]
-
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
 INSTALLED_APPS = [
-    "django.contrib.admin",
+    # "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "reports.apps.ReportsConfig",
+    "django.contrib.sites",
+    "reports",
+    "hubble",
+    "training",
+    "ajax_datatable",
 ]
+
+SESSION_ENGINE = "django.contrib.sessions.backends.file"
+SESSION_FILE_PATH = os.path.join(BASE_DIR, "session_files")
+
+# Session age should be in secs
+SESSION_COOKIE_AGE = 288000
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -60,6 +73,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "hubble.middlewares.subdomain_classifier.SubdomainClassifier",
+    "hubble.middlewares.verify_users.VerifiedUser",
 ]
 
 ROOT_URLCONF = "hubble_report.urls"
@@ -121,7 +136,7 @@ TIME_ZONE = "Asia/Kolkata"
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -137,3 +152,59 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+AUTH_USER_MODEL = "hubble.User"
+
+ENV_NAME = env("ENV_NAME")
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://reports.hubble-reports.test",
+    "https://training.hubble-reports.test",
+    "https://reports-dev.mallow-tech.com",
+    "https://training-dev.mallow-tech.com",
+]
+
+LOGIN_URL = "login"
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "console": {
+            # exact format is not important, this is the minimum information
+            "format": "%(asctime)s %(name)-12s %(levelname)-8s %(message)s",
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "console",
+        },
+        "teams": {
+            "level": "WARNING",
+            "class": "core.teams_logger.TeamsExceptionHandler",
+        },
+    },
+    "loggers": {
+        "": {
+            "level": "WARNING",
+            "handlers": ["console", "teams"],
+        },
+    },
+}
+
+if ENV_NAME == ENVIRONMENT_DEVELOPMENT:
+    # Local development dependencies.
+    INSTALLED_APPS += [
+        "silk",
+    ]
+
+    MIDDLEWARE += [
+        "silk.middleware.SilkyMiddleware",
+    ]
+
+    SILKY_PYTHON_PROFILER = True
+    SILKY_META = True
+    SILKY_ANALYZE_QUERIES = True
+    SILKY_AUTHENTICATION = True
+    SILKY_AUTHORISATION = True
