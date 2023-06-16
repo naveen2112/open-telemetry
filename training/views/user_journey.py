@@ -82,7 +82,6 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
 
 
 @login_required()
-@validate_authorization()
 def update_task_score(request, pk):
     """
     Create User report
@@ -114,7 +113,6 @@ def update_task_score(request, pk):
 
 
 @login_required()
-@validate_authorization()
 def add_extension(request, pk):
     Extension.objects.create(
         sub_batch=SubBatch.objects.filter(intern_details__user=pk).first(),
@@ -125,7 +123,6 @@ def add_extension(request, pk):
 
 
 @login_required()
-@validate_authorization()
 def delete_extension(request, pk):
     """
     Delete Timeline Template

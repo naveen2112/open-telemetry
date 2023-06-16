@@ -95,7 +95,7 @@ Timeline Template Detail
     });
 
     $(function() {
-        if ("{{ request.user_is_admin }}"){
+        if ("{{ request.user.is_admin_user }}" == "True"){
             $("#sortable").sortable({
                 stop: function() {
                     var selectedData = [];
