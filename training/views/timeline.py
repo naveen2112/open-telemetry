@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import F, Sum, FloatField
@@ -135,6 +137,7 @@ def timeline_template_data(request, pk):
         }  # Covert django queryset object to dict,which can be easily serialized and sent as a JSON response
         return JsonResponse(data, safe=False)
     except Exception as e:
+        logging.error(f"An error has occured while fetching the Timeline \n{e}")
         return JsonResponse({"message": "No timeline template found"}, status=500)
 
 
@@ -177,6 +180,7 @@ def delete_timeline_template(request, pk):
         timeline.delete()
         return JsonResponse({"message": "Timeline Template deleted succcessfully"})
     except Exception as e:
+        logging.error(f"An error has occured while deleting the Timeline \n{e}")
         return JsonResponse(
             {"message": "Error while deleting Timeline Template!"}, status=500
         )

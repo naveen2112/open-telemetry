@@ -14,6 +14,8 @@ from core.utils import CustomDatatable, validate_authorization
 from hubble.models import Batch, InternDetail, SubBatch
 from training.forms import BatchForm
 
+import logging
+
 
 class BatchList(LoginRequiredMixin, FormView):
     """
@@ -108,6 +110,7 @@ def batch_data(request, pk):
         }  # Covert django queryset object to dict,which can be easily serialized and sent as a JSON response
         return JsonResponse(data, safe=False)
     except Exception as e:
+        logging.error(f"An error has occured while fetching the batch data \n{e}")
         return JsonResponse({"message": "Error while getting the data!"}, status=500)
 
 
@@ -150,6 +153,7 @@ def delete_batch(request, pk):
         batch.delete()
         return JsonResponse({"message": "Batch deleted succcessfully"})
     except Exception as e:
+        logging.error(f"An error has occured while deleting the batch data \n{e}")
         return JsonResponse({"message": "Error while deleting Batch!"}, status=500)
 
 

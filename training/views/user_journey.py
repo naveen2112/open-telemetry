@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.db.models import (BooleanField, Case, Count, OuterRef, Q, Subquery,
@@ -136,6 +138,7 @@ def delete_extension(request, pk):
             {"message": "Week extension deleted succcessfully", "status": "success"}
         )
     except Exception as e:
+        logging.error(f"An error has occured while deleting an Extension task \n{e}")
         return JsonResponse(
             {"message": "Error while deleting week extension!"}, status=500
         )

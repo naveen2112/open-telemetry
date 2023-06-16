@@ -1,4 +1,5 @@
 import datetime
+import logging
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -201,5 +202,6 @@ def delete_sub_batch_timeline(request, pk):
                 {"message": "This task has been already started!"}, status=500
             )
     except Exception as e:
+        logging.error(f"An error has occured while deleting the data \n{e}")
         return JsonResponse({"message": "Error while deleting Task!"}, status=500)
     

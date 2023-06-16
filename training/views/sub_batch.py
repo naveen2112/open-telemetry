@@ -1,4 +1,4 @@
-import datetime
+import logging
 
 import pandas as pd
 from django.contrib.auth.decorators import login_required
@@ -160,6 +160,7 @@ def get_timeline(request):
             {"timeline": model_to_dict(timeline)}
         )  # Return the response with active template for a team
     except Exception as e:
+        logging.error(f"An error has occured while fetching an active timeline template for the team {team_id.name} \n{e}")
         return JsonResponse(
             {
                 "message": "No active timeline template found",
@@ -226,6 +227,7 @@ def delete_sub_batch(request, pk):
         sub_batch.delete()
         return JsonResponse({"message": "Sub-Batch deleted succcessfully"})
     except Exception as e:
+        logging.error(f"An error has occured while deleting the Sub-Batch \n{e}")
         return JsonResponse({"message": "Error while deleting Sub-Batch!"}, status=500)
 
 
@@ -325,6 +327,7 @@ def remove_trainee(request, pk):
         intern_detail.delete()
         return JsonResponse({"message": "Intern has been deleted succssfully"})
     except Exception as e:
+        logging.error(f"An error has occured while deleting an intern \n{e}")
         return JsonResponse(
             {"message": "Error while deleting Timeline Template!"}, status=500
         )
