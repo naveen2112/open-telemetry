@@ -16,7 +16,6 @@ from hubble.models import Timeline, TimelineTask
 from training.forms import TimelineForm, TimelineTaskForm
 
 
-@method_decorator(validate_authorization(), name="dispatch")
 class TimelineTemplate(LoginRequiredMixin, FormView):
     """
     Timeline Template
@@ -26,7 +25,6 @@ class TimelineTemplate(LoginRequiredMixin, FormView):
     template_name = "timeline_template.html"
 
 
-@method_decorator(validate_authorization(), name="dispatch")
 class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
     """
     Timeline Template Datatable
@@ -184,7 +182,6 @@ def delete_timeline_template(request, pk):
         )
 
 
-@method_decorator(validate_authorization(), name="dispatch")
 class TimelineTemplateDetails(LoginRequiredMixin, DetailView):
     """
     Timeline Template Detail

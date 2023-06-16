@@ -10,7 +10,6 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView
-from django.utils.decorators import method_decorator
 
 from core import template_utils
 from core.utils import (CustomDatatable, schedule_timeline_for_sub_batch,
@@ -20,7 +19,6 @@ from hubble.models import (Batch, InternDetail, SubBatch, SubBatchTaskTimeline,
 from training.forms import AddInternForm, SubBatchForm
 
 
-@method_decorator(validate_authorization(), name="dispatch")
 class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
     """
     Sub-Batch Datatable
@@ -231,14 +229,12 @@ def delete_sub_batch(request, pk):
         return JsonResponse({"message": "Error while deleting Sub-Batch!"}, status=500)
 
 
-@method_decorator(validate_authorization(), name="dispatch")
 class SubBatchDetail(LoginRequiredMixin, DetailView):
     model = SubBatch
     extra_context = {"form": AddInternForm()}
     template_name = "sub_batch/sub_batch_detail.html"
 
 
-@method_decorator(validate_authorization(), name="dispatch")
 class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
     """
     Sub-Batch-Trainees Datatable

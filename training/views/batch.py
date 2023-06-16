@@ -15,7 +15,6 @@ from hubble.models import Batch, InternDetail, SubBatch
 from training.forms import BatchForm
 
 
-@method_decorator(validate_authorization(), name="dispatch")
 class BatchList(LoginRequiredMixin, FormView):
     """
     Timeline Template
@@ -25,7 +24,6 @@ class BatchList(LoginRequiredMixin, FormView):
     template_name = "batch/batch_list.html"
 
 
-@method_decorator(validate_authorization(), name="dispatch")
 class BatchDataTable(LoginRequiredMixin, CustomDatatable):
     """
     Batch Datatable
@@ -155,7 +153,6 @@ def delete_batch(request, pk):
         return JsonResponse({"message": "Error while deleting Batch!"}, status=500)
 
 
-@method_decorator(validate_authorization(), name="dispatch")
 class BatchDetails(LoginRequiredMixin, DetailView):
     model = Batch
     template_name = "sub_batch/sub_batch.html"

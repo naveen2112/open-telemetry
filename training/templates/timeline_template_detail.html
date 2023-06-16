@@ -95,18 +95,20 @@ Timeline Template Detail
     });
 
     $(function() {
-        $("#sortable").sortable({
-            stop: function() {
-                var selectedData = [];
-                $("#sortable > tr").each(function() {
-                    selectedData.push($(this).children(':first').children(':first').attr('data-id'));
-                })
-                if (copy_seleted.toString() !== selectedData.toString()) {
-                    copy_seleted = selectedData;
-                    updateOrder(copy_seleted);
+        if ("{{ request.user_is_admin }}"){
+            $("#sortable").sortable({
+                stop: function() {
+                    var selectedData = [];
+                    $("#sortable > tr").each(function() {
+                        selectedData.push($(this).children(':first').children(':first').attr('data-id'));
+                    })
+                    if (copy_seleted.toString() !== selectedData.toString()) {
+                        copy_seleted = selectedData;
+                        updateOrder(copy_seleted);
+                    }
                 }
-            }
-        });
+            });
+        }
     });
 
     function updateOrder(data) {

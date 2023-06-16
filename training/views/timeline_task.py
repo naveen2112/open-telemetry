@@ -13,7 +13,6 @@ from hubble.models import Timeline, TimelineTask
 from training.forms import TimelineTaskForm
 
 
-@method_decorator(validate_authorization(), name="dispatch")
 class TimelineTemplateTaskDataTable(LoginRequiredMixin, CustomDatatable):
     """
     Timeline Template Task Datatable

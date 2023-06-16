@@ -82,27 +82,26 @@ Sub Batch timeline
 <script>
     let copy_seleted = [];
     $(document).ready(function() {
-        $(document).ready(function() {
-            AjaxDatatableViewUtils.initialize_table(
-                $('#sub-batch-timeline-table'),
-                "{% url 'sub-batch.datatable' %}",
-                {
-                    serverSide: true,
-                    processing: true,
-                    autoWidth: false,
-                    scrollX: false,
-                    order: [],
-                }, {
-                "sub_batch_id": "{{ object.id }}"
-            });
+        AjaxDatatableViewUtils.initialize_table(
+            $('#sub-batch-timeline-table'),
+            "{% url 'sub-batch.datatable' %}",
+            {
+                serverSide: true,
+                processing: true,
+                autoWidth: false,
+                scrollX: false,
+                order: [],
+            }, {
+            "sub_batch_id": "{{ object.id }}"
         });
-        $("#sortable > tr").each(function() {
-            copy_selected.push($(this).children(':first').text());
-        })
+    });
+    $("#sortable > tr").each(function() {
+        copy_selected.push($(this).children(':first').text());
     });
 
     $(function() {
-        $("#sortable").sortable({
+        if ("{{ request.user_is_admin_user }}"){
+            $("#sortable").sortable({
             stop: function() {
                 var selectedData = [];
                 $("#sortable > tr").each(function() {
@@ -114,6 +113,7 @@ Sub Batch timeline
                 }
             }
         });
+    }
     });
 
     function openTaskCreateModal() {
@@ -200,51 +200,51 @@ Sub Batch timeline
         });
     }
 
-        function updateTimelineTask() {
+    function updateTimelineTask() {
+        $('.page-loader').show();
+        $.ajax({
+            type: "POST",
+            url: "/sub-batch-timeline/"+ $('#timeline_id').val() +"/edit",
+            headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
+            data: {
+                id: $('#timeline_id').val(),
+                name: $('#id_name').val(),
+                days: $('#id_days').val(),
+                order: $('#id_order').val(),
+                present_type: $('input[name="present_type"]:checked').val(),
+                task_type: $('input[name="task_type"]:checked').val(),
+            },
+            success: function(data) {
+                removeErrors();
+                $('.page-loader').hide();
+                if (data.status === 'success') {
+                    $('#sub-batch-timeline-table').DataTable().ajax.reload();
+                    closeModal('modal');
+                }else {
+                    renderFormError(data);
+                }
+            }
+        });
+    }
+
+    function deleteTimeline(url) {
+        let text = 'Are you sure do you want to delete';
+        if (confirm(text) == true) {
             $('.page-loader').show();
             $.ajax({
-                type: "POST",
-                url: "/sub-batch-timeline/"+ $('#timeline_id').val() +"/edit",
-                headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
-                data: {
-                    id: $('#timeline_id').val(),
-                    name: $('#id_name').val(),
-                    days: $('#id_days').val(),
-                    order: $('#id_order').val(),
-                    present_type: $('input[name="present_type"]:checked').val(),
-                    task_type: $('input[name="task_type"]:checked').val(),
-                },
+                type: "DELETE",
+                url: url,
                 success: function(data) {
-                    removeErrors();
                     $('.page-loader').hide();
-                    if (data.status === 'success') {
-                        $('#sub-batch-timeline-table').DataTable().ajax.reload();
-                        closeModal('modal');
-                    }else {
-                        renderFormError(data);
-                    }
-                }
+                    $('#sub-batch-timeline-table').DataTable().ajax.reload();
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    alert(jqXHR.responseJSON.message);
+                    $('.page-loader').hide();
+                },
             });
         }
-
-        function deleteTimeline(url) {
-            let text = 'Are you sure do you want to delete';
-            if (confirm(text) == true) {
-                $('.page-loader').show();
-                $.ajax({
-                    type: "DELETE",
-                    url: url,
-                    success: function(data) {
-                        $('.page-loader').hide();
-                        $('#sub-batch-timeline-table').DataTable().ajax.reload();
-                    },
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        alert(jqXHR.responseJSON.message);
-                        $('.page-loader').hide();
-                    },
-                });
-            }
-        }
+    }
 
     var date = new Date()
     $('#date_range').daterangepicker({

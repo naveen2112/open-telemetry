@@ -15,7 +15,6 @@ from hubble.models import (Assessment, Extension, SubBatch,
 from training.forms import InternScoreForm
 
 
-@method_decorator(validate_authorization(), name="dispatch")
 class TraineeJourneyView(LoginRequiredMixin, DetailView):
     model = User
     template_name = "sub_batch/user_journey_page.html"

@@ -16,7 +16,6 @@ from hubble.models import SubBatch, SubBatchTaskTimeline
 from training.forms import SubBatchTimelineForm
 
 
-@method_decorator(validate_authorization(), name="dispatch")
 class SubBatchTimeline(LoginRequiredMixin, DetailView):
     """
     Sub batch Timeline
@@ -27,7 +26,6 @@ class SubBatchTimeline(LoginRequiredMixin, DetailView):
     template_name = "sub_batch/timeline.html"
 
 
-@method_decorator(validate_authorization(), name="dispatch")
 class SubBatchTimelineDataTable(LoginRequiredMixin, CustomDatatable):
     """
     Timeline Template Task Datatable
