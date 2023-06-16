@@ -6,8 +6,8 @@ from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
-from django.views.decorators.http import require_http_methods
 from django.utils.decorators import method_decorator
+from django.views.decorators.http import require_http_methods
 
 from core import template_utils
 from core.utils import CustomDatatable, validate_authorization
@@ -45,10 +45,16 @@ class TimelineTemplateTaskDataTable(LoginRequiredMixin, CustomDatatable):
     def customize_row(self, row, obj):
         row["action"] = f"<div class='form-inline justify-content-center'>-</div>"
         if self.request.user.is_admin_user:
-            buttons = (
-                template_utils.edit_button(reverse("timeline-task.show", args=[obj.id]))
-                + template_utils.delete_button("deleteTimeline('" + reverse("timeline-task.delete", args=[obj.id]) + "')"))
-            row["action"] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
+            buttons = template_utils.edit_button(
+                reverse("timeline-task.show", args=[obj.id])
+            ) + template_utils.delete_button(
+                "deleteTimeline('"
+                + reverse("timeline-task.delete", args=[obj.id])
+                + "')"
+            )
+            row[
+                "action"
+            ] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
         row["name"] = f"<span data-id='{obj.id}'>{obj.name}</span>"
         return
 
@@ -135,7 +141,9 @@ def update_timeline_task(request, pk):
 
 @login_required()
 @validate_authorization()
-@require_http_methods(["DELETE"])  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
+@require_http_methods(
+    ["DELETE"]
+)  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
 def delete_timeline_task(request, pk):
     """
     Delete Timeline Template Task

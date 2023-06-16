@@ -1,6 +1,7 @@
 from django.db import models
-from hubble.models import User, Module
+
 from core import db
+from hubble.models import Module, User
 
 
 class Task(db.SoftDeleteWithBaseModel):

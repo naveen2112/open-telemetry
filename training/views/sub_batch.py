@@ -63,13 +63,16 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
         )
 
     def customize_row(self, row, obj):
-        buttons = (template_utils.show_button(reverse("sub-batch.detail", args=[obj.id])))
+        buttons = template_utils.show_button(reverse("sub-batch.detail", args=[obj.id]))
         if self.request.user.is_admin_user:
-            buttons += (
-                template_utils.edit_button_new_page(reverse("sub-batch.edit", args=[obj.id]))
-                + template_utils.delete_button("deleteSubBatch('" + reverse("sub-batch.delete", args=[obj.id]) + "')")
+            buttons += template_utils.edit_button_new_page(
+                reverse("sub-batch.edit", args=[obj.id])
+            ) + template_utils.delete_button(
+                "deleteSubBatch('" + reverse("sub-batch.delete", args=[obj.id]) + "')"
             )
-        row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        row[
+            "action"
+        ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         row["start_date"] = obj.start_date.strftime("%d %b %Y")
         return
 
@@ -89,8 +92,12 @@ def create_sub_batch(request, pk):
             excel_file = request.FILES["users_list_file"]
             df = pd.read_excel(excel_file)
             if (df.columns[0] == "employee_id") and (df.columns[1] == "college"):
-                if User.objects.filter(employee_id__in=df["employee_id"]).count() == len(df["employee_id"]):
-                    if InternDetail.objects.filter(user__employee_id__in=df["employee_id"]).exists():
+                if User.objects.filter(
+                    employee_id__in=df["employee_id"]
+                ).count() == len(df["employee_id"]):
+                    if InternDetail.objects.filter(
+                        user__employee_id__in=df["employee_id"]
+                    ).exists():
                         sub_batch_form.add_error(
                             None,
                             "Some of the Users are already added in another sub-batch",
@@ -160,7 +167,9 @@ def get_timeline(request):
             {"timeline": model_to_dict(timeline)}
         )  # Return the response with active template for a team
     except Exception as e:
-        logging.error(f"An error has occured while fetching an active timeline template for the team {team_id.name} \n{e}")
+        logging.error(
+            f"An error has occured while fetching an active timeline template for the team {team_id.name} \n{e}"
+        )
         return JsonResponse(
             {
                 "message": "No active timeline template found",
@@ -187,9 +196,7 @@ def update_sub_batch(request, pk):
                 active_form = sub_batch_form.save()
                 if int(request.POST.get("timeline")) != sub_batch.timeline.id:
                     SubBatchTaskTimeline.bulk_delete({"sub_batch_id": pk})
-                    schedule_timeline_for_sub_batch(
-                        sub_batch, request.user
-                    )
+                    schedule_timeline_for_sub_batch(sub_batch, request.user)
                 else:
                     schedule_timeline_for_sub_batch(
                         sub_batch,
@@ -268,7 +275,9 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
         return self.model.objects.filter(sub_batch__id=request.POST.get("sub_batch"))
 
     def customize_row(self, row, obj):
-        buttons = (template_utils.show_button(reverse("user_reports", args=[obj.user.id])))
+        buttons = template_utils.show_button(
+            reverse("user_reports", args=[obj.user.id])
+        )
         if self.request.user.is_admin_user:
             buttons += (
                 # template_utils.edit_button_new_page(reverse("batch")) + #need to change in next PR
@@ -276,7 +285,9 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
                     "removeIntern('" + reverse("trainee.remove", args=[obj.id]) + "')"
                 )
             )
-        row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        row[
+            "action"
+        ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         row["expected_completion"] = obj.expected_completion.strftime("%d %b %Y")
         return
 

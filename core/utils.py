@@ -5,7 +5,7 @@ from django.http import HttpResponseForbidden
 
 from core.constants import ADMIN_EMAILS
 from hubble.models import (Holiday, InternDetail, SubBatchTaskTimeline,
-                           TimelineTask, User)
+                           TimelineTask)
 
 
 class CustomDatatable(AjaxDatatableView):
@@ -77,7 +77,9 @@ def validate_authorization():
             if request.user.is_admin_user:
                 return view_func(request, *args, **kwargs)
             return HttpResponseForbidden()
+
         return wrapped_view
+
     return decorator
 
 
@@ -180,7 +182,9 @@ def schedule_timeline_for_sub_batch(sub_batch, user=None, is_create=True):
         return values["end_date_time"]
 
     else:
-        for task in SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch).order_by("order"):
+        for task in SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch).order_by(
+            "order"
+        ):
             values = calculate_duration_for_task(
                 holidays, start_date, is_half_day, task.days
             )

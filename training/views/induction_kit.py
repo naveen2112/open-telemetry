@@ -1,11 +1,10 @@
 import os
+
 from django.conf import settings
-from django.views.generic import TemplateView
-from django.http import FileResponse
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
-from django.utils.decorators import method_decorator
-from core.utils import validate_authorization
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import FileResponse
+from django.views.generic import TemplateView
 
 
 class InductionKit(LoginRequiredMixin, TemplateView):
@@ -23,6 +22,7 @@ class InductionKit(LoginRequiredMixin, TemplateView):
             if os.path.splitext(file)[1] == ".pdf"
         ],
     }
+
 
 @login_required()
 def induction_kit_detail(request, text):
