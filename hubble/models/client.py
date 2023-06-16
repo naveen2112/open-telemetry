@@ -1,6 +1,8 @@
 from django.db import models
-from .currency import Currency
+
 from core import db
+
+from .currency import Currency
 
 
 class Client(db.SoftDeleteWithBaseModel):

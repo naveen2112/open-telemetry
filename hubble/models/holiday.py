@@ -1,6 +1,7 @@
 from django.db import models
-from hubble.models import User
+
 from core import db
+from hubble.models import User
 
 
 class Holiday(db.SoftDeleteWithBaseModel):

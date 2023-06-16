@@ -1,4 +1,4 @@
-import datetime
+import logging
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -6,12 +6,13 @@ from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView
-from django.utils.decorators import method_decorator
 
 from core import template_utils
-from core.utils import CustomDatatable, schedule_timeline_for_sub_batch, validate_authorization
+from core.utils import (CustomDatatable, schedule_timeline_for_sub_batch,
+                        validate_authorization)
 from hubble.models import SubBatch, SubBatchTaskTimeline
 from training.forms import SubBatchTimelineForm
 
@@ -61,9 +62,12 @@ class SubBatchTimelineDataTable(LoginRequiredMixin, CustomDatatable):
         if self.request.user.is_admin_user:
             row["action"] = f"<div class='form-inline justify-content-center'>-</div>"
             if obj.can_editable():
-                buttons = (
-                    template_utils.edit_button(reverse("sub_batch.timeline.show", args=[obj.id])) + 
-                    template_utils.delete_button("deleteTimeline('"+ reverse("sub_batch.timeline.delete", args=[obj.id])+ "')")
+                buttons = template_utils.edit_button(
+                    reverse("sub_batch.timeline.show", args=[obj.id])
+                ) + template_utils.delete_button(
+                    "deleteTimeline('"
+                    + reverse("sub_batch.timeline.delete", args=[obj.id])
+                    + "')"
                 )
                 row[
                     "action"
@@ -131,16 +135,16 @@ def sub_batch_timeline_data(request, pk):
 def update_sub_batch_timeline(request, pk):
     current_task = get_object_or_404(SubBatchTaskTimeline, id=pk)
     previous_duration = current_task.days
-    sub_batch = SubBatch.objects.get(id = current_task.sub_batch_id)
+    sub_batch = SubBatch.objects.get(id=current_task.sub_batch_id)
     if current_task.can_editable():
         form = SubBatchTimelineForm(request.POST, instance=current_task)
         if form.is_valid():
-            if (form.cleaned_data["days"] != previous_duration):
+            if form.cleaned_data["days"] != previous_duration:
                 timeline_task = form.save(commit=False)
                 timeline_task.sub_batch = sub_batch
                 timeline_task.created_by = request.user
-            form.save()   
-            schedule_timeline_for_sub_batch(sub_batch=sub_batch, is_create=False)   
+            form.save()
+            schedule_timeline_for_sub_batch(sub_batch=sub_batch, is_create=False)
             return JsonResponse({"status": "success"})
         field_errors = form.errors.as_json()
         non_field_errors = form.non_field_errors().as_json()
@@ -184,7 +188,7 @@ def delete_sub_batch_timeline(request, pk):
     try:
         timeline = get_object_or_404(SubBatchTaskTimeline, id=pk)
         if timeline.can_editable():
-            sub_batch = SubBatch.objects.get(id = timeline.sub_batch_id)
+            sub_batch = SubBatch.objects.get(id=timeline.sub_batch_id)
             task_list = SubBatchTaskTimeline.objects.filter(
                 sub_batch=sub_batch.id,
                 order__gt=timeline.order,
@@ -201,5 +205,5 @@ def delete_sub_batch_timeline(request, pk):
                 {"message": "This task has been already started!"}, status=500
             )
     except Exception as e:
+        logging.error(f"An error has occured while deleting the data \n{e}")
         return JsonResponse({"message": "Error while deleting Task!"}, status=500)
-    

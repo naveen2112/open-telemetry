@@ -1,20 +1,13 @@
 from django.db import models
-from hubble.models import User, Team
-from . import Project, Module, Task
-from django.utils import timezone
+from django.db.models import (Case, CharField, F, FloatField, Func, Q, Sum,
+                              Value, When)
 from django.db.models.functions import Coalesce, Round
+from django.utils import timezone
+
 from core import db
-from django.db.models import (
-    F,
-    Q,
-    Sum,
-    Case,
-    When,
-    FloatField,
-    Func,
-    Value,
-    CharField,
-)
+from hubble.models import Team, User
+
+from . import Module, Project, Task
 
 
 class TimesheetCustomQuerySet(models.QuerySet):
@@ -126,27 +119,31 @@ class TimesheetCustomQuerySet(models.QuerySet):
             )
             .values("day", "team__name")
             .annotate(
-                gap=Coalesce(Case(
-                    When(a_sum=0, then=0),
-                    default=Round(
-                        100
-                        * (
-                            (
-                                Sum(
-                                    F(
-                                        "user__expected_user_efficiencies__expected_efficiency"
+                gap=Coalesce(
+                    Case(
+                        When(a_sum=0, then=0),
+                        default=Round(
+                            100
+                            * (
+                                (
+                                    Sum(
+                                        F(
+                                            "user__expected_user_efficiencies__expected_efficiency"
+                                        )
                                     )
+                                    - Sum(F("authorized_hours"))
                                 )
-                                - Sum(F("authorized_hours"))
-                            )
-                            / Sum(
-                                "user__expected_user_efficiencies__expected_efficiency"
-                            )
+                                / Sum(
+                                    "user__expected_user_efficiencies__expected_efficiency"
+                                )
+                            ),
+                            2,
                         ),
-                        2,
+                        output_field=FloatField(),
                     ),
+                    0,
                     output_field=FloatField(),
-                ), 0, output_field= FloatField()),
+                ),
                 efficiency_capacity=Sum(F("authorized_hours")),
                 monetization_capacity=Sum(
                     F("user__expected_user_efficiencies__expected_efficiency")

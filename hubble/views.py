@@ -1,3 +1,5 @@
+import logging
+
 from django.contrib import messages
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout
@@ -50,6 +52,7 @@ def signin(request):
             request.session["auth_flow"] = flow
         except Exception as e:
             print(e)
+            logging.error(f"An error has been occured while login {e}")
         return HttpResponseRedirect(flow["auth_uri"])
 
 

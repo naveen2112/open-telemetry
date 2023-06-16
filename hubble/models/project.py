@@ -1,6 +1,7 @@
 from django.db import models
-from hubble.models import User, Currency, Client
+
 from core import db
+from hubble.models import Client, Currency, User
 
 
 class Project(db.SoftDeleteWithBaseModel):

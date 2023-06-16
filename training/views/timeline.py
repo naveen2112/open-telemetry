@@ -1,6 +1,8 @@
+import logging
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import F, Sum, FloatField
+from django.db.models import F, FloatField, Sum
 from django.db.models.functions import Coalesce
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
@@ -8,7 +10,6 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView, FormView
-from django.utils.decorators import method_decorator
 
 from core import template_utils
 from core.utils import CustomDatatable, validate_authorization
@@ -36,7 +37,12 @@ class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
         {"name": "id", "visible": False, "searchable": False},
         {"name": "name", "visible": True, "searchable": True},
         {"name": "Days", "visible": True, "searchable": True},
-        {"name": "is_active", "title": "Is Active", "visible": True, "searchable": True},
+        {
+            "name": "is_active",
+            "title": "Is Active",
+            "visible": True,
+            "searchable": True,
+        },
         {
             "name": "team",
             "visible": True,
@@ -56,17 +62,31 @@ class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
     def get_initial_queryset(self, request=None):
         return self.model.objects.filter(
             task_timeline__deleted_at__isnull=True
-        ).annotate(Days=Coalesce(Sum(F("task_timeline__days")), 0, output_field=FloatField())) # TODO :: should we need '-' incase we need to CAST here
-     
+        ).annotate(
+            Days=Coalesce(Sum(F("task_timeline__days")), 0, output_field=FloatField())
+        )  # TODO :: should we need '-' incase we need to CAST here
+
     def customize_row(self, row, obj):
-        buttons = (template_utils.show_button(reverse("timeline-template.detail", args=[obj.id])))
+        buttons = template_utils.show_button(
+            reverse("timeline-template.detail", args=[obj.id])
+        )
         if self.request.user.is_admin_user:
             buttons += (
-                template_utils.edit_button(reverse("timeline-template.show", args=[obj.id]))
-                + template_utils.delete_button("deleteTimeline('" + reverse("timeline-template.delete", args=[obj.id]) + "')")
-                + template_utils.duplicate_button(reverse("timeline-template.show", args=[obj.id]))
+                template_utils.edit_button(
+                    reverse("timeline-template.show", args=[obj.id])
+                )
+                + template_utils.delete_button(
+                    "deleteTimeline('"
+                    + reverse("timeline-template.delete", args=[obj.id])
+                    + "')"
+                )
+                + template_utils.duplicate_button(
+                    reverse("timeline-template.show", args=[obj.id])
+                )
             )
-        row["action"] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
+        row[
+            "action"
+        ] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
         return
 
     def render_column(self, row, column):
@@ -135,6 +155,7 @@ def timeline_template_data(request, pk):
         }  # Covert django queryset object to dict,which can be easily serialized and sent as a JSON response
         return JsonResponse(data, safe=False)
     except Exception as e:
+        logging.error(f"An error has occured while fetching the Timeline \n{e}")
         return JsonResponse({"message": "No timeline template found"}, status=500)
 
 
@@ -165,7 +186,9 @@ def update_timeline_template(request, pk):
 
 
 @validate_authorization()
-@require_http_methods(["DELETE"])  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
+@require_http_methods(
+    ["DELETE"]
+)  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
 def delete_timeline_template(request, pk):
     """
     Delete Timeline Template
@@ -173,10 +196,11 @@ def delete_timeline_template(request, pk):
     """
     try:
         timeline = get_object_or_404(Timeline, id=pk)
-        TimelineTask.bulk_delete({"timeline_id":pk})
+        TimelineTask.bulk_delete({"timeline_id": pk})
         timeline.delete()
         return JsonResponse({"message": "Timeline Template deleted succcessfully"})
     except Exception as e:
+        logging.error(f"An error has occured while deleting the Timeline \n{e}")
         return JsonResponse(
             {"message": "Error while deleting Timeline Template!"}, status=500
         )

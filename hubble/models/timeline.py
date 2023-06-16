@@ -1,6 +1,7 @@
 from django.db import models
+
 from core import db
-from hubble.models import User, Team
+from hubble.models import Team, User
 
 
 class Timeline(db.SoftDeleteWithBaseModel):

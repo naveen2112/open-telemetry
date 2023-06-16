@@ -1,5 +1,7 @@
 from django.db import models
+
 from core import db
+
 from .user import User
 
 

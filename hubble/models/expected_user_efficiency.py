@@ -1,11 +1,17 @@
 from django.db import models
-from hubble.models import User
+
 from core import db
+from hubble.models import User
 
 
 class ExpectedUserEfficiency(db.SoftDeleteWithBaseModel):
     id = models.BigAutoField(primary_key=True)
-    user = models.ForeignKey(User, models.CASCADE, related_name= 'expected_user_efficiencies', db_column = 'user_id')
+    user = models.ForeignKey(
+        User,
+        models.CASCADE,
+        related_name="expected_user_efficiencies",
+        db_column="user_id",
+    )
     expected_efficiency = models.FloatField()
     effective_from = models.DateField()
     effective_to = models.DateField(blank=True, null=True)

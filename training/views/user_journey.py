@@ -1,12 +1,13 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
+import logging
+
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import (BooleanField, Case, Count, OuterRef, Q, Subquery,
                               Value, When)
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.views.generic import DetailView
-from django.utils.decorators import method_decorator
 
 from core.constants import TASK_TYPE_ASSESSMENT
 from core.utils import validate_authorization
@@ -57,9 +58,7 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
                 "is_retry",
                 "inactive_tasks",
             )
-            .order_by(
-            "order"
-            )
+            .order_by("order")
         )
 
         extended_task_summary = (
@@ -93,9 +92,7 @@ def update_task_score(request, pk):
             report.user_id = pk
             report.task_id = request.POST.get("task")
             report.extension_id = request.POST.get("extension")
-            report.sub_batch = SubBatch.objects.filter(
-                intern_details__user=pk
-            ).first()
+            report.sub_batch = SubBatch.objects.filter(intern_details__user=pk).first()
             report.is_retry = True if request.POST.get("status") == "true" else False
             report.created_by = request.user
             report.save()
@@ -131,11 +128,12 @@ def delete_extension(request, pk):
     try:
         extension = get_object_or_404(Extension, id=pk)
         extension.delete()
-        Assessment.bulk_delete({"extension":extension})
+        Assessment.bulk_delete({"extension": extension})
         return JsonResponse(
             {"message": "Week extension deleted succcessfully", "status": "success"}
         )
     except Exception as e:
+        logging.error(f"An error has occured while deleting an Extension task \n{e}")
         return JsonResponse(
             {"message": "Error while deleting week extension!"}, status=500
         )
