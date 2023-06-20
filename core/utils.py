@@ -194,3 +194,26 @@ def schedule_timeline_for_sub_batch(sub_batch, user=None, is_create=True):
             task.end_date = values["end_date_time"]
             task.save()
     update_expected_end_date_of_intern_details(sub_batch.id)
+
+
+
+
+from django.test.runner import DiscoverRunner
+class UnManagedModelTestRunner(DiscoverRunner):
+    """
+        Test runner that automatically makes all unmanaged models in your Django
+        project managed for the duration of the test run, so that one doesn’t need
+        to execute the SQL manually to create them.
+    """
+    def setup_test_environment(self, *args, **kwargs):
+        from django.apps import apps
+        get_models = apps.get_models
+        self.unmanaged_models = [m for m in get_models() if not m._meta.managed]
+        for m in self.unmanaged_models:
+            m._meta.managed = True
+        super(UnManagedModelTestRunner, self).setup_test_environment(*args, **kwargs)
+
+    def teardown_test_environment(self, *args, **kwargs):
+        super(UnManagedModelTestRunner, self).teardown_test_environment(*args, **kwargs)
+        for m in self.unmanaged_models:
+            m._meta.managed = False
