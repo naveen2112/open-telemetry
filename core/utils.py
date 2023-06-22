@@ -2,6 +2,7 @@ import datetime
 
 from ajax_datatable import AjaxDatatableView
 from django.http import HttpResponseForbidden
+from django.test.runner import DiscoverRunner
 
 from core.constants import ADMIN_EMAILS
 from hubble.models import (Holiday, InternDetail, SubBatchTaskTimeline,
@@ -196,9 +197,6 @@ def schedule_timeline_for_sub_batch(sub_batch, user=None, is_create=True):
     update_expected_end_date_of_intern_details(sub_batch.id)
 
 
-
-
-from django.test.runner import DiscoverRunner
 class UnManagedModelTestRunner(DiscoverRunner):
     """
         Test runner that automatically makes all unmanaged models in your Django
