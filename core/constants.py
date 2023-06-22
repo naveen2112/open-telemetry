@@ -34,5 +34,4 @@ ADMIN_EMAILS = [
     "kumaresan@mallow-tech.com",
     "satheesh@mallow-tech.com",
     "anandraj@mallow-tech.com",
-    "palaniyappan@mallow-tech.com"
 ]
