@@ -12,6 +12,12 @@ class TimelineForm(forms.ModelForm):
         self.fields["team"].empty_label = "Select a Team"
         self.fields["name"].validators.append(MinLengthValidator(3))
 
+    def clean(self):
+        cleaned_data = super().clean()
+        if self.data.get("id") and (not models.Timeline.objects.filter(id=self.data.get("id")).exists()):
+            self.add_error(None, "You are trying to duplicate invalid template")
+        return cleaned_data
+        
     def clean_is_active(self):
         """
         This function checks if a team already has an active template and raises a validation error if
@@ -22,7 +28,7 @@ class TimelineForm(forms.ModelForm):
                 team=self.cleaned_data["team"], is_active=True
             ).values("id")
             if (len(query)) and (query[0]["id"] != (self.instance.id)):
-                raise ValidationError("Team already has an active template.")
+                raise ValidationError("Team already has an active template.", code="template_in_use")
 
     class Meta:
         model = models.Timeline

@@ -105,7 +105,6 @@ WSGI_APPLICATION = "hubble_report.wsgi.application"
 
 DATABASES = {
     "default": env.db(),
-    "test": env.db(),
 }
 
 
@@ -211,13 +210,3 @@ if ENV_NAME == ENVIRONMENT_DEVELOPMENT:
     SILKY_AUTHORISATION = True
 
 TEST_RUNNER = "core.utils.UnManagedModelTestRunner"
-
-# class DisableMigrations(object):
-
-#     def __contains__(self, item):
-#         return True
-
-#     def __getitem__(self, item):
-#         return None
-
-# MIGRATION_MODULES = DisableMigrations()

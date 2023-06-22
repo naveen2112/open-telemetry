@@ -2,6 +2,8 @@ from datetime import datetime
 
 from django.contrib.auth.models import AbstractBaseUser
 from django.db import models
+from hubble.models.team import Team 
+from hubble.models.designation import Designation
 
 from core import db
 from core.constants import ADMIN_EMAILS
@@ -17,9 +19,9 @@ class User(AbstractBaseUser, db.SoftDeleteWithBaseModel):
     is_employed = models.BooleanField(blank=True, null=True)
     remember_token = models.CharField(max_length=100, blank=True, null=True)
     status = models.CharField(max_length=255)
-    team = models.ForeignKey("hubble.Team", models.CASCADE, blank=True, null=True)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, blank=True, null=True)
     branch_id = models.BigIntegerField(blank=True, null=True)
-    designation = models.ForeignKey("hubble.Designation", models.CASCADE, blank=True, null=True)
+    designation = models.ForeignKey(Designation, on_delete=models.CASCADE, blank=True, null=True)
     team_owner = models.BooleanField(blank=True, null=True)
     first_name = models.CharField(max_length=255, blank=True, null=True)
     last_name = models.CharField(max_length=255, blank=True, null=True)
@@ -33,7 +35,7 @@ class User(AbstractBaseUser, db.SoftDeleteWithBaseModel):
     REQUIRED_FIELDS = []
 
     class Meta:
-        managed = False
+        # managed = False
         db_table = "users"
 
     def __str__(self):

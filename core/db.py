@@ -1,6 +1,7 @@
 import datetime
 
 from django.db import models
+from django.contrib.auth.models import BaseUserManager
 
 
 class DateTimeWithoutTZField(models.DateTimeField):
@@ -24,7 +25,7 @@ class BaseModel(models.Model):
         abstract = True
 
 
-class SoftDeleteManager(models.Manager):
+class SoftDeleteManager(BaseUserManager):
     def get_queryset(self):
         return super().get_queryset().filter(deleted_at__isnull=True)
 

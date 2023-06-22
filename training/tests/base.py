@@ -4,13 +4,12 @@ from django.apps import apps
 from django.conf import settings
 from django.db.models import Q
 from django.test import Client, TestCase
-from django.urls import reverse
-from django.utils.translation import activate, ngettext_lazy
+from django.utils.translation import ngettext_lazy
 from faker import Faker
 from model_bakery import baker
 
 from core.constants import ADMIN_EMAILS
-from hubble.models import Team, Timeline, User
+from hubble.models import User
 
 
 class BaseTestCase(TestCase):
@@ -31,8 +30,13 @@ class BaseTestCase(TestCase):
         user = baker.make(User, is_employed=True, _fill_optional=["email"])
         user.set_password("12345")
         user.save()
-        ADMIN_EMAILS.append(user.email) # TODO :: Need to remove this logic after roles and permission
+        ADMIN_EMAILS.append(
+            user.email
+        )  # TODO :: Need to remove this logic after roles and permission
         return user
+
+    def create_team(self):
+        return baker.make("hubble.Team")
 
     def authenticate(self, user=None):
         """
@@ -42,35 +46,23 @@ class BaseTestCase(TestCase):
             user = self.create_user()
         self.client.force_login(user)
 
-    def make_get_request(self, route_name):
+    def make_get_request(self, url_pattern):
         """
         This function is responsible for handling the GET requests without any arguments
         """
-        return self.client.get(reverse(route_name)) # Need to change pass reversed url here
+        return self.client.get(url_pattern)
 
-    def make_post_request(self, route_name, data):
+    def make_post_request(self, url_pattern, data):
         """
         This function is responsible for handling the POST requests without any arguments
         """
-        return self.client.post(reverse(route_name), data) # Need to change pass reversed url here
+        return self.client.post(url_pattern, data)
 
-    def make_get_request_with_argument(self, route_name, timeline_id):
-        """
-        This function is responsible for handling GET requests with arguments
-        """
-        return self.client.get(reverse(route_name, args=[timeline_id])) # Need to change pass reversed url here
-
-    def make_post_request_with_argument(self, route_name, timeline_id, data):
-        """
-        This function is responsible for handling POST requests with arguments
-        """
-        return self.client.post(reverse(route_name, args=[timeline_id]), data) # Need to change pass reversed url here
-
-    def make_delete_request(self, route_name, timeline_id):
+    def make_delete_request(self, url_pattern):
         """
         This function is responsible for handling DELETE requests with arguments
         """
-        return self.client.delete(reverse(route_name, args=[timeline_id])) # Need to change pass reversed url here
+        return self.client.delete(url_pattern)
 
     def get_valid_inputs(self, override={}):
         """
@@ -125,40 +117,52 @@ class BaseTestCase(TestCase):
         """
         return str(response.decode()).replace('\\"', "'")
 
-    def get_ajax_response(self, current_value, field_errors={}, non_field_errors={}, validation_parameter=None):
+    def get_error_message(self, key, value, current_value, validation_parameter=None):
+        if value == "min_length":
+            message = ngettext_lazy(
+                "Ensure this value has at least %(validation_parameter)d character (it has %(current_length)d).",
+                "Ensure this value has at least %(validation_parameter)d characters (it has %(current_length)d).",
+                validation_parameter,
+            ) % {
+                "current_length": len(current_value[key]),
+                "validation_parameter": validation_parameter,
+            }
+        elif value == "required":
+            message = "This field is required."
+        elif value == "invalid_choice":
+            message = "Select a valid choice. That choice is not one of the available choices."
+        return message
+
+    def get_ajax_response(
+        self,
+        current_value,
+        field_errors={},
+        non_field_errors={},
+        validation_parameter=None,
+        custom_validation_error_message={},
+    ):
         """
         This function helps to build the desired JSON response dynamically
         """
-        field_error_response = {} # TODO :: if empty return list
+        field_error_response = {} if field_errors else []
         for key, values in field_errors.items():
             temp = []
             for value in values:
-                # TODO
-                if value == "min_length":
-                    limit = 3
-                    message = ngettext_lazy(
-                        "Ensure this value has at least %(limit)d character (it has %(current_length)d).",
-                        "Ensure this value has at least %(limit)d characters (it has %(current_length)d).",
-                        limit
-                        ) % {'current_length' : len(current_value[key]), 'limit' : limit}
-                    # message = f"Ensure this value has at least 3 characters (it has {len(current_value[key])})."
-                elif value == "required":
-                    message = "This field is required."
-                elif value == "":
-                    message = "Team already has an active template."
-                elif value == "invalid_choice":
-                    message = "Select a valid choice. That choice is not one of the available choices."
-
-                abc = {
+                message = custom_validation_error_message.get(
+                    value
+                ) or self.get_error_message(
+                    key, value, current_value, validation_parameter
+                )
+                error_details = {
                     "message": message,
                     "code": value,
                 }
-                temp.append(abc)
+                temp.append(error_details)
             field_error_response[key] = temp
 
         non_field_error_response = []
-        for non_field_error in non_field_errors:
-            pass
+        if non_field_errors != {}:
+            non_field_error_response.append(non_field_errors)
 
         return json.dumps(
             {
