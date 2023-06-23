@@ -19,7 +19,7 @@ class User(AbstractBaseUser, db.SoftDeleteWithBaseModel):
     status = models.CharField(max_length=255)
     team = models.ForeignKey("hubble.Team", models.CASCADE, blank=True, null=True)
     branch_id = models.BigIntegerField(blank=True, null=True)
-    designation = models.ForeignKey("hubble.Designation", models.CASCADE, blank=True, null=True)
+    # designation = models.ForeignKey("hubble.Designation", models.CASCADE, blank=True, null=True)
     team_owner = models.BooleanField(blank=True, null=True)
     first_name = models.CharField(max_length=255, blank=True, null=True)
     last_name = models.CharField(max_length=255, blank=True, null=True)
