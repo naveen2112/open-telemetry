@@ -17,4 +17,14 @@ class Migration(migrations.Migration):
             name='user',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='assessments', to=settings.AUTH_USER_MODEL),
         ),
+        migrations.AddField(
+            model_name='user',
+            name='designation',
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='hubble.designation'),
+        ),
+        migrations.AddField(
+            model_name='user',
+            name='team',
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='hubble.team'),
+        ),
     ]

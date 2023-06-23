@@ -4,16 +4,42 @@ from django.apps import apps
 from django.conf import settings
 from django.db.models import Q
 from django.test import Client, TestCase
+from django.test.runner import DiscoverRunner
 from django.utils.translation import ngettext_lazy
 from faker import Faker
 from model_bakery import baker
 
 from core.constants import ADMIN_EMAILS
 from hubble.models import User
+from hubble_report.settings import env
+
+
+class UnManagedModelTestRunner(DiscoverRunner):
+    """
+        Test runner that automatically makes all unmanaged models in your Django
+        project managed for the duration of the test run, so that one doesn't need
+        to execute the SQL manually to create them.
+    """
+    def setup_test_environment(self, *args, **kwargs):
+        from django.apps import apps
+        get_models = apps.get_models
+        self.unmanaged_models = [m for m in get_models() if not m._meta.managed]
+        for m in self.unmanaged_models:
+            m._meta.managed = True
+        super(UnManagedModelTestRunner, self).setup_test_environment(*args, **kwargs)
+
+    def teardown_test_environment(self, *args, **kwargs):
+        super(UnManagedModelTestRunner, self).teardown_test_environment(*args, **kwargs)
+        for m in self.unmanaged_models:
+            m._meta.managed = False
 
 
 class BaseTestCase(TestCase):
+    """
+    This class helps us to follow DRY principles in Training module testing
+    """
     persisted_valid_inputs = {}
+    testcase_server_name =  env("TRAINING_TESTING_SERVER_NAME")
 
     def setUp(self):
         """
@@ -28,8 +54,6 @@ class BaseTestCase(TestCase):
         This function is responsible for creating an user and giving them admi access
         """
         user = baker.make(User, is_employed=True, _fill_optional=["email"])
-        user.set_password("12345")
-        user.save()
         ADMIN_EMAILS.append(
             user.email
         )  # TODO :: Need to remove this logic after roles and permission
@@ -48,21 +72,21 @@ class BaseTestCase(TestCase):
 
     def make_get_request(self, url_pattern):
         """
-        This function is responsible for handling the GET requests without any arguments
+        This function is responsible for handling the GET requests
         """
-        return self.client.get(url_pattern)
+        return self.client.get(url_pattern, SERVER_NAME=self.testcase_server_name)
 
     def make_post_request(self, url_pattern, data):
         """
-        This function is responsible for handling the POST requests without any arguments
+        This function is responsible for handling the POST requests
         """
-        return self.client.post(url_pattern, data)
+        return self.client.post(url_pattern, data, SERVER_NAME=self.testcase_server_name)
 
     def make_delete_request(self, url_pattern):
         """
-        This function is responsible for handling DELETE requests with arguments
+        This function is responsible for handling DELETE requests}
         """
-        return self.client.delete(url_pattern)
+        return self.client.delete(url_pattern, SERVER_NAME=self.testcase_server_name)
 
     def get_valid_inputs(self, override={}):
         """
@@ -117,15 +141,18 @@ class BaseTestCase(TestCase):
         """
         return str(response.decode()).replace('\\"', "'")
 
-    def get_error_message(self, key, value, current_value, validation_parameter=None):
+    def get_error_message(self, key, value, current_value, validation_parameter):
+        """
+        This function is responsible for building the error json response dynamically
+        """
         if value == "min_length":
             message = ngettext_lazy(
                 "Ensure this value has at least %(validation_parameter)d character (it has %(current_length)d).",
                 "Ensure this value has at least %(validation_parameter)d characters (it has %(current_length)d).",
-                validation_parameter,
+                validation_parameter[key],
             ) % {
                 "current_length": len(current_value[key]),
-                "validation_parameter": validation_parameter,
+                "validation_parameter": validation_parameter[key],
             }
         elif value == "required":
             message = "This field is required."
@@ -135,10 +162,10 @@ class BaseTestCase(TestCase):
 
     def get_ajax_response(
         self,
-        current_value,
+        current_value={},
         field_errors={},
         non_field_errors={},
-        validation_parameter=None,
+        validation_parameter={},
         custom_validation_error_message={},
     ):
         """
