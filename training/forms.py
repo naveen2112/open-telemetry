@@ -2,6 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator
 
+from core.constants import PRESENT_TYPES, TASK_TYPES
 from hubble import models
 from hubble.models import Assessment
 
@@ -66,9 +67,9 @@ class TimelineTaskForm(forms.ModelForm):
         raises a validation error.
         """
         if value <= 0:
-            raise ValidationError("Value must be greater than 0")
+            raise ValidationError("Value must be greater than 0", code="Zero Error")
         if value % 0.5 != 0:
-            raise ValidationError("Value must be a multiple of 0.5")
+            raise ValidationError("Value must be a multiple of 0.5", code="Multiple of five")
 
     days = forms.FloatField(
         widget=forms.NumberInput(
@@ -79,6 +80,8 @@ class TimelineTaskForm(forms.ModelForm):
         ),
         validators=[validate_days],
     )
+    present_type = forms.ChoiceField(error_messages={"invalid_choice": "Select a valid choice. That choice is not one of the available choices."}, widget=forms.RadioSelect, choices=PRESENT_TYPES)
+    task_type = forms.ChoiceField(error_messages={"invalid_choice": "Select a valid choice. That choice is not one of the available choices."}, widget=forms.RadioSelect, choices=TASK_TYPES)
 
     class Meta:
         model = models.TimelineTask
@@ -91,8 +94,6 @@ class TimelineTaskForm(forms.ModelForm):
                     "placeholder": "Timeline name...",
                 }
             ),
-            "present_type": forms.RadioSelect(),
-            "task_type": forms.RadioSelect(),
         }
 
 

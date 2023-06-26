@@ -2,7 +2,7 @@ from django.forms.models import model_to_dict
 from django.urls import reverse
 from model_bakery import baker
 
-from core.base import BaseTestCase
+from core.base_test import BaseTestCase
 from hubble.models import Timeline
 
 

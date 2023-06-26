@@ -123,6 +123,7 @@ Timeline Template Detail
             url: "{% url 'timeline-task.reorder' %}",
             data: {
                 data: data,
+                timeline_id: "{{ timeline.id }}",
             },
             success: function(data) {
                 if (data.status === 'success') {

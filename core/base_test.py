@@ -39,7 +39,7 @@ class BaseTestCase(TestCase):
     This class helps us to follow DRY principles in Training module testing
     """
     persisted_valid_inputs = {}
-    testcase_server_name =  env("TRAINING_TESTING_SERVER_NAME")
+    testcase_server_name =  env("TRAINING_TESTCASE_SERVER_NAME")
 
     def setUp(self):
         """
@@ -198,3 +198,10 @@ class BaseTestCase(TestCase):
                 "non_field_errors": str(non_field_error_response),
             }
         )
+    
+    def get_form_errors(self, form, field_errors, current_value={}, validation_parameter={}):
+        for key, values in field_errors.items():
+            for value in values:
+                error_message = self.get_error_message(key, value, current_value, validation_parameter)
+                self.assertFormError(form, key, error_message)
+

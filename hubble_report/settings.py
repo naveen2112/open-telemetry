@@ -209,4 +209,4 @@ if ENV_NAME == ENVIRONMENT_DEVELOPMENT:
     SILKY_AUTHENTICATION = True
     SILKY_AUTHORISATION = True
 
-TEST_RUNNER = "core.base.UnManagedModelTestRunner"
+TEST_RUNNER = "core.base_test.UnManagedModelTestRunner"
