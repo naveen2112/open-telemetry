@@ -68,7 +68,10 @@ def callback(request):
     result = auth_helper.get_token_from_code(request)
     data = result["id_token_claims"]
     user_crendentials = data["preferred_username"]
-    user = User.objects.get(email=user_crendentials)
+    try:
+        user = User.objects.get(email=user_crendentials)
+    except Exception as e:
+        user = None
     if (
         user is not None
     ):  # Checks whether the authenticated member is form Mallow or no, by checking with Database
