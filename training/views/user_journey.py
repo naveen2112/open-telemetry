@@ -44,7 +44,9 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
                 comment=Subquery(latest_task_report.values("comment")),
                 is_retry=Subquery(latest_task_report.values("is_retry")),
                 inactive_tasks=Case(
-                    When(start_date__gt=timezone.now(), then=Value(False)),
+                    When(
+                        start_date__gt=timezone.now(), then=Value(False)
+                    ),  # TODO :: Temporarily changed to False, need to update in future
                     default=Value(False),
                     output_field=BooleanField(),
                 ),

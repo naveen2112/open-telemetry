@@ -4,7 +4,6 @@
 
 {% block title %} {{ object.name }} {% endblock %}
 
-{% comment %}
 {% block header %}
 <div class="px-5 pt-9 bg-white pb-7">
     <a href="{% url 'sub-batch.detail' sub_batch.id %}" class="flex items-center text-sm text-dark-blue">
@@ -25,6 +24,7 @@
                 </div>
             </div>
         </div>
+        {% comment %}
         <div class="rounded-xl bg-mild-green-10 flex justify-center items-center flex-col mr-6"
             style="width: 180px;height: 90px;">
             <h3 class="font-bold mb-2">10</h3>
@@ -42,10 +42,10 @@
             </div>
             <p class="text-sm text-gray-400">53% Completed</p>
         </div>
+        {% endcomment %}
     </div>
 </div>
 {% endblock %}
-{% endcomment %}
 
 
 
@@ -115,7 +115,7 @@
             </div>
             <div class="w-full flex justify-between items-center mb-5">
                 <div class="div flex flex-col justify-center items-center">
-                    <h3 class="font-bold mb-1">{% if task.inactive_tasks %} - {% else %} {{ task.last_entry|default:"-"}} {% endif %}</h3>
+                    <h3 class="font-bold mb-1">{% if task.inactive_tasks %} - {% else %} {{ task.last_entry|default_if_none:"-"}} {% endif %}</h3>
                     <p>Score</p>
                 </div>
                 <div class="div flex flex-col justify-center items-center">
@@ -160,7 +160,7 @@
             </div>
             <div class="w-full flex justify-between items-center mb-5">
                 <div class="div flex flex-col justify-center items-center">
-                    <h3 class="font-bold mb-1">{{ assessment.last_entry|default:" - " }}</h3>
+                    <h3 class="font-bold mb-1">{{ assessment.last_entry|default_if_none:" - " }}</h3>
                     <p>Score</p>
                 </div>
                 <div class="div flex flex-col justify-center items-center">
