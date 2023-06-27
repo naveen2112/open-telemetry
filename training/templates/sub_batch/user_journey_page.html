@@ -4,6 +4,7 @@
 
 {% block title %} {{ object.name }} {% endblock %}
 
+{% comment %}
 {% block header %}
 <div class="px-5 pt-9 bg-white pb-7">
     <a href="{% url 'sub-batch.detail' sub_batch.id %}" class="flex items-center text-sm text-dark-blue">
@@ -44,6 +45,7 @@
     </div>
 </div>
 {% endblock %}
+{% endcomment %}
 
 
 
