@@ -256,9 +256,9 @@ class SubBatchTimelineForm(forms.ModelForm):
         raises a validation error.
         """
         if value <= 0:
-            raise ValidationError("Value must be greater than 0")
+            raise ValidationError("Value must be greater than 0", code="value_cannot_be_zero")
         if value % 0.5 != 0:
-            raise ValidationError("Value must be a multiple of 0.5")
+            raise ValidationError("Value must be a multiple of 0.5", code="is_not_divisible_by_0.5")
 
     days = forms.FloatField(
         widget=forms.NumberInput(
@@ -278,6 +278,9 @@ class SubBatchTimelineForm(forms.ModelForm):
             }
         ),
     )
+    present_type = forms.ChoiceField(error_messages={"invalid_choice": "Select a valid choice. That choice is not one of the available choices."}, widget=forms.RadioSelect, choices=PRESENT_TYPES)
+    task_type = forms.ChoiceField(error_messages={"invalid_choice": "Select a valid choice. That choice is not one of the available choices."}, widget=forms.RadioSelect, choices=TASK_TYPES)
+
 
     class Meta:
         model = models.SubBatchTaskTimeline
@@ -290,8 +293,6 @@ class SubBatchTimelineForm(forms.ModelForm):
                     "placeholder": "Task Name...",
                 }
             ),
-            "present_type": forms.RadioSelect(),
-            "task_type": forms.RadioSelect(),
         }
 
 
