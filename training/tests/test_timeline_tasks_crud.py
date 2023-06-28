@@ -42,6 +42,9 @@ class TimelineTaskCreateTest(BaseTestCase):
         }
 
     def validate_response(self, response, data):
+        """
+        To automate the assertion commands, where same logics are repeated
+        """
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertTrue(response.status_code, 200)
         self.assertDatabaseHas(
@@ -261,6 +264,9 @@ class TimelineTaskUpdateTest(BaseTestCase):
         self.timeline_task_id = task_timeline.id
 
     def validate_response(self, response, data):
+        """
+        To automate the assertion commands, where same logics are repeated
+        """
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertTrue(response.status_code, 200)
         self.assertDatabaseHas(
