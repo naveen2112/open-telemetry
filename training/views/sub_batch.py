@@ -300,8 +300,6 @@ def add_trainee(request):
     """
     if request.method == "POST":
         form = AddInternForm(request.POST)
-        # if request.POST.get("user_id"):
-              # Adding form error if the trainees is already added in another
         if form.is_valid():  # Check if form is valid or not
             sub_batch = SubBatch.objects.get(id=request.POST.get("sub_batch_id"))
             timeline_data = SubBatchTaskTimeline.objects.filter(
