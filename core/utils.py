@@ -98,7 +98,6 @@ def is_leave_day(holidays, start_date):
     return (
         (start_date.date() in holidays)
         or (start_date.date().weekday() == 6)
-        or ((start_date.date().day <= 7) and (start_date.date().weekday() == 5))
     )
 
 
