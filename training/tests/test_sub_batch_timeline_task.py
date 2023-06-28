@@ -1,17 +1,15 @@
 import random
+
 from django.forms.models import model_to_dict
 from django.urls import reverse
+from django.utils import timezone
 from model_bakery import baker
 from model_bakery.recipe import seq
+
 from core.base_test import BaseTestCase
-from django.utils import timezone
-from core.constants import (
-    PRESENT_TYPE_IN_PERSON,
-    PRESENT_TYPE_REMOTE,
-    TASK_TYPE_ASSESSMENT,
-    TASK_TYPE_CULTURAL_MEET,
-    TASK_TYPE_TASK,
-)
+from core.constants import (PRESENT_TYPE_IN_PERSON, PRESENT_TYPE_REMOTE,
+                            TASK_TYPE_ASSESSMENT, TASK_TYPE_CULTURAL_MEET,
+                            TASK_TYPE_TASK)
 from hubble.models import SubBatchTaskTimeline
 
 
@@ -45,6 +43,9 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
         }
 
     def validate_response(self, response, data):
+        """
+            To automate the assertion commands, where same logic is repeated
+        """
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertTrue(response.status_code, 200)
         self.assertDatabaseHas(
@@ -66,7 +67,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
             reverse(self.route_name, args=[self.sub_batch.id])
         )
         self.assertTemplateUsed(response, "sub_batch/timeline.html")
-        self.assertContains(response, "Create Task")
+        self.assertContains(response, self.sub_batch.name)
 
     def test_success(self):
         """
@@ -77,6 +78,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
             reverse(self.create_route_name, args=[self.sub_batch.batch.id]), data=data
         )
         self.validate_response(response, data)
+
         # Check what happens when valid decimal data is given as input
         data = self.get_valid_inputs(
             {
@@ -89,6 +91,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
             reverse(self.create_route_name, args=[self.sub_batch.batch.id]), data=data
         )
         self.validate_response(response, data)
+
         # Check whether the radio select options work correctly
         data = self.get_valid_inputs(
             {
@@ -169,6 +172,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
             ),
         )
         self.assertTrue(response.status_code, 200)
+
         # Check what happend when the days field fails value_cannot_be_zero
         response = self.make_post_request(
             reverse(self.create_route_name, args=[self.sub_batch.batch.id]),
@@ -263,7 +267,10 @@ class SubBatchTaskTimelineUpdateTest(BaseTestCase):
         """
         This function is responsible for updating the valid inputs and creating data in databases as reqiured
         """
-        self.sub_batch = baker.make("hubble.SubBatch", start_date=(timezone.now() + timezone.timedelta(1)).date())
+        self.sub_batch = baker.make(
+            "hubble.SubBatch",
+            start_date=(timezone.now() + timezone.timedelta(1)).date(),
+        )
         self.persisted_valid_inputs = {
             "name": self.faker.name(),
             "days": 2,
@@ -271,10 +278,17 @@ class SubBatchTaskTimelineUpdateTest(BaseTestCase):
             "task_type": TASK_TYPE_TASK,
             "order": 1,
         }
-        sub_batch_task_timeline = baker.make("hubble.SubBatchTaskTimeline", order=1, start_date=(timezone.now() + timezone.timedelta(1)).date())
+        sub_batch_task_timeline = baker.make(
+            "hubble.SubBatchTaskTimeline",
+            order=1,
+            start_date=(timezone.now() + timezone.timedelta(1)).date(),
+        )
         self.sub_batch_task_timeline_id = sub_batch_task_timeline.id
 
     def validate_response(self, response, data):
+        """
+            To automate the assertion commands, where same logic is repeated
+        """
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertTrue(response.status_code, 200)
         self.assertDatabaseHas(
@@ -334,7 +348,6 @@ class SubBatchTaskTimelineUpdateTest(BaseTestCase):
         )
         self.validate_response(response, data)
 
-
     def test_min_length_validation(self):
         """
         To check what happens when name field fails MinlengthValidation
@@ -367,7 +380,13 @@ class SubBatchTaskTimelineUpdateTest(BaseTestCase):
                 self.update_edit_route_name, args=[self.sub_batch_task_timeline_id]
             ),
             data=self.get_valid_inputs(
-                {"days": "", "name": "", "task_type": "", "present_type": "", "order": ""}
+                {
+                    "days": "",
+                    "name": "",
+                    "task_type": "",
+                    "present_type": "",
+                    "order": "",
+                }
             ),
         )
         field_errors = {
@@ -375,7 +394,7 @@ class SubBatchTaskTimelineUpdateTest(BaseTestCase):
             "days": {"required"},
             "present_type": {"required"},
             "task_type": {"required"},
-            "order": {"required"}
+            "order": {"required"},
         }
         self.assertEqual(
             self.bytes_cleaner(response.content),
@@ -402,6 +421,7 @@ class SubBatchTaskTimelineUpdateTest(BaseTestCase):
             ),
         )
         self.assertTrue(response.status_code, 200)
+        
         response = self.make_post_request(
             reverse(
                 self.update_edit_route_name, args=[self.sub_batch_task_timeline_id]
@@ -459,14 +479,23 @@ class SubBatchTaskTimelineDeleteTest(BaseTestCase):
         """
         To check what happens when valid id is given for delete
         """
-        sub_batch = baker.make("hubble.SubBatch", start_date=(timezone.now() + timezone.timedelta(1)).date())
-        sub_batch_task_timeline = baker.make("hubble.SubBatchTaskTimeline", sub_batch=sub_batch, order=seq(0), days=2, start_date= (timezone.now() + timezone.timedelta(1)).date(), _quantity=2)
+        sub_batch = baker.make(
+            "hubble.SubBatch",
+            start_date=(timezone.now() + timezone.timedelta(1)).date(),
+        )
+        sub_batch_task_timeline = baker.make(
+            "hubble.SubBatchTaskTimeline",
+            sub_batch=sub_batch,
+            order=seq(0),
+            days=2,
+            start_date=(timezone.now() + timezone.timedelta(1)).date(),
+            _quantity=2,
+        )
         response = self.make_delete_request(
             reverse(self.delete_route_name, args=[sub_batch_task_timeline[0].id])
         )
         self.assertJSONEqual(
-            self.decoded_json(response),
-            {"message": "Task deleted succcessfully"}
+            self.decoded_json(response), {"message": "Task deleted succcessfully"}
         )
 
     def test_failure(self):
@@ -502,12 +531,16 @@ class SubBatchTaskTimelineReOrderTest(BaseTestCase):
         """
         self.sub_batch = baker.make("hubble.SubBatch")
         baker.make(
-            "hubble.SubBatchTaskTimeline", order=seq(0), days=1, sub_batch=self.sub_batch, _quantity=5
+            "hubble.SubBatchTaskTimeline",
+            order=seq(0),
+            days=1,
+            sub_batch=self.sub_batch,
+            _quantity=5,
         )
         self.sub_batch_task_timeline_ids = list(
-            SubBatchTaskTimeline.objects.filter(sub_batch_id=self.sub_batch.id).values_list(
-                "id", flat=True
-            )
+            SubBatchTaskTimeline.objects.filter(
+                sub_batch_id=self.sub_batch.id
+            ).values_list("id", flat=True)
         )
         random.shuffle(self.sub_batch_task_timeline_ids)
 
@@ -516,7 +549,10 @@ class SubBatchTaskTimelineReOrderTest(BaseTestCase):
         Check what happens when valid data is given as input
         """
         data = self.get_valid_inputs(
-            {"data[]": self.sub_batch_task_timeline_ids, "sub_batch_id": self.sub_batch.id}
+            {
+                "data[]": self.sub_batch_task_timeline_ids,
+                "sub_batch_id": self.sub_batch.id,
+            }
         )
         response = self.make_post_request(reverse(self.reorder_route_name), data=data)
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
