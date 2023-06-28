@@ -60,7 +60,7 @@ class BatchCreateTest(BaseTestCase):
             self.get_ajax_response(field_errors=field_errors),
         )
 
-    def test_min_length_validation(self):
+    def test_minimum_length_validation(self):
         """
         Check what happens when name field fails MinlengthValidation
         """
@@ -162,7 +162,7 @@ class BatchUpdateTest(BaseTestCase):
             self.get_ajax_response(field_errors=field_errors),
         )
 
-    def test_min_length_validation(self):
+    def test_minimum_length_validation(self):
         """
         To check what happens when name field fails MinlengthValidation
         """
