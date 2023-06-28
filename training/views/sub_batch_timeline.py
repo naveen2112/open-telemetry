@@ -164,15 +164,18 @@ def update_sub_batch_timeline(request, pk):
 @validate_authorization()
 def update_task_sequence(request):
     task_order = request.POST.getlist("data[]")
-    sub_batch_task = SubBatchTaskTimeline.objects.get(id=task_order[0])
-    order = 0
-    for task_id in task_order:
-        task = SubBatchTaskTimeline.objects.get(id=task_id)
-        order += 1
-        task.order = order
-        task.save()
-    schedule_timeline_for_sub_batch(sub_batch_task.sub_batch, is_create=False)
-    return JsonResponse({"status": "success"})
+    check_valid_tasks = SubBatchTaskTimeline.objects.filter(sub_batch_id=request.POST.get("sub_batch_id"), id__in=task_order).count()
+    if check_valid_tasks == len(task_order):
+        sub_batch_task = SubBatchTaskTimeline.objects.get(id=task_order[0])
+        order = 0
+        for task_id in task_order:
+            task = SubBatchTaskTimeline.objects.get(id=task_id)
+            order += 1
+            task.order = order
+            task.save()
+        schedule_timeline_for_sub_batch(sub_batch_task.sub_batch, is_create=False)
+        return JsonResponse({"status": "success"})
+    return JsonResponse({"message": "Some of the tasks doesn't belong to the current timeline", "status": "error"})
 
 
 @login_required()

@@ -188,6 +188,7 @@ Sub Batch timeline
             url: "{% url 'sub_batch.timeline.reorder' %}",
             data: {
                 data: data,
+                sub_batch_id: "{{ object.id }}",
             },
             success: function(data) {
                 $('#sub-batch-timeline-table').DataTable().ajax.reload();

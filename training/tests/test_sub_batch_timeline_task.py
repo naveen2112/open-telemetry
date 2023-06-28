@@ -481,12 +481,12 @@ class SubBatchTaskTimelineDeleteTest(BaseTestCase):
         self.assertTrue(response.status_code, 500)
 
 
-class TimelineTaskReOrderTest(BaseTestCase):
+class SubBatchTaskTimelineReOrderTest(BaseTestCase):
     """
     This class is responsible for testing the order of the tasks after changing the order in timeline task module
     """
 
-    reorder_route_name = "timeline-task.reorder"
+    reorder_route_name = "sub_batch.timeline.reorder"
 
     def setUp(self):
         """
@@ -500,41 +500,31 @@ class TimelineTaskReOrderTest(BaseTestCase):
         """
         This function is responsible for updating the valid inputs and creating data in databases as reqiured
         """
-        self.timeline = baker.make("hubble.Timeline")
+        self.sub_batch = baker.make("hubble.SubBatch")
         baker.make(
-            "hubble.TimelineTask", order=seq(0), timeline=self.timeline, _quantity=5
+            "hubble.SubBatchTaskTimeline", order=seq(0), days=1, sub_batch=self.sub_batch, _quantity=5
         )
-        self.timeline_task_ids = list(
-            TimelineTask.objects.filter(timeline_id=self.timeline.id).values_list(
+        self.sub_batch_task_timeline_ids = list(
+            SubBatchTaskTimeline.objects.filter(sub_batch_id=self.sub_batch.id).values_list(
                 "id", flat=True
             )
         )
-        random.shuffle(self.timeline_task_ids)
+        random.shuffle(self.sub_batch_task_timeline_ids)
 
     def test_success(self):
         """
         Check what happens when valid data is given as input
         """
-        self.timeline = baker.make("hubble.Timeline")
-        baker.make(
-            "hubble.TimelineTask", order=seq(0), timeline=self.timeline, _quantity=5
-        )
-        self.timeline_task_ids = list(
-            TimelineTask.objects.filter(timeline_id=self.timeline.id).values_list(
-                "id", flat=True
-            )
-        )
-        random.shuffle(self.timeline_task_ids)
         data = self.get_valid_inputs(
-            {"data[]": self.timeline_task_ids, "timeline_id": self.timeline.id}
+            {"data[]": self.sub_batch_task_timeline_ids, "sub_batch_id": self.sub_batch.id}
         )
         response = self.make_post_request(reverse(self.reorder_route_name), data=data)
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertTrue(response.status_code, 200)
-        for order, task_id in enumerate(self.timeline_task_ids):
+        for order, task_id in enumerate(self.sub_batch_task_timeline_ids):
             self.assertDatabaseHas(
-                "TimelineTask",
-                {"id": task_id, "timeline_id": self.timeline.id, "order": order + 1},
+                "SubBatchTaskTimeline",
+                {"id": task_id, "sub_batch_id": self.sub_batch.id, "order": order + 1},
             )
 
     def test_failure(self):
@@ -542,7 +532,7 @@ class TimelineTaskReOrderTest(BaseTestCase):
         Check what happens when invalid timeline task ids are given as input
         """
         data = self.get_valid_inputs(
-            {"data[]": [0] * 5, "timeline_id": self.timeline.id}
+            {"data[]": [0] * 5, "sub_batch_id": self.sub_batch.id}
         )
         response = self.make_post_request(reverse(self.reorder_route_name), data=data)
         self.assertJSONEqual(
