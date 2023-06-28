@@ -63,7 +63,7 @@ class TimelineTaskCreateTest(BaseTestCase):
             reverse(self.route_name, args=[self.timeline.id])
         )
         self.assertTemplateUsed(response, "timeline_template_detail.html")
-        self.assertContains(response, "Back to Timeline template")
+        self.assertContains(response, self.timeline.name)
 
     def test_success(self):
         """
@@ -260,16 +260,7 @@ class TimelineTaskUpdateTest(BaseTestCase):
         task_timeline = baker.make("hubble.TimelineTasK", timeline=timeline, order=1)
         self.timeline_task_id = task_timeline.id
 
-    def test_success_edit(self):
-        """
-        Check what happens when valid data is given as input
-        """
-        # Valid scenario 1: Valid inputs for all fields
-        data = self.get_valid_inputs()
-        response = self.make_post_request(
-            reverse(self.update_edit_route_name, args=[self.timeline_task_id]),
-            data=data,
-        )
+    def validate_response(self, response, data):
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertTrue(response.status_code, 200)
         self.assertDatabaseHas(
@@ -282,6 +273,18 @@ class TimelineTaskUpdateTest(BaseTestCase):
                 "timeline_id": data["timeline_id"],
             },
         )
+
+    def test_success_edit(self):
+        """
+        Check what happens when valid data is given as input
+        """
+        # Valid scenario 1: Valid inputs for all fields
+        data = self.get_valid_inputs()
+        response = self.make_post_request(
+            reverse(self.update_edit_route_name, args=[self.timeline_task_id]),
+            data=data,
+        )
+        self.validate_response(response, data)
 
         # Valid Scenario 2: Days can have decimal values, which satisfies the is_not_divisible_by_0.5 condition
         data = self.get_valid_inputs(
@@ -295,18 +298,7 @@ class TimelineTaskUpdateTest(BaseTestCase):
             reverse(self.update_edit_route_name, args=[self.timeline_task_id]),
             data=data,
         )
-        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
-        self.assertTrue(response.status_code, 200)
-        self.assertDatabaseHas(
-            "TimelineTask",
-            {
-                "name": data["name"],
-                "days": data["days"],
-                "present_type": data["present_type"],
-                "task_type": data["task_type"],
-                "timeline_id": data["timeline_id"],
-            },
-        )
+        self.validate_response(response, data)
 
         # Valid Scenario 3: Selecting Other options in Radio Select
         data = self.get_valid_inputs(
@@ -320,18 +312,7 @@ class TimelineTaskUpdateTest(BaseTestCase):
             reverse(self.update_edit_route_name, args=[self.timeline_task_id]),
             data=data,
         )
-        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
-        self.assertTrue(response.status_code, 200)
-        self.assertDatabaseHas(
-            "TimelineTask",
-            {
-                "name": data["name"],
-                "days": data["days"],
-                "present_type": data["present_type"],
-                "task_type": data["task_type"],
-                "timeline_id": data["timeline_id"],
-            },
-        )
+        self.validate_response(response, data)
 
     def test_min_length_validation(self):
         """
