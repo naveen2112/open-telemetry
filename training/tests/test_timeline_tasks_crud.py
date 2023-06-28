@@ -98,7 +98,7 @@ class TimelineTaskCreateTest(BaseTestCase):
         response = self.make_post_request(reverse(self.create_route_name), data=data)
         self.validate_response(response, data)
 
-    def test_min_length_validation(self):
+    def test_minimum_length_validation(self):
         """
         To check what happens when name field fails MinlengthValidation
         """
@@ -205,7 +205,7 @@ class TimelineTaskShowTest(BaseTestCase):
         super().setUp()
         self.authenticate()
 
-    def test_success_show(self):
+    def test_success(self):
         """
         Checks what happens when valid inputs are given for all fields
         """
@@ -224,7 +224,7 @@ class TimelineTaskShowTest(BaseTestCase):
             },
         )
 
-    def test_failure_show(self):
+    def test_failure(self):
         """
         Checks what happens when we try to access invalid timeline task id in update
         """
@@ -280,7 +280,7 @@ class TimelineTaskUpdateTest(BaseTestCase):
             },
         )
 
-    def test_success_edit(self):
+    def test_success(self):
         """
         Check what happens when valid data is given as input
         """
@@ -320,7 +320,7 @@ class TimelineTaskUpdateTest(BaseTestCase):
         )
         self.validate_response(response, data)
 
-    def test_min_length_validation(self):
+    def test_minimum_length_validation(self):
         """
         To check what happens when name field fails MinlengthValidation
         """
