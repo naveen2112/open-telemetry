@@ -83,7 +83,7 @@ class AddInternTest(BaseTestCase):
             self.get_ajax_response(field_errors=field_errors),
         )
 
-    def test_minimim_length_validation(self):
+    def test_minimum_length_validation(self):
         """
         To check what happens when college field fails MinlengthValidation
         """
