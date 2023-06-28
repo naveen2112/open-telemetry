@@ -32,17 +32,15 @@ class TimelineCreateTest(BaseTestCase):
             "team": self.create_team().id,
             "is_active": False,
         }
-        timeline = baker.make(
+        self.timeline = baker.make(
             "hubble.Timeline", team_id=self.persisted_valid_inputs["team"]
         )
         baker.make(
             "hubble.TimelineTask",
-            timeline_id=timeline.id,
+            timeline_id=self.timeline.id,
             _fill_optional=["order"],
             _quantity=5,
         )
-        self.timeline_id = timeline.id
-        self.team_id = timeline.team_id
 
     def test_template(self):
         """
@@ -87,7 +85,7 @@ class TimelineCreateTest(BaseTestCase):
         # Valid sceanrio 3: Valid inputs for all fields and is_active=False, along with duplicated timeline id
         response = self.make_post_request(
             reverse(self.create_route_name),
-            data=self.get_valid_inputs({"id": self.timeline_id}),
+            data=self.get_valid_inputs({"id": self.timeline.id}),
         )
         duplicated_timeline_id = Timeline.objects.order_by("-id").first()
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
@@ -102,7 +100,7 @@ class TimelineCreateTest(BaseTestCase):
             reverse(self.create_route_name),
             data=self.get_valid_inputs(
                 {
-                    "id": self.timeline_id,
+                    "id": self.timeline.id,
                     "is_active": "true",
                     "team": self.create_team().id,
                 }
@@ -130,7 +128,7 @@ class TimelineCreateTest(BaseTestCase):
             self.get_ajax_response(field_errors=field_errors),
         )
 
-    def test_min_length_validation(self):
+    def test_minimum_length_failure(self):
         """
         To check what happens when name field fails MinlengthValidation
         """
@@ -148,7 +146,7 @@ class TimelineCreateTest(BaseTestCase):
         )
         self.assertTrue(response.status_code, 200)
 
-    def test_invalid_duplicate_id_validation(self):
+    def test_invalid_template_id_validation(self):
         """
         What happens when the duplicated id is invalid
         """
@@ -176,12 +174,12 @@ class TimelineCreateTest(BaseTestCase):
         """
         # What happens when is_active field is set True and the team selected currently already has a active teemplate
         response = self.make_post_request(
-            reverse(self.update_edit_route_name, args=[self.timeline_id]),
+            reverse(self.update_edit_route_name, args=[self.timeline.id]),
             data=self.get_valid_inputs({"is_active": "true"}),
         )
         response = self.make_post_request(
             reverse(self.create_route_name),
-            data=self.get_valid_inputs({"is_active": "true", "team": self.team_id}),
+            data=self.get_valid_inputs({"is_active": "true", "team": self.timeline.team_id}),
         )
         field_errors = {"is_active": {"template_in_use"}}
         error_message = {"template_in_use": "Team already has an active template."}
@@ -224,7 +222,7 @@ class TimelineShowTest(BaseTestCase):
         super().setUp()
         self.authenticate()
 
-    def test_success_show(self):
+    def test_success(self):
         """
         Checks what happens when valid inputs are given for all fields
         """
@@ -237,7 +235,7 @@ class TimelineShowTest(BaseTestCase):
             {"timeline": model_to_dict(Timeline.objects.get(id=timeline.id))},
         )
 
-    def test_failure_show(self):
+    def test_failure(self):
         """
         Checks what happens when we try to access invalid arguments in update
         """
@@ -270,27 +268,25 @@ class TimelineUpdateTest(BaseTestCase):
             "team": self.create_team().id,
             "is_active": False,
         }
-        timeline = baker.make(
+        self.timeline = baker.make(
             "hubble.Timeline", team_id=self.persisted_valid_inputs["team"]
         )
-        self.timeline_id = timeline.id
-        self.team_id = timeline.team_id
 
-    def test_success_edit(self):
+    def test_success(self):
         """
         Check what happens when valid data is given as input
         """
         # Valid scenario 1: Valid inputs for name and team fields and is_active=False
         data = self.get_valid_inputs()
         response = self.make_post_request(
-            reverse(self.update_edit_route_name, args=[self.timeline_id]), data=data
+            reverse(self.update_edit_route_name, args=[self.timeline.id]), data=data
         )
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertTrue(response.status_code, 200)
         self.assertDatabaseHas(
             "Timeline",
             {
-                "id": self.timeline_id,
+                "id": self.timeline.id,
                 "name": data["name"],
                 "team": data["team"],
                 "is_active": data["is_active"],
@@ -300,7 +296,7 @@ class TimelineUpdateTest(BaseTestCase):
         # Valid scenario 2: Valid inputs for name and team fields and is_active=True
         data = self.get_valid_inputs({"is_active": "true"})
         response = self.make_post_request(
-            reverse(self.update_edit_route_name, args=[self.timeline_id]),
+            reverse(self.update_edit_route_name, args=[self.timeline.id]),
             data=data,
         )
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
@@ -308,7 +304,7 @@ class TimelineUpdateTest(BaseTestCase):
         self.assertDatabaseHas(
             "Timeline",
             {
-                "id": self.timeline_id,
+                "id": self.timeline.id,
                 "name": data["name"],
                 "team": data["team"],
                 "is_active": data["is_active"].capitalize(),
@@ -320,7 +316,7 @@ class TimelineUpdateTest(BaseTestCase):
         This function checks the required field validations
         """
         response = self.make_post_request(
-            reverse(self.update_edit_route_name, args=[self.timeline_id]),
+            reverse(self.update_edit_route_name, args=[self.timeline.id]),
             data=self.get_valid_inputs({"name": "", "team": ""}),
         )
         field_errors = {"name": {"required"}, "team": {"required"}}
@@ -335,7 +331,7 @@ class TimelineUpdateTest(BaseTestCase):
         Check what happens when invalid choice for the respective field is given as input
         """
         response = self.make_post_request(
-            reverse(self.update_edit_route_name, args=[self.timeline_id]),
+            reverse(self.update_edit_route_name, args=[self.timeline.id]),
             data=self.get_valid_inputs({"team": self.faker.name()}),
         )
         field_errors = {"team": {"invalid_choice"}}
@@ -345,13 +341,13 @@ class TimelineUpdateTest(BaseTestCase):
         )
         self.assertTrue(response.status_code, 200)
 
-    def test_min_length_validation(self):
+    def test_minimum_length_failure(self):
         """
         Check what happens when a field doesn't meet the limit value of MinlengthValidator
         """
         data = self.get_valid_inputs({"name": self.faker.pystr(max_chars=2)})
         response = self.make_post_request(
-            reverse(self.update_edit_route_name, args=[self.timeline_id]), data=data
+            reverse(self.update_edit_route_name, args=[self.timeline.id]), data=data
         )
         field_errors = {"name": {"min_length"}}
         validation_paramters = {"name": 3}
@@ -371,10 +367,10 @@ class TimelineUpdateTest(BaseTestCase):
         """
         response = self.make_post_request(
             reverse(self.create_route_name),
-            data=self.get_valid_inputs({"team": self.team_id, "is_active": "true"}),
+            data=self.get_valid_inputs({"team": self.timeline.team_id, "is_active": "true"}),
         )
         response = self.make_post_request(
-            reverse(self.update_edit_route_name, args=[self.timeline_id]),
+            reverse(self.update_edit_route_name, args=[self.timeline.id]),
             data=self.get_valid_inputs({"is_active": "true"}),
         )
         field_errors = {"is_active": {"template_in_use"}}
