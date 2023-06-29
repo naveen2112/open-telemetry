@@ -67,9 +67,9 @@ class TimelineTaskForm(forms.ModelForm):
         raises a validation error.
         """
         if value <= 0:
-            raise ValidationError("Value must be greater than 0", code="Zero Error")
+            raise ValidationError("Value must be greater than 0", code="value_cannot_be_zero")
         if value % 0.5 != 0:
-            raise ValidationError("Value must be a multiple of 0.5", code="Multiple of five")
+            raise ValidationError("Value must be a multiple of 0.5", code="is_not_divisible_by_0.5")
 
     days = forms.FloatField(
         widget=forms.NumberInput(
