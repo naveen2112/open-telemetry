@@ -83,6 +83,17 @@ class AddInternTest(BaseTestCase):
             self.get_ajax_response(field_errors=field_errors),
         )
 
+        response = self.make_post_request(
+            reverse(self.create_route_name),
+            data=self.get_valid_inputs(
+                {"sub_batch_id": ""}
+            ),
+        )
+        self.assertTrue(
+            self.bytes_cleaner(response.content),
+            {"message": "Invalid SubBatch id", "status": "error"}
+        )
+
     def test_minimum_length_validation(self):
         """
         To check what happens when college field fails MinlengthValidation
