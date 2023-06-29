@@ -213,6 +213,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
         """
         Check what happens when invalid order is given
         """
+        # Check for zero_order_error
         response = self.make_post_request(
             reverse(self.create_route_name, args=[self.sub_batch.batch.id]),
             data=self.get_valid_inputs({"order": 0}),
@@ -224,6 +225,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
         )
         self.assertTrue(response.status_code, 200)
 
+        # check when there is gap between order input and the largest order in db
         response = self.make_post_request(
             reverse(self.create_route_name, args=[self.sub_batch.batch.id]),
             data=self.get_valid_inputs({"order": 999}),
@@ -525,13 +527,12 @@ class SubBatchTaskTimelineDeleteTest(BaseTestCase):
         sub_batch_task_timeline = baker.make(
             "hubble.SubBatchTaskTimeline",
             sub_batch=sub_batch,
-            order=seq(0),
+            order=1,
             days=2,
             start_date=(timezone.now() + timezone.timedelta(1)).date(),
-            _quantity=2,
         )
         response = self.make_delete_request(
-            reverse(self.delete_route_name, args=[sub_batch_task_timeline[0].id])
+            reverse(self.delete_route_name, args=[sub_batch_task_timeline.id])
         )
         self.assertJSONEqual(
             self.decoded_json(response), {"message": "Task deleted succcessfully"}
@@ -587,13 +588,15 @@ class SubBatchTaskTimelineReOrderTest(BaseTestCase):
         """
         Check what happens when valid data is given as input
         """
-        data = self.get_valid_inputs(
-            {
-                "data[]": self.sub_batch_task_timeline_ids,
-                "sub_batch_id": self.sub_batch.id,
-            }
+        response = self.make_post_request(
+            reverse(self.reorder_route_name),
+            data=self.get_valid_inputs(
+                {
+                    "data[]": self.sub_batch_task_timeline_ids,
+                    "sub_batch_id": self.sub_batch.id,
+                }
+            ),
         )
-        response = self.make_post_request(reverse(self.reorder_route_name), data=data)
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertTrue(response.status_code, 200)
         for order, task_id in enumerate(self.sub_batch_task_timeline_ids):

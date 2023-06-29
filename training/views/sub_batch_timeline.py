@@ -196,13 +196,16 @@ def delete_sub_batch_timeline(request, pk):
                 sub_batch=sub_batch.id,
                 order__gt=timeline.order,
             )  # Remaining task after the deletion of the task
-            order = timeline.order - 1
+            if len(task_list) > 0:
+                order = timeline.order - 1
+                timeline.delete()
+                for task in task_list:
+                    order += 1
+                    task.order = order
+                schedule_timeline_for_sub_batch(sub_batch=sub_batch, is_create=False)
+                return JsonResponse({"message": "Task deleted succcessfully"})
             timeline.delete()
-            for task in task_list:
-                order += 1
-                task.order = order
-            schedule_timeline_for_sub_batch(sub_batch=sub_batch, is_create=False)
-            return JsonResponse({"message": "Task deleted succcessfully"})
+            return JsonResponse({"message": "Task deleted succcessfully"}) # TODO :: NEed to check with Poovarasu Bro
         else:
             return JsonResponse(
                 {"message": "This task has been already started!"}, status=500
