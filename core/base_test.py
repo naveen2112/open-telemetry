@@ -202,10 +202,3 @@ class BaseTestCase(TestCase):
                 "non_field_errors": str(non_field_error_response),
             }
         )
-    
-    def get_form_errors(self, form, field_errors, current_value={}, validation_parameter={}):
-        for key, values in field_errors.items():
-            for value in values:
-                error_message = self.get_error_message(key, value, current_value, validation_parameter)
-                self.assertFormError(form, key, error_message)
-
