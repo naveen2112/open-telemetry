@@ -158,6 +158,8 @@ class BaseTestCase(TestCase):
             message = "This field is required."
         elif value == "invalid_choice":
             message = "Select a valid choice. That choice is not one of the available choices."
+        elif value == "invalid_score":
+            message = "Score must be between 0 to 100"
         return message
 
     def get_ajax_response(
