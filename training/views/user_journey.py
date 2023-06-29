@@ -111,12 +111,15 @@ def update_task_score(request, pk):
 
 @login_required()
 def add_extension(request, pk):
-    Extension.objects.create(
-        sub_batch=SubBatch.objects.filter(intern_details__user=pk).first(),
-        user_id=pk,
-        created_by=request.user,
-    )
-    return JsonResponse({"status": "success"})
+    try:
+        Extension.objects.create(
+            sub_batch=SubBatch.objects.filter(intern_details__user=pk).first(),
+            user_id=pk,
+            created_by=request.user,
+        )
+        return JsonResponse({"status": "success"})
+    except Exception as e:
+        return JsonResponse({"status": "error"})
 
 
 @login_required()
