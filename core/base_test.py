@@ -158,6 +158,10 @@ class BaseTestCase(TestCase):
             message = "This field is required."
         elif value == "invalid_choice":
             message = "Select a valid choice. That choice is not one of the available choices."
+        elif value == "invalid_order":
+            message = f"The current order of the task is invalid. The valid input for order ranges form 1-{validation_parameter[key]}."
+        elif value == "zero_order_error":
+            message = "Order value must be greater than zero."
         return message
 
     def get_ajax_response(

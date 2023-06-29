@@ -40,11 +40,12 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
             "present_type": PRESENT_TYPE_REMOTE,
             "task_type": TASK_TYPE_TASK,
             "order": 1,
+            "sub_batch_id": self.sub_batch.id,
         }
 
     def validate_response(self, response, data):
         """
-            To automate the assertion commands, where same logic is repeated
+        To automate the assertion commands, where same logic is repeated
         """
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertTrue(response.status_code, 200)
@@ -208,6 +209,44 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
         )
         self.assertTrue(response.status_code, 200)
 
+    def test_invalid_order_validation(self):
+        """
+        Check what happens when invalid order is given
+        """
+        response = self.make_post_request(
+            reverse(self.create_route_name, args=[self.sub_batch.batch.id]),
+            data=self.get_valid_inputs({"order": 0}),
+        )
+        field_errors = {"order": {"zero_order_error"}}
+        self.assertEqual(
+            self.bytes_cleaner(response.content),
+            self.get_ajax_response(field_errors=field_errors),
+        )
+        self.assertTrue(response.status_code, 200)
+
+        response = self.make_post_request(
+            reverse(self.create_route_name, args=[self.sub_batch.batch.id]),
+            data=self.get_valid_inputs({"order": 999}),
+        )
+        field_errors = {
+            "order": {"invalid_order"},
+        }
+        validation_parameters = {
+            "order": [
+                SubBatchTaskTimeline.objects.filter(sub_batch_id=self.sub_batch.id)
+                .values_list("order", flat=True)
+                .last()
+            ][0]
+            or 0 + 1
+        }
+        self.assertEqual(
+            self.bytes_cleaner(response.content),
+            self.get_ajax_response(
+                field_errors=field_errors, validation_parameter=validation_parameters
+            ),
+        )
+        self.assertTrue(response.status_code, 200)
+
 
 class SubBatchTaskTimelineShowTest(BaseTestCase):
     """
@@ -287,7 +326,7 @@ class SubBatchTaskTimelineUpdateTest(BaseTestCase):
 
     def validate_response(self, response, data):
         """
-            To automate the assertion commands, where same logic is repeated
+        To automate the assertion commands, where same logic is repeated
         """
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertTrue(response.status_code, 200)
@@ -421,7 +460,7 @@ class SubBatchTaskTimelineUpdateTest(BaseTestCase):
             ),
         )
         self.assertTrue(response.status_code, 200)
-        
+
         response = self.make_post_request(
             reverse(
                 self.update_edit_route_name, args=[self.sub_batch_task_timeline_id]

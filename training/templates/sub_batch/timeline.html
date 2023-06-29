@@ -139,6 +139,7 @@ Sub Batch timeline
                     order: $('#id_order').val(),
                     present_type: $('input[name="present_type"]:checked').val(),
                     task_type: $('input[name="task_type"]:checked').val(),
+                    sub_batch_id: "{{ object.id }}",
                     start_date: $("#date_range").attr('start-date'),
                     end_date: $("#date_range").attr('end-date')
                 },
