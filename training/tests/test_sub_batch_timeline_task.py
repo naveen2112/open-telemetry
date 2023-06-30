@@ -48,7 +48,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
         To automate the assertion commands, where same logic is repeated
         """
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertDatabaseHas(
             "SubBatchTaskTimeline",
             {
@@ -124,7 +124,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
                 validation_parameter=validation_paramters,
             ),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_required_validation(self):
         """
@@ -153,7 +153,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
             self.bytes_cleaner(response.content),
             self.get_ajax_response(field_errors=field_errors),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_validate_days_validation(self):
         """
@@ -172,7 +172,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
                 field_errors=field_errors, custom_validation_error_message=error_message
             ),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
         # Check what happend when the days field fails value_cannot_be_zero
         response = self.make_post_request(
@@ -187,7 +187,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
                 field_errors=field_errors, custom_validation_error_message=error_message
             ),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_invalid_choice_validations(self):
         """
@@ -207,7 +207,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
             self.bytes_cleaner(response.content),
             self.get_ajax_response(field_errors=field_errors),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_invalid_order_validation(self):
         """
@@ -223,7 +223,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
             self.bytes_cleaner(response.content),
             self.get_ajax_response(field_errors=field_errors),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
         # check when there is gap between order input and the largest order in db
         response = self.make_post_request(
@@ -247,7 +247,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
                 field_errors=field_errors, validation_parameter=validation_parameters
             ),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
 
 class SubBatchTaskTimelineShowTest(BaseTestCase):
@@ -331,7 +331,7 @@ class SubBatchTaskTimelineUpdateTest(BaseTestCase):
         To automate the assertion commands, where same logic is repeated
         """
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertDatabaseHas(
             "SubBatchTaskTimeline",
             {
@@ -410,7 +410,7 @@ class SubBatchTaskTimelineUpdateTest(BaseTestCase):
                 validation_parameter=validation_paramters,
             ),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_required_validation(self):
         """
@@ -441,7 +441,7 @@ class SubBatchTaskTimelineUpdateTest(BaseTestCase):
             self.bytes_cleaner(response.content),
             self.get_ajax_response(field_errors=field_errors),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_validate_days_validation(self):
         """
@@ -461,7 +461,7 @@ class SubBatchTaskTimelineUpdateTest(BaseTestCase):
                 field_errors=field_errors, custom_validation_error_message=error_message
             ),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
         response = self.make_post_request(
             reverse(
@@ -477,7 +477,7 @@ class SubBatchTaskTimelineUpdateTest(BaseTestCase):
                 field_errors=field_errors, custom_validation_error_message=error_message
             ),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_invalid_choice_validations(self):
         """
@@ -499,7 +499,7 @@ class SubBatchTaskTimelineUpdateTest(BaseTestCase):
             self.bytes_cleaner(response.content),
             self.get_ajax_response(field_errors=field_errors),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
 
 class SubBatchTaskTimelineDeleteTest(BaseTestCase):
@@ -547,7 +547,7 @@ class SubBatchTaskTimelineDeleteTest(BaseTestCase):
             response.content,
             {"message": "Error while deleting Task!"},
         )
-        self.assertTrue(response.status_code, 500)
+        self.assertEqual(response.status_code, 500)
 
 
 class SubBatchTaskTimelineReOrderTest(BaseTestCase):
@@ -598,7 +598,7 @@ class SubBatchTaskTimelineReOrderTest(BaseTestCase):
             ),
         )
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         for order, task_id in enumerate(self.sub_batch_task_timeline_ids):
             self.assertDatabaseHas(
                 "SubBatchTaskTimeline",
@@ -620,4 +620,4 @@ class SubBatchTaskTimelineReOrderTest(BaseTestCase):
                 "status": "error",
             },
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
