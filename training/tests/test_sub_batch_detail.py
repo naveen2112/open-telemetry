@@ -1,3 +1,5 @@
+import json
+
 from django.urls import reverse
 from django.utils import timezone
 from model_bakery import baker
@@ -57,7 +59,7 @@ class AddInternTest(BaseTestCase):
         data = self.get_valid_inputs()
         response = self.make_post_request(reverse(self.create_route_name), data=data)
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertDatabaseHas(
             "InternDetail",
             {
@@ -85,13 +87,11 @@ class AddInternTest(BaseTestCase):
 
         response = self.make_post_request(
             reverse(self.create_route_name),
-            data=self.get_valid_inputs(
-                {"sub_batch_id": ""}
-            ),
+            data=self.get_valid_inputs({"sub_batch_id": ""}),
         )
-        self.assertTrue(
+        self.assertEqual(
             self.bytes_cleaner(response.content),
-            {"message": "Invalid SubBatch id", "status": "error"}
+            json.dumps({"message": "Invalid SubBatch id", "status": "error"}),
         )
 
     def test_minimum_length_validation(self):
@@ -110,7 +110,7 @@ class AddInternTest(BaseTestCase):
                 validation_parameter=validation_paramters,
             ),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_invalid_choice_validation(self):
         """
@@ -124,7 +124,7 @@ class AddInternTest(BaseTestCase):
             self.bytes_cleaner(response.content),
             self.get_ajax_response(field_errors=field_errors),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_invalid_sub_batch_id(self):
         """
@@ -176,7 +176,7 @@ class DeleteInternTest(BaseTestCase):
         self.assertJSONEqual(
             response.content, {"message": "Intern has been deleted succssfully"}
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertDatabaseNotHas("InternDetail", {"id": trainee.id})
 
     def test_failure(self):
@@ -187,4 +187,4 @@ class DeleteInternTest(BaseTestCase):
         self.assertJSONEqual(
             response.content, {"message": "Error while deleting Timeline Template!"}
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 500)
