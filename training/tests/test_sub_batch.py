@@ -2,13 +2,13 @@ from django.conf import settings
 from django.forms.models import model_to_dict
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.html import strip_tags
 from model_bakery import baker
 from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
 from hubble.models import User
 from training.forms import SubBatchForm
-from django.utils.html import strip_tags
 
 
 class SubBatchCreateTest(BaseTestCase):
@@ -77,7 +77,9 @@ class SubBatchCreateTest(BaseTestCase):
         """
         Check what happens when valid data is given as input
         """
-        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
+        with open(
+            self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
+        ) as sample_file:
             data = self.get_valid_inputs({"users_list_file": sample_file})
             response = self.make_post_request(
                 reverse(self.create_route_name, args=[self.batch_id]), data=data
@@ -100,7 +102,9 @@ class SubBatchCreateTest(BaseTestCase):
         """
         This function checks the required validation for the team and name fields
         """
-        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
+        with open(
+            self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
+        ) as sample_file:
             data = self.get_valid_inputs(
                 {
                     "users_list_file": sample_file,
@@ -129,7 +133,9 @@ class SubBatchCreateTest(BaseTestCase):
         """
         Check what happens when invalid data for team field is given as input
         """
-        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
+        with open(
+            self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
+        ) as sample_file:
             data = self.get_valid_inputs(
                 {
                     "users_list_file": sample_file,
@@ -156,7 +162,9 @@ class SubBatchCreateTest(BaseTestCase):
         """
         To check what happens when name field fails MinlengthValidation
         """
-        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
+        with open(
+            self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
+        ) as sample_file:
             data = self.get_valid_inputs(
                 {"users_list_file": sample_file, "name": self.faker.pystr(max_chars=2)}
             )
@@ -177,39 +185,56 @@ class SubBatchCreateTest(BaseTestCase):
         """
         # When file is not uploaded
         data = self.get_valid_inputs()
-        response = self.make_post_request(reverse(self.create_route_name, args=[self.batch_id]), data=data)
+        response = self.make_post_request(
+            reverse(self.create_route_name, args=[self.batch_id]), data=data
+        )
         self.assertEqual(strip_tags(response.context["errors"]), "Please upload a file")
 
         # Invalid data in file interns belong to another sub-batch
-        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
+        with open(
+            self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
+        ) as sample_file:
             data = self.get_valid_inputs({"users_list_file": sample_file})
             self.make_post_request(
                 reverse(self.create_route_name, args=[self.batch_id]), data=data
             )
-        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
+        with open(
+            self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
+        ) as sample_file:
             data = self.get_valid_inputs({"users_list_file": sample_file})
             response = self.make_post_request(
                 reverse(self.create_route_name, args=[self.batch_id]), data=data
             )
-            self.assertEqual(strip_tags(response.context["errors"]), "Some of the Users are already added in another sub-batch")
+            self.assertEqual(
+                strip_tags(response.context["errors"]),
+                "Some of the Users are already added in another sub-batch",
+            )
 
         # Invalid data in file, employee_id doesn't match with any employee_id in db
-        with open(self.get_file_path() + "invalid_file_upload1.xlsx", "rb") as sample_file:
+        with open(
+            self.get_file_path() + "invalid_file_upload1.xlsx", "rb"
+        ) as sample_file:
             data = self.get_valid_inputs({"users_list_file": sample_file})
             response = self.make_post_request(
                 reverse(self.create_route_name, args=[self.batch_id]), data=data
             )
-            self.assertEqual(strip_tags(response.context["errors"]), "Some of the employee ids are not present in the database, please check again")
+            self.assertEqual(
+                strip_tags(response.context["errors"]),
+                "Some of the employee ids are not present in the database, please check again",
+            )
 
         # Invalid column names are present
-        with open(self.get_file_path() + "invalid_file_upload2.xlsx", "rb") as sample_file:
+        with open(
+            self.get_file_path() + "invalid_file_upload2.xlsx", "rb"
+        ) as sample_file:
             data = self.get_valid_inputs({"users_list_file": sample_file})
             response = self.make_post_request(
                 reverse(self.create_route_name, args=[self.batch_id]), data=data
             )
-            self.assertEqual(strip_tags(response.context["errors"]), "Invalid keys are present in the file, please check the sample file")
-
-
+            self.assertEqual(
+                strip_tags(response.context["errors"]),
+                "Invalid keys are present in the file, please check the sample file",
+            )
 
 
 class SubBatchUpdateTest(BaseTestCase):
@@ -317,7 +342,9 @@ class SubBatchUpdateTest(BaseTestCase):
             "primary_mentor_id": {"required"},
             "secondary_mentor_id": {"required"},
         }
-        self.validate_form_errors(field_errors=field_errors, form=SubBatchForm(data=data))
+        self.validate_form_errors(
+            field_errors=field_errors, form=SubBatchForm(data=data)
+        )
 
     def test_invalid_choice_validation(self):
         """
@@ -340,7 +367,9 @@ class SubBatchUpdateTest(BaseTestCase):
             "primary_mentor_id": {"invalid_choice"},
             "secondary_mentor_id": {"invalid_choice"},
         }
-        self.validate_form_errors(field_errors=field_errors, form=SubBatchForm(data=data))
+        self.validate_form_errors(
+            field_errors=field_errors, form=SubBatchForm(data=data)
+        )
 
     def test_minimum_length_validation(self):
         """
@@ -371,7 +400,9 @@ class SubBatchUpdateTest(BaseTestCase):
         field_errors = {
             "timeline": {"timeline_with_no_tasks"},
         }
-        self.validate_form_errors(field_errors=field_errors, form=SubBatchForm(data=data))
+        self.validate_form_errors(
+            field_errors=field_errors, form=SubBatchForm(data=data)
+        )
 
 
 class SubBatchShowTest(BaseTestCase):
@@ -434,9 +465,7 @@ class GetTimelineTest(BaseTestCase):
         response = self.make_post_request(
             reverse(self.get_timeline_route_name), data={"team_id": team_id}
         )
-        self.assertJSONEqual(
-            (response.content), {'timeline': model_to_dict(timeline)}
-        )
+        self.assertJSONEqual((response.content), {"timeline": model_to_dict(timeline)})
         self.assertEqual(response.status_code, 200)
 
     def test_failure(self):
