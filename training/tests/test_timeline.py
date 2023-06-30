@@ -58,7 +58,7 @@ class TimelineCreateTest(BaseTestCase):
         data = self.get_valid_inputs()
         response = self.make_post_request(reverse(self.create_route_name), data=data)
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertDatabaseHas(
             "Timeline",
             {
@@ -72,7 +72,7 @@ class TimelineCreateTest(BaseTestCase):
         data = self.get_valid_inputs({"is_active": "true"})
         response = self.make_post_request(reverse(self.create_route_name), data=data)
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertDatabaseHas(
             "Timeline",
             {
@@ -89,7 +89,7 @@ class TimelineCreateTest(BaseTestCase):
         )
         duplicated_timeline_id = Timeline.objects.order_by("-id").first()
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertDatabaseHas("Timeline", {"id": duplicated_timeline_id.id})
         self.assertDatabaseCount(
             "TimelineTask", {"timeline": duplicated_timeline_id}, 5
@@ -108,7 +108,7 @@ class TimelineCreateTest(BaseTestCase):
         )
         duplicated_timeline_id = Timeline.objects.order_by("-id").first()
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertDatabaseHas("Timeline", {"id": duplicated_timeline_id.id})
         self.assertDatabaseCount(
             "TimelineTask", {"timeline": duplicated_timeline_id}, 5
@@ -144,7 +144,7 @@ class TimelineCreateTest(BaseTestCase):
                 validation_parameter=validation_paramters,
             ),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_invalid_template_id_validation(self):
         """
@@ -190,7 +190,7 @@ class TimelineCreateTest(BaseTestCase):
                 custom_validation_error_message=error_message,
             ),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_invalid_choice_validation(self):
         """
@@ -205,7 +205,7 @@ class TimelineCreateTest(BaseTestCase):
             self.bytes_cleaner(response.content),
             self.get_ajax_response(field_errors=field_errors),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
 
 class TimelineShowTest(BaseTestCase):
@@ -282,7 +282,7 @@ class TimelineUpdateTest(BaseTestCase):
             reverse(self.update_edit_route_name, args=[self.timeline.id]), data=data
         )
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertDatabaseHas(
             "Timeline",
             {
@@ -300,7 +300,7 @@ class TimelineUpdateTest(BaseTestCase):
             data=data,
         )
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertDatabaseHas(
             "Timeline",
             {
@@ -324,7 +324,7 @@ class TimelineUpdateTest(BaseTestCase):
             self.bytes_cleaner(response.content),
             self.get_ajax_response(field_errors=field_errors),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_invalid_choice_validation(self):
         """
@@ -339,7 +339,7 @@ class TimelineUpdateTest(BaseTestCase):
             self.bytes_cleaner(response.content),
             self.get_ajax_response(field_errors=field_errors),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_minimum_length_failure(self):
         """
@@ -359,7 +359,7 @@ class TimelineUpdateTest(BaseTestCase):
                 validation_parameter=validation_paramters,
             ),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_is_active_failure(self):
         """
@@ -382,7 +382,7 @@ class TimelineUpdateTest(BaseTestCase):
                 custom_validation_error_message=custom_error,
             ),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
 
 class TimelineDeleteTest(BaseTestCase):
@@ -411,7 +411,7 @@ class TimelineDeleteTest(BaseTestCase):
         self.assertJSONEqual(
             response.content, {"message": "Timeline Template deleted successfully"}
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertDatabaseNotHas("Timeline", {"id": timeline.id})
 
     def test_failure(self):
@@ -422,4 +422,4 @@ class TimelineDeleteTest(BaseTestCase):
         self.assertJSONEqual(
             response.content, {"message": "Error while deleting Timeline Template!"}
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 500)

@@ -48,7 +48,7 @@ class UpdateAssessmentTest(BaseTestCase):
             reverse(self.route_name, args=[self.trainee.user_id])
         )
         self.assertTemplateUsed(response, "sub_batch/user_journey_page.html")
-        self.assertContains(response, self.trainee.user_id)
+        self.assertContains(response, self.trainee.user.employee_id)
 
     def test_success(self):
         """
@@ -60,7 +60,7 @@ class UpdateAssessmentTest(BaseTestCase):
             reverse(self.update_edit_route_name, args=[self.trainee.user_id]), data=data
         )
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertDatabaseHas(
             "Assessment",
             {
@@ -77,7 +77,7 @@ class UpdateAssessmentTest(BaseTestCase):
             reverse(self.update_edit_route_name, args=[self.trainee.user_id]), data=data
         )
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertDatabaseHas(
             "Assessment",
             {
@@ -101,6 +101,7 @@ class UpdateAssessmentTest(BaseTestCase):
             self.bytes_cleaner(response.content),
             self.get_ajax_response(field_errors=field_errors),
         )
+        self.assertEqual(response.status_code, 200)
 
     def test_invalid_score_validation(self):
         """
@@ -116,6 +117,7 @@ class UpdateAssessmentTest(BaseTestCase):
             self.bytes_cleaner(response.content),
             self.get_ajax_response(field_errors=field_errors),
         )
+        self.assertEqual(response.status_code, 200)
 
         # Check what happens when score is negative
         response = self.make_post_request(
@@ -127,3 +129,4 @@ class UpdateAssessmentTest(BaseTestCase):
             self.bytes_cleaner(response.content),
             self.get_ajax_response(field_errors=field_errors),
         )
+        self.assertEqual(response.status_code, 200)
