@@ -43,7 +43,7 @@ class BatchCreateTest(BaseTestCase):
         data = self.get_valid_inputs()
         response = self.make_post_request(reverse(self.create_route_name), data=data)
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertDatabaseHas("Batch", {"name": data["name"]})
 
     def test_required_validation(self):
@@ -76,7 +76,7 @@ class BatchCreateTest(BaseTestCase):
                 validation_parameter=validation_paramters,
             ),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
 
 class BatchShowTest(BaseTestCase):
@@ -145,7 +145,7 @@ class BatchUpdateTest(BaseTestCase):
             reverse(self.update_edit_route_name, args=[self.batch_id]), data=data
         )
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertDatabaseHas("Batch", {"name": data["name"]})
 
     def test_required_validation(self):
@@ -180,7 +180,7 @@ class BatchUpdateTest(BaseTestCase):
                 validation_parameter=validation_paramters,
             ),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
 
 class BatchDeleteTest(BaseTestCase):
@@ -208,7 +208,7 @@ class BatchDeleteTest(BaseTestCase):
         self.assertJSONEqual(
             response.content, {"message": "Batch deleted succcessfully"}
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertDatabaseNotHas("Batch", {"id": batch.id})
 
     def test_failure(self):
