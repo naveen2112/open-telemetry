@@ -49,7 +49,7 @@ class ExtensionCreateTest(BaseTestCase):
             reverse(self.create_route_name, args=[self.trainee.user_id]), data={}
         )
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertDatabaseHas(
             "Extension",
             {"user_id": self.trainee.user_id, "sub_batch": self.sub_batch},
@@ -63,7 +63,7 @@ class ExtensionCreateTest(BaseTestCase):
             reverse(self.create_route_name, args=[0]), data={}
         )
         self.assertJSONEqual(self.decoded_json(response), {"status": "error"})
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
 
 class ExtensionUpdateTest(BaseTestCase):
@@ -108,7 +108,7 @@ class ExtensionUpdateTest(BaseTestCase):
             reverse(self.update_edit_route_name, args=[self.trainee.user_id]), data=data
         )
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertDatabaseHas(
             "Assessment",
             {
@@ -125,7 +125,7 @@ class ExtensionUpdateTest(BaseTestCase):
             reverse(self.update_edit_route_name, args=[self.trainee.user_id]), data=data
         )
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertDatabaseHas(
             "Assessment",
             {
@@ -204,7 +204,7 @@ class ExtensionWeekTaskDelete(BaseTestCase):
             response.content,
             {"message": "Week extension deleted succcessfully", "status": "success"},
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertDatabaseNotHas("Extension", {"id": extension.id})
 
     def test_failure(self):
@@ -215,4 +215,4 @@ class ExtensionWeekTaskDelete(BaseTestCase):
         self.assertJSONEqual(
             response.content, {"message": "Error while deleting week extension!"}
         )
-        self.assertTrue(response.status_code, 500)
+        self.assertEqual(response.status_code, 500)
