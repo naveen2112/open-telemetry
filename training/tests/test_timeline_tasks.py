@@ -46,7 +46,7 @@ class TimelineTaskCreateTest(BaseTestCase):
         To automate the assertion commands, where same logics are repeated
         """
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertDatabaseHas(
             "TimelineTask",
             {
@@ -114,7 +114,7 @@ class TimelineTaskCreateTest(BaseTestCase):
                 validation_parameter=validation_paramters,
             ),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_required_validation(self):
         """
@@ -136,7 +136,7 @@ class TimelineTaskCreateTest(BaseTestCase):
             self.bytes_cleaner(response.content),
             self.get_ajax_response(field_errors=field_errors),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_validate_days_validation(self):
         """
@@ -154,7 +154,7 @@ class TimelineTaskCreateTest(BaseTestCase):
                 field_errors=field_errors, custom_validation_error_message=error_message
             ),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
         # Check what happend when the days field fails value_cannot_be_zero
         response = self.make_post_request(
@@ -168,7 +168,7 @@ class TimelineTaskCreateTest(BaseTestCase):
                 field_errors=field_errors, custom_validation_error_message=error_message
             ),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_invalid_choice_validations(self):
         """
@@ -188,7 +188,7 @@ class TimelineTaskCreateTest(BaseTestCase):
             self.bytes_cleaner(response.content),
             self.get_ajax_response(field_errors=field_errors),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
 
 class TimelineTaskShowTest(BaseTestCase):
@@ -268,7 +268,7 @@ class TimelineTaskUpdateTest(BaseTestCase):
         To automate the assertion commands, where same logics are repeated
         """
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertDatabaseHas(
             "TimelineTask",
             {
@@ -339,7 +339,7 @@ class TimelineTaskUpdateTest(BaseTestCase):
                 validation_parameter=validation_paramters,
             ),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_required_validation(self):
         """
@@ -361,7 +361,7 @@ class TimelineTaskUpdateTest(BaseTestCase):
             self.bytes_cleaner(response.content),
             self.get_ajax_response(field_errors=field_errors),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_validate_days_validation(self):
         """
@@ -379,7 +379,7 @@ class TimelineTaskUpdateTest(BaseTestCase):
                 field_errors=field_errors, custom_validation_error_message=error_message
             ),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
         response = self.make_post_request(
             reverse(self.update_edit_route_name, args=[self.timeline_task_id]),
@@ -393,7 +393,7 @@ class TimelineTaskUpdateTest(BaseTestCase):
                 field_errors=field_errors, custom_validation_error_message=error_message
             ),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_invalid_choice_validations(self):
         """
@@ -413,7 +413,7 @@ class TimelineTaskUpdateTest(BaseTestCase):
             self.bytes_cleaner(response.content),
             self.get_ajax_response(field_errors=field_errors),
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
 
 class TimelineTaskDeleteTest(BaseTestCase):
@@ -443,7 +443,7 @@ class TimelineTaskDeleteTest(BaseTestCase):
         self.assertJSONEqual(
             response.content, {"message": "Timeline Template Task deleted successfully"}
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         self.assertDatabaseNotHas("TimelineTask", {"id": timelinetask.id})
 
     def test_failure(self):
@@ -455,7 +455,7 @@ class TimelineTaskDeleteTest(BaseTestCase):
             response.content,
             {"message": "Error while deleting Timeline Template Task!"},
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 500)
 
 
 class TimelineTaskReOrderTest(BaseTestCase):
@@ -507,7 +507,7 @@ class TimelineTaskReOrderTest(BaseTestCase):
         )
         response = self.make_post_request(reverse(self.reorder_route_name), data=data)
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         for order, task_id in enumerate(self.timeline_task_ids):
             self.assertDatabaseHas(
                 "TimelineTask",
@@ -529,4 +529,4 @@ class TimelineTaskReOrderTest(BaseTestCase):
                 "status": "error",
             },
         )
-        self.assertTrue(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
