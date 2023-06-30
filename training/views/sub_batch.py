@@ -146,6 +146,8 @@ def create_sub_batch(request, pk):
                 sub_batch_form.add_error(
                     None, "The Selected Team's Active Timeline doesn't have any tasks"
                 )
+        # else:
+        #     print(sub_batch_form.errors)
     context = {
         "form": sub_batch_form,
         "sub_batch_id": pk,
@@ -162,13 +164,13 @@ def get_timeline(request):
     """
     team_id = request.POST.get("team_id")
     try:
-        timeline = Timeline.objects.get(team=team_id, is_active=True)
+        timeline = Timeline.objects.get(team_id=team_id, is_active=True)
         return JsonResponse(
             {"timeline": model_to_dict(timeline)}
         )  # Return the response with active template for a team
     except Exception as e:
         logging.error(
-            f"An error has occured while fetching an active timeline template for the team {team_id.name} \n{e}"
+            f"An error has occured while fetching an active timeline template for the team \n{e}"
         )
         return JsonResponse(
             {
@@ -184,29 +186,27 @@ def update_sub_batch(request, pk):
     """
     Update Sub-batch View
     """
-    sub_batch = SubBatch.objects.get(id=pk)
+    try:
+        sub_batch = SubBatch.objects.get(id=pk)
+    except Exception as e:
+        return JsonResponse({"message": "Invalid SubBatch id", "status": "error"})
     if request.method == "POST":
         sub_batch_form = SubBatchForm(request.POST, instance=sub_batch)
         if sub_batch_form.is_valid():
             # validation start date
             active_form = sub_batch_form.save(commit=False)
-            if TimelineTask.objects.filter(timeline=active_form.timeline.id):
-                sub_batch.primary_mentor_id = request.POST.get("primary_mentor_id")
-                sub_batch.secondary_mentor_id = request.POST.get("secondary_mentor_id")
-                active_form = sub_batch_form.save()
-                if int(request.POST.get("timeline")) != sub_batch.timeline.id:
-                    SubBatchTaskTimeline.bulk_delete({"sub_batch_id": pk})
-                    schedule_timeline_for_sub_batch(sub_batch, request.user)
-                else:
-                    schedule_timeline_for_sub_batch(
-                        sub_batch,
-                        is_create=False,
-                    )
-                return redirect(reverse("batch.detail", args=[sub_batch.batch.id]))
+            sub_batch.primary_mentor_id = request.POST.get("primary_mentor_id")
+            sub_batch.secondary_mentor_id = request.POST.get("secondary_mentor_id")
+            active_form = sub_batch_form.save()
+            if int(request.POST.get("timeline")) != sub_batch.timeline.id:
+                SubBatchTaskTimeline.bulk_delete({"sub_batch_id": pk})
+                schedule_timeline_for_sub_batch(sub_batch, request.user)
             else:
-                sub_batch_form.add_error(
-                    None, "The Selected Team's Active Timeline doesn't have any tasks"
+                schedule_timeline_for_sub_batch(
+                    sub_batch,
+                    is_create=False,
                 )
+            return redirect(reverse("batch.detail", args=[sub_batch.batch.id]))
         context = {"form": sub_batch_form, "sub_batch": sub_batch}
         return render(request, "sub_batch/update_sub_batch.html", context)
     sub_batch = SubBatch.objects.get(id=pk)
