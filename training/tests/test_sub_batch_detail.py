@@ -1,5 +1,3 @@
-import json
-
 from django.urls import reverse
 from django.utils import timezone
 from model_bakery import baker
@@ -89,9 +87,9 @@ class AddInternTest(BaseTestCase):
             reverse(self.create_route_name),
             data=self.get_valid_inputs({"sub_batch_id": ""}),
         )
-        self.assertEqual(
-            self.bytes_cleaner(response.content),
-            json.dumps({"message": "Invalid SubBatch id", "status": "error"}),
+        self.assertJSONEqual(
+            self.decoded_json(response),
+            {"message": "Invalid SubBatch id", "status": "error"},
         )
 
     def test_minimum_length_validation(self):
