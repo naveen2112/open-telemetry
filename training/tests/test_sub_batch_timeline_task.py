@@ -132,15 +132,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
         """
         response = self.make_post_request(
             reverse(self.create_route_name, args=[self.sub_batch.batch.id]),
-            data=self.get_valid_inputs(
-                {
-                    "days": "",
-                    "name": "",
-                    "task_type": "",
-                    "present_type": "",
-                    "order": "",
-                }
-            ),
+            data={},
         )
         field_errors = {
             "name": {"required"},
@@ -420,15 +412,7 @@ class SubBatchTaskTimelineUpdateTest(BaseTestCase):
             reverse(
                 self.update_edit_route_name, args=[self.sub_batch_task_timeline_id]
             ),
-            data=self.get_valid_inputs(
-                {
-                    "days": "",
-                    "name": "",
-                    "task_type": "",
-                    "present_type": "",
-                    "order": "",
-                }
-            ),
+            data={},
         )
         field_errors = {
             "name": {"required"},
