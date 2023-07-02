@@ -515,28 +515,61 @@ class SubBatchTaskTimelineDeleteTest(BaseTestCase):
         """
         super().setUp()
         self.authenticate()
+        self.sub_batch = baker.make(
+            "hubble.SubBatch",
+            start_date=(timezone.now() + timezone.timedelta(1)).date(),
+        )
 
     def test_success(self):
         """
         To check what happens when valid id is given for delete
         """
-        sub_batch = baker.make(
-            "hubble.SubBatch",
-            start_date=(timezone.now() + timezone.timedelta(1)).date(),
-        )
         sub_batch_task_timeline = baker.make(
             "hubble.SubBatchTaskTimeline",
-            sub_batch=sub_batch,
+            sub_batch=self.sub_batch,
+            order=seq(0),
+            days=1,
+            start_date=(timezone.now() + timezone.timedelta()).date(),
+            _quantity=2,
+        )
+        self.assertDatabaseHas(
+            "SubBatchTaskTimeline", {"id": sub_batch_task_timeline[0].id}
+        )
+        response = self.make_delete_request(
+            reverse(self.delete_route_name, args=[sub_batch_task_timeline[0].id])
+        )
+        self.assertJSONEqual(
+            self.decoded_json(response), {"message": "Task deleted succcessfully"}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertDatabaseNotHas(
+            "SubBatchTaskTimeline", {"id": sub_batch_task_timeline[0].id}
+        )
+
+    def test_deleting_last_task(self):
+        """
+        Check what happens when we try to delete the last task in timeline
+        """
+        sub_batch_task_timeline = baker.make(
+            "hubble.SubBatchTaskTimeline",
+            sub_batch=self.sub_batch,
             order=1,
-            days=2,
-            start_date=(timezone.now() + timezone.timedelta(1)).date(),
+            days=1,
+            start_date=(timezone.now() + timezone.timedelta()).date(),
+        )
+        self.assertDatabaseHas(
+            "SubBatchTaskTimeline", {"id": sub_batch_task_timeline.id}
         )
         response = self.make_delete_request(
             reverse(self.delete_route_name, args=[sub_batch_task_timeline.id])
         )
         self.assertJSONEqual(
-            self.decoded_json(response), {"message": "Task deleted succcessfully"}
+            self.decoded_json(response),
+            {
+                "message": "This is the last task, Atleast one task should exist in the timeline"
+            },
         )
+        self.assertEqual(response.status_code, 500)
 
     def test_failure(self):
         """

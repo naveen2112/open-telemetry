@@ -164,7 +164,9 @@ def update_sub_batch_timeline(request, pk):
 @validate_authorization()
 def update_task_sequence(request):
     task_order = request.POST.getlist("data[]")
-    check_valid_tasks = SubBatchTaskTimeline.objects.filter(sub_batch_id=request.POST.get("sub_batch_id"), id__in=task_order).count()
+    check_valid_tasks = SubBatchTaskTimeline.objects.filter(
+        sub_batch_id=request.POST.get("sub_batch_id"), id__in=task_order
+    ).count()
     if check_valid_tasks == len(task_order):
         sub_batch_task = SubBatchTaskTimeline.objects.get(id=task_order[0])
         order = 0
@@ -175,7 +177,12 @@ def update_task_sequence(request):
             task.save()
         schedule_timeline_for_sub_batch(sub_batch_task.sub_batch, is_create=False)
         return JsonResponse({"status": "success"})
-    return JsonResponse({"message": "Some of the tasks doesn't belong to the current timeline", "status": "error"})
+    return JsonResponse(
+        {
+            "message": "Some of the tasks doesn't belong to the current timeline",
+            "status": "error",
+        }
+    )
 
 
 @login_required()
@@ -196,16 +203,24 @@ def delete_sub_batch_timeline(request, pk):
                 sub_batch=sub_batch.id,
                 order__gt=timeline.order,
             )  # Remaining task after the deletion of the task
-            if len(task_list) > 0:
+            if (
+                SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch.id).count()
+            ) > 1:
+                #Check whether multiple tasks are available before deleting
                 order = timeline.order - 1
                 timeline.delete()
                 for task in task_list:
                     order += 1
                     task.order = order
+                    task.save()
                 schedule_timeline_for_sub_batch(sub_batch=sub_batch, is_create=False)
                 return JsonResponse({"message": "Task deleted succcessfully"})
-            timeline.delete()
-            return JsonResponse({"message": "Task deleted succcessfully"}) # TODO :: NEed to check with Poovarasu Bro
+            return JsonResponse(
+                {
+                    "message": "This is the last task, Atleast one task should exist in the timeline"
+                },
+                status=500,
+            )
         else:
             return JsonResponse(
                 {"message": "This task has been already started!"}, status=500

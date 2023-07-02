@@ -285,19 +285,22 @@ class SubBatchTimelineForm(forms.ModelForm):
             )
 
     def clean_order(self):
-        maximum_order_value = [
-            models.SubBatchTaskTimeline.objects.filter(
-                sub_batch_id=self.data.get("sub_batch_id")
-            )
-            .values_list("order", flat=True)
-            .last()
-        ][0] or 0 + 1
-        if (self.cleaned_data["order"] > maximum_order_value):
+        maximum_order_value = (
+            [
+                models.SubBatchTaskTimeline.objects.filter(
+                    sub_batch_id=self.data.get("sub_batch_id")
+                )
+                .values_list("order", flat=True)
+                .last()
+            ][0]
+            or 0
+        ) + 1
+        if self.cleaned_data["order"] > maximum_order_value:
             raise ValidationError(
                 f"The current order of the task is invalid. The valid input for order ranges form 1-{maximum_order_value}.",
                 code="invalid_order",
             )
-        if (self.cleaned_data["order"] <= 0):
+        if self.cleaned_data["order"] <= 0:
             raise ValidationError(
                 "Order value must be greater than zero.",
                 code="zero_order_error",
