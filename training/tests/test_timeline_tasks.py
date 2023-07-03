@@ -122,9 +122,7 @@ class TimelineTaskCreateTest(BaseTestCase):
         """
         response = self.make_post_request(
             reverse(self.create_route_name),
-            data=self.get_valid_inputs(
-                {"days": "", "name": "", "task_type": "", "present_type": ""}
-            ),
+            data={"timeline_id": self.timeline.id,},
         )
         field_errors = {
             "name": {"required"},
@@ -347,9 +345,7 @@ class TimelineTaskUpdateTest(BaseTestCase):
         """
         response = self.make_post_request(
             reverse(self.update_edit_route_name, args=[self.timeline_task_id]),
-            data=self.get_valid_inputs(
-                {"days": "", "name": "", "task_type": "", "present_type": ""}
-            ),
+            data={},
         )
         field_errors = {
             "name": {"required"},
