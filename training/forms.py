@@ -162,7 +162,7 @@ class SubBatchForm(forms.ModelForm):
 
     def clean_timeline(self):
         if not models.TimelineTask.objects.filter(timeline=self.cleaned_data["timeline"].id):
-            raise ValidationError("The Selected Team's Active Timeline doesn't have any tasks.", code="timeline_with_no_tasks")
+            raise ValidationError("The Selected Team's Active Timeline doesn't have any tasks.", code="timeline_has_no_tasks")
         return self.cleaned_data["timeline"]
 
     class Meta:

@@ -105,7 +105,7 @@ class SubBatchCreateTest(BaseTestCase):
         with open(
             self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
         ) as sample_file:
-            data = {"users_list_file": sample_file,}
+            data = {"users_list_file": sample_file}
             self.make_post_request(
                 reverse(self.create_route_name, args=[self.batch_id]), data=data
             )
@@ -370,7 +370,7 @@ class SubBatchUpdateTest(BaseTestCase):
             form=SubBatchForm(data=data),
         )
 
-    def test_timeline_with_no_tasks(self):
+    def test_timeline_has_no_tasks(self):
         """
         Check what happpens when a timeline with no task is selected
         """
@@ -381,7 +381,7 @@ class SubBatchUpdateTest(BaseTestCase):
             reverse(self.update_route_name, args=[self.sub_batch_id]), data=data
         )
         field_errors = {
-            "timeline": {"timeline_with_no_tasks"},
+            "timeline": {"timeline_has_no_tasks"},
         }
         self.validate_form_errors(
             field_errors=field_errors, form=SubBatchForm(data=data)

@@ -158,7 +158,7 @@ class BaseTestCase(TestCase):
             message = "This field is required."
         elif value == "invalid_choice":
             message = "Select a valid choice. That choice is not one of the available choices."
-        elif value == "timeline_with_no_tasks":
+        elif value == "timeline_has_no_tasks":
             message = "The Selected Team's Active Timeline doesn't have any tasks."
         return message
 
