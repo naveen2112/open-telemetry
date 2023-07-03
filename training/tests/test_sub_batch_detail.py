@@ -73,9 +73,7 @@ class AddInternTest(BaseTestCase):
         """
         response = self.make_post_request(
             reverse(self.create_route_name),
-            data=self.get_valid_inputs(
-                {"user_id": "", "college": "", "sub_batch_id": ""}
-            ),
+            data={},
         )
         field_errors = {"user_id": {"required"}, "college": {"required"}}
         self.assertEqual(
