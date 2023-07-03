@@ -94,7 +94,7 @@ class UpdateAssessmentTest(BaseTestCase):
         """
         response = self.make_post_request(
             reverse(self.update_edit_route_name, args=[self.trainee.user_id]),
-            data=self.get_valid_inputs({"score": "", "comment": ""}),
+            data={}
         )
         field_errors = {"score": {"required"}, "comment": {"required"}}
         self.assertEqual(
