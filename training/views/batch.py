@@ -2,7 +2,8 @@ import logging
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count, F, Q
+from django.db.models import Count, Q, Subquery, OuterRef
+from django.db.models.functions import Coalesce
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -35,7 +36,12 @@ class BatchDataTable(LoginRequiredMixin, CustomDatatable):
 
     column_defs = [
         {"name": "id", "visible": False, "searchable": False},
-        {"name": "name", "visible": True, "searchable": False},
+        {"name": "name", "visible": True, "searchable": True},
+        {
+            "name": "number_of_sub_batches",
+            "title": "Number of Sub-Batches",
+            "searchable": False,
+        },
         {
             "name": "total_trainee",
             "title": "No. of Trainee",
@@ -53,11 +59,24 @@ class BatchDataTable(LoginRequiredMixin, CustomDatatable):
     ]
 
     def get_initial_queryset(self, request=None):
-        return self.model.objects.all().annotate(
+        return self.model.objects.annotate(
             total_trainee=Count(
                 "sub_batches__intern_details",
                 filter=Q(sub_batches__intern_details__deleted_at__isnull=True),
-            )
+            ),
+            number_of_sub_batches=Coalesce(
+                Subquery(
+                    self.model.objects.filter(sub_batches__batch_id=OuterRef("id"))
+                    .annotate(
+                        number_of_sub_batches=Count(
+                            "sub_batches__id",
+                            filter=Q(sub_batches__deleted_at__isnull=True),
+                        )
+                    )
+                    .values("number_of_sub_batches")
+                ),
+                0,
+            ),
         )
 
     def customize_row(self, row, obj):
@@ -163,3 +182,12 @@ def delete_batch(request, pk):
 class BatchDetails(LoginRequiredMixin, DetailView):
     model = Batch
     template_name = "sub_batch/sub_batch.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(BatchDetails, self).get_context_data(**kwargs)
+        context["teams"] = (
+            SubBatch.objects.filter(batch_id=self.kwargs["pk"])
+            .annotate(count=Count("team", distinct=True))
+            .values("count")
+        )
+        return context

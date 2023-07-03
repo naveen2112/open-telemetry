@@ -47,6 +47,14 @@ Batch
     </div>
 </div>
 
+<div class="flex mb-7 items-center">
+    <div class="relative mr-5" id="timeline-table_filter">
+        <input type="text" value="" name="search_project" placeholder="Search by Name"
+            class="w-397 h-10 pl-11 pr-2.5 py-3 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0"
+            id="search_project">
+        <span class="absolute top-2 left-2"><span class="hbl hbl-search-icon text-dark-black-50 text-2xl"></span></span>
+    </div>
+</div>
 <table id="batch-table" class="display border-0 table-with-no-border dataTable no-footer" style="width: 100%;"
     role="grid" aria-describedby="batch-table_info">
 </table>
@@ -55,18 +63,22 @@ Batch
 {% block script %}
 <script>
     $(document).ready(function() {
-        $(document).ready(function() {
-            AjaxDatatableViewUtils.initialize_table(
-                $('#batch-table'),
-                "{% url 'batch.datatable' %}",
-                {
-                    serverSide: true,
-                    processing: true,
-                    autoWidth: false,
-                    scrollX: false,
-                },
-            );
-        });
+        AjaxDatatableViewUtils.initialize_table(
+            $('#batch-table'),
+            "{% url 'batch.datatable' %}",
+            {
+                serverSide: true,
+                processing: true,
+                autoWidth: false,
+                scrollX: false,
+            },
+        );
+    });
+
+    $("#search_project").on('input', function () {
+        var searchvalue = $(this).val();
+        var table = $("#batch-table").DataTable();
+        table.search(searchvalue).draw();
     });
 
     function openModal() {
