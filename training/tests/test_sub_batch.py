@@ -105,16 +105,7 @@ class SubBatchCreateTest(BaseTestCase):
         with open(
             self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
         ) as sample_file:
-            data = self.get_valid_inputs(
-                {
-                    "users_list_file": sample_file,
-                    "name": "",
-                    "team": "",
-                    "timeline": "",
-                    "primary_mentor_id": "",
-                    "secondary_mentor_id": "",
-                }
-            )
+            data = {"users_list_file": sample_file,}
             self.make_post_request(
                 reverse(self.create_route_name, args=[self.batch_id]), data=data
             )
@@ -323,15 +314,7 @@ class SubBatchUpdateTest(BaseTestCase):
         """
         This function checks the required validation for the team and name fields
         """
-        data = self.get_valid_inputs(
-            {
-                "name": "",
-                "team": "",
-                "timeline": "",
-                "primary_mentor_id": "",
-                "secondary_mentor_id": "",
-            }
-        )
+        data = {}
         self.make_post_request(
             reverse(self.update_route_name, args=[self.sub_batch_id]), data=data
         )
