@@ -6,6 +6,7 @@ from training.views import (batch, induction_kit, sub_batch,
                             sub_batch_timeline, timeline, timeline_task,
                             user_journey)
 
+
 urlpatterns = [
     path("", include('hubble.urls')),
     path("", view.home, name="training.home"),

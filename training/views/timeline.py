@@ -198,7 +198,7 @@ def delete_timeline_template(request, pk):
         timeline = get_object_or_404(Timeline, id=pk)
         TimelineTask.bulk_delete({"timeline_id": pk})
         timeline.delete()
-        return JsonResponse({"message": "Timeline Template deleted succcessfully"})
+        return JsonResponse({"message": "Timeline Template deleted successfully"})
     except Exception as e:
         logging.error(f"An error has occured while deleting the Timeline \n{e}")
         return JsonResponse(

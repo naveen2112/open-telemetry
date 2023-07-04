@@ -182,12 +182,3 @@ def delete_batch(request, pk):
 class BatchDetails(LoginRequiredMixin, DetailView):
     model = Batch
     template_name = "sub_batch/sub_batch.html"
-
-    def get_context_data(self, **kwargs):
-        context = super(BatchDetails, self).get_context_data(**kwargs)
-        context["teams"] = (
-            SubBatch.objects.filter(batch_id=self.kwargs["pk"])
-            .annotate(count=Count("team", distinct=True))
-            .values("count")
-        )
-        return context

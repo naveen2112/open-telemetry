@@ -63,11 +63,14 @@ class TimelineTemplateTaskDataTable(LoginRequiredMixin, CustomDatatable):
 @validate_authorization()
 def update_order(request):
     data = request.POST.getlist("data[]")
-    for order, id in enumerate(data):
-        task = TimelineTask.objects.get(id=id)
-        task.order = order + 1
-        task.save()
-    return JsonResponse({"status": "success"})
+    check_valid_tasks = TimelineTask.objects.filter(timeline_id=request.POST.get("timeline_id"), id__in=data).count()
+    if check_valid_tasks == len(data):
+        for order, id in enumerate(data):
+            task = TimelineTask.objects.get(id=id)
+            task.order = order + 1
+            task.save()
+        return JsonResponse({"status": "success"})
+    return JsonResponse({"message": "Some of the tasks doesn't belong to the current timeline", "status": "error"})
 
 
 @login_required()
@@ -152,7 +155,7 @@ def delete_timeline_task(request, pk):
     try:
         timeline_task = get_object_or_404(TimelineTask, id=pk)
         timeline_task.delete()
-        return JsonResponse({"message": "Timeline Template Task deleted succcessfully"})
+        return JsonResponse({"message": "Timeline Template Task deleted successfully"})
     except Exception as e:
         logging.error(f"An error has occured while deleting the Timeline Task \n{e}")
         return JsonResponse(
