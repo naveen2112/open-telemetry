@@ -239,7 +239,8 @@ class BatchDatatableTest(BaseTestCase):
         """
         This function is responsible for updating the valid inputs and creating data in databases as reqiured
         """
-        self.batch = baker.make("hubble.Batch", name=seq("test"), _quantity=2)
+        self.name = self.faker.name()
+        self.batch = baker.make("hubble.Batch", name=seq(self.name), _quantity=2)
         self.persisted_valid_inputs = {
             "draw": 1,
             "start": 0,
@@ -274,5 +275,6 @@ class BatchDatatableTest(BaseTestCase):
         """
         To check what happens when search value is given
         """
-        response = self.make_post_request(reverse(self.datatable_route_name), data=self.get_valid_inputs({"search[value]": "test1"}))
-        self.assertTrue(response.json()["recordsTotal"], Batch.objects.filter(name__icontains="test1").count())
+        search_value = self.name + "1"
+        response = self.make_post_request(reverse(self.datatable_route_name), data=self.get_valid_inputs({"search[value]": search_value}))
+        self.assertTrue(response.json()["recordsTotal"], Batch.objects.filter(name__icontains=search_value).count())
