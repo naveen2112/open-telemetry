@@ -28,11 +28,23 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
 
     column_defs = [
         {"name": "id", "visible": False, "searchable": False},
-        {"name": "name", "visible": True, "searchable": False},
-        {"name": "team", "visible": True, "searchable": False},
+        {"name": "name", "visible": True, "searchable": True},
+        {
+            "name": "team",
+            "foreign_field": "team__name",
+            "title": "Teams",
+            "visible": True,
+            "searchable": True,
+        },
         {
             "name": "trainee_count",
             "title": "No. of Trainees",
+            "visible": True,
+            "searchable": False,
+        },
+        {
+            "name": "reporting_persons",
+            "title": "Reporting Persons",
             "visible": True,
             "searchable": False,
         },
@@ -41,7 +53,7 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
             "name": "timeline",
             "title": "Assigned Timeline Template",
             "visible": True,
-            "searchable": False,
+            "searchable": True,
             "foreign_field": "timeline__name",
         },
         {
@@ -73,8 +85,26 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
         row[
             "action"
         ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        row["reporting_persons"] = " / ".join(
+            [obj.primary_mentor.name, obj.secondary_mentor.name]
+        )
         row["start_date"] = obj.start_date.strftime("%d %b %Y")
         return
+
+    def get_response_dict(self, request, paginator, draw_idx, start_pos):
+        response = super().get_response_dict(request, paginator, draw_idx, start_pos)
+        response["extra_data"] = list(
+            Batch.objects.filter(id=request.POST.get("batch_id"))
+            .annotate(
+                no_of_teams=Count("sub_batches__team", distinct=True),
+                no_of_trainees=Count(
+                    "sub_batches__intern_details",
+                    filter=Q(sub_batches__intern_details__deleted_at__isnull=True),
+                ),
+            )
+            .values("no_of_teams", "no_of_trainees")
+        )
+        return response
 
 
 @login_required()
