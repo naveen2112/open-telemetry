@@ -271,7 +271,7 @@ class BatchDatatableTest(BaseTestCase):
         self.assertTrue(response.json()["recordsTotal"], len(self.batch))
 
 
-    def test_check(self):
+    def test_database_search(self):
         """
         To check what happens when search value is given
         """
