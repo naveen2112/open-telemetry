@@ -36,7 +36,6 @@ class BatchCreateTest(BaseTestCase):
         response = self.make_get_request(reverse(self.route_name))
         self.assertTemplateUsed(response, "batch/batch_list.html")
         self.assertContains(response, "Batch List")
-        # self.assertContains(response, "Number of Sub-Batches") # TODO :: Need to create a datatable
 
     def test_success(self):
         """
@@ -240,7 +239,7 @@ class BatchDatatableTest(BaseTestCase):
         """
         This function is responsible for updating the valid inputs and creating data in databases as reqiured
         """
-        self.batch = baker.make("hubble.Batch", name=seq("test"),_quantity=2)
+        self.batch = baker.make("hubble.Batch", name=seq("test"), _quantity=2)
         self.persisted_valid_inputs = {
             "draw": 1,
             "start": 0,
