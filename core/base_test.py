@@ -164,6 +164,8 @@ class BaseTestCase(TestCase):
             message = "Order value must be greater than zero."
         elif value == "timeline_has_no_tasks":
             message = "The Selected Team's Active Timeline doesn't have any tasks."
+        elif value == "invalid_score":
+            message = "Score must be between 0 to 100"
         return message
 
     def get_ajax_response(

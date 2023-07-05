@@ -370,6 +370,12 @@ class SubBatchTimelineForm(forms.ModelForm):
 
 
 class InternScoreForm(forms.ModelForm):
+
+    def clean_score(self):
+        if not(0 <= self.cleaned_data["score"] <= 100):
+            raise ValidationError("Score must be between 0 to 100", code="invalid_score")
+        return self.cleaned_data["score"]
+        
     class Meta:
         model = Assessment
         fields = ("score", "is_retry", "comment")
