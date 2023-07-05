@@ -162,6 +162,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://training.hubble-reports.test",
     "https://reports-dev.mallow-tech.com",
     "https://training-dev.mallow-tech.com",
+    "https://training.mallow-tech.com",
 ]
 
 LOGIN_URL = "login"
