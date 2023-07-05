@@ -1,6 +1,9 @@
 from django.forms.models import model_to_dict
 from django.urls import reverse
+from django.db.models import Count, Q, Subquery, OuterRef
+from django.db.models.functions import Coalesce
 from model_bakery import baker
+from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
 from hubble.models import Batch
@@ -217,3 +220,94 @@ class BatchDeleteTest(BaseTestCase):
         """
         response = self.make_delete_request(reverse(self.delete_route_name, args=[0]))
         self.assertEqual(response.status_code, 500)
+
+
+class BatchDatatableTest(BaseTestCase):
+    """
+    This class is responsible for testing the Datatables present in the Batch module
+    """
+    datatable_route_name = "batch.datatable"
+    route_name = "batch"
+
+    def setUp(self):
+        """
+        This function will run before every test and makes sure required data are ready
+        """
+        super().setUp()
+        self.authenticate()
+        self.update_valid_input()
+
+    def update_valid_input(self):
+        """
+        This function is responsible for updating the valid inputs and creating data in databases as reqiured
+        """
+        self.name = self.faker.name()
+        self.batch = baker.make("hubble.Batch", name=seq(self.name), _quantity=2)
+        self.persisted_valid_inputs = {
+            "draw": 1,
+            "start": 0,
+            "length": 10,
+            "search[value]": "", 
+        }
+
+    def test_template(self):
+        """
+        To makes sure that the correct template is used
+        """
+        response = self.make_get_request(reverse(self.route_name))
+        self.assertTemplateUsed(response, "batch/batch_list.html")
+        self.assertContains(response, "Batch List")
+
+    def test_datatable(self):
+        """
+        To check whether all columns are present in datatable and length of rows without any filter
+        """
+        batches = Batch.objects.annotate(
+            total_trainee=Count(
+                "sub_batches__intern_details",
+                filter=Q(sub_batches__intern_details__deleted_at__isnull=True),
+            ),
+            number_of_sub_batches=Coalesce(
+                Subquery(
+                    Batch.objects.filter(sub_batches__batch_id=OuterRef("id"))
+                    .annotate(
+                        number_of_sub_batches=Count(
+                            "sub_batches__id",
+                            filter=Q(sub_batches__deleted_at__isnull=True),
+                        )
+                    )
+                    .values("number_of_sub_batches")
+                ),
+                0,
+            ),
+        )
+        response = self.make_post_request(reverse(self.datatable_route_name), data=self.get_valid_inputs())
+        self.assertEqual(response.status_code, 200)
+
+        # Check whether row details are correct 
+        for row in range(len(batches)):
+            expected_value = batches[row]
+            received_value = response.json()["data"][row]
+            self.assertEqual(expected_value.pk, int(received_value["pk"]))
+            self.assertEqual(expected_value.name, received_value["name"])
+            self.assertEqual(expected_value.number_of_sub_batches, int(received_value["number_of_sub_batches"]))
+        
+        # Check whether all headers are present
+        for row in response.json()["data"]:
+            self.assertTrue("pk" in row)
+            self.assertTrue("name" in row)
+            self.assertTrue("number_of_sub_batches" in row)
+            self.assertTrue("total_trainee" in row)
+            self.assertTrue("action" in row)
+            
+        # Check the numbers of rows received is equal to the number of expected rows
+        self.assertTrue(response.json()["recordsTotal"], len(self.batch))
+
+
+    def test_database_search(self):
+        """
+        To check what happens when search value is given
+        """
+        search_value = self.name + "1"
+        response = self.make_post_request(reverse(self.datatable_route_name), data=self.get_valid_inputs({"search[value]": search_value}))
+        self.assertTrue(response.json()["recordsTotal"], Batch.objects.filter(name__icontains=search_value).count())
