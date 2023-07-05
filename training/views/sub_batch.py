@@ -3,7 +3,7 @@ import logging
 import pandas as pd
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count, OuterRef, Q, Subquery
+from django.db.models import Count, OuterRef, Q, Subquery, F, Sum
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -15,7 +15,7 @@ from core import template_utils
 from core.utils import (CustomDatatable, schedule_timeline_for_sub_batch,
                         validate_authorization)
 from hubble.models import (Batch, InternDetail, SubBatch, SubBatchTaskTimeline,
-                           Timeline, TimelineTask, User)
+                           Timeline, TimelineTask, User, Assessment)
 from training.forms import AddInternForm, SubBatchForm
 
 
@@ -307,6 +307,17 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
     ]
 
     def get_initial_queryset(self, request=None):
+        latest_task_report = Assessment.objects.filter(
+            task=OuterRef("id")
+        ).order_by("-id")[:1]
+        task_summary = (
+            SubBatchTaskTimeline.objects.filter(
+                sub_batch=request.POST.get("sub_batch"), task_type="Assessment"
+            )
+            .annotate(
+                last_entry=Subquery(latest_task_report.values("score")),).values("assessments__user_id", "id", "last_entry"))
+        # print(task_summary)
+        # print(InternDetail.objects.filter(sub_batch__id=request.POST.get("sub_batch")).annotate(total_marks=Sum(F("user__assessments__score")), filter=(Q(user__assessments__is_retry=False) & Q(user__assessments__deleted_at__isnull=True))).values("user", "total_marks"))
         return self.model.objects.filter(sub_batch__id=request.POST.get("sub_batch"))
 
     def customize_row(self, row, obj):
@@ -373,5 +384,5 @@ def remove_trainee(request, pk):
     except Exception as e:
         logging.error(f"An error has occured while deleting an intern \n{e}")
         return JsonResponse(
-            {"message": "Error while deleting Timeline Template!"}, status=500
+            {"message": "Error while deleting Trainee!"}, status=500
         )
