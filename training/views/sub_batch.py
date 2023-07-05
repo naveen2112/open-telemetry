@@ -168,7 +168,7 @@ def get_timeline(request):
         )  # Return the response with active template for a team
     except Exception as e:
         logging.error(
-            f"An error has occured while fetching an active timeline template for the team \n{e}"
+            f"An error has occured while fetching an active timeline template for the team {team_id}\n{e}"
         )
         return JsonResponse(
             {

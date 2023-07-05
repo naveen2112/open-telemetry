@@ -18,6 +18,7 @@ pandas = "^2.0.2"
 openpyxl = "^3.1.2"
 model-bakery = "^1.12.0"
 faker = "^18.10.1"
+psycopg2 = "^2.9.6"
 
 
 [tool.poetry.group.dev.dependencies]
