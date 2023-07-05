@@ -15,10 +15,12 @@ class TimelineForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        if self.data.get("id") and (not models.Timeline.objects.filter(id=self.data.get("id")).exists()):
+        if self.data.get("id") and (
+            not models.Timeline.objects.filter(id=self.data.get("id")).exists()
+        ):
             self.add_error(None, "You are trying to duplicate invalid template")
         return cleaned_data
-        
+
     def clean_is_active(self):
         """
         This function checks if a team already has an active template and raises a validation error if
@@ -29,7 +31,9 @@ class TimelineForm(forms.ModelForm):
                 team=self.cleaned_data["team"], is_active=True
             ).values("id")
             if (len(query)) and (query[0]["id"] != (self.instance.id)):
-                raise ValidationError("Team already has an active template.", code="template_in_use")
+                raise ValidationError(
+                    "Team already has an active template.", code="template_in_use"
+                )
 
     class Meta:
         model = models.Timeline
@@ -67,9 +71,13 @@ class TimelineTaskForm(forms.ModelForm):
         raises a validation error.
         """
         if value <= 0:
-            raise ValidationError("Value must be greater than 0", code="value_cannot_be_zero")
+            raise ValidationError(
+                "Value must be greater than 0", code="value_cannot_be_zero"
+            )
         if value % 0.5 != 0:
-            raise ValidationError("Value must be a multiple of 0.5", code="is_not_divisible_by_0.5")
+            raise ValidationError(
+                "Value must be a multiple of 0.5", code="is_not_divisible_by_0.5"
+            )
 
     days = forms.FloatField(
         widget=forms.NumberInput(
@@ -80,8 +88,20 @@ class TimelineTaskForm(forms.ModelForm):
         ),
         validators=[validate_days],
     )
-    present_type = forms.ChoiceField(error_messages={"invalid_choice": "Select a valid choice. That choice is not one of the available choices."}, widget=forms.RadioSelect, choices=PRESENT_TYPES)
-    task_type = forms.ChoiceField(error_messages={"invalid_choice": "Select a valid choice. That choice is not one of the available choices."}, widget=forms.RadioSelect, choices=TASK_TYPES)
+    present_type = forms.ChoiceField(
+        error_messages={
+            "invalid_choice": "Select a valid choice. That choice is not one of the available choices."
+        },
+        widget=forms.RadioSelect,
+        choices=PRESENT_TYPES,
+    )
+    task_type = forms.ChoiceField(
+        error_messages={
+            "invalid_choice": "Select a valid choice. That choice is not one of the available choices."
+        },
+        widget=forms.RadioSelect,
+        choices=TASK_TYPES,
+    )
 
     class Meta:
         model = models.TimelineTask
@@ -271,9 +291,36 @@ class SubBatchTimelineForm(forms.ModelForm):
         raises a validation error.
         """
         if value <= 0:
-            raise ValidationError("Value must be greater than 0")
+            raise ValidationError(
+                "Value must be greater than 0", code="value_cannot_be_zero"
+            )
         if value % 0.5 != 0:
-            raise ValidationError("Value must be a multiple of 0.5")
+            raise ValidationError(
+                "Value must be a multiple of 0.5", code="is_not_divisible_by_0.5"
+            )
+
+    def clean_order(self):
+        maximum_order_value = (
+            [
+                models.SubBatchTaskTimeline.objects.filter(
+                    sub_batch_id=self.data.get("sub_batch_id")
+                )
+                .values_list("order", flat=True)
+                .last()
+            ][0]
+            or 0
+        ) + 1
+        if self.cleaned_data["order"] > maximum_order_value:
+            raise ValidationError(
+                f"The current order of the task is invalid. The valid input for order ranges form 1-{maximum_order_value}.",
+                code="invalid_order",
+            )
+        if self.cleaned_data["order"] <= 0:
+            raise ValidationError(
+                "Order value must be greater than zero.",
+                code="zero_order_error",
+            )
+        return self.cleaned_data["order"]
 
     days = forms.FloatField(
         widget=forms.NumberInput(
@@ -293,6 +340,20 @@ class SubBatchTimelineForm(forms.ModelForm):
             }
         ),
     )
+    present_type = forms.ChoiceField(
+        error_messages={
+            "invalid_choice": "Select a valid choice. That choice is not one of the available choices."
+        },
+        widget=forms.RadioSelect,
+        choices=PRESENT_TYPES,
+    )
+    task_type = forms.ChoiceField(
+        error_messages={
+            "invalid_choice": "Select a valid choice. That choice is not one of the available choices."
+        },
+        widget=forms.RadioSelect,
+        choices=TASK_TYPES,
+    )
 
     class Meta:
         model = models.SubBatchTaskTimeline
@@ -305,8 +366,6 @@ class SubBatchTimelineForm(forms.ModelForm):
                     "placeholder": "Task Name...",
                 }
             ),
-            "present_type": forms.RadioSelect(),
-            "task_type": forms.RadioSelect(),
         }
 
 
