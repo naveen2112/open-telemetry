@@ -373,5 +373,5 @@ def remove_trainee(request, pk):
     except Exception as e:
         logging.error(f"An error has occured while deleting an intern \n{e}")
         return JsonResponse(
-            {"message": "Error while deleting Timeline Template!"}, status=500
+            {"message": "Error while deleting Trainee!"}, status=500
         )
