@@ -298,23 +298,21 @@ def add_trainee(request):
     """
     if request.method == "POST":
         form = AddInternForm(request.POST)
-        if request.POST.get("user_id"):
-            if InternDetail.objects.filter(user=request.POST.get("user_id")).exists():
-                form.add_error(
-                    "user_id", "Trainee already added in the another sub-batch"
-                )  # Adding form error if the trainees is already added in another
         if form.is_valid():  # Check if form is valid or not
-            sub_batch = SubBatch.objects.get(id=request.POST.get("sub_batch_id"))
-            timeline_data = SubBatchTaskTimeline.objects.filter(
-                sub_batch=sub_batch
-            ).last()
-            trainee = form.save(commit=False)
-            trainee.user_id = request.POST.get("user_id")
-            trainee.sub_batch = sub_batch
-            trainee.expected_completion = timeline_data.end_date
-            trainee.created_by = request.user
-            trainee.save()
-            return JsonResponse({"status": "success"})
+            try:
+                sub_batch = SubBatch.objects.get(id=request.POST.get("sub_batch_id"))
+                timeline_data = SubBatchTaskTimeline.objects.filter(
+                    sub_batch=sub_batch
+                ).last()
+                trainee = form.save(commit=False)
+                trainee.user_id = request.POST.get("user_id")
+                trainee.sub_batch = sub_batch
+                trainee.expected_completion = timeline_data.end_date
+                trainee.created_by = request.user
+                trainee.save()
+                return JsonResponse({"status": "success"})
+            except Exception as e:
+                return JsonResponse({"message": "Invalid SubBatch id", "status": "error"})
         else:
             field_errors = form.errors.as_json()
             non_field_errors = form.non_field_errors().as_json()
