@@ -3,11 +3,12 @@ from django.forms.models import model_to_dict
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import strip_tags
+from django.db.models import Count, Q
 from model_bakery import baker
 from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
-from hubble.models import User, SubBatch
+from hubble.models import User, SubBatch, Batch
 from training.forms import SubBatchForm
 
 
@@ -526,7 +527,8 @@ class SubBatchDatatableTest(BaseTestCase):
         """
         self.batch = baker.make("hubble.Batch")
         self.team = baker.make("hubble.Team")
-        self.sub_batch = baker.make("hubble.SubBatch", name=seq("test"), team_id=self.team.id, batch_id=self.batch.id, _quantity=2)
+        self.name = self.faker.name()
+        self.sub_batch = baker.make("hubble.SubBatch", name=seq(self.name), team_id=self.team.id, batch_id=self.batch.id, _quantity=2)
         self.persisted_valid_inputs = {
             "draw": 1,
             "start": 0,
@@ -547,12 +549,27 @@ class SubBatchDatatableTest(BaseTestCase):
         """
         To check whether all columns are present in datatable and length of rows without any filter
         """
+        no_of_teams = SubBatch.objects.filter(batch_id=self.batch.id).values("team").distinct().count()
+        sub_batches = SubBatch.objects.filter(batch=self.batch.id).annotate(
+            trainee_count=Count(
+                "intern_details",
+                filter=Q(intern_details__deleted_at__isnull=True),
+            )
+        )
         response = self.make_post_request(reverse(self.datatable_route_name), data=self.get_valid_inputs())
         self.assertEqual(response.status_code, 200)
         self.assertTrue("extra_data" in response.json())
         self.assertTrue("no_of_teams" in response.json()["extra_data"][0])
         self.assertTrue("no_of_trainees" in response.json()["extra_data"][0])
-        self.assertEqual(response.json()["extra_data"][0]["no_of_teams"], 1)
+        self.assertEqual(response.json()["extra_data"][0]["no_of_teams"], no_of_teams)
+        for row in range(len(sub_batches)):
+            expected_value = sub_batches[row]
+            received_value = response.json()["data"][row]
+            self.assertEqual(expected_value.pk, int(received_value["pk"]))
+            self.assertEqual(expected_value.name, received_value["name"])
+            self.assertEqual(expected_value.trainee_count, int(received_value["trainee_count"]))
+            self.assertEqual(expected_value.timeline.name, received_value["timeline"])
+            self.assertEqual(expected_value.start_date.strftime("%d %b %Y"), received_value["start_date"])
         for row in response.json()["data"]:
             self.assertTrue("pk" in row)
             self.assertTrue("name" in row)
@@ -564,10 +581,10 @@ class SubBatchDatatableTest(BaseTestCase):
             self.assertTrue("action" in row)
         self.assertTrue(response.json()["recordsTotal"], len(self.sub_batch))
 
-
-    def test_check(self):
+    def test_datatable_search(self):
         """
         To check what happens when search value is given
         """
-        response = self.make_post_request(reverse(self.datatable_route_name), data=self.get_valid_inputs({"search[value]": "test1"}))
-        self.assertTrue(response.json()["recordsTotal"], SubBatch.objects.filter(name__icontains="test1").count())
+        name_to_be_searched = self.name + "1"
+        response = self.make_post_request(reverse(self.datatable_route_name), data=self.get_valid_inputs({"search[value]": name_to_be_searched}))
+        self.assertTrue(response.json()["recordsTotal"], SubBatch.objects.filter(name__icontains=name_to_be_searched).count())
