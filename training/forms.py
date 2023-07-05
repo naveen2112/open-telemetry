@@ -160,6 +160,11 @@ class SubBatchForm(forms.ModelForm):
                 "initialValue"
             ] = instance.secondary_mentor_id
 
+    def clean_timeline(self):
+        if not models.TimelineTask.objects.filter(timeline=self.cleaned_data["timeline"].id):
+            raise ValidationError("The Selected Team's Active Timeline doesn't have any tasks.", code="timeline_has_no_tasks")
+        return self.cleaned_data["timeline"]
+
     class Meta:
         model = models.SubBatch
         fields = (
@@ -215,6 +220,16 @@ class AddInternForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["college"].validators.append(MinLengthValidator(3))
         self.fields["user_id"].empty_label = "Select a Trainee"
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if self.data.get("sub_batch_id") and not (models.SubBatch.objects.filter(id=self.data.get("sub_batch_id")).exists()):
+            self.add_error(None, "You are trying to add trainees to an invalid SubBatch")
+        return cleaned_data
+    
+    def clean_user_id(self):
+        if models.InternDetail.objects.filter(user=self.cleaned_data["user_id"]).exists():
+            raise ValidationError("Trainee already added in the another sub-batch", code="trainee_exists")
 
     user_id = forms.ModelChoiceField(
         queryset=(
