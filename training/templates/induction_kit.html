@@ -1,0 +1,30 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block title %}
+Induction Kit
+{% endblock title %}
+
+{% block header %}
+Induction Kit
+{% endblock %}
+
+{% block body %}
+<div class="flex">
+    <div class="flex flex-wrap">
+        {% for filename in pdf_files %}
+        <a href="{% url 'induction-kit.detail' filename %}" target="_blank" class=" text-blue-600 text-xs sm:text-sm"
+            id="card-link">
+            <div class=" bg-white rounded-xl shadow-md overflow-hidden p-4" id="card-container">
+                <div class="relative mb-4">
+                    <img class="h-14 w-12 object-cover" src="{% static 'training/images/pdficon.svg' %}" alt="pdf icon">
+                </div>
+                <div>
+                    <h4 href="#" class="mt-2 text-gray-900 hover:underline text-sm sm:text-lg">{{ filename }}</h4>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

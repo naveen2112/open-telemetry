@@ -1,0 +1,208 @@
+{% extends 'layouts/base.html' %}
+
+{% load static %}
+
+{% block title %}
+Create Sub Batch
+{% endblock title %}
+
+{% block header %}
+<div class="flex justify-between items-center">
+    <div>
+        <div class="text-dark-black text-lg mb-1 leading-none" style="white-space: nowrap">
+            Create Sub Batch
+        </div>
+        <div class="text-dark-black-50 text-sm">
+
+        </div>
+    </div>
+    <div class=" w-full flex justify-end items-center batch-btn">
+        <a href="{% url 'batch.detail' sub_batch_id %}"
+            class="text-white bg-gray-500 rounded inline-flex items-center px-3 py-1 mr-6 text-base font-normal">
+            <span class="text-xl mr-2">x</span>
+            Cancel
+        </a>
+        <button class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal"
+            id="create_sub_batch">
+            <span class="text-xl mr-2">+</span>
+            Create Sub Batch
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block body %}
+<form method="post" enctype="multipart/form-data" id="sub_batch_form">
+    {% csrf_token %}
+    <div class="grid grid-cols-3 gap-210">
+        <div class="form-field">
+            {{ form.name|show_label }}
+            {{ form.name }}
+            {{ form.name|show_field_errors }}
+        </div>
+        <div class="work-basic-dropdown form-field">
+            {{ form.team|show_label }}
+            <div class="relative mt-2.5">
+                {{ form.team }}
+            </div>
+            {{ form.team|show_field_errors }}
+        </div>
+        <div class="form-field">
+            {{ form.start_date|show_label }}
+            {{ form.start_date }}
+            {{ form.start_date|show_field_errors }}
+        </div>
+        <div class="work-basic-dropdown form-field">
+            {{ form.timeline|show_label }}
+            <div class="relative" mt-2.5>
+                <div class="w-full block border border-primary-dark-30 mt-2.5 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 bg-transparent w-250"
+                    id="timeline-name" style="
+                                    position: absolute;
+                                    top: -10px;
+                                "></div>
+                {{ form.timeline }}
+            </div>
+            {{ form.timeline|show_field_errors }}
+        </div>
+        <div class="work-basic-dropdown form-field" id="primary-mentor-container">
+            {{ form.primary_mentor_id|show_label }}
+            <div class="relative mt-2.5">
+                {{ form.primary_mentor_id }}
+            </div>
+            {{ form.primary_mentor_id|show_field_errors }}
+        </div>
+        <div class="work-basic-dropdown form-field">
+            {{ form.secondary_mentor_id|show_label }}
+            <div class="relative">
+                {{ form.secondary_mentor_id }}
+            </div>
+            {{ form.secondary_mentor_id|show_field_errors }}
+        </div>
+        <div class="col-span-2">
+            <div class="mb-3.6 text-sm text-dark-black-50">Upload Excel<span class="text-red-600">*</span></div>
+
+            <div class="mt-2 mb-3 flex">
+                <input type="file" class="hidden" id="file_upload" accept=".xlsx, .xls" name="users_list_file">
+                <label
+                    class="w-64 flex justify-center border-dashed border-2 border-dark-black-35 rounded-md items-center cursor-pointer "
+                    for="file_upload" id="profileImageUpload">
+                    <span class="text-dark-black-35 text-clip overflow-hidden text-sm file_input_text"
+                        style="text-align: center">
+                        Click Here To Upload File<br>Excel File Only
+                    </span>
+                    <span class="hidden text-dark-black-35 text-clip overflow-hidden text-sm file_input_name"
+                        style="text-align: center"></span>
+                </label>
+                <div
+                    class="text-dark-red ml-10 mt-7 text-sm font-normal mb-7 inline-flex items-center cursor-pointer remove-file">
+                    Remove File
+                </div>
+            </div>
+
+            {% if form.errors %}
+            {{ form.non_field_errors|show_non_field_errors }}
+            {% endif %}
+
+        </div>
+    </div>
+</form>
+
+<div class="mt mb-9 flex">
+    <div class="mr-9">
+        <a href="{% static 'training/pdf/Sample_Intern_Upload.xlsx' %}" download>
+            <button
+                class="text-white bg-dark-blue rounded inline-flex items-center pr-3 pl-2 py-1 text-base font-normal">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20px" height="20px" viewBox="0 0 512 512">
+                    <path fill="#fff"
+                        d="M480 352h-133.5l-45.25 45.25C289.2 409.3 273.1 416 256 416s-33.16-6.656-45.25-18.75L165.5 352H32c-17.67 0-32 14.33-32 32v96c0 17.67 14.33 32 32 32h448c17.67 0 32-14.33 32-32v-96C512 366.3 497.7 352 480 352zM432 456c-13.2 0-24-10.8-24-24c0-13.2 10.8-24 24-24s24 10.8 24 24C456 445.2 445.2 456 432 456zM233.4 374.6C239.6 380.9 247.8 384 256 384s16.38-3.125 22.62-9.375l128-128c12.49-12.5 12.49-32.75 0-45.25c-12.5-12.5-32.76-12.5-45.25 0L288 274.8V32c0-17.67-14.33-32-32-32C238.3 0 224 14.33 224 32v242.8L150.6 201.4c-12.49-12.5-32.75-12.5-45.25 0c-12.49 12.5-12.49 32.75 0 45.25L233.4 374.6z" />
+                </svg>
+                <span class='ml-1'>Download Sample</span>
+            </button>
+        </a>
+    </div>
+</div>
+<div class="mt-2">
+    <div>
+        <strong>Note:</strong>
+    </div>
+    <ul class="profile_sidebar">
+        <li>1. Please ensure the entered User ID and College names is in same format as provided in the
+            excel
+            sheet</li>
+        <li>2. Date should be in the format YYYY/MM/DD </li>
+    </ul>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+
+    $("#id_team").change(function() {
+      update_timeline_value();  
+    })
+
+    function update_timeline_value() {
+        if ($("#id_team").val()) {
+            $('.page-loader').show();
+            $("#id_timeline").val("");
+            $.ajax({
+                type: "POST",
+                url: "{% url 'sub-batch.get_timeline' %}",
+                data: {
+                    team_id: $("#id_team").val()
+                },
+                success: function (data) {
+                    $('.page-loader').hide();
+                    $("#id_timeline").val(data.timeline.id);
+                    $("#timeline-name").html(data.timeline.name);
+                    $('#id_timeline').siblings().find('#show-value').html(data.timeline.name);
+                },
+                error: function (xhr, status, error) {
+                    $('.page-loader').hide();
+                    alert(xhr.responseJSON.message);
+                }
+            });
+        }
+    };
+
+    $(document).ready(function() {
+        function readURL(input) {
+            if (input.files && input.files[0]) {
+                let fileName = input.files[0].name;
+                $('.file_input_name').show().html(fileName);
+                $('.file_input_text').hide();
+            }
+        }
+
+        $("#file_upload").change(function() {
+            readURL(this);
+        });
+
+        $(".remove-file").on("click", function() {
+            $("#file_upload").val(null);
+            $('.file_input_name').hide();
+            $('.file_input_text').show();
+        });
+    });
+
+    $(document).ready(function() {
+        update_timeline_value();
+        $('#create_sub_batch').click(function(e) {
+            e.preventDefault();
+            $('#sub_batch_form').submit();
+        })
+    });
+
+    $(function() {
+        var date = new Date()
+        $('input[name="start_date"]').daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true,
+            minDate: date,
+            locale: {
+                format: 'YYYY-MM-DD',
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,236 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}
+Timeline Template
+{% endblock title %}
+
+{% block header %}
+<div class="flex justify-between items-center">
+    <div>
+        <div class="text-dark-black text-lg mb-1 leading-none">
+            Timeline Template List
+        </div>
+        <div class="text-dark-black-50 text-sm">
+            List of Timeline Templates
+        </div>
+    </div>
+    {% if request.user.is_admin_user %}
+        <button class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal"
+            onclick="openModal()">
+            <span class="text-xl mr-2">+</span>
+            Create Timeline
+        </button>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block body %}
+<div class="mb-5 flex justify-end items-center">
+    <div class="jquery-modal current hidden" id="modal">
+        <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
+            <p class="font-semibold text-lg mb-10" id="form_heading">Create Timeline</p>
+            <form method="post" class="timeline-form" id="timeline-create-form">
+                <input type="hidden" name="timeline_id" id="timeline_id">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <div class="form-group mb-7" id="{{ form.name.label|lower }}_group">
+                        {{ form.name|show_label }}
+                        {{ form.name }}
+                    </div>
+                    <div class="work-basic-dropdown mb-7" id="{{ form.team.label|lower }}_group">
+                        {{ form.team|show_label }}
+                        <div class="relative">
+                            {{ form.team }}
+                        </div>
+                    </div>
+                    <div class="flex items-center mb-7" id="{{ form.is_active.label|lower }}_group">
+                        {{ form.is_active }}
+                        <label for="is_active" class="ml-3 mb-3.6 text-sm text-dark-black-50">Active Template</label>
+                    </div>
+                </div>
+                <div id="non_field_error"></div>
+                <div class="text-center mt-10">
+                    <a class="cursor-pointer inline-block align-middle border border-grey px-8 py-2 rounded mr-6"
+                        onclick="closeModal('modal')">Close</a>
+                    <a class="cursor-pointer inline-block align-middle text-white bg-dark-blue rounded inline-flex items-center rounded px-8 py-2 text-base font-normal"
+                        id="submit-btn">Submit</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="flex mb-7 items-center">
+    <div class="relative mr-5" id="timeline-table_filter">
+        <input type="text" value="" name="search_project" placeholder="Search by Name, Team"
+            class="w-397 h-10 pl-11 pr-2.5 py-3 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0"
+            id="search_project">
+        <span class="absolute top-2 left-2"><span class="hbl hbl-search-icon text-dark-black-50 text-2xl"></span></span>
+    </div>
+</div>
+
+<table id="timeline-table" class="display border-0 table-with-no-border dataTable no-footer" style="width: 100%;"
+    role="grid" aria-describedby="timeline-table_info">
+</table>
+{% endblock %}
+
+{% block script %}
+<script>
+    $(document).ready(function() {
+        AjaxDatatableViewUtils.initialize_table(
+            $('#timeline-table'),
+            "{% url 'timeline-template.datatable' %}",
+            {
+                serverSide: true,
+                processing: true,
+                autoWidth: false,
+                scrollX: false,
+                order: [],
+            },
+        );
+    });
+    $("#search_project").on('input', function() {
+        var searchvalue = $(this).val();
+        var table = $("#timeline-table").DataTable();
+        table.search(searchvalue).draw();
+    });
+    function openModal() {
+        openBaseModal();
+        $('#id_team').val('');
+        $('.dropdown_selected_value').html('');
+        $('#id_name').val('');
+        $('#id_is_active').prop('checked', false);
+        $('#submit-btn').attr("onclick", "createTimeline()");
+        $('#form_heading').html("Create Timeline");
+    }
+
+    function createTimeline() {
+        removeErrors();
+        $('.page-loader').show();
+        $.ajax({
+            type: "POST",
+            url: "{% url 'timeline-template.create' %}",
+            data: {
+                id: $("#timeline_id").val(),
+                name: $('#id_name').val(),
+                team: $('#id_team').val(),
+                is_active: $('.checkbox_active').is(":checked"),
+            },
+            success: function(data) {
+                removeErrors();
+                $('.page-loader').hide();
+                if (data.status === 'success') {
+                    $('#timeline-table').DataTable().ajax.reload();
+                    closeModal('modal');
+                } else {
+                    renderFormError(data);
+                }
+            },
+            error: function() {
+                $('.page-loader').hide();
+                alert("Something went wrong");
+            },
+        });
+    }
+
+    function openUpdateModel(url) {
+        removeErrors();
+        $('.page-loader').show();
+        $('#id_team').val('');
+        $('.dropdown_selected_value').html('');
+        $.ajax({
+            type: "GET",
+            url: url,
+            success: function(data) {
+                $('.page-loader').hide();
+                $('#form_heading').html("Update Timeline");
+                $('#id_name').val(data.timeline.name);
+                $('#id_team').val(data.timeline.team);
+                $('#timeline_id').val(data.timeline.id);
+                if (data.timeline.is_active) {
+                    $("#id_is_active").attr('checked', true);
+                } else {
+                    $("#id_is_active").attr('checked', false);
+                }
+                $('.dropdown_selected_value').html($("#id_team option[value='" + data.timeline.team + "']").text());
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                alert(jqXHR.responseJSON.message);
+                $('.page-loader').hide();
+            },
+        });
+        document.getElementById("modal").classList.remove("hidden");
+        document.getElementById("modal").classList.add("blocker");
+        $('#submit-btn').attr("onclick", "updateTimeline()");
+    }
+
+    function updateTimeline() {
+        $('.page-loader').show();
+        $.ajax({
+            type: "POST",
+            url: "timeline-template/" + $("#timeline_id").val() + "/edit", //TODO
+            data: {
+                name: $('#id_name').val(),
+                team: $("#id_team").val(),
+                is_active: $('#id_is_active').is(":checked"),
+            },
+            success: function(data) {
+                removeErrors();
+                $('.page-loader').hide();
+                if (data.status === 'success') {
+                    $('#timeline-table').DataTable().ajax.reload();
+                    closeModal('modal');
+                } else {
+                    renderFormError(data);
+                }
+            },
+            error: function() {
+                $('.page-loader').hide();
+                alert("Something went wrong");
+            },
+        });
+    }
+
+    function deleteTimeline(url) {
+        let text = 'Are you sure do you want to delete';
+        if (confirm(text) == true) {
+            $('.page-loader').show();
+            $.ajax({
+                type: "DELETE",
+                url: url,
+                success: function(data) {
+                    $('.page-loader').hide();
+                    $('#timeline-table').DataTable().ajax.reload();
+                },
+                error: function() {
+                    $('.page-loader').hide();
+                    alert("Something went wrong");
+                },
+            });
+        }
+    }
+
+    function duplicateTimelineModal(url) {
+        removeErrors();
+        $('.page-loader').show();
+        $('#duplicate_team').val('');
+        $('.dropdown_selected_value').html('');
+        $.ajax({
+            type: "GET",
+            url: url,
+            success: function(data) {
+                $('.page-loader').hide();
+                $('#id_name').val('Copy_' + data.timeline.name);
+                $('#timeline_id').val(data.timeline.id);
+            },
+            error: function() {
+                $('.page-loader').hide();
+                alert("Something went wrong");
+            },
+        });
+        document.getElementById("modal").classList.remove("hidden");
+        document.getElementById("modal").classList.add("blocker");
+        $('#submit-btn').attr("onclick", "createTimeline()");
+    }
+</script>
+{% endblock %}
