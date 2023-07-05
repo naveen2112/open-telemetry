@@ -122,7 +122,9 @@ class TimelineTaskCreateTest(BaseTestCase):
         """
         response = self.make_post_request(
             reverse(self.create_route_name),
-            data={"timeline_id": self.timeline.id,},
+            data={
+                "timeline_id": self.timeline.id,
+            },
         )
         field_errors = {
             "name": {"required"},
@@ -526,3 +528,74 @@ class TimelineTaskReOrderTest(BaseTestCase):
             },
         )
         self.assertEqual(response.status_code, 200)
+
+
+class TimelineTasksDatatableTest(BaseTestCase):
+    """
+    This class is responsible for testing the Datatables present in the Batch module
+    """
+
+    datatable_route_name = "timeline-task.datatable"
+    route_name = "timeline-template.detail"
+
+    def setUp(self):
+        """
+        This function will run before every test and makes sure required data are ready
+        """
+        super().setUp()
+        self.authenticate()
+        self.timeline = baker.make("hubble.Timeline")
+
+    def test_template(self):
+        """
+        To makes sure that the correct template is used
+        """
+        response = self.make_get_request(
+            reverse(self.route_name, args=[self.timeline.id])
+        )
+        self.assertTemplateUsed(response, "timeline_template_detail.html")
+        self.assertContains(response, self.timeline.name)
+
+    def test_datatable(self):
+        """
+        To check whether all columns are present in datatable and length of rows without any filter
+        """
+        timelinetasks = baker.make(
+            "hubble.TimelineTasK",
+            timeline_id=self.timeline.id,
+            order=seq(0),
+            days=2,
+            _quantity=2,
+        )
+
+        payload = {"draw": 1, "start": 0, "length": 10, "timeline_id": self.timeline.id}
+        response = self.make_post_request(
+            reverse(self.datatable_route_name), data=payload
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Check whether row details are correct
+        for row in range(len(timelinetasks)):
+            expected_value = timelinetasks[row]
+            received_value = response.json()["data"][row]
+            self.assertEqual(expected_value.pk, int(received_value["pk"]))
+            self.assertEqual(
+                expected_value.name, received_value["name"].split(">")[1].split("<")[0]
+            )
+            self.assertEqual(expected_value.days, float(received_value["days"]))
+            self.assertEqual(
+                expected_value.present_type, received_value["present_type"]
+            )
+            self.assertEqual(expected_value.task_type, received_value["task_type"])
+
+        # Check whether all headers are present
+        for row in response.json()["data"]:
+            self.assertTrue("pk" in row)
+            self.assertTrue("name" in row)
+            self.assertTrue("days" in row)
+            self.assertTrue("present_type" in row)
+            self.assertTrue("task_type" in row)
+            self.assertTrue("action" in row)
+
+        # Check the numbers of rows received is equal to the number of expected rows
+        self.assertTrue(response.json()["recordsTotal"], len(timelinetasks))

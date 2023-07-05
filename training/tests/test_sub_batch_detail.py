@@ -181,6 +181,65 @@ class DeleteInternTest(BaseTestCase):
         """
         response = self.make_delete_request(reverse(self.delete_route_name, args=[0]))
         self.assertJSONEqual(
-            response.content, {"message": "Error while deleting Timeline Template!"}
+            response.content, {"message": "Error while deleting Trainee!"}
         )
         self.assertEqual(response.status_code, 500)
+
+
+class TraineeDatatableTest(BaseTestCase):
+    """
+    This class is responsible for testing the Datatables present in the Batch module
+    """
+
+    datatable_route_name = "sub-batch.trainees-datatable"
+    route_name = "sub-batch.detail"
+
+    def setUp(self):
+        """
+        This function will run before every test and makes sure required data are ready
+        """
+        super().setUp()
+        self.authenticate()
+        self.sub_batch = baker.make("hubble.SubBatch", start_date=timezone.now().date())
+
+    def test_template(self):
+        """
+        To makes sure that the correct template is used
+        """
+        response = self.make_get_request(
+            reverse(self.route_name, args=[self.sub_batch.id])
+        )
+        self.assertTemplateUsed(response, "sub_batch/sub_batch_detail.html")
+        self.assertContains(response, self.sub_batch.name)
+
+    def test_datatable(self):
+        """
+        To check whether all columns are present in datatable and length of rows without any filter
+        """
+        trainees = baker.make(
+            "hubble.InternDetail",
+            sub_batch_id=self.sub_batch.id,
+            _fill_optional=["expected_completion"],
+            _quantity=5,
+        )
+        payload = {"draw": 1, "start": 0, "length": 10, "sub_batch": self.sub_batch.id}
+        response = self.make_post_request(
+            reverse(self.datatable_route_name), data=payload
+        )
+        self.assertEqual(response.status_code, 200)
+        for row in range(len(trainees)):
+            expected_value = trainees[row]
+            received_value = response.json()["data"][row]
+            self.assertEqual(expected_value.pk, int(received_value["pk"]))
+            self.assertEqual(expected_value.user.name, received_value["user"])
+            self.assertEqual(expected_value.college, received_value["college"])
+            self.assertEqual(
+                expected_value.expected_completion.strftime("%d %b %Y"),
+                received_value["expected_completion"],
+            )
+        for row in response.json()["data"]:
+            self.assertTrue("pk" in row)
+            self.assertTrue("user" in row)
+            self.assertTrue("college" in row)
+            self.assertTrue("expected_completion" in row)
+        self.assertTrue(response.json()["recordsTotal"], len(trainees))

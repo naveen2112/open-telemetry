@@ -638,3 +638,91 @@ class SubBatchTaskTimelineReOrderTest(BaseTestCase):
             },
         )
         self.assertEqual(response.status_code, 200)
+
+
+class SubBatchTimelineDatatableTest(BaseTestCase):
+    """
+    This class is responsible for testing the Datatables present in the Batch module
+    """
+
+    datatable_route_name = "sub-batch.datatable"
+    route_name = "sub-batch.timeline"
+
+    def setUp(self):
+        """
+        This function will run before every test and makes sure required data are ready
+        """
+        super().setUp()
+        self.authenticate()
+        self.sub_batch = baker.make("hubble.SubBatch", start_date=timezone.now().date())
+
+    def test_template(self):
+        """
+        To makes sure that the correct template is used
+        """
+        response = self.make_get_request(
+            reverse(self.route_name, args=[self.sub_batch.id])
+        )
+        self.assertTemplateUsed(response, "sub_batch/timeline.html")
+        self.assertContains(response, self.sub_batch.name)
+
+    def test_datatable(self):
+        """
+        To check whether all columns are present in datatable and length of rows without any filter
+        """
+        sub_batch_task_timeline = baker.make(
+            "hubble.SubBatchTaskTimeline",
+            sub_batch=self.sub_batch,
+            order=seq(0),
+            days=1,
+            start_date=(timezone.now() + timezone.timedelta(1)).date(),
+            end_date=(timezone.now() + timezone.timedelta(2)).date(),
+            _quantity=2,
+        )
+        payload = {
+            "draw": 1,
+            "start": 0,
+            "length": 10,
+            "sub_batch_id": self.sub_batch.id,
+        }
+        response = self.make_post_request(
+            reverse(self.datatable_route_name), data=payload
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Check whether row details are correct
+        for row in range(len(sub_batch_task_timeline)):
+            expected_value = sub_batch_task_timeline[row]
+            received_value = response.json()["data"][row]
+            self.assertEqual(expected_value.pk, int(received_value["pk"]))
+            self.assertEqual(
+                expected_value.order,
+                int(float(received_value["order"].split(">")[1].split("<")[0])),
+            )
+            self.assertEqual(expected_value.name, received_value["name"])
+            self.assertEqual(expected_value.days, float(received_value["days"]))
+            self.assertEqual(
+                expected_value.present_type, received_value["present_type"]
+            )
+            self.assertEqual(expected_value.task_type, received_value["task_type"])
+            self.assertEqual(
+                expected_value.start_date.strftime("%d %b %Y"),
+                received_value["start_date"],
+            )
+            self.assertEqual(
+                expected_value.end_date.strftime("%d %b %Y"), received_value["end_date"]
+            )
+
+        # Check whether all headers are present
+        for row in response.json()["data"]:
+            self.assertTrue("pk" in row)
+            self.assertTrue("order" in row)
+            self.assertTrue("name" in row)
+            self.assertTrue("days" in row)
+            self.assertTrue("present_type" in row)
+            self.assertTrue("task_type" in row)
+            self.assertTrue("start_date" in row)
+            self.assertTrue("end_date" in row)
+
+        # Check the numbers of rows received is equal to the number of expected rows
+        self.assertTrue(response.json()["recordsTotal"], len(sub_batch_task_timeline))

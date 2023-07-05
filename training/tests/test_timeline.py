@@ -1,6 +1,9 @@
 from django.forms.models import model_to_dict
 from django.urls import reverse
 from model_bakery import baker
+from model_bakery.recipe import seq
+from django.db.models import Sum, FloatField, F
+from django.db.models.functions import Coalesce
 
 from core.base_test import BaseTestCase
 from hubble.models import Timeline
@@ -423,3 +426,69 @@ class TimelineDeleteTest(BaseTestCase):
             response.content, {"message": "Error while deleting Timeline Template!"}
         )
         self.assertEqual(response.status_code, 500)
+
+
+class TimelineDatatableTest(BaseTestCase):
+    """
+    This class is responsible for testing the Datatables present in the Batch module
+    """
+    datatable_route_name = "timeline-template.datatable"
+    route_name = "timeline-template"
+
+    def setUp(self):
+        """
+        This function will run before every test and makes sure required data are ready
+        """
+        super().setUp()
+        self.authenticate()
+
+    def test_template(self):
+        """
+        To makes sure that the correct template is used
+        """
+        response = self.make_get_request(reverse(self.route_name))
+        self.assertTemplateUsed(response, "timeline_template.html")
+        self.assertContains(response, "Timeline Template List")
+
+    def test_datatable(self):
+        """
+        To check whether all columns are present in datatable and length of rows without any filter
+        """
+        name = self.faker.name()
+        baker.make("hubble.Timeline", name=seq(name))
+        timeline = Timeline.objects.filter(
+            task_timeline__deleted_at__isnull=True
+        ).annotate(
+            Days=Coalesce(Sum(F("task_timeline__days")), 0, output_field=FloatField())
+        )
+
+        payload = {
+            "draw": 1,
+            "start": 0,
+            "length": 10,
+        }
+        response = self.make_post_request(reverse(self.datatable_route_name), data=payload)
+        self.assertEqual(response.status_code, 200)
+
+        # Check whether row details are correct 
+        for row in range(len(timeline)):
+            expected_value = timeline[row]
+            received_value = response.json()["data"][row]
+            self.assertEqual(expected_value.pk, int(received_value["pk"]))
+            self.assertEqual(expected_value.name, received_value["name"])
+            if received_value["is_active"].split(">")[1].split("<")[0]=="In Active":
+                self.assertEqual(expected_value.is_active, False)
+            else:
+                self.assertEqual(expected_value.is_active, True)
+            self.assertEqual(expected_value.team.name, received_value["team"])
+
+        # Check whether all headers are present
+        for row in response.json()["data"]:
+            self.assertTrue("pk" in row)
+            self.assertTrue("name" in row)
+            self.assertTrue("is_active" in row)
+            self.assertTrue("team" in row)
+            self.assertTrue("action" in row)
+
+        # Check the numbers of rows received is equal to the number of expected rows
+        self.assertTrue(response.json()["recordsTotal"], len(timeline))
