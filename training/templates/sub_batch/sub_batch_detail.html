@@ -135,7 +135,6 @@ Sub Batch details
     }
     function addIntern() {
         $('.page-loader').show();
-        console.log($("#id_user").val());
         $.ajax({
             type: "POST",
             url: "{% url 'trainees.add' %}",
