@@ -158,6 +158,8 @@ class BaseTestCase(TestCase):
             message = "This field is required."
         elif value == "invalid_choice":
             message = "Select a valid choice. That choice is not one of the available choices."
+        elif value == "timeline_has_no_tasks":
+            message = "The Selected Team's Active Timeline doesn't have any tasks."
         return message
 
     def get_ajax_response(
@@ -198,3 +200,10 @@ class BaseTestCase(TestCase):
                 "non_field_errors": str(non_field_error_response),
             }
         )
+    
+    def validate_form_errors(self, form, field_errors, current_value={}, validation_parameter={}):
+        for key, values in field_errors.items():
+            for value in values:
+                error_message = self.get_error_message(key, value, current_value, validation_parameter)
+                self.assertFormError(form, key, error_message)
+
