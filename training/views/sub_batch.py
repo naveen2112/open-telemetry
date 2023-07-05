@@ -85,9 +85,6 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
         row[
             "action"
         ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
-        row["reporting_persons"] = " / ".join(
-            [obj.primary_mentor.name, obj.secondary_mentor.name]
-        )
         row["start_date"] = obj.start_date.strftime("%d %b %Y")
         return
 

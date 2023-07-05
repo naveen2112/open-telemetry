@@ -6,25 +6,44 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('hubble', '0001_initial'),
+        ("hubble", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='assessment',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='assessments', to=settings.AUTH_USER_MODEL),
-        ),
-        migrations.AddField(
-            model_name='user',
-            name='designation',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='hubble.designation'),
-        ),
-        migrations.AddField(
-            model_name='user',
-            name='team',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='hubble.team'),
-        ),
+            model_name="assessment",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="assessments",
+                to=settings.AUTH_USER_MODEL,
+            ),
+        )
     ]
+
+    if settings.TESTING:
+        operations.append(
+            migrations.AddField(
+                model_name="user",
+                name="designation",
+                field=models.ForeignKey(
+                    blank=True,
+                    null=True,
+                    on_delete=django.db.models.deletion.CASCADE,
+                    to="hubble.designation",
+                ),
+            )
+        )
+        operations.append(
+            migrations.AddField(
+                model_name="user",
+                name="team",
+                field=models.ForeignKey(
+                    blank=True,
+                    null=True,
+                    on_delete=django.db.models.deletion.CASCADE,
+                    to="hubble.team",
+                ),
+            )
+        )

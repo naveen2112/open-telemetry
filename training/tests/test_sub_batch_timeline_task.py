@@ -76,7 +76,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
         """
         data = self.get_valid_inputs()
         response = self.make_post_request(
-            reverse(self.create_route_name, args=[self.sub_batch.batch.id]), data=data
+            reverse(self.create_route_name, args=[self.sub_batch.id]), data=data
         )
         self.validate_response(response, data)
 
@@ -89,7 +89,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
             }
         )
         response = self.make_post_request(
-            reverse(self.create_route_name, args=[self.sub_batch.batch.id]), data=data
+            reverse(self.create_route_name, args=[self.sub_batch.id]), data=data
         )
         self.validate_response(response, data)
 
@@ -102,7 +102,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
             }
         )
         response = self.make_post_request(
-            reverse(self.create_route_name, args=[self.sub_batch.batch.id]), data=data
+            reverse(self.create_route_name, args=[self.sub_batch.id]), data=data
         )
         self.validate_response(response, data)
 
@@ -112,7 +112,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
         """
         data = self.get_valid_inputs({"name": self.faker.pystr(max_chars=2)})
         response = self.make_post_request(
-            reverse(self.create_route_name, args=[self.sub_batch.batch.id]), data=data
+            reverse(self.create_route_name, args=[self.sub_batch.id]), data=data
         )
         field_errors = {"name": {"min_length"}}
         validation_paramters = {"name": 3}
@@ -131,7 +131,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
         This function checks the required validation for the all the fields
         """
         response = self.make_post_request(
-            reverse(self.create_route_name, args=[self.sub_batch.batch.id]),
+            reverse(self.create_route_name, args=[self.sub_batch.id]),
             data={},
         )
         field_errors = {
@@ -153,7 +153,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
         """
         # Check what happens when days field fails the validation is_not_divisible_by_0.5
         response = self.make_post_request(
-            reverse(self.create_route_name, args=[self.sub_batch.batch.id]),
+            reverse(self.create_route_name, args=[self.sub_batch.id]),
             data=self.get_valid_inputs({"days": 0.25}),
         )
         field_errors = {"days": {"is_not_divisible_by_0.5"}}
@@ -168,7 +168,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
 
         # Check what happend when the days field fails value_cannot_be_zero
         response = self.make_post_request(
-            reverse(self.create_route_name, args=[self.sub_batch.batch.id]),
+            reverse(self.create_route_name, args=[self.sub_batch.id]),
             data=self.get_valid_inputs({"days": 0}),
         )
         field_errors = {"days": {"value_cannot_be_zero"}}
@@ -186,7 +186,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
         Check what happens when invalid data for present_type and task_type are given as input
         """
         response = self.make_post_request(
-            reverse(self.create_route_name, args=[self.sub_batch.batch.id]),
+            reverse(self.create_route_name, args=[self.sub_batch.id]),
             data=self.get_valid_inputs(
                 {"present_type": self.faker.name(), "task_type": self.faker.name()}
             ),
@@ -207,7 +207,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
         """
         # Check for zero_order_error
         response = self.make_post_request(
-            reverse(self.create_route_name, args=[self.sub_batch.batch.id]),
+            reverse(self.create_route_name, args=[self.sub_batch.id]),
             data=self.get_valid_inputs({"order": 0}),
         )
         field_errors = {"order": {"zero_order_error"}}
@@ -219,7 +219,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
 
         # check when there is gap between order input and the largest order in db
         response = self.make_post_request(
-            reverse(self.create_route_name, args=[self.sub_batch.batch.id]),
+            reverse(self.create_route_name, args=[self.sub_batch.id]),
             data=self.get_valid_inputs({"order": 999}),
         )
         field_errors = {

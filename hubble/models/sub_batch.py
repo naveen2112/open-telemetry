@@ -25,3 +25,7 @@ class SubBatch(db.SoftDeleteWithBaseModel):
 
     def __str__(self):
         return self.name
+    
+    @property
+    def reporting_persons(self):
+        return " / ".join([self.primary_mentor.name, self.secondary_mentor.name])

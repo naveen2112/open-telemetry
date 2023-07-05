@@ -569,6 +569,7 @@ class SubBatchDatatableTest(BaseTestCase):
             self.assertEqual(expected_value.name, received_value["name"])
             self.assertEqual(expected_value.trainee_count, int(received_value["trainee_count"]))
             self.assertEqual(expected_value.timeline.name, received_value["timeline"])
+            self.assertEqual(expected_value.reporting_persons, received_value["reporting_persons"])
             self.assertEqual(expected_value.start_date.strftime("%d %b %Y"), received_value["start_date"])
         for row in response.json()["data"]:
             self.assertTrue("pk" in row)

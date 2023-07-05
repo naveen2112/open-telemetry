@@ -38,8 +38,9 @@ class BaseTestCase(TestCase):
     """
     This class helps us to follow DRY principles in Training module testing
     """
+
     persisted_valid_inputs = {}
-    testcase_server_name =  env("TRAINING_TESTCASE_SERVER_NAME")
+    testcase_server_name = env("TRAINING_TESTCASE_SERVER_NAME")
 
     def setUp(self):
         """
@@ -80,7 +81,9 @@ class BaseTestCase(TestCase):
         """
         This function is responsible for handling the POST requests
         """
-        return self.client.post(url_pattern, data, SERVER_NAME=self.testcase_server_name)
+        return self.client.post(
+            url_pattern, data, SERVER_NAME=self.testcase_server_name
+        )
 
     def make_delete_request(self, url_pattern):
         """
@@ -207,9 +210,12 @@ class BaseTestCase(TestCase):
             }
         )
 
-    def validate_form_errors(self, form, field_errors, current_value={}, validation_parameter={}):
+    def validate_form_errors(
+        self, form, field_errors, current_value={}, validation_parameter={}
+    ):
         for key, values in field_errors.items():
             for value in values:
-                error_message = self.get_error_message(key, value, current_value, validation_parameter)
+                error_message = self.get_error_message(
+                    key, value, current_value, validation_parameter
+                )
                 self.assertFormError(form, key, error_message)
-
