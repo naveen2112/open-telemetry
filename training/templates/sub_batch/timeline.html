@@ -139,6 +139,7 @@ Sub Batch timeline
                     order: $('#id_order').val(),
                     present_type: $('input[name="present_type"]:checked').val(),
                     task_type: $('input[name="task_type"]:checked').val(),
+                    sub_batch_id: "{{ object.id }}",
                     start_date: $("#date_range").attr('start-date'),
                     end_date: $("#date_range").attr('end-date')
                 },
@@ -188,6 +189,7 @@ Sub Batch timeline
             url: "{% url 'sub_batch.timeline.reorder' %}",
             data: {
                 data: data,
+                sub_batch_id: "{{ object.id }}",
             },
             success: function(data) {
                 $('#sub-batch-timeline-table').DataTable().ajax.reload();

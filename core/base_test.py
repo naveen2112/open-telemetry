@@ -158,8 +158,14 @@ class BaseTestCase(TestCase):
             message = "This field is required."
         elif value == "invalid_choice":
             message = "Select a valid choice. That choice is not one of the available choices."
+        elif value == "invalid_order":
+            message = f"The current order of the task is invalid. The valid input for order ranges form 1-{validation_parameter[key]}."
+        elif value == "zero_order_error":
+            message = "Order value must be greater than zero."
         elif value == "timeline_has_no_tasks":
             message = "The Selected Team's Active Timeline doesn't have any tasks."
+        elif value == "invalid_score":
+            message = "Score must be between 0 to 100"
         return message
 
     def get_ajax_response(
@@ -200,7 +206,7 @@ class BaseTestCase(TestCase):
                 "non_field_errors": str(non_field_error_response),
             }
         )
-    
+
     def validate_form_errors(self, form, field_errors, current_value={}, validation_parameter={}):
         for key, values in field_errors.items():
             for value in values:
