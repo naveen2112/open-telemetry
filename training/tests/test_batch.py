@@ -1,5 +1,7 @@
 from django.forms.models import model_to_dict
 from django.urls import reverse
+from django.db.models import Count, Q, Subquery, OuterRef
+from django.db.models.functions import Coalesce
 from model_bakery import baker
 from model_bakery.recipe import seq
 
@@ -36,7 +38,6 @@ class BatchCreateTest(BaseTestCase):
         response = self.make_get_request(reverse(self.route_name))
         self.assertTemplateUsed(response, "batch/batch_list.html")
         self.assertContains(response, "Batch List")
-        # self.assertContains(response, "Number of Sub-Batches") # TODO :: Need to create a datatable
 
     def test_success(self):
         """
@@ -240,7 +241,8 @@ class BatchDatatableTest(BaseTestCase):
         """
         This function is responsible for updating the valid inputs and creating data in databases as reqiured
         """
-        self.batch = baker.make("hubble.Batch", name=seq("test"),_quantity=2)
+        self.name = self.faker.name()
+        self.batch = baker.make("hubble.Batch", name=seq(self.name), _quantity=2)
         self.persisted_valid_inputs = {
             "draw": 1,
             "start": 0,
@@ -260,20 +262,52 @@ class BatchDatatableTest(BaseTestCase):
         """
         To check whether all columns are present in datatable and length of rows without any filter
         """
+        batches = Batch.objects.annotate(
+            total_trainee=Count(
+                "sub_batches__intern_details",
+                filter=Q(sub_batches__intern_details__deleted_at__isnull=True),
+            ),
+            number_of_sub_batches=Coalesce(
+                Subquery(
+                    Batch.objects.filter(sub_batches__batch_id=OuterRef("id"))
+                    .annotate(
+                        number_of_sub_batches=Count(
+                            "sub_batches__id",
+                            filter=Q(sub_batches__deleted_at__isnull=True),
+                        )
+                    )
+                    .values("number_of_sub_batches")
+                ),
+                0,
+            ),
+        )
         response = self.make_post_request(reverse(self.datatable_route_name), data=self.get_valid_inputs())
         self.assertEqual(response.status_code, 200)
+
+        # Check whether row details are correct 
+        for row in range(len(batches)):
+            expected_value = batches[row]
+            received_value = response.json()["data"][row]
+            self.assertEqual(expected_value.pk, int(received_value["pk"]))
+            self.assertEqual(expected_value.name, received_value["name"])
+            self.assertEqual(expected_value.number_of_sub_batches, int(received_value["number_of_sub_batches"]))
+        
+        # Check whether all headers are present
         for row in response.json()["data"]:
             self.assertTrue("pk" in row)
             self.assertTrue("name" in row)
             self.assertTrue("number_of_sub_batches" in row)
             self.assertTrue("total_trainee" in row)
             self.assertTrue("action" in row)
+            
+        # Check the numbers of rows received is equal to the number of expected rows
         self.assertTrue(response.json()["recordsTotal"], len(self.batch))
 
 
-    def test_check(self):
+    def test_database_search(self):
         """
         To check what happens when search value is given
         """
-        response = self.make_post_request(reverse(self.datatable_route_name), data=self.get_valid_inputs({"search[value]": "test1"}))
-        self.assertTrue(response.json()["recordsTotal"], Batch.objects.filter(name__icontains="test1").count())
+        search_value = self.name + "1"
+        response = self.make_post_request(reverse(self.datatable_route_name), data=self.get_valid_inputs({"search[value]": search_value}))
+        self.assertTrue(response.json()["recordsTotal"], Batch.objects.filter(name__icontains=search_value).count())
