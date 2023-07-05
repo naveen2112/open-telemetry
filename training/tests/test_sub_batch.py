@@ -525,7 +525,8 @@ class SubBatchDatatableTest(BaseTestCase):
         This function is responsible for updating the valid inputs and creating data in databases as reqiured
         """
         self.batch = baker.make("hubble.Batch")
-        self.sub_batch = baker.make("hubble.SubBatch", name=seq("test"), batch_id=self.batch.id, _quantity=2)
+        self.team = baker.make("hubble.Team")
+        self.sub_batch = baker.make("hubble.SubBatch", name=seq("test"), team_id=self.team.id, batch_id=self.batch.id, _quantity=2)
         self.persisted_valid_inputs = {
             "draw": 1,
             "start": 0,
@@ -548,6 +549,10 @@ class SubBatchDatatableTest(BaseTestCase):
         """
         response = self.make_post_request(reverse(self.datatable_route_name), data=self.get_valid_inputs())
         self.assertEqual(response.status_code, 200)
+        self.assertTrue("extra_data" in response.json())
+        self.assertTrue("no_of_teams" in response.json()["extra_data"][0])
+        self.assertTrue("no_of_trainees" in response.json()["extra_data"][0])
+        self.assertEqual(response.json()["extra_data"][0]["no_of_teams"], 1)
         for row in response.json()["data"]:
             self.assertTrue("pk" in row)
             self.assertTrue("name" in row)

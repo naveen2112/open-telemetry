@@ -3,7 +3,7 @@ import logging
 import pandas as pd
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count, Q
+from django.db.models import Count, OuterRef, Q, Subquery
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -96,7 +96,17 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
         response["extra_data"] = list(
             Batch.objects.filter(id=request.POST.get("batch_id"))
             .annotate(
-                no_of_teams=Count("sub_batches__team", distinct=True),
+                no_of_teams=Subquery(
+                    Batch.objects.filter(sub_batches__batch_id=OuterRef("id"))
+                    .annotate(
+                        count_of_teams=Count(
+                            "sub_batches__team",
+                            distinct=True,
+                            filter=Q(sub_batches__deleted_at__isnull=True),
+                        )
+                    )
+                    .values("count_of_teams")
+                ),
                 no_of_trainees=Count(
                     "sub_batches__intern_details",
                     filter=Q(sub_batches__intern_details__deleted_at__isnull=True),
