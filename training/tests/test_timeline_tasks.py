@@ -45,7 +45,9 @@ class TimelineTaskCreateTest(BaseTestCase):
         """
         To automate the assertion commands, where same logics are repeated
         """
-        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
+        self.assertJSONEqual(
+            self.decoded_json(response), {"status": "success"}
+        )
         self.assertEqual(response.status_code, 200)
         self.assertDatabaseHas(
             "TimelineTask",
@@ -65,7 +67,9 @@ class TimelineTaskCreateTest(BaseTestCase):
         response = self.make_get_request(
             reverse(self.route_name, args=[self.timeline.id])
         )
-        self.assertTemplateUsed(response, "timeline_template_detail.html")
+        self.assertTemplateUsed(
+            response, "timeline_template_detail.html"
+        )
         self.assertContains(response, self.timeline.name)
 
     def test_success(self):
@@ -73,7 +77,9 @@ class TimelineTaskCreateTest(BaseTestCase):
         Check what happens when valid data is given as input
         """
         data = self.get_valid_inputs()
-        response = self.make_post_request(reverse(self.create_route_name), data=data)
+        response = self.make_post_request(
+            reverse(self.create_route_name), data=data
+        )
         self.validate_response(response, data)
 
         # Check what happens when valid decimal data is given as input
@@ -84,7 +90,9 @@ class TimelineTaskCreateTest(BaseTestCase):
                 "task_type": TASK_TYPE_CULTURAL_MEET,
             }
         )
-        response = self.make_post_request(reverse(self.create_route_name), data=data)
+        response = self.make_post_request(
+            reverse(self.create_route_name), data=data
+        )
         self.validate_response(response, data)
 
         # Check whether the radio select options work correctly
@@ -95,15 +103,21 @@ class TimelineTaskCreateTest(BaseTestCase):
                 "task_type": TASK_TYPE_ASSESSMENT,
             }
         )
-        response = self.make_post_request(reverse(self.create_route_name), data=data)
+        response = self.make_post_request(
+            reverse(self.create_route_name), data=data
+        )
         self.validate_response(response, data)
 
     def test_minimum_length_validation(self):
         """
         To check what happens when name field fails MinlengthValidation
         """
-        data = self.get_valid_inputs({"name": self.faker.pystr(max_chars=2)})
-        response = self.make_post_request(reverse(self.create_route_name), data=data)
+        data = self.get_valid_inputs(
+            {"name": self.faker.pystr(max_chars=2)}
+        )
+        response = self.make_post_request(
+            reverse(self.create_route_name), data=data
+        )
         field_errors = {"name": {"min_length"}}
         validation_paramters = {"name": 3}
         self.assertEqual(
@@ -144,28 +158,36 @@ class TimelineTaskCreateTest(BaseTestCase):
         """
         # Check what happens when days field fails the validation is_not_divisible_by_0.5
         response = self.make_post_request(
-            reverse(self.create_route_name), data=self.get_valid_inputs({"days": 0.25})
+            reverse(self.create_route_name),
+            data=self.get_valid_inputs({"days": 0.25}),
         )
         field_errors = {"days": {"is_not_divisible_by_0.5"}}
-        error_message = {"is_not_divisible_by_0.5": "Value must be a multiple of 0.5"}
+        error_message = {
+            "is_not_divisible_by_0.5": "Value must be a multiple of 0.5"
+        }
         self.assertEqual(
             self.bytes_cleaner(response.content),
             self.get_ajax_response(
-                field_errors=field_errors, custom_validation_error_message=error_message
+                field_errors=field_errors,
+                custom_validation_error_message=error_message,
             ),
         )
         self.assertEqual(response.status_code, 200)
 
         # Check what happend when the days field fails value_cannot_be_zero
         response = self.make_post_request(
-            reverse(self.create_route_name), data=self.get_valid_inputs({"days": 0})
+            reverse(self.create_route_name),
+            data=self.get_valid_inputs({"days": 0}),
         )
         field_errors = {"days": {"value_cannot_be_zero"}}
-        error_message = {"value_cannot_be_zero": "Value must be greater than 0"}
+        error_message = {
+            "value_cannot_be_zero": "Value must be greater than 0"
+        }
         self.assertEqual(
             self.bytes_cleaner(response.content),
             self.get_ajax_response(
-                field_errors=field_errors, custom_validation_error_message=error_message
+                field_errors=field_errors,
+                custom_validation_error_message=error_message,
             ),
         )
         self.assertEqual(response.status_code, 200)
@@ -177,7 +199,10 @@ class TimelineTaskCreateTest(BaseTestCase):
         response = self.make_post_request(
             reverse(self.create_route_name),
             data=self.get_valid_inputs(
-                {"present_type": self.faker.name(), "task_type": self.faker.name()}
+                {
+                    "present_type": self.faker.name(),
+                    "task_type": self.faker.name(),
+                }
             ),
         )
         field_errors = {
@@ -210,7 +235,9 @@ class TimelineTaskShowTest(BaseTestCase):
         Checks what happens when valid inputs are given for all fields
         """
         timelinetask = baker.make(
-            "hubble.TimelineTasK", timeline=baker.make("hubble.Timeline"), order=1
+            "hubble.TimelineTasK",
+            timeline=baker.make("hubble.Timeline"),
+            order=1,
         )
         response = self.make_get_request(
             reverse(self.update_show_route_name, args=[timelinetask.id])
@@ -228,7 +255,9 @@ class TimelineTaskShowTest(BaseTestCase):
         """
         Checks what happens when we try to access invalid timeline task id in update
         """
-        response = self.make_get_request(reverse(self.update_show_route_name, args=[0]))
+        response = self.make_get_request(
+            reverse(self.update_show_route_name, args=[0])
+        )
         self.assertEqual(response.status_code, 500)
 
 
@@ -260,14 +289,18 @@ class TimelineTaskUpdateTest(BaseTestCase):
             "task_type": TASK_TYPE_TASK,
             "timeline_id": timeline.id,
         }
-        task_timeline = baker.make("hubble.TimelineTasK", timeline=timeline, order=1)
+        task_timeline = baker.make(
+            "hubble.TimelineTasK", timeline=timeline, order=1
+        )
         self.timeline_task_id = task_timeline.id
 
     def validate_response(self, response, data):
         """
         To automate the assertion commands, where same logics are repeated
         """
-        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
+        self.assertJSONEqual(
+            self.decoded_json(response), {"status": "success"}
+        )
         self.assertEqual(response.status_code, 200)
         self.assertDatabaseHas(
             "TimelineTask",
@@ -287,7 +320,10 @@ class TimelineTaskUpdateTest(BaseTestCase):
         # Valid scenario 1: Valid inputs for all fields
         data = self.get_valid_inputs()
         response = self.make_post_request(
-            reverse(self.update_edit_route_name, args=[self.timeline_task_id]),
+            reverse(
+                self.update_edit_route_name,
+                args=[self.timeline_task_id],
+            ),
             data=data,
         )
         self.validate_response(response, data)
@@ -301,7 +337,10 @@ class TimelineTaskUpdateTest(BaseTestCase):
             }
         )
         response = self.make_post_request(
-            reverse(self.update_edit_route_name, args=[self.timeline_task_id]),
+            reverse(
+                self.update_edit_route_name,
+                args=[self.timeline_task_id],
+            ),
             data=data,
         )
         self.validate_response(response, data)
@@ -315,7 +354,10 @@ class TimelineTaskUpdateTest(BaseTestCase):
             }
         )
         response = self.make_post_request(
-            reverse(self.update_edit_route_name, args=[self.timeline_task_id]),
+            reverse(
+                self.update_edit_route_name,
+                args=[self.timeline_task_id],
+            ),
             data=data,
         )
         self.validate_response(response, data)
@@ -324,9 +366,14 @@ class TimelineTaskUpdateTest(BaseTestCase):
         """
         To check what happens when name field fails MinlengthValidation
         """
-        data = self.get_valid_inputs({"name": self.faker.pystr(max_chars=2)})
+        data = self.get_valid_inputs(
+            {"name": self.faker.pystr(max_chars=2)}
+        )
         response = self.make_post_request(
-            reverse(self.update_edit_route_name, args=[self.timeline_task_id]),
+            reverse(
+                self.update_edit_route_name,
+                args=[self.timeline_task_id],
+            ),
             data=data,
         )
         field_errors = {"name": {"min_length"}}
@@ -346,7 +393,10 @@ class TimelineTaskUpdateTest(BaseTestCase):
         This function checks the required validation for the all the fields
         """
         response = self.make_post_request(
-            reverse(self.update_edit_route_name, args=[self.timeline_task_id]),
+            reverse(
+                self.update_edit_route_name,
+                args=[self.timeline_task_id],
+            ),
             data={},
         )
         field_errors = {
@@ -366,29 +416,41 @@ class TimelineTaskUpdateTest(BaseTestCase):
         This function checks the validate days validation for the days fields
         """
         response = self.make_post_request(
-            reverse(self.update_edit_route_name, args=[self.timeline_task_id]),
+            reverse(
+                self.update_edit_route_name,
+                args=[self.timeline_task_id],
+            ),
             data=self.get_valid_inputs({"days": 0.25}),
         )
         field_errors = {"days": {"is_not_divisible_by_0.5"}}
-        error_message = {"is_not_divisible_by_0.5": "Value must be a multiple of 0.5"}
+        error_message = {
+            "is_not_divisible_by_0.5": "Value must be a multiple of 0.5"
+        }
         self.assertEqual(
             self.bytes_cleaner(response.content),
             self.get_ajax_response(
-                field_errors=field_errors, custom_validation_error_message=error_message
+                field_errors=field_errors,
+                custom_validation_error_message=error_message,
             ),
         )
         self.assertEqual(response.status_code, 200)
 
         response = self.make_post_request(
-            reverse(self.update_edit_route_name, args=[self.timeline_task_id]),
+            reverse(
+                self.update_edit_route_name,
+                args=[self.timeline_task_id],
+            ),
             data=self.get_valid_inputs({"days": 0}),
         )
         field_errors = {"days": {"value_cannot_be_zero"}}
-        error_message = {"value_cannot_be_zero": "Value must be greater than 0"}
+        error_message = {
+            "value_cannot_be_zero": "Value must be greater than 0"
+        }
         self.assertEqual(
             self.bytes_cleaner(response.content),
             self.get_ajax_response(
-                field_errors=field_errors, custom_validation_error_message=error_message
+                field_errors=field_errors,
+                custom_validation_error_message=error_message,
             ),
         )
         self.assertEqual(response.status_code, 200)
@@ -398,9 +460,15 @@ class TimelineTaskUpdateTest(BaseTestCase):
         Check what happens when invalid data for team field is given as input
         """
         response = self.make_post_request(
-            reverse(self.update_edit_route_name, args=[self.timeline_task_id]),
+            reverse(
+                self.update_edit_route_name,
+                args=[self.timeline_task_id],
+            ),
             data=self.get_valid_inputs(
-                {"present_type": self.faker.name(), "task_type": self.faker.name()}
+                {
+                    "present_type": self.faker.name(),
+                    "task_type": self.faker.name(),
+                }
             ),
         )
         field_errors = {
@@ -433,22 +501,29 @@ class TimelineTaskDeleteTest(BaseTestCase):
         To check what happens when valid id is given for delete
         """
         timelinetask = baker.make(
-            "hubble.TimelineTasK", timeline=baker.make("hubble.Timeline"), order=1
+            "hubble.TimelineTasK",
+            timeline=baker.make("hubble.Timeline"),
+            order=1,
         )
         response = self.make_delete_request(
             reverse(self.delete_route_name, args=[timelinetask.id])
         )
         self.assertJSONEqual(
-            response.content, {"message": "Timeline Template Task deleted successfully"}
+            response.content,
+            {"message": "Timeline Template Task deleted successfully"},
         )
         self.assertEqual(response.status_code, 200)
-        self.assertDatabaseNotHas("TimelineTask", {"id": timelinetask.id})
+        self.assertDatabaseNotHas(
+            "TimelineTask", {"id": timelinetask.id}
+        )
 
     def test_failure(self):
         """
         To check what happens when invalid id is given for delete
         """
-        response = self.make_delete_request(reverse(self.delete_route_name, args=[0]))
+        response = self.make_delete_request(
+            reverse(self.delete_route_name, args=[0])
+        )
         self.assertJSONEqual(
             response.content,
             {"message": "Error while deleting Timeline Template Task!"},
@@ -477,12 +552,15 @@ class TimelineTaskReOrderTest(BaseTestCase):
         """
         self.timeline = baker.make("hubble.Timeline")
         baker.make(
-            "hubble.TimelineTask", order=seq(0), timeline=self.timeline, _quantity=5
+            "hubble.TimelineTask",
+            order=seq(0),
+            timeline=self.timeline,
+            _quantity=5,
         )
         self.timeline_task_ids = list(
-            TimelineTask.objects.filter(timeline_id=self.timeline.id).values_list(
-                "id", flat=True
-            )
+            TimelineTask.objects.filter(
+                timeline_id=self.timeline.id
+            ).values_list("id", flat=True)
         )
         random.shuffle(self.timeline_task_ids)
 
@@ -492,24 +570,38 @@ class TimelineTaskReOrderTest(BaseTestCase):
         """
         self.timeline = baker.make("hubble.Timeline")
         baker.make(
-            "hubble.TimelineTask", order=seq(0), timeline=self.timeline, _quantity=5
+            "hubble.TimelineTask",
+            order=seq(0),
+            timeline=self.timeline,
+            _quantity=5,
         )
         self.timeline_task_ids = list(
-            TimelineTask.objects.filter(timeline_id=self.timeline.id).values_list(
-                "id", flat=True
-            )
+            TimelineTask.objects.filter(
+                timeline_id=self.timeline.id
+            ).values_list("id", flat=True)
         )
         random.shuffle(self.timeline_task_ids)
         data = self.get_valid_inputs(
-            {"data[]": self.timeline_task_ids, "timeline_id": self.timeline.id}
+            {
+                "data[]": self.timeline_task_ids,
+                "timeline_id": self.timeline.id,
+            }
         )
-        response = self.make_post_request(reverse(self.reorder_route_name), data=data)
-        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
+        response = self.make_post_request(
+            reverse(self.reorder_route_name), data=data
+        )
+        self.assertJSONEqual(
+            self.decoded_json(response), {"status": "success"}
+        )
         self.assertEqual(response.status_code, 200)
         for order, task_id in enumerate(self.timeline_task_ids):
             self.assertDatabaseHas(
                 "TimelineTask",
-                {"id": task_id, "timeline_id": self.timeline.id, "order": order + 1},
+                {
+                    "id": task_id,
+                    "timeline_id": self.timeline.id,
+                    "order": order + 1,
+                },
             )
 
     def test_failure(self):
@@ -519,7 +611,9 @@ class TimelineTaskReOrderTest(BaseTestCase):
         data = self.get_valid_inputs(
             {"data[]": [0] * 5, "timeline_id": self.timeline.id}
         )
-        response = self.make_post_request(reverse(self.reorder_route_name), data=data)
+        response = self.make_post_request(
+            reverse(self.reorder_route_name), data=data
+        )
         self.assertJSONEqual(
             response.content,
             {
@@ -553,7 +647,9 @@ class TimelineTasksDatatableTest(BaseTestCase):
         response = self.make_get_request(
             reverse(self.route_name, args=[self.timeline.id])
         )
-        self.assertTemplateUsed(response, "timeline_template_detail.html")
+        self.assertTemplateUsed(
+            response, "timeline_template_detail.html"
+        )
         self.assertContains(response, self.timeline.name)
 
     def test_datatable(self):
@@ -568,7 +664,12 @@ class TimelineTasksDatatableTest(BaseTestCase):
             _quantity=2,
         )
 
-        payload = {"draw": 1, "start": 0, "length": 10, "timeline_id": self.timeline.id}
+        payload = {
+            "draw": 1,
+            "start": 0,
+            "length": 10,
+            "timeline_id": self.timeline.id,
+        }
         response = self.make_post_request(
             reverse(self.datatable_route_name), data=payload
         )
@@ -578,15 +679,23 @@ class TimelineTasksDatatableTest(BaseTestCase):
         for row in range(len(timelinetasks)):
             expected_value = timelinetasks[row]
             received_value = response.json()["data"][row]
-            self.assertEqual(expected_value.pk, int(received_value["pk"]))
             self.assertEqual(
-                expected_value.name, received_value["name"].split(">")[1].split("<")[0]
+                expected_value.pk, int(received_value["pk"])
             )
-            self.assertEqual(expected_value.days, float(received_value["days"]))
             self.assertEqual(
-                expected_value.present_type, received_value["present_type"]
+                expected_value.name,
+                received_value["name"].split(">")[1].split("<")[0],
             )
-            self.assertEqual(expected_value.task_type, received_value["task_type"])
+            self.assertEqual(
+                expected_value.days, float(received_value["days"])
+            )
+            self.assertEqual(
+                expected_value.present_type,
+                received_value["present_type"],
+            )
+            self.assertEqual(
+                expected_value.task_type, received_value["task_type"]
+            )
 
         # Check whether all headers are present
         for row in response.json()["data"]:
@@ -598,4 +707,6 @@ class TimelineTasksDatatableTest(BaseTestCase):
             self.assertTrue("action" in row)
 
         # Check the numbers of rows received is equal to the number of expected rows
-        self.assertTrue(response.json()["recordsTotal"], len(timelinetasks))
+        self.assertTrue(
+            response.json()["recordsTotal"], len(timelinetasks)
+        )

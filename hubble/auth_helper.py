@@ -27,7 +27,9 @@ def get_msal_app(cache=None):
 def get_sign_in_flow(callback_module):
     return get_msal_app().initiate_auth_code_flow(
         scopes=["user.read"],
-        redirect_uri="https://" + callback_module + env("REDIRECT_PATH"),
+        redirect_uri="https://"
+        + callback_module
+        + env("REDIRECT_PATH"),
     )
 
 

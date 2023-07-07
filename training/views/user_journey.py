@@ -37,12 +37,15 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
             )
             .annotate(
                 retries=Count(
-                    "assessments__is_retry", filter=Q(assessments__user=self.object)
+                    "assessments__is_retry",
+                    filter=Q(assessments__user=self.object),
                 )
                 - 1,
                 last_entry=Subquery(latest_task_report.values("score")),
                 comment=Subquery(latest_task_report.values("comment")),
-                is_retry=Subquery(latest_task_report.values("is_retry")),
+                is_retry=Subquery(
+                    latest_task_report.values("is_retry")
+                ),
                 inactive_tasks=Case(
                     When(
                         start_date__gt=timezone.now(), then=Value(False)
@@ -64,14 +67,24 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
         )
 
         extended_task_summary = (
-            Extension.objects.filter(sub_batch=sub_batch_id, user=self.object)
+            Extension.objects.filter(
+                sub_batch=sub_batch_id, user=self.object
+            )
             .annotate(
                 retries=Count("assessments__is_retry") - 1,
-                last_entry=Subquery(latest_extended_task_report.values("score")),
-                comment=Subquery(latest_extended_task_report.values("comment")),
-                is_retry=Subquery(latest_extended_task_report.values("is_retry")),
+                last_entry=Subquery(
+                    latest_extended_task_report.values("score")
+                ),
+                comment=Subquery(
+                    latest_extended_task_report.values("comment")
+                ),
+                is_retry=Subquery(
+                    latest_extended_task_report.values("is_retry")
+                ),
             )
-            .values("id", "last_entry", "retries", "comment", "is_retry")
+            .values(
+                "id", "last_entry", "retries", "comment", "is_retry"
+            )
         )
 
         context = super().get_context_data(**kwargs)
@@ -94,8 +107,12 @@ def update_task_score(request, pk):
             report.user_id = pk
             report.task_id = request.POST.get("task")
             report.extension_id = request.POST.get("extension")
-            report.sub_batch = SubBatch.objects.filter(intern_details__user=pk).first()
-            report.is_retry = True if request.POST.get("status") == "true" else False
+            report.sub_batch = SubBatch.objects.filter(
+                intern_details__user=pk
+            ).first()
+            report.is_retry = (
+                True if request.POST.get("status") == "true" else False
+            )
             report.created_by = request.user
             report.save()
             return JsonResponse({"status": "success"})
@@ -115,7 +132,9 @@ def update_task_score(request, pk):
 def add_extension(request, pk):
     try:
         Extension.objects.create(
-            sub_batch=SubBatch.objects.filter(intern_details__user=pk).first(),
+            sub_batch=SubBatch.objects.filter(
+                intern_details__user=pk
+            ).first(),
             user_id=pk,
             created_by=request.user,
         )
@@ -135,10 +154,16 @@ def delete_extension(request, pk):
         extension.delete()
         Assessment.bulk_delete({"extension": extension})
         return JsonResponse(
-            {"message": "Week extension deleted succcessfully", "status": "success"}
+            {
+                "message": "Week extension deleted succcessfully",
+                "status": "success",
+            }
         )
     except Exception as e:
-        logging.error(f"An error has occured while deleting an Extension task \n{e}")
+        logging.error(
+            f"An error has occured while deleting an Extension task \n{e}"
+        )
         return JsonResponse(
-            {"message": "Error while deleting week extension!"}, status=500
+            {"message": "Error while deleting week extension!"},
+            status=500,
         )

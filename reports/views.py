@@ -46,7 +46,7 @@ class EfficiencyDatatable(CustomDatatable):
     """
 
     model = TimesheetEntry
-    initial_order = ["team__name", "asc"],
+    initial_order = (["team__name", "asc"],)
     search_value_seperator = "+"
 
     column_defs = [
@@ -86,7 +86,9 @@ class EfficiencyDatatable(CustomDatatable):
         buttons = template_utils.show_btn(
             reverse("detailed_efficiency", args=[obj["pk"]])
         )
-        row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        row[
+            "action"
+        ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         return
 
     def get_initial_queryset(self, request=None):
@@ -103,7 +105,11 @@ class EfficiencyDatatable(CustomDatatable):
                     Avg(
                         100
                         * (F("authorized_hours"))
-                        / (F("user__expected_user_efficiencies__expected_efficiency"))
+                        / (
+                            F(
+                                "user__expected_user_efficiencies__expected_efficiency"
+                            )
+                        )
                     ),
                     2,
                 ),
@@ -130,7 +136,7 @@ class MonetizationDatatable(CustomDatatable):
     """
 
     model = TimesheetEntry
-    initial_order = ["team__name", "asc"],
+    initial_order = (["team__name", "asc"],)
 
     column_defs = [
         {
@@ -338,7 +344,11 @@ class DetaileEfficiencyDatatable(CustomDatatable):
                     Avg(
                         100
                         * (F("authorized_hours"))
-                        / (F("user__expected_user_efficiencies__expected_efficiency"))
+                        / (
+                            F(
+                                "user__expected_user_efficiencies__expected_efficiency"
+                            )
+                        )
                     )
                 ),
             )

@@ -2,7 +2,7 @@ from django.shortcuts import redirect, render
 
 
 def home(request):
-    return redirect('induction-kit')
+    return redirect("induction-kit")
 
 
 def error_404(request, exception):
