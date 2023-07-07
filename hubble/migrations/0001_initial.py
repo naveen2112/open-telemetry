@@ -38,7 +38,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'users',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
         migrations.CreateModel(
@@ -57,7 +57,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'clients',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
         migrations.CreateModel(
@@ -72,7 +72,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'currencies',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
         migrations.CreateModel(
@@ -87,7 +87,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'designations',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
         migrations.CreateModel(
@@ -103,7 +103,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'expected_user_efficiencies',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
         migrations.CreateModel(
@@ -120,7 +120,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'holidays',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
         migrations.CreateModel(
@@ -134,7 +134,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'modules',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
         migrations.CreateModel(
@@ -154,7 +154,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'projects',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
         migrations.CreateModel(
@@ -173,7 +173,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'project_resources',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
         migrations.CreateModel(
@@ -188,7 +188,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'project_resource_positions',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
         migrations.CreateModel(
@@ -203,7 +203,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'tasks',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
         migrations.CreateModel(
@@ -219,7 +219,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'teams',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
         migrations.CreateModel(
@@ -238,7 +238,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 'db_table': 'timesheet_entries',
-                'managed': False,
+                'managed': settings.IS_TESTING,
             },
         ),
         migrations.CreateModel(
