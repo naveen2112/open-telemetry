@@ -65,7 +65,7 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
         extended_task_summary = (
             Extension.objects.filter(sub_batch=sub_batch_id, user=self.object)
             .annotate(
-                retries=Count("assessments__is_retry") - 1,
+                retries=Count("assessments__is_retry", filter=Q(assessments__is_retry=True)),
                 last_entry=Subquery(latest_extended_task_report.values("score")),
                 comment=Subquery(latest_extended_task_report.values("comment")),
                 is_retry=Subquery(latest_extended_task_report.values("is_retry")),
