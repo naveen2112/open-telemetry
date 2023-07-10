@@ -5,12 +5,12 @@ Sub Batch details
 {% endblock title %}
 
 {% block header %}
+<a href="{% url 'batch.detail' object.batch.id %}" class="flex items-center text-sm text-dark-blue pb-2">
+    <div class="inline mr-1"> <span class="hbl hbl-left text-2xl text-dark-black/50"></span></div>
+    Back to {{ object.batch }}
+</a>
 <div class="flex flex-row">
     <div>
-        <a href="{% url 'batch.detail' object.batch.id %}" class="flex items-center text-sm text-dark-blue pb-2">
-            <div class="inline mr-1"> <span class="hbl hbl-left text-2xl text-dark-black/50"></span></div>
-            Back to {{ object.batch }}
-        </a>
         <div class="text-dark-black text-lg mb-1 leading-none">
             {{ object.name }}
         </div>
@@ -32,11 +32,13 @@ Sub Batch details
             <h4 class="text-lg text-black ">{{ timeline.name|title }}</h3>
         </div>
     </div>
-    <div class="relative mr-5" id="sub_batch-trainee-table_filter">
-        <input type="text" value="" name="search_project" placeholder="Search by Name"
+    <div class="relative items-center px-2" id="sub_batch-trainee-table_filter">
+        <div class="relative">
+            <input type="text" value="" name="search_project" placeholder="Search by Name"
             class="w-250 h-10 pl-11 pr-2.5 py-3 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0"
             id="search_project">
-        <span class="absolute top-2 left-2"><span class="hbl hbl-search-icon text-dark-black-50 text-2xl"></span></span>
+            <span class="absolute top-2 left-2"><span class="hbl hbl-search-icon text-dark-black-50 text-2xl"></span></span>
+        </div>
     </div>
 </div>
 {% endblock %}
