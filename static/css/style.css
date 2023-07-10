@@ -120,13 +120,10 @@
 
 .tooltip .tooltiptext {
     visibility: hidden;
-    width: 130px;
-    background-color: #fff;
-    color: #000;
-    text-align: center;
     border-radius: 6px;
     padding: 5px 0;
     position: absolute;
+    white-space: nowrap;
     z-index: 1;
     padding: 10px;
     left: 20px;

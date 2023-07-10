@@ -3,7 +3,8 @@ import logging
 import pandas as pd
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count, OuterRef, Q, Subquery, F, Sum
+from django.db.models import Avg, Count, OuterRef, Q, Subquery, Sum
+from django.db.models.functions import Coalesce
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -15,7 +16,7 @@ from core import template_utils
 from core.utils import (CustomDatatable, schedule_timeline_for_sub_batch,
                         validate_authorization)
 from hubble.models import (Batch, InternDetail, SubBatch, SubBatchTaskTimeline,
-                           Timeline, TimelineTask, User, Assessment)
+                           Timeline, TimelineTask, User)
 from training.forms import AddInternForm, SubBatchForm
 
 
@@ -288,8 +289,32 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
 
     column_defs = [
         {"name": "pk", "visible": False, "searchable": False},
-        {"name": "user", "title": "User", "visible": True, "searchable": False},
+        {
+            "name": "user",
+            "foreign_field": "user__name",
+            "title": "User",
+            "visible": True,
+            "searchable": True,
+        },
         {"name": "college", "title": "College", "visible": True, "searchable": False},
+        {
+            "name": "completion",
+            "title": "Completion (%)",
+            "visible": True,
+            "searchable": False,
+        },
+        {
+            "name": "average_marks",
+            "title": "Average Score (%)",
+            "visible": True,
+            "searchable": False,
+        },
+        {
+            "name": "no_of_retries",
+            "title": "Total Retries (%)",
+            "visible": True,
+            "searchable": False,
+        },
         {
             "name": "expected_completion",
             "title": "Expected Completion",
@@ -307,18 +332,60 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
     ]
 
     def get_initial_queryset(self, request=None):
-        latest_task_report = Assessment.objects.filter(
-            task=OuterRef("id")
-        ).order_by("-id")[:1]
-        task_summary = (
+        task_count = (
             SubBatchTaskTimeline.objects.filter(
-                sub_batch=request.POST.get("sub_batch"), task_type="Assessment"
+                sub_batch_id=request.POST.get("sub_batch")
+            )
+            .values("id")
+            .count()
+        )
+        retries = (
+            SubBatchTaskTimeline.objects.filter(
+                sub_batch_id=request.POST.get("sub_batch"),
+                assessments__user_id=OuterRef("user_id"),
+                id=OuterRef("user__assessments__task_id"),
             )
             .annotate(
-                last_entry=Subquery(latest_task_report.values("score")),).values("assessments__user_id", "id", "last_entry"))
-        # print(task_summary)
-        # print(InternDetail.objects.filter(sub_batch__id=request.POST.get("sub_batch")).annotate(total_marks=Sum(F("user__assessments__score")), filter=(Q(user__assessments__is_retry=False) & Q(user__assessments__deleted_at__isnull=True))).values("user", "total_marks"))
-        return self.model.objects.filter(sub_batch__id=request.POST.get("sub_batch"))
+                count=Count("assessments__is_retry") - 1,
+                passed=Count(
+                    "assessments__is_retry", filter=Q(assessments__is_retry=False)
+                ),
+            )
+            .values("assessments__user_id", "id", "count", "passed")
+        )
+        last_attempt = (
+            SubBatchTaskTimeline.objects.filter(
+                id=OuterRef("user__assessments__task_id"),
+                assessments__user_id=OuterRef("user_id"),
+            )
+            .annotate(
+                count=Count(
+                    "assessments__is_retry", filter=Q(assessments__is_retry=True)
+                )
+                - 1
+            )
+            .order_by("-assessments__id")[:1]
+        )
+        query = (
+            self.model.objects.filter(sub_batch__id=request.POST.get("sub_batch"))
+            .select_related("user")
+            .annotate(
+                average_marks=Coalesce(
+                    Avg(
+                        Subquery(last_attempt.values("assessments__score")),
+                        distinct=True,
+                    ),
+                    0.0,
+                ),
+                no_of_retries=Sum(Subquery(retries.values("count")), distinct=True),
+                completion=(
+                    Sum(Subquery(retries.values("passed")), distinct=True) / task_count
+                )
+                * 100,
+            )
+        )
+        # print(SubBatchTaskTimeline.objects.filter(sub_batch_id=request.POST.get("sub_batch"), assessments__user_id=9, id=90).annotate(passed=Count("assessments__is_retry", filter=Q(assessments__is_retry=False))).values("assessments__user_id", "id", "passed"))
+        return query
 
     def customize_row(self, row, obj):
         buttons = template_utils.show_button(
@@ -336,6 +403,29 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
         ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         row["expected_completion"] = obj.expected_completion.strftime("%d %b %Y")
         return
+
+    def get_response_dict(self, request, paginator, draw_idx, start_pos):
+        response = super().get_response_dict(request, paginator, draw_idx, start_pos)
+        permformance_report = {
+            "Good": 0,
+            "Meet Expectation": 0,
+            "Above Average": 0,
+            "Average": 0,
+            "Poor": 0,
+        }
+        for performance in response["data"]:
+            if float(performance["average_marks"]) >= 90:
+                permformance_report["Good"] += 1
+            elif 90 > float(performance["average_marks"]) >= 75:
+                permformance_report["Meet Expectation"] += 1
+            elif 75 > float(performance["average_marks"]) >= 65:
+                permformance_report["Above Average"] += 1
+            elif 65 > float(performance["average_marks"]) >= 50:
+                permformance_report["Average"] += 1
+            elif float(performance["average_marks"]) < 50:
+                permformance_report["Poor"] += 1
+        response["extra_data"] = permformance_report
+        return response
 
 
 @login_required()
@@ -360,7 +450,9 @@ def add_trainee(request):
                 trainee.save()
                 return JsonResponse({"status": "success"})
             except Exception as e:
-                return JsonResponse({"message": "Invalid SubBatch id", "status": "error"})
+                return JsonResponse(
+                    {"message": "Invalid SubBatch id", "status": "error"}
+                )
         else:
             field_errors = form.errors.as_json()
             non_field_errors = form.non_field_errors().as_json()
@@ -383,6 +475,4 @@ def remove_trainee(request, pk):
         return JsonResponse({"message": "Intern has been deleted succssfully"})
     except Exception as e:
         logging.error(f"An error has occured while deleting an intern \n{e}")
-        return JsonResponse(
-            {"message": "Error while deleting Trainee!"}, status=500
-        )
+        return JsonResponse({"message": "Error while deleting Trainee!"}, status=500)
