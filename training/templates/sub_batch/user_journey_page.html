@@ -4,12 +4,8 @@
 
 {% block title %} {{ object.name }} {% endblock %}
 
-{% block header %}
+{% block container %}
 <div class="px-5 pt-9 bg-white pb-7">
-    <a href="{% url 'sub-batch.detail' sub_batch.id %}" class="flex items-center text-sm text-dark-blue">
-        <div class="inline mr-1"> <span class="hbl hbl-left text-2xl text-dark-black/50"></span></div>
-        Back to {{ sub_batch.name|title }}
-    </a>
     <div class="flex items-center my-5">
         <div class="flex items-center mr-10">
             <div class="pr-4">
@@ -45,13 +41,32 @@
         {% endcomment %}
     </div>
 </div>
+<div class="px-3 pt-5">
+    <div class="text-dark-black text-lg mb-1 leading-none">
+        <p class="text-sm">
+            <a href="{% url 'batch' %}" class="text-sm text-dark-blue">
+                Batch List
+            </a>
+            >
+            <a href="{% url 'batch.detail' sub_batch.batch.id %}" class="text-sm text-dark-blue">
+                {{ sub_batch.batch.name }}
+            </a>
+            >
+            <a href="{% url 'sub-batch.detail' sub_batch.id %}" class="text-sm text-dark-blue">
+                {{ sub_batch.name|title }}
+            </a>
+            >
+            {{ object.name }}
+        </p>
+    </div>
+</div>
 {% endblock %}
 
 
 
 {% block body %}
 <div>
-    <div class="flex justify-between items-center my-6">
+    <div class="flex justify-between items-center">
         <h3 class="font-semibold">Assignment Journey</h3>
             <button onclick="addWeekExtensionCard('{{ object.id }}')"
                 class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal">
