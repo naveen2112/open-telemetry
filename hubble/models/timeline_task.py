@@ -1,10 +1,16 @@
+"""
+The TimelineTask class is a Django model that represents a task in a timeline
+"""
 from django.db import models
 
 from core import db
-from hubble.models import Timeline, User
 
 
 class TimelineTask(db.SoftDeleteWithBaseModel):
+    """
+    Store the task data and it timeline id
+    """
+
     PRESENT_TYPE_REMOTE = "Remote"
     PRESENT_TYPE_IN_PERSON = "In-Person"
     PRESENT_TYPES = [
@@ -24,20 +30,30 @@ class TimelineTask(db.SoftDeleteWithBaseModel):
     name = models.CharField(max_length=250)
     days = models.FloatField()
     timeline = models.ForeignKey(
-        Timeline, on_delete=models.CASCADE, related_name="task_timeline"
+        "hubble.Timeline",
+        on_delete=models.CASCADE,
+        related_name="task_timeline",
     )
     present_type = models.CharField(
-        max_length=250, choices=PRESENT_TYPES, default=PRESENT_TYPE_REMOTE
+        max_length=250,
+        choices=PRESENT_TYPES,
+        default=PRESENT_TYPE_REMOTE,
     )
     task_type = models.CharField(
         max_length=250, choices=TASK_TYPES, default=TASK_TYPE_TASK
     )
     order = models.IntegerField(blank=True)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(
+        "hubble.User", on_delete=models.CASCADE
+    )
 
     class Meta:
+        """
+        Meta class for defining class behavior and properties.
+        """
+
         db_table = "timeline_tasks"
         ordering = ["order"]
 
     def __str__(self):
-        return self.name
+        return str(self.name)

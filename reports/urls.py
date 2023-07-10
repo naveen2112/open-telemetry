@@ -1,13 +1,20 @@
-from django.urls import path, include, register_converter
-from reports import views
-from hubble import views as sso_view
+"""
+Report app url configuration
+"""
+from django.urls import include, path
 
+from hubble import views as sso_view
+from reports import views
 
 urlpatterns = [
     path("auth", include("hubble.urls")),
     path("hubble-sso-callback", sso_view.callback, name="callback"),
     path("", views.Index.as_view(), name="index"),
-    path("monetization", views.MonetizationReport.as_view(), name="monetization"),
+    path(
+        "monetization",
+        views.MonetizationReport.as_view(),
+        name="monetization",
+    ),
     path(
         "detailed-efficiency/<int:pk>",
         views.DetailedEfficiency.as_view(),
@@ -29,5 +36,9 @@ urlpatterns = [
         views.MonetizationDatatable.as_view(),
         name="monetization_datatable",
     ),
-    path("kpi-datatable", views.KPIDatatable.as_view(), name="kpi_datatable"),
+    path(
+        "kpi-datatable",
+        views.KPIDatatable.as_view(),
+        name="kpi_datatable",
+    ),
 ]

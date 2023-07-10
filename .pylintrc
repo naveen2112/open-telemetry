@@ -1,0 +1,25 @@
+[MASTER]
+disable = unused-argument, fixme, protected-access, attribute-defined-outside-init, dangerous-default-value, too-many-arguments, wrong-import-order, too-few-public-methods, broad-exception-caught, arguments-differ, import-error, no-member, too-many-ancestors, f-string-without-interpolation
+
+
+
+
+
+
+; Need to Omit
+; TODO :: Need to remove this logic after roles and permission (fixme)
+; Too many arguments (6/5) (too-many-arguments)
+; Access to a protected member _meta of a client class (protected-access)
+;  Attribute 'unmanaged_models' defined outside __init__ (attribute-defined-outside-init)
+;  Dangerous default value {} as argument (dangerous-default-value)
+; Too many arguments (6/5) (too-many-arguments)
+
+; Waiting for confirmation
+; third party import "from hubble_report.settings import env" should be placed before "from core.constants import ADMIN_EMAILS" (wrong-import-order)
+; Too few public methods (0/2) (too-few-public-methods)
+; Catching too general exception Exception (broad-exception-caught)
+; Number of parameters was 3 in 'AjaxDatatableView.get_table_row_id' and is now 4 in overriding 'CustomDatatable.get_table_row_id' method (arguments-differ)
+; Unable to import 'hubble_report' (import-error)
+; E1101: Instance of 'DateTimeWithoutTZField' has no 'date' member (no-member)
+; Too many ancestors (9/7) (too-many-ancestors)
+; Using an f-string that does not have any interpolated variables (f-string-without-interpolation)

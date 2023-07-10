@@ -1,15 +1,20 @@
+"""
+Module contains the custom configuration for the Django ajax datatable
+"""
 import datetime
 
 from ajax_datatable import AjaxDatatableView
 from django.http import HttpResponseForbidden
 
-from core.constants import ADMIN_EMAILS
 from hubble.models import (Holiday, InternDetail, SubBatchTaskTimeline,
                            TimelineTask)
 
 
 class CustomDatatable(AjaxDatatableView):
-    """This class provides the feature of sending a list of dictionaries as input to the datatable"""
+    """
+    This class provides the feature of sending a list of dictionaries
+    as input to the datatable
+    """
 
     show_column_filters = False
 
@@ -23,7 +28,7 @@ class CustomDatatable(AjaxDatatableView):
         """
         result = ""
         if self.table_row_id_fieldname:
-            if type(obj) == dict:
+            if isinstance(obj, dict):
                 try:
                     result = self.table_row_id_prefix + str(i + 1)
                 except AttributeError:
@@ -42,16 +47,19 @@ class CustomDatatable(AjaxDatatableView):
         return row.get(column, None)
 
     def prepare_results(self, request, qs):
-        """This function is responsible for preparing the json data which should be returned as response when the datatable is called"""
+        """This function is responsible for preparing the json data which
+        should be returned as response when the datatable is called
+        """
         json_data = []
         columns = [c["name"] for c in self.column_specs]
-        if len(qs) > 0 and type(qs[0]) is dict:
+        if len(qs) > 0 and isinstance(qs[0], dict):
             func = getattr(self, "render_dict_column")
         else:
             func = getattr(self, "render_column")
         for i, cur_object in enumerate(qs):
             retdict = {
-                # fieldname: '<div class="field-%s">%s</div>' % (fieldname, self.render_column(cur_object, fieldname))
+                # fieldname: '<div class="field-%s">%s</div>'
+                # % (fieldname, self.render_column(cur_object, fieldname))
                 fieldname: func(cur_object, fieldname)
                 for fieldname in columns
                 if fieldname
@@ -72,8 +80,19 @@ class CustomDatatable(AjaxDatatableView):
 
 
 def validate_authorization():
+    """
+    Decorator function that validates user authorization
+    """
+
     def decorator(view_func):
+        """
+        Decorator function that wraps the view function
+        """
+
         def wrapped_view(request, *args, **kwargs):
+            """
+            Wrapped view function that performs authorization validation
+            """
             if request.user.is_admin_user:
                 return view_func(request, *args, **kwargs)
             return HttpResponseForbidden()
@@ -84,6 +103,10 @@ def validate_authorization():
 
 
 def update_expected_end_date_of_intern_details(sub_batch):
+    """
+    Updates the expected completion date of intern details based on the
+    latest sub-batch task timeline
+    """
     expected_completion_day = (
         SubBatchTaskTimeline.objects.filter(sub_batch_id=sub_batch)
         .order_by("-order")
@@ -95,13 +118,21 @@ def update_expected_end_date_of_intern_details(sub_batch):
 
 
 def is_leave_day(holidays, start_date):
-    return (
-        (start_date.date() in holidays)
-        or (start_date.date().weekday() == 6)
+    """
+    Checks if a given date is a leave day (holiday or Sunday)
+    """
+    return (start_date.date() in holidays) or (
+        start_date.date().weekday() == 6
     )
 
 
-def calculate_duration_for_task(holidays, start_date, is_half_day, number_of_days):
+def calculate_duration_for_task(
+    holidays, start_date, is_half_day, number_of_days
+):
+    """
+    Calculates the start and end date/time for a task, taking into
+    account holidays, half-day status, and the number of days
+    """
     if start_date.time() == datetime.time(hour=18, minute=0):
         start_date += datetime.timedelta(1)
         start_date = start_date.replace(hour=9, minute=0)
@@ -153,13 +184,25 @@ def calculate_duration_for_task(holidays, start_date, is_half_day, number_of_day
     }
 
 
-def schedule_timeline_for_sub_batch(sub_batch, user=None, is_create=True):
-    holidays = list(Holiday.objects.values_list("date_of_holiday", flat=True))
-    start_date = datetime.datetime.strptime(str(sub_batch.start_date), "%Y-%m-%d")
+def schedule_timeline_for_sub_batch(
+    sub_batch, user=None, is_create=True
+):
+    """
+    Schedules the timeline for a sub-batch
+    """
+    value_end_date = {}
+    holidays = list(
+        Holiday.objects.values_list("date_of_holiday", flat=True)
+    )
+    start_date = datetime.datetime.strptime(
+        str(sub_batch.start_date), "%Y-%m-%d"
+    )
     is_half_day = False
     order = 0
     if is_create:
-        for task in TimelineTask.objects.filter(timeline=sub_batch.timeline.id):
+        for task in TimelineTask.objects.filter(
+            timeline=sub_batch.timeline.id
+        ):
             values = calculate_duration_for_task(
                 holidays, start_date, is_half_day, task.days
             )
@@ -178,12 +221,12 @@ def schedule_timeline_for_sub_batch(sub_batch, user=None, is_create=True):
             )
             start_date = values["end_date_time"]
             is_half_day = values["ends_afternoon"]
-        return values["end_date_time"]
+        value_end_date = values["end_date_time"]
 
     else:
-        for task in SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch).order_by(
-            "order"
-        ):
+        for task in SubBatchTaskTimeline.objects.filter(
+            sub_batch=sub_batch
+        ).order_by("order"):
             values = calculate_duration_for_task(
                 holidays, start_date, is_half_day, task.days
             )
@@ -193,3 +236,4 @@ def schedule_timeline_for_sub_batch(sub_batch, user=None, is_create=True):
             task.end_date = values["end_date_time"]
             task.save()
     update_expected_end_date_of_intern_details(sub_batch.id)
+    return value_end_date

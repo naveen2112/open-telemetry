@@ -1,3 +1,6 @@
+"""
+Module containing custom template tags and filters for the project.
+"""
 from django import template
 from django.urls import resolve
 from django.utils.html import strip_tags
@@ -10,6 +13,10 @@ register = template.Library()
 
 @register.simple_tag(takes_context=True)
 def set_active(context, names):
+    """
+    Determines the active state of a sidebar item based on the current route name
+    and  returns the CSS class 'sidebar-active'
+    """
     current_route_name = resolve(
         context["request"].path_info
     ).route  # Get the url of the current request
@@ -29,44 +36,53 @@ def set_active(context, names):
 
 @register.simple_tag
 def get_constant(name):
+    """
+    Retrieves a constant value from the 'constants' module based on the provided name
+    """
     return getattr(constants, name)
 
 
 @register.filter()
 def show_field_errors(field):
+    """
+    Returns an HTML representation of the error message for a
+    field with custom styling
+    """
     if field.errors:
         error_message = ""
         for error in field.errors:
             error_message = strip_tags(error)
         return mark_safe(
-            '<span id="validation-error" class="ajax-error form_errors text-red-600">{}</span>'.format(
-                error_message
-            )
+            f'<span id="validation-error" class="ajax-error form_errors\
+                text-red-600">{error_message}</span>'
         )
-    else:
-        return ""
+    return ""
 
 
 @register.filter()
 def show_non_field_errors(error):
+    """
+    Returns an HTML representation of the error message for a
+    non-field with custom styling
+    """
     if error:
         return mark_safe(
-            '<span id="validation-error" class="ajax-error form_errors text-red-600">{}</span>'.format(
-                error
-            )
+            f'<span id="validation-error" class="ajax-error form_errors\
+                text-red-600">{error}</span>'
         )
-    else:
-        return ""
+    return ""
 
 
 @register.filter()
 def show_label(field):
+    """
+    Returns an HTML representation of the label with custom styling
+    """
+    required = ""
     if field.field.required:  # Check the field is required or not
         required = '<span class="text-red-600">*</span>'
-    else:
-        required = ""
     return mark_safe(
-        '<label for="{}" class="mb-3.6 text-sm text-dark-black-50">{} {}</label>'.format(
-            field.label, field.label, required
-        )
+        f'<label for="{field.label}" class="mb-3.6 text-sm text-dark-black-50">\
+            {field.label} {required}\
+        </label>'
     )

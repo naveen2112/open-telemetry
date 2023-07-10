@@ -1,3 +1,6 @@
+"""
+Module containing constants and configurations for the project.
+"""
 from datetime import datetime
 
 COPY_RIGHTS_TEXT = (
@@ -35,4 +38,5 @@ ADMIN_EMAILS = [
     "satheesh@mallow-tech.com",
     "anandraj@mallow-tech.com",
     "sanjay@mallow-tech.com",
+    "tariqjamal@mallow-tech.com",
 ]

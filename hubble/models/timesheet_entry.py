@@ -1,3 +1,6 @@
+"""
+The TimesheetEntry class is a model that represents a timesheet entry
+"""
 from django.db import models
 from django.db.models import (Case, CharField, F, FloatField, Func, Q, Sum,
                               Value, When)
@@ -5,19 +8,30 @@ from django.db.models.functions import Coalesce, Round
 from django.utils import timezone
 
 from core import db
-from hubble.models import Team, User
 
 from . import Module, Project, Task
 
 
 class TimesheetCustomQuerySet(models.QuerySet):
+    """
+    Provide custom query method for the model
+    """
+
     def date_range(self, from_date, to_date):
+        """
+        Filters the timesheets based on the given date range and the
+        effective date range of the user's expected efficiency
+        """
         return self.filter(
             Q(
                 entry_date__range=(
-                    F("user__expected_user_efficiencies__effective_from"),
+                    F(
+                        "user__expected_user_efficiencies__effective_from"
+                    ),
                     Coalesce(
-                        F("user__expected_user_efficiencies__effective_to"),
+                        F(
+                            "user__expected_user_efficiencies__effective_to"
+                        ),
                         timezone.now(),
                     ),
                 )
@@ -26,16 +40,25 @@ class TimesheetCustomQuerySet(models.QuerySet):
         )
 
     def efficiency_fields(self):
+        """
+        Annotates the timesheets with efficiency-related fields
+        """
         return self.annotate(
             capacity=Coalesce(
-                Sum(F("user__expected_user_efficiencies__expected_efficiency")),
+                Sum(
+                    F(
+                        "user__expected_user_efficiencies__expected_efficiency"
+                    )
+                ),
                 0,
                 output_field=FloatField(),
             ),
             efficiency=Coalesce(
                 Sum(F("authorized_hours")), 0, output_field=FloatField()
             ),
-            productivity=Coalesce(Sum(F("billed_hours")), 0, output_field=FloatField()),
+            productivity=Coalesce(
+                Sum(F("billed_hours")), 0, output_field=FloatField()
+            ),
             efficiency_gap=Coalesce(
                 Round(
                     100
@@ -48,7 +71,9 @@ class TimesheetCustomQuerySet(models.QuerySet):
                             )
                             - Sum(F("authorized_hours"))
                         )
-                        / Sum("user__expected_user_efficiencies__expected_efficiency")
+                        / Sum(
+                            "user__expected_user_efficiencies__expected_efficiency"
+                        )
                     ),
                     2,
                 ),
@@ -67,7 +92,9 @@ class TimesheetCustomQuerySet(models.QuerySet):
                             )
                             - Sum(F("billed_hours"))
                         )
-                        / Sum("user__expected_user_efficiencies__expected_efficiency")
+                        / Sum(
+                            "user__expected_user_efficiencies__expected_efficiency"
+                        )
                     ),
                     2,
                 ),
@@ -82,6 +109,10 @@ class TimesheetCustomQuerySet(models.QuerySet):
         )
 
     def kpi_fields(self):
+        """
+        Annotates the timesheets with KPI-related fields.The results are ordered
+        by authorized sum in descending order and then by billed sum in ascending order
+        """
         return (
             self.annotate(
                 project_name=F("project__name"),
@@ -107,6 +138,9 @@ class TimesheetCustomQuerySet(models.QuerySet):
         )
 
     def monetization_fields(self):
+        """
+        Annotates the timesheets with monetization-related fields
+        """
         return (
             self.annotate(a_sum=Sum("authorized_hours"))
             .annotate(
@@ -146,7 +180,9 @@ class TimesheetCustomQuerySet(models.QuerySet):
                 ),
                 efficiency_capacity=Sum(F("authorized_hours")),
                 monetization_capacity=Sum(
-                    F("user__expected_user_efficiencies__expected_efficiency")
+                    F(
+                        "user__expected_user_efficiencies__expected_efficiency"
+                    )
                 ),
                 ratings=Sum(F("authorized_hours")),
             )
@@ -154,34 +190,67 @@ class TimesheetCustomQuerySet(models.QuerySet):
 
 
 class TimesheetManager(models.Manager):
+    """
+    Custom manager for the Timesheet model
+    """
+
     def get_queryset(self):
+        """
+        Get the custom query set for Timesheet model
+        """
         return TimesheetCustomQuerySet(self.model, using=self._db)
 
     def date_range(self, from_date, to_date):
+        """
+        Filter timesheets based on a date range
+        """
         return self.get_queryset.date_range(from_date, to_date)
 
     def efficiency_fields(self):
+        """
+        Get the efficiency fields of timesheets
+        """
         return self.get_queryset.efficiency_fields()
 
     def monetization_fields(self):
+        """
+        Get the monetization fields of timesheets
+        """
         return self.get_queryset.monetization_fields()
 
     def kpi_fields(self):
+        """
+        Get the KPI (Key Performance Indicator) fields of timesheets
+        """
         return self.get_queryset.kpi_fields()
 
 
 class TimesheetEntry(db.BaseModel):
+    """
+    Store the timesheet entry data along with projct and module as a foreign key field
+    """
+
     id = models.BigAutoField(primary_key=True)
     user = models.ForeignKey(
-        User, models.CASCADE, related_name="timesheet_entries", db_column="user_id"
+        "hubble.User",
+        models.CASCADE,
+        related_name="timesheet_entries",
+        db_column="user_id",
     )
     project = models.ForeignKey(
         Project, models.CASCADE, related_name="timesheet_entries"
     )
-    module = models.ForeignKey(Module, models.CASCADE, related_name="timesheet_entries")
-    task = models.ForeignKey(Task, models.CASCADE, related_name="timesheet_entries")
+    module = models.ForeignKey(
+        Module, models.CASCADE, related_name="timesheet_entries"
+    )
+    task = models.ForeignKey(
+        Task, models.CASCADE, related_name="timesheet_entries"
+    )
     team = models.ForeignKey(
-        Team, models.CASCADE, related_name="timesheet_entries", db_column="team_id"
+        "hubble.Team",
+        models.CASCADE,
+        related_name="timesheet_entries",
+        db_column="team_id",
     )
     description = models.TextField()
     entry_date = models.DateField()
@@ -193,5 +262,9 @@ class TimesheetEntry(db.BaseModel):
     objects = TimesheetManager()
 
     class Meta:
+        """
+        Meta class for defining class behavior and properties.
+        """
+
         managed = False
         db_table = "timesheet_entries"
