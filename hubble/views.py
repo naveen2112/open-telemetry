@@ -21,7 +21,9 @@ def login(request):
     context[
         "login_method"
     ] = ENV_NAME  # This context variable will be used in template to render correct authentication method
-    context["ENVIRONMENT_DEVELOPMENT"] = constants.ENVIRONMENT_DEVELOPMENT
+    context[
+        "ENVIRONMENT_DEVELOPMENT"
+    ] = constants.ENVIRONMENT_DEVELOPMENT
     return render(request, "auth/login.html", context)
 
 

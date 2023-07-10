@@ -17,14 +17,21 @@ class Assessment(db.SoftDeleteWithBaseModel):
         related_name="assessments",
     )
     extension = models.ForeignKey(
-        Extension, on_delete=models.CASCADE, null=True, related_name="assessments"
+        Extension,
+        on_delete=models.CASCADE,
+        null=True,
+        related_name="assessments",
     )
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="assessments")
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="assessments"
+    )
     score = models.IntegerField()
     is_retry = models.BooleanField(default=False)
     comment = models.TextField()
     created_by = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="created_assessments"
+        User,
+        on_delete=models.CASCADE,
+        related_name="created_assessments",
     )
 
     class Meta:

@@ -11,7 +11,10 @@ class Module(db.SoftDeleteWithBaseModel):
         "hubble.Project", models.CASCADE, related_name="modules"
     )
     created_by = models.ForeignKey(
-        User, models.CASCADE, db_column="created_by", related_name="created_modules"
+        User,
+        models.CASCADE,
+        db_column="created_by",
+        related_name="created_modules",
     )
 
     class Meta:

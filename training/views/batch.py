@@ -2,13 +2,12 @@ import logging
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count, Q, Subquery, OuterRef
+from django.db.models import Count, OuterRef, Q, Subquery
 from django.db.models.functions import Coalesce
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
-from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView, FormView
 
@@ -62,15 +61,21 @@ class BatchDataTable(LoginRequiredMixin, CustomDatatable):
         return self.model.objects.annotate(
             total_trainee=Count(
                 "sub_batches__intern_details",
-                filter=Q(sub_batches__intern_details__deleted_at__isnull=True),
+                filter=Q(
+                    sub_batches__intern_details__deleted_at__isnull=True
+                ),
             ),
             number_of_sub_batches=Coalesce(
                 Subquery(
-                    self.model.objects.filter(sub_batches__batch_id=OuterRef("id"))
+                    self.model.objects.filter(
+                        sub_batches__batch_id=OuterRef("id")
+                    )
                     .annotate(
                         number_of_sub_batches=Count(
                             "sub_batches__id",
-                            filter=Q(sub_batches__deleted_at__isnull=True),
+                            filter=Q(
+                                sub_batches__deleted_at__isnull=True
+                            ),
                         )
                     )
                     .values("number_of_sub_batches")
@@ -80,12 +85,16 @@ class BatchDataTable(LoginRequiredMixin, CustomDatatable):
         )
 
     def customize_row(self, row, obj):
-        buttons = template_utils.show_button(reverse("batch.detail", args=[obj.id]))
+        buttons = template_utils.show_button(
+            reverse("batch.detail", args=[obj.id])
+        )
         if self.request.user.is_admin_user:
             buttons += template_utils.edit_button(
                 reverse("batch.show", args=[obj.id])
             ) + template_utils.delete_button(
-                "deleteBatch('" + reverse("batch.delete", args=[obj.id]) + "')"
+                "deleteBatch('"
+                + reverse("batch.delete", args=[obj.id])
+                + "')"
             )
         row[
             "action"
@@ -130,8 +139,12 @@ def batch_data(request, pk):
         }  # Covert django queryset object to dict,which can be easily serialized and sent as a JSON response
         return JsonResponse(data, safe=False)
     except Exception as e:
-        logging.error(f"An error has occured while fetching the batch data \n{e}")
-        return JsonResponse({"message": "Error while getting the data!"}, status=500)
+        logging.error(
+            f"An error has occured while fetching the batch data \n{e}"
+        )
+        return JsonResponse(
+            {"message": "Error while getting the data!"}, status=500
+        )
 
 
 @login_required()
@@ -169,14 +182,20 @@ def delete_batch(request, pk):
     """
     try:
         batch = get_object_or_404(Batch, id=pk)
-        intern_details = list(batch.sub_batches.all().values_list("id", flat=True))
+        intern_details = list(
+            batch.sub_batches.all().values_list("id", flat=True)
+        )
         SubBatch.bulk_delete({"batch_id": pk})
         InternDetail.bulk_delete({"sub_batch_id__in": intern_details})
         batch.delete()
         return JsonResponse({"message": "Batch deleted succcessfully"})
     except Exception as e:
-        logging.error(f"An error has occured while deleting the batch data \n{e}")
-        return JsonResponse({"message": "Error while deleting Batch!"}, status=500)
+        logging.error(
+            f"An error has occured while deleting the batch data \n{e}"
+        )
+        return JsonResponse(
+            {"message": "Error while deleting Batch!"}, status=500
+        )
 
 
 class BatchDetails(LoginRequiredMixin, DetailView):

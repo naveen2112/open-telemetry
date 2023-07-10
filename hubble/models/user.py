@@ -6,18 +6,25 @@ from django.db import models
 from core import db
 from core.constants import ADMIN_EMAILS
 
+
 class User(AbstractBaseUser, db.SoftDeleteWithBaseModel):
     id = models.BigAutoField(primary_key=True)
-    employee_id = models.CharField(max_length=255, blank=True, null=True)
+    employee_id = models.CharField(
+        max_length=255, blank=True, null=True
+    )
     email = models.CharField(unique=True, max_length=255)
     email_verified_at = db.DateTimeWithoutTZField(blank=True, null=True)
     password = models.CharField(max_length=255, blank=True, null=True)
     username = models.CharField(max_length=255, blank=True, null=True)
     name = models.CharField(max_length=255, blank=False, null=False)
     is_employed = models.BooleanField(blank=True, null=True)
-    remember_token = models.CharField(max_length=100, blank=True, null=True)
+    remember_token = models.CharField(
+        max_length=100, blank=True, null=True
+    )
     status = models.CharField(max_length=255)
-    team = models.ForeignKey("hubble.Team", models.CASCADE, blank=True, null=True)
+    team = models.ForeignKey(
+        "hubble.Team", models.CASCADE, blank=True, null=True
+    )
     branch_id = models.BigIntegerField(blank=True, null=True)
     # designation = models.ForeignKey("hubble.Designation", models.CASCADE, blank=True, null=True)
     team_owner = models.BooleanField(blank=True, null=True)
@@ -38,7 +45,7 @@ class User(AbstractBaseUser, db.SoftDeleteWithBaseModel):
 
     def __str__(self):
         return self.name
-    
+
     @property
     def is_admin_user(self):
         return self.email in ADMIN_EMAILS

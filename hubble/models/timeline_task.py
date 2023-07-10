@@ -27,7 +27,9 @@ class TimelineTask(db.SoftDeleteWithBaseModel):
         Timeline, on_delete=models.CASCADE, related_name="task_timeline"
     )
     present_type = models.CharField(
-        max_length=250, choices=PRESENT_TYPES, default=PRESENT_TYPE_REMOTE
+        max_length=250,
+        choices=PRESENT_TYPES,
+        default=PRESENT_TYPE_REMOTE,
     )
     task_type = models.CharField(
         max_length=250, choices=TASK_TYPES, default=TASK_TYPE_TASK

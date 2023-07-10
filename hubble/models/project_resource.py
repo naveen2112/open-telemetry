@@ -7,7 +7,11 @@ from hubble.models import ProjectResourcePosition, User
 class ProjectResource(db.SoftDeleteWithBaseModel):
     id = models.BigAutoField(primary_key=True)
     user = models.OneToOneField(
-        User, models.CASCADE, blank=True, null=True, related_name="project_resource"
+        User,
+        models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="project_resource",
     )
     project = models.ForeignKey(
         "hubble.Project",
@@ -23,7 +27,9 @@ class ProjectResource(db.SoftDeleteWithBaseModel):
         null=True,
         related_name="resource_reporting_persons",
     )
-    resource_type = models.CharField(max_length=255, blank=True, null=True)
+    resource_type = models.CharField(
+        max_length=255, blank=True, null=True
+    )
     utilisation = models.IntegerField(blank=True, null=True)
     charge_by_hour = models.FloatField(blank=True, null=True)
     primary_project = models.BooleanField(blank=True, null=True)
