@@ -68,9 +68,7 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
     ]
 
     def get_initial_queryset(self, request=None):
-        return self.model.objects.filter(
-            batch=request.POST.get("batch_id")
-        ).annotate(
+        return self.model.objects.filter(batch=request.POST.get("batch_id")).annotate(
             trainee_count=Count(
                 "intern_details",
                 filter=Q(intern_details__deleted_at__isnull=True),
@@ -78,16 +76,12 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
         )
 
     def customize_row(self, row, obj):
-        buttons = template_utils.show_button(
-            reverse("sub-batch.detail", args=[obj.id])
-        )
+        buttons = template_utils.show_button(reverse("sub-batch.detail", args=[obj.id]))
         if self.request.user.is_admin_user:
             buttons += template_utils.edit_button_new_page(
                 reverse("sub-batch.edit", args=[obj.id])
             ) + template_utils.delete_button(
-                "deleteSubBatch('"
-                + reverse("sub-batch.delete", args=[obj.id])
-                + "')"
+                "deleteSubBatch('" + reverse("sub-batch.delete", args=[obj.id]) + "')"
             )
         row[
             "action"
@@ -95,35 +89,25 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
         row["start_date"] = obj.start_date.strftime("%d %b %Y")
         return
 
-    def get_response_dict(
-        self, request, paginator, draw_idx, start_pos
-    ):
-        response = super().get_response_dict(
-            request, paginator, draw_idx, start_pos
-        )
+    def get_response_dict(self, request, paginator, draw_idx, start_pos):
+        response = super().get_response_dict(request, paginator, draw_idx, start_pos)
         response["extra_data"] = list(
             Batch.objects.filter(id=request.POST.get("batch_id"))
             .annotate(
                 no_of_teams=Subquery(
-                    Batch.objects.filter(
-                        sub_batches__batch_id=OuterRef("id")
-                    )
+                    Batch.objects.filter(sub_batches__batch_id=OuterRef("id"))
                     .annotate(
                         count_of_teams=Count(
                             "sub_batches__team",
                             distinct=True,
-                            filter=Q(
-                                sub_batches__deleted_at__isnull=True
-                            ),
+                            filter=Q(sub_batches__deleted_at__isnull=True),
                         )
                     )
                     .values("count_of_teams")
                 ),
                 no_of_trainees=Count(
                     "sub_batches__intern_details",
-                    filter=Q(
-                        sub_batches__intern_details__deleted_at__isnull=True
-                    ),
+                    filter=Q(sub_batches__intern_details__deleted_at__isnull=True),
                 ),
             )
             .values("no_of_teams", "no_of_trainees")
@@ -145,9 +129,7 @@ def create_sub_batch(request, pk):
         if "users_list_file" in request.FILES:
             excel_file = request.FILES["users_list_file"]
             df = pd.read_excel(excel_file)
-            if (df.columns[0] == "employee_id") and (
-                df.columns[1] == "college"
-            ):
+            if (df.columns[0] == "employee_id") and (df.columns[1] == "college"):
                 if User.objects.filter(
                     employee_id__in=df["employee_id"]
                 ).count() == len(df["employee_id"]):
@@ -172,40 +154,26 @@ def create_sub_batch(request, pk):
             sub_batch_form.add_error(
                 None, "Please upload a file"
             )  # Adding the non-field-error if the file was not uploaded while submission
-        if (
-            sub_batch_form.is_valid()
-        ):  # Check if both the forms are valid or not
+        if sub_batch_form.is_valid():  # Check if both the forms are valid or not
             sub_batch = sub_batch_form.save(commit=False)
-            if TimelineTask.objects.filter(
-                timeline=sub_batch.timeline.id
-            ):
+            if TimelineTask.objects.filter(timeline=sub_batch.timeline.id):
                 sub_batch.batch = Batch.objects.get(id=pk)
                 sub_batch.created_by = request.user
-                sub_batch.primary_mentor_id = request.POST.get(
-                    "primary_mentor_id"
-                )
-                sub_batch.secondary_mentor_id = request.POST.get(
-                    "secondary_mentor_id"
-                )
+                sub_batch.primary_mentor_id = request.POST.get("primary_mentor_id")
+                sub_batch.secondary_mentor_id = request.POST.get("secondary_mentor_id")
                 sub_batch.save()
-                timeline_task_end_date = (
-                    schedule_timeline_for_sub_batch(
-                        sub_batch=sub_batch, user=request.user
-                    )
+                timeline_task_end_date = schedule_timeline_for_sub_batch(
+                    sub_batch=sub_batch, user=request.user
                 )
                 user_details = dict(
-                    User.objects.filter(
-                        employee_id__in=df["employee_id"]
-                    ).values_list("employee_id", "id")
+                    User.objects.filter(employee_id__in=df["employee_id"]).values_list(
+                        "employee_id", "id"
+                    )
                 )
-                for row in range(
-                    len(df)
-                ):  # Iterating over pandas dataframe
+                for row in range(len(df)):  # Iterating over pandas dataframe
                     InternDetail.objects.create(
                         sub_batch=sub_batch,
-                        user_id=user_details[
-                            str(df["employee_id"][row])
-                        ],
+                        user_id=user_details[str(df["employee_id"][row])],
                         expected_completion=timeline_task_end_date,
                         college=df["college"][row],
                         created_by=request.user,
@@ -258,25 +226,16 @@ def update_sub_batch(request, pk):
     try:
         sub_batch = SubBatch.objects.get(id=pk)
     except Exception as e:
-        return JsonResponse(
-            {"message": "Invalid SubBatch id", "status": "error"}
-        )
+        return JsonResponse({"message": "Invalid SubBatch id", "status": "error"})
     if request.method == "POST":
         sub_batch_form = SubBatchForm(request.POST, instance=sub_batch)
         if sub_batch_form.is_valid():
             # validation start date
             active_form = sub_batch_form.save(commit=False)
-            sub_batch.primary_mentor_id = request.POST.get(
-                "primary_mentor_id"
-            )
-            sub_batch.secondary_mentor_id = request.POST.get(
-                "secondary_mentor_id"
-            )
+            sub_batch.primary_mentor_id = request.POST.get("primary_mentor_id")
+            sub_batch.secondary_mentor_id = request.POST.get("secondary_mentor_id")
             active_form = sub_batch_form.save()
-            if (
-                int(request.POST.get("timeline"))
-                != sub_batch.timeline.id
-            ):
+            if int(request.POST.get("timeline")) != sub_batch.timeline.id:
                 SubBatchTaskTimeline.bulk_delete({"sub_batch_id": pk})
                 schedule_timeline_for_sub_batch(sub_batch, request.user)
             else:
@@ -284,13 +243,9 @@ def update_sub_batch(request, pk):
                     sub_batch,
                     is_create=False,
                 )
-            return redirect(
-                reverse("batch.detail", args=[sub_batch.batch.id])
-            )
+            return redirect(reverse("batch.detail", args=[sub_batch.batch.id]))
         context = {"form": sub_batch_form, "sub_batch": sub_batch}
-        return render(
-            request, "sub_batch/update_sub_batch.html", context
-        )
+        return render(request, "sub_batch/update_sub_batch.html", context)
     sub_batch = SubBatch.objects.get(id=pk)
     context = {
         "form": SubBatchForm(instance=sub_batch),
@@ -314,16 +269,10 @@ def delete_sub_batch(request, pk):
         InternDetail.bulk_delete({"sub_batch_id": pk})
         SubBatchTaskTimeline.bulk_delete({"sub_batch_id": pk})
         sub_batch.delete()
-        return JsonResponse(
-            {"message": "Sub-Batch deleted succcessfully"}
-        )
+        return JsonResponse({"message": "Sub-Batch deleted succcessfully"})
     except Exception as e:
-        logging.error(
-            f"An error has occured while deleting the Sub-Batch \n{e}"
-        )
-        return JsonResponse(
-            {"message": "Error while deleting Sub-Batch!"}, status=500
-        )
+        logging.error(f"An error has occured while deleting the Sub-Batch \n{e}")
+        return JsonResponse({"message": "Error while deleting Sub-Batch!"}, status=500)
 
 
 class SubBatchDetail(LoginRequiredMixin, DetailView):
@@ -429,14 +378,19 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
                     ),
                     0.0,
                 ),
-                no_of_retries=Sum(Subquery(retries.values("count")), distinct=True),
-                completion=(
-                    Sum(Subquery(retries.values("passed")), distinct=True) / task_count
-                )
-                * 100,
+                no_of_retries=Coalesce(
+                    Sum(Subquery(retries.values("count")), distinct=True), 0
+                ),
+                completion=Coalesce(
+                    (
+                        Sum(Subquery(retries.values("passed")), distinct=True)
+                        / task_count
+                    )
+                    * 100,
+                    0,
+                ),
             )
         )
-        # print(SubBatchTaskTimeline.objects.filter(sub_batch_id=request.POST.get("sub_batch"), assessments__user_id=9, id=90).annotate(passed=Count("assessments__is_retry", filter=Q(assessments__is_retry=False))).values("assessments__user_id", "id", "passed"))
         return query
 
     def customize_row(self, row, obj):
@@ -447,22 +401,18 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
             buttons += (
                 # template_utils.edit_button_new_page(reverse("batch")) + #need to change in next PR
                 template_utils.delete_button(
-                    "removeIntern('"
-                    + reverse("trainee.remove", args=[obj.id])
-                    + "')"
+                    "removeIntern('" + reverse("trainee.remove", args=[obj.id]) + "')"
                 )
             )
         row[
             "action"
         ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
-        row["expected_completion"] = obj.expected_completion.strftime(
-            "%d %b %Y"
-        )
+        row["expected_completion"] = obj.expected_completion.strftime("%d %b %Y")
         return
 
     def get_response_dict(self, request, paginator, draw_idx, start_pos):
         response = super().get_response_dict(request, paginator, draw_idx, start_pos)
-        permformance_report = {
+        performance_report = {
             "Good": 0,
             "Meet Expectation": 0,
             "Above Average": 0,
@@ -471,16 +421,16 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
         }
         for performance in response["data"]:
             if float(performance["average_marks"]) >= 90:
-                permformance_report["Good"] += 1
+                performance_report["Good"] += 1
             elif 90 > float(performance["average_marks"]) >= 75:
-                permformance_report["Meet Expectation"] += 1
+                performance_report["Meet Expectation"] += 1
             elif 75 > float(performance["average_marks"]) >= 65:
-                permformance_report["Above Average"] += 1
+                performance_report["Above Average"] += 1
             elif 65 > float(performance["average_marks"]) >= 50:
-                permformance_report["Average"] += 1
+                performance_report["Average"] += 1
             elif float(performance["average_marks"]) < 50:
-                permformance_report["Poor"] += 1
-        response["extra_data"] = permformance_report
+                performance_report["Poor"] += 1
+        response["extra_data"] = performance_report
         return response
 
 
@@ -494,9 +444,7 @@ def add_trainee(request):
         form = AddInternForm(request.POST)
         if form.is_valid():  # Check if form is valid or not
             try:
-                sub_batch = SubBatch.objects.get(
-                    id=request.POST.get("sub_batch_id")
-                )
+                sub_batch = SubBatch.objects.get(id=request.POST.get("sub_batch_id"))
                 timeline_data = SubBatchTaskTimeline.objects.filter(
                     sub_batch=sub_batch
                 ).last()
@@ -530,9 +478,7 @@ def remove_trainee(request, pk):
     try:
         intern_detail = get_object_or_404(InternDetail, id=pk)
         intern_detail.delete()
-        return JsonResponse(
-            {"message": "Intern has been deleted succssfully"}
-        )
+        return JsonResponse({"message": "Intern has been deleted succssfully"})
     except Exception as e:
         logging.error(f"An error has occured while deleting an intern \n{e}")
         return JsonResponse({"message": "Error while deleting Trainee!"}, status=500)
