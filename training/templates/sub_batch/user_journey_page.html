@@ -20,25 +20,23 @@
                 </div>
             </div>
         </div>
-        {% comment %}
         <div class="rounded-xl bg-mild-green-10 flex justify-center items-center flex-col mr-6"
             style="width: 180px;height: 90px;">
-            <h3 class="font-bold mb-2">10</h3>
+            <h3 class="font-bold mb-2">{{ query.average_marks|default_if_none:"-" }}</h3>
             <p class="text-mild-green text-base">Average Score %</p>
         </div>
         <div class="rounded-xl bg-dark-blue-10 flex justify-center items-center flex-col mr-6"
             style="width: 180px;height: 90px;">
-            <h3 class="font-bold mb-2">4</h3>
-            <p class="text-dark-blue text-base">Total Retries %</p>
+            <h3 class="font-bold mb-2">{{ query.no_of_retries }}</h3>
+            <p class="text-dark-blue text-base">Total Retries</p>
         </div>
         <div class=" flex justify-between items-start flex-col" style="width: 180px;height: 90px;">
             <h3 class="font-bold mb-2">Overall Completion</h3>
             <div style="width: 250px;height: 10px;" class="rounded-xl bg-dark-blue-10">
-                <div class="rounded-xl bg-dark-blue" style="width: 70%;height: 100%;"></div>
+                <div class="rounded-xl bg-dark-blue" style="width: {{ query.completion }}%;height: 100%;"></div>
             </div>
-            <p class="text-sm text-gray-400">53% Completed</p>
+            <p class="text-sm text-gray-400">{{ query.completion }}% Completed</p>
         </div>
-        {% endcomment %}
     </div>
 </div>
 <div class="px-3 pt-5">
@@ -92,6 +90,7 @@
                     <div class="form-group mb-7" id="{{form.status.label|lower}}_group">
                         {{ form.is_retry }}
                         <label for="is_retry" class="ml-3 mb-3.6 text-sm text-dark-black-50">Mark as retry</label>
+                        <p class="text-dark-red text-xs">Note: Please make sure to check the checkbox when entering the retry score, but do not select it the first time.</p>
                     </div>
                 </div>
                 <div id="non_field_error"></div>
@@ -117,7 +116,7 @@
                             <div class="inline mr-1"><span class="hbl hbl-edit text-2xl text-dark-black/50"></span></div>
                         </a>
                     <p>
-                        {% if task.retries != -1 %}
+                        {% if task.retries != 0 %}
                             {% if task.is_retry %}
                                 <span class="bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm">Retry</span>
                             {% else %}
@@ -134,11 +133,11 @@
                     <p>Score</p>
                 </div>
                 <div class="div flex flex-col justify-center items-center">
-                    <h3 class="font-bold mb-1">{% if task.inactive_tasks %} - {% else %} {% if task.retries == -1 %} - {% else %} {{ task.retries|default:"-" }} {% endif %} {% endif %}</h3>
+                    <h3 class="font-bold mb-1">{% if task.inactive_tasks %} - {% else %} {{ task.retries|default:"-" }} {% endif %}</h3>
                     <p>Retries</p>
                 </div>
                 <div class="div flex flex-col justify-center items-center">
-                    <h3 class="font-bold mb-1">{% if task.inactive_tasks %} - {% else %} {% if task.retries == -1 %} No
+                    <h3 class="font-bold mb-1">{% if task.inactive_tasks %} - {% else %} {% if task.retries == 0 %} No
                         {% else%} Yes {% endif %} {% endif %}</h3>
                     <p>Present Status</p>
                 </div>
@@ -163,7 +162,7 @@
                             <div class="inline mr-1"><span class="hbl hbl-delete text-2xl text-dark-black/50"></span></div>
                         </a>
                     <p>
-                        {% if assessment.retries != -1 %} 
+                        {% if assessment.retries != 0 %} 
                             {% if assessment.is_retry %}
                                 <span class="bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm">Retry</span>
                             {% else %}
@@ -179,11 +178,11 @@
                     <p>Score</p>
                 </div>
                 <div class="div flex flex-col justify-center items-center">
-                    <h3 class="font-bold mb-1">{% if assessment.retries == -1 %} - {% else%} {{ assessment.retries|default:"-" }} {% endif %}</h3>
+                    <h3 class="font-bold mb-1">{% if assessment.retries == 0 %} - {% else%} {{ assessment.retries|default:"-" }} {% endif %}</h3>
                     <p>Retries</p>
                 </div>
                 <div class="div flex flex-col justify-center items-center">
-                    <h3 class="font-bold mb-1">{% if assessment.retries == -1 %} No {% else%} Yes {% endif %}</h3>
+                    <h3 class="font-bold mb-1">{% if assessment.retries == 0 %} No {% else%} Yes {% endif %}</h3>
                     <p>Present Status</p>
                 </div>
             </div>

@@ -1,4 +1,4 @@
-from django.db.models import Avg, Count, OuterRef, Q, Subquery, Sum
+from django.db.models import Avg, Count, OuterRef, Q, Subquery, Sum, F, Case, When, Value
 from django.db.models.functions import Coalesce
 from django.urls import reverse
 from django.utils import timezone
@@ -225,6 +225,12 @@ class TraineeDatatableTest(BaseTestCase):
             _fill_optional=["expected_completion"],
             _quantity=5,
         )
+        baker.make(
+            "hubble.SubBatchTaskTimeline",
+            days=seq(0),
+            order=seq(0),
+            sub_batch_id=self.sub_batch.id
+        )
         self.persisted_valid_inputs = {
             "draw": 1,
             "start": 0,
@@ -253,7 +259,9 @@ class TraineeDatatableTest(BaseTestCase):
         To check whether all columns are present in datatable and length of rows without any filter
         """
         task_count = (
-            SubBatchTaskTimeline.objects.filter(sub_batch_id=self.sub_batch.id)
+            SubBatchTaskTimeline.objects.filter(
+                sub_batch_id=self.sub_batch.id
+            )
             .values("id")
             .count()
         )
@@ -264,23 +272,14 @@ class TraineeDatatableTest(BaseTestCase):
                 id=OuterRef("user__assessments__task_id"),
             )
             .annotate(
-                count=Count("assessments__is_retry") - 1,
-                passed=Count(
-                    "assessments__is_retry", filter=Q(assessments__is_retry=False)
-                ),
+                count=Count("assessments__is_retry", filter=Q(assessments__is_retry=True)),
             )
-            .values("assessments__user_id", "id", "count", "passed")
+            .values("assessments__user_id", "id", "count", "assessments__score")   
         )
         last_attempt = (
             SubBatchTaskTimeline.objects.filter(
                 id=OuterRef("user__assessments__task_id"),
                 assessments__user_id=OuterRef("user_id"),
-            )
-            .annotate(
-                count=Count(
-                    "assessments__is_retry", filter=Q(assessments__is_retry=True)
-                )
-                - 1
             )
             .order_by("-assessments__id")[:1]
         )
@@ -288,23 +287,29 @@ class TraineeDatatableTest(BaseTestCase):
             InternDetail.objects.filter(sub_batch__id=self.sub_batch.id)
             .select_related("user")
             .annotate(
-                average_marks=Coalesce(
-                    Avg(
-                        Subquery(last_attempt.values("assessments__score")),
-                        distinct=True,
+                average_marks=Case(
+                    When(
+                        user_id=F("user__assessments__user_id"),
+                        then=Coalesce(
+                            Avg(
+                                Subquery(last_attempt.values("assessments__score")),
+                                distinct=True,
+                            ),
+                            0.0,
+                        ),
                     ),
-                    0.0,
+                    default=None,
                 ),
                 no_of_retries=Coalesce(
                     Sum(Subquery(retries.values("count")), distinct=True), 0
                 ),
                 completion=Coalesce(
                     (
-                        Sum(Subquery(retries.values("passed")), distinct=True)
-                        / task_count
+                        Count("user__assessments__task_id", filter=Q(user__assessments__user_id=F("user_id")), distinct=True)
+                        / float(task_count)
                     )
                     * 100,
-                    0,
+                    0.0,
                 ),
             )
         )
@@ -318,10 +323,15 @@ class TraineeDatatableTest(BaseTestCase):
             self.assertEqual(expected_value.pk, int(received_value["pk"]))
             self.assertEqual(expected_value.user.name, received_value["user"])
             self.assertEqual(expected_value.college, received_value["college"])
-            self.assertEqual(expected_value.completion, int(received_value["completion"]))
-            self.assertEqual(
-                expected_value.average_marks, float(received_value["average_marks"])
-            )
+            self.assertEqual(expected_value.completion, float(received_value["completion"]))
+            if expected_value.average_marks == None:
+                self.assertEqual(
+                    "-", received_value["average_marks"]
+                )
+            else:
+                self.assertEqual(
+                    expected_value.average_marks, float(received_value["average_marks"])
+                )
             self.assertEqual(
                 expected_value.no_of_retries, int(received_value["no_of_retries"])
             )
@@ -362,21 +372,21 @@ class TraineeDatatableTest(BaseTestCase):
             "Average": 0,
             "Poor": 0,
         }
-
         response = self.make_post_request(
             reverse(self.datatable_route_name), data=self.get_valid_inputs()
         )
         for performance in response.json()["data"]:
-            if float(performance["average_marks"]) >= 90:
-                performance_report["Good"] += 1
-            elif 90 > float(performance["average_marks"]) >= 75:
-                performance_report["Meet Expectation"] += 1
-            elif 75 > float(performance["average_marks"]) >= 65:
-                performance_report["Above Average"] += 1
-            elif 65 > float(performance["average_marks"]) >= 50:
-                performance_report["Average"] += 1
-            elif float(performance["average_marks"]) < 50:
-                performance_report["Poor"] += 1
+            if performance["average_marks"] != "-":
+                if float(performance["average_marks"]) >= 90:
+                    performance_report["Good"] += 1
+                elif 90 > float(performance["average_marks"]) >= 75:
+                    performance_report["Meet Expectation"] += 1
+                elif 75 > float(performance["average_marks"]) >= 65:
+                    performance_report["Above Average"] += 1
+                elif 65 > float(performance["average_marks"]) >= 50:
+                    performance_report["Average"] += 1
+                elif float(performance["average_marks"]) < 50:
+                    performance_report["Poor"] += 1
 
         self.assertTrue("extra_data" in response.json())
         self.assertTrue("Good" in response.json()["extra_data"])
