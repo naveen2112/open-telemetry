@@ -13,11 +13,14 @@ from django.utils.translation import ngettext_lazy
 from faker import Faker
 from model_bakery import baker
 
-from core.constants import ADMIN_EMAILS
 from hubble.models import User
 from hubble_report.settings import env
+from core.constants import ADMIN_EMAILS
 
 
+# It is used to disable the 'potected access error', the protected member
+# is not intended to access it from outside the class or subclass
+# pylint: disable=protected-access
 class UnManagedModelTestRunner(DiscoverRunner):
     """
     Test runner that automatically makes all unmanaged models in your Django
@@ -26,6 +29,9 @@ class UnManagedModelTestRunner(DiscoverRunner):
     """
 
     def setup_test_environment(self, *args, **kwargs):
+        # It is used to disable the 'attribute-defined-outside-init' the
+        # instance attribute is defines outside the class
+        # pylint: disable=attribute-defined-outside-init
         self.unmanaged_models = [
             m for m in apps.get_models() if not m._meta.managed
         ]
@@ -57,7 +63,8 @@ class BaseTestCase(TestCase):
 
     def create_user(self):
         """
-        This function is responsible for creating an user and giving them admi access
+        This function is responsible for creating an user and giving
+        them admin access
         """
         user = baker.make(
             User, is_employed=True, _fill_optional=["email"]
@@ -105,6 +112,10 @@ class BaseTestCase(TestCase):
             url_pattern, SERVER_NAME=self.testcase_server_name
         )
 
+    # It isn used to disable 'dangerous-default-value'.By default, pylint
+    # warns against using mutable objects as default values for function
+    # parameters because they can lead to unexpected behavior
+    # pylint: disable=dangerous-default-value
     def get_valid_inputs(self, override={}):
         """
         This function is responsible for getting the valid inputs for
@@ -114,19 +125,22 @@ class BaseTestCase(TestCase):
 
     def decoded_json(self, response):
         """
-        This function is responsible getting the response and converting into bytes
+        This function is responsible getting the response and converting
+        into bytes
         """
         return response.content
 
     def get_model_instance(self, model_name):
         """
-        This function is responsible for getting the correct model for DB testcases
+        This function is responsible for getting the correct model
+        for DB testcases
         """
         return apps.get_model(app_label="hubble", model_name=model_name)
 
     def get_queryset_instance(self, model_name, filters):
         """
-        This function is responsible for filtering the model as per the need
+        This function is responsible for filtering the model
+        as per the need
         """
         model = self.get_model_instance(model_name)
         query_filters = Q(**filters)
@@ -134,7 +148,8 @@ class BaseTestCase(TestCase):
 
     def assert_database_has(self, model_name, filters):
         """
-        This function checks whether the DB has the data which we have created or manipulated
+        This function checks whether the DB has the data which
+        we have created or manipulated
         """
         queryset = self.get_queryset_instance(model_name, filters)
         self.assertTrue(queryset.exists())
@@ -148,7 +163,8 @@ class BaseTestCase(TestCase):
 
     def assert_database_not_has(self, model_name, filters):
         """
-        This function checks whether the data we desired to delete, has been deleted ot not
+        This function checks whether the data we desired to delete,
+        has been deleted ot not
         """
         queryset = self.get_queryset_instance(model_name, filters)
         self.assertFalse(queryset.exists())
@@ -163,26 +179,26 @@ class BaseTestCase(TestCase):
         self, key, value, current_value, validation_parameter
     ):
         """
-        This function is responsible for building the error json response dynamically
+        This function is responsible for building the error json
+        response dynamically
         """
         if value == "min_length":
-            message = (
-                ngettext_lazy(
-                    "Ensure this value has at least %(validation_parameter)d character (it has %(current_length)d).",
-                    "Ensure this value has at least %(validation_parameter)d characters (it has %(current_length)d).",
-                    validation_parameter[key],
-                )
-                % {
-                    "current_length": len(current_value[key]),
-                    "validation_parameter": validation_parameter[key],
-                }
-            )
+            message = ngettext_lazy(
+                "Ensure this value has at least %(validation_parameter)d "
+                "character (it has %(current_length)d).",
+                "Ensure this value has at least %(validation_parameter)d "
+                "characters (it has %(current_length)d).",
+                validation_parameter[key],
+            ) % {
+                "current_length": len(current_value[key]),
+                "validation_parameter": validation_parameter[key],
+            }
         elif value == "required":
             message = "This field is required."
         elif value == "invalid_choice":
             message = "Select a valid choice. That choice is not one of the available choices."
         elif value == "invalid_order":
-            message = f"The current order of the task is invalid. The valid input for order ranges form 1-{validation_parameter[key]}."
+            message = f"The current order of the task is invalid. The valid input for order ranges form 1-{validation_parameter[key]}."  # pylint: disable=C0301
         elif value == "zero_order_error":
             message = "Order value must be greater than zero."
         elif value == "timeline_has_no_tasks":
@@ -191,6 +207,10 @@ class BaseTestCase(TestCase):
             message = "Score must be between 0 to 100"
         return message
 
+    # It is used to disable the "too-mnay-arguments", according to PEP8
+    # guidlines if the function has more than 5 arguments in the function
+    # it will make code harder to maintain
+    # pylint: disable-next=too-many-arguments
     def get_ajax_response(
         self,
         current_value={},
@@ -230,6 +250,10 @@ class BaseTestCase(TestCase):
             }
         )
 
+    # It is used to disable the "too-mnay-arguments", according to PEP8
+    # guidlines if the function has more than 5 arguments in the function
+    # it will make code harder to maintain
+    # pylint: disable-next=dangerous-default-value
     def validate_form_errors(
         self,
         form,
@@ -238,7 +262,8 @@ class BaseTestCase(TestCase):
         validation_parameter={},
     ):
         """
-        Validates form errors by retrieving error messages and asserting them for each field
+        Validates form errors by retrieving error messages and asserting
+        them for each field
         """
         for key, values in field_errors.items():
             for value in values:

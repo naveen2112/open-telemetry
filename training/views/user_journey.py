@@ -120,17 +120,18 @@ def update_task_score(request, primary_key):
             report.sub_batch = SubBatch.objects.filter(
                 intern_details__user=primary_key
             ).first()
-            report.is_retry = request.POST.get("status")
+            report.is_retry = request.POST.get("status") == "true"
             report.created_by = request.user
             report.save()
             response_data["status"] = "success"
-        field_errors = form.errors.as_json()
-        non_field_errors = form.non_field_errors().as_json()
-        response_data = {
-            "status": "error",
-            "field_errors": field_errors,
-            "non_field_errors": non_field_errors,
-        }
+        else:
+            field_errors = form.errors.as_json()
+            non_field_errors = form.non_field_errors().as_json()
+            response_data = {
+                "status": "error",
+                "field_errors": field_errors,
+                "non_field_errors": non_field_errors,
+            }
     return JsonResponse(response_data)
 
 

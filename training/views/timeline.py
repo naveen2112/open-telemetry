@@ -129,8 +129,8 @@ def create_timeline_template(request):
         form = TimelineForm(request.POST)
         if form.is_valid():  # Check if form is valid or not
             timeline = form.save(commit=False)
-            timeline.is_active = request.POST.get(
-                "is_active"
+            timeline.is_active = (
+                request.POST.get("is_active") == "true"
             )  # Set is_active to true
             # if the input is checked else it will be false
             timeline.created_by = request.user
@@ -153,14 +153,14 @@ def create_timeline_template(request):
                         created_by=task.created_by,
                     )
             response_data["status"] = "success"
-
-        field_errors = form.errors.as_json()
-        non_field_errors = form.non_field_errors().as_json()
-        response_data = {
-            "status": "error",
-            "field_errors": field_errors,
-            "non_field_errors": non_field_errors,
-        }
+        else:
+            field_errors = form.errors.as_json()
+            non_field_errors = form.non_field_errors().as_json()
+            response_data = {
+                "status": "error",
+                "field_errors": field_errors,
+                "non_field_errors": non_field_errors,
+            }
     return JsonResponse(response_data)
 
 
@@ -200,8 +200,8 @@ def update_timeline_template(request, primary_key):
     )
     if form.is_valid():  # check if form is valid or not
         timeline = form.save(commit=False)
-        timeline.is_active = request.POST.get(
-            "is_active"
+        timeline.is_active = (
+            request.POST.get("is_active") == "true"
         )  # Set is_active to true
         # if the input is checked else it will be false
         timeline.save()

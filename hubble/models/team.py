@@ -25,4 +25,4 @@ class Team(db.SoftDeleteWithBaseModel):
         db_table = "teams"
 
     def __str__(self):
-        return self.name
+        return str(self.name)

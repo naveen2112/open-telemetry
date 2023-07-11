@@ -48,6 +48,7 @@ class BaseModel(models.Model):
         """
         Meta class for defining class behavior and properties.
         """
+
         abstract = True
 
 
@@ -92,8 +93,11 @@ class SoftDeleteWithBaseModel(BaseModel):
         """
         Meta class for defining class behavior and properties.
         """
+
         abstract = True
 
+    # It is used to ommit 'unused-argument'.The function has unused arguments
+    # pylint: disable=unused-argument
     def delete(self, *args, **kwargs):
         """
         This function sets the "deleted_at" attribute to the current datetime and saves the object.

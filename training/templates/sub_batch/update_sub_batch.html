@@ -1,140 +1,126 @@
 {% extends 'layouts/base.html' %}
 
 {% block title %}
-Update Sub Batch
+    Update Sub Batch
 {% endblock title %}
 
 {% block header %}
-<div class="flex justify-between items-center">
-    <div>
-        <div class="text-dark-black text-lg mb-1 leading-none">
-            Update Sub-Batch
+    <div class="flex justify-between items-center">
+        <div>
+            <div class="text-dark-black text-lg mb-1 leading-none">Update Sub-Batch</div>
+            <div class="text-dark-black-50 text-sm"></div>
         </div>
-        <div class="text-dark-black-50 text-sm">
-
+        <div class=" w-full flex justify-end items-center batch-btn">
+            <a href="{% url 'batch.detail' sub_batch.batch.id %}"
+               class="text-white bg-gray-500 rounded inline-flex items-center px-3 py-1 mr-6 text-base font-normal">
+                <span class="text-xl mr-2">x</span>
+                Cancel
+            </a>
+            <button type="submit"
+                    class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal"
+                    id="update_sub_batch">
+                <span class="text-xl mr-2">+</span>
+                Update Sub Batch
+            </button>
         </div>
     </div>
-    <div class=" w-full flex justify-end items-center batch-btn">
-        <a href="{% url 'batch.detail' sub_batch.batch.id %}"
-            class="text-white bg-gray-500 rounded inline-flex items-center px-3 py-1 mr-6 text-base font-normal">
-            <span class="text-xl mr-2">x</span>
-            Cancel
-        </a>
-        <button type="submit"
-            class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal"
-            id="update_sub_batch">
-            <span class="text-xl mr-2">+</span>
-            Update Sub Batch
-        </button>
-    </div>
-</div>
 {% endblock %}
 
 {% block body %}
-<form method="post" enctype="multipart/form-data" id="sub_batch_form">
-    {% csrf_token %}
-    <div class="grid grid-cols-3 gap-210">
-        <div class="form-field">
-            {{ form.name|show_label }}
-            {{ form.name }}
-            {{ form.name|show_field_errors }}
-        </div>
-        <div class="work-basic-dropdown form-field">
-            {{ form.team|show_label }}
-            <div class="relative">
-                {{ form.team }}
+    <form method="post" enctype="multipart/form-data" id="sub_batch_form">
+        {% csrf_token %}
+        <div class="grid grid-cols-3 gap-210">
+            <div class="form-field">
+                {{ form.name|show_label }}
+                {{ form.name }}
+                {{ form.name|show_field_errors }}
             </div>
-            {{ form.team|show_field_errors }}
-        </div>
-        <div class="form-field">
-            {{ form.start_date|show_label }}
-            {{ form.start_date }}
-            {{ form.start_date|show_field_errors }}
-        </div>
-        <div class="work-basic-dropdown form-field">
-            {{ form.timeline|show_label }}
-            <div class="relative">
-                <div class="w-full block border border-primary-dark-30 mt-2.5 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 bg-transparent w-250"
-                    id="timeline-name" style="
-                                    position: absolute;
-                                    top: -10px;
-                                "></div>
-                {{ form.timeline }}
+            <div class="work-basic-dropdown form-field">
+                {{ form.team|show_label }}
+                <div class="relative">{{ form.team }}</div>
+                {{ form.team|show_field_errors }}
             </div>
-            {{ form.timeline|show_field_errors }}
-        </div>
-        <div class="work-basic-dropdown form-field">
-            {{ form.primary_mentor_id|show_label }}
-            <div class="relative mt-2.5">
-                {{ form.primary_mentor_id }}
+            <div class="form-field">
+                {{ form.start_date|show_label }}
+                {{ form.start_date }}
+                {{ form.start_date|show_field_errors }}
             </div>
-            {{ form.primary_mentor_id|show_field_errors }}
-        </div>
-        <div class="work-basic-dropdown form-field">
-            {{ form.secondary_mentor_id|show_label }}
-            <div class="relative mt-2.5">
-                {{ form.secondary_mentor_id }}
+            <div class="work-basic-dropdown form-field">
+                {{ form.timeline|show_label }}
+                <div class="relative">
+                    <div class="w-full block border border-primary-dark-30 mt-2.5 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 bg-transparent w-250"
+                         id="timeline-name"
+                         style="position: absolute;
+                                top: -10px"></div>
+                    {{ form.timeline }}
+                </div>
+                {{ form.timeline|show_field_errors }}
             </div>
-            {{ form.secondary_mentor_id|show_field_errors }}
+            <div class="work-basic-dropdown form-field">
+                {{ form.primary_mentor_id|show_label }}
+                <div class="relative mt-2.5">{{ form.primary_mentor_id }}</div>
+                {{ form.primary_mentor_id|show_field_errors }}
+            </div>
+            <div class="work-basic-dropdown form-field">
+                {{ form.secondary_mentor_id|show_label }}
+                <div class="relative mt-2.5">{{ form.secondary_mentor_id }}</div>
+                {{ form.secondary_mentor_id|show_field_errors }}
+            </div>
         </div>
-    </div>
-    <div class="mt-5">
-        {% if form.errors %}
-        {{ form.non_field_errors|show_non_field_errors }}
-        {% endif %}
-    </div>
-</form>
+        <div class="mt-5">
+            {% if form.errors %}{{ form.non_field_errors|show_non_field_errors }}{% endif %}
+        </div>
+    </form>
 {% endblock %}
 
 {% block script %}
-<script>
-
-    $("#id_team").change(function () {
+    <script>
+        $("#id_team").change(function() {
             update_timeline_value();
         })
 
-    function update_timeline_value() {
-        if ($("#id_team").val()) {
-            $('.page-loader').show();
-            $("#id_timeline").val("");
-            $.ajax({
-                type: "POST",
-                url: "{% url 'sub-batch.get_timeline' %}",
-                data: {
-                    team_id: $("#id_team").val()
-                },
-                success: function (data) {
-                    $('.page-loader').hide();
-                    $("#id_timeline").val(data.timeline.id);
-                    $("#timeline-name").html(data.timeline.name);
-                    $('#id_timeline').siblings().find('#show-value').html(data.timeline.name);
-                },
-                error: function (xhr, status, error) {
-                    $('.page-loader').hide();
-                    alert(xhr.responseJSON.message);
+        function update_timeline_value() {
+            if ($("#id_team").val()) {
+                $('.page-loader').show();
+                $("#id_timeline").val("");
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'sub-batch.get_timeline' %}",
+                    data: {
+                        team_id: $("#id_team").val()
+                    },
+                    success: function(data) {
+                        $('.page-loader').hide();
+                        $("#id_timeline").val(data.timeline.id);
+                        $("#timeline-name").html(data.timeline.name);
+                        $('#id_timeline').siblings().find('#show-value').html(data.timeline.name);
+                    },
+                    error: function(xhr, status, error) {
+                        $('.page-loader').hide();
+                        alert(xhr.responseJSON.message);
+                    }
+                });
+            }
+        };
+
+        $(document).ready(function() {
+            update_timeline_value();
+            $('#update_sub_batch').click(function(e) {
+                e.preventDefault();
+                $('#sub_batch_form').submit();
+            })
+        });
+
+        $(function() {
+            var startDate = new Date('{{ sub_batch.start_date }}');
+            $('input[name="start_date"]').daterangepicker({
+                singleDatePicker: true,
+                showDropdowns: true,
+                minDate: startDate,
+                locale: {
+                    format: 'YYYY-MM-DD'
                 }
             });
-        }
-    };
-
-    $(document).ready(function() {
-        update_timeline_value();
-        $('#update_sub_batch').click(function(e) {
-            e.preventDefault();
-            $('#sub_batch_form').submit();
-        })
-    });
-
-    $(function() {
-        var startDate = new Date('{{ sub_batch.start_date }}');
-        $('input[name="start_date"]').daterangepicker({
-            singleDatePicker: true,
-            showDropdowns: true,
-            minDate: startDate,
-            locale: {
-                format: 'YYYY-MM-DD'
-            }
         });
-    });
-</script>
+    </script>
 {% endblock %}

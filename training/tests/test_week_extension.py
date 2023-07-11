@@ -129,12 +129,14 @@ class ExtensionUpdateTest(BaseTestCase):
         """
         # Check what happens when is_retry is True
         data = self.get_valid_inputs()
+        print(data)
         response = self.make_post_request(
             reverse(
                 self.update_edit_route_name, args=[self.trainee.user_id]
             ),
             data=data,
         )
+        print(self.decoded_json(response))
         self.assertJSONEqual(
             self.decoded_json(response), {"status": "success"}
         )

@@ -62,7 +62,7 @@ class TimelineTemplateTaskDataTable(
         """
         row[
             "action"
-        ] = f"<div class='form-inline justify-content-center'>-</div>"
+        ] = "<div class='form-inline justify-content-center'>-</div>"
         if self.request.user.is_admin_user:
             buttons = template_utils.edit_button(
                 reverse("timeline-task.show", args=[obj.id])
@@ -96,10 +96,11 @@ def update_order(request):
             task.order = order + 1
             task.save()
         response_data["status"] = "success"
-    response_data = {
-        "message": "Some of the tasks don't belong to the current timeline",
-        "status": "error",
-    }
+    else:
+        response_data = {
+            "message": "Some of the tasks doesn't belong to the current timeline",
+            "status": "error",
+        }
     return JsonResponse(response_data)
 
 

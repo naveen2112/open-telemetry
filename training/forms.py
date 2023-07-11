@@ -129,16 +129,16 @@ class TimelineTaskForm(forms.ModelForm):
     )
     present_type = forms.ChoiceField(
         error_messages={
-            "invalid_choice": "Select a valid choice. \
-                That choice is not one of the available choices."
+            "invalid_choice": "Select a valid choice. "
+            "That choice is not one of the available choices."
         },
         widget=forms.RadioSelect,
         choices=PRESENT_TYPES,
     )
     task_type = forms.ChoiceField(
         error_messages={
-            "invalid_choice": "Select a valid choice. \
-                That choice is not one of the available choices."
+            "invalid_choice": "Select a valid choice. "
+            "That choice is not one of the available choices."
         },
         widget=forms.RadioSelect,
         choices=TASK_TYPES,
@@ -447,9 +447,8 @@ class SubBatchTimelineForm(forms.ModelForm):
         ) + 1
         if self.cleaned_data["order"] > maximum_order_value:
             raise ValidationError(
-                f"The current order of the task is invalid. The valid \
-                    input for order ranges form 1-{maximum_order_value}.",
-                code="invalid_order",
+                f"The current order of the task is invalid. The valid input for order ranges form 1-{maximum_order_value}.",  # pylint: disable=C0301
+                code="invali_order",
             )
         if self.cleaned_data["order"] <= 0:
             raise ValidationError(
@@ -482,16 +481,16 @@ class SubBatchTimelineForm(forms.ModelForm):
     )
     present_type = forms.ChoiceField(
         error_messages={
-            "invalid_choice": "Select a valid choice. That \
-                choice is not one of the available choices."
+            "invalid_choice": "Select a valid choice. "
+            "That choice is not one of the available choices."
         },
         widget=forms.RadioSelect,
         choices=PRESENT_TYPES,
     )
     task_type = forms.ChoiceField(
         error_messages={
-            "invalid_choice": "Select a valid choice. That \
-                choice is not one of the available choices."
+            "invalid_choice": "Select a valid choice. "
+            "That choice is not one of the available choices."
         },
         widget=forms.RadioSelect,
         choices=TASK_TYPES,

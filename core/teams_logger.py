@@ -37,7 +37,7 @@ class TeamsExceptionHandler(AdminEmailHandler):
     Inherits from the AdminEmailHandler class
     """
 
-    def emit(self, record, *args, **kwargs):
+    def emit(self, record):
         url = env("TEAMS_LOGGING_WEBHOOK_URL")
 
         if url:

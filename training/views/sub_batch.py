@@ -378,7 +378,7 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
     model = InternDetail
 
     column_defs = [
-        {"name": "primary_key", "visible": False, "searchable": False},
+        {"name": "pk", "visible": False, "searchable": False},
         {
             "name": "user",
             "title": "User",

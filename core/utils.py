@@ -18,6 +18,10 @@ class CustomDatatable(AjaxDatatableView):
 
     show_column_filters = False
 
+    # It is used to ommit 'arguments-differ'.In this case, the
+    # `get_table_row_id` method in the `CustomDatatable` class has a different
+    # signature than the method it is overriding from the
+    # pylint: disable=arguments-differ
     def get_table_row_id(self, request, obj, i):
         """
         Provides a specific ID for the table row; default: "row-ID"

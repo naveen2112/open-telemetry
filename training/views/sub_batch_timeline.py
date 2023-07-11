@@ -271,8 +271,8 @@ def delete_sub_batch_timeline(request, primary_key):
                 )
             return JsonResponse(
                 {
-                    "message": "This is the last task, Atleast one task should \
-                        exist in the timeline"
+                    "message": "This is the last task, Atleast one"
+                    " task should exist in the timeline"
                 },
                 status=500,
             )

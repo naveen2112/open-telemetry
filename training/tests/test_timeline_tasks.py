@@ -278,7 +278,6 @@ class TimelineTaskUpdateTest(BaseTestCase):
         This function will run before every test and makes sure required data are ready
         """
         super().setUp()
-        self.maxDiff = True
         self.authenticate()
         self.update_valid_input()
 
@@ -573,6 +572,9 @@ class TimelineTaskReOrderTest(BaseTestCase):
         )
         random.shuffle(self.timeline_task_ids)
 
+    # It is used to disable the 'attribute-defined-outside-init' the
+    # instance attribute is defines outside the class
+    # pylint: disable=attribute-defined-outside-init
     def test_success(self):
         """
         Check what happens when valid data is given as input

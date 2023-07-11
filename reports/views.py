@@ -90,7 +90,7 @@ class EfficiencyDatatable(CustomDatatable):
 
     def customize_row(self, row, obj):
         # This is responsible for adding the view action button
-        buttons = template_utils.show_btn(
+        buttons = template_utils.show_btn( # pylint: disable=no-member
             reverse("detailed_efficiency", args=[obj["pk"]])
         )
         row[
@@ -210,10 +210,14 @@ class MonetizationDatatable(CustomDatatable):
             return f'{row["gap"]}%'
         if column == "ratings":
             if int(row["gap"]) <= 15:
-                return f'<span class="bg-mild-green-10 text-mild-green py-0.5 \
-                    px-1.5 rounded-xl text-sm">Good</span>'
-            return f'<span class="bg-dark-red-10 text-dark-red py-0.5 \
-                    px-1.5 rounded-xl text-sm">Need Improvements</span>'
+                return (
+                    '<span class="bg-mild-green-10 text-mild-green py-0.5 '
+                    'px-1.5 rounded-xl text-sm">Good</span>'
+                )
+            return (
+                '<span class="bg-dark-red-10 text-dark-red py-0.5 '
+                'px-1.5 rounded-xl text-sm">Need Improvements</span>'
+            )
         return super().render_dict_column(row, column)
 
 

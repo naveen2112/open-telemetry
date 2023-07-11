@@ -50,4 +50,7 @@ class SubBatchTaskTimeline(db.SoftDeleteWithBaseModel):
         """
         Check if the timesheet is editable based on its start date
         """
+        # It is used to ommit 'no-member' it tells that the '
+        # DateTimeWithoutTZField has no date member
+        # pylint: disable=no-member
         return self.start_date.date() >= timezone.now().date()
