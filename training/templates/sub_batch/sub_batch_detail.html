@@ -40,13 +40,18 @@ Sub Batch details
             <span class="absolute top-2 left-2"><span class="hbl hbl-search-icon text-dark-black-50 text-2xl"></span></span>
         </div>
     </div>
+    <div
+        class="px-4 py-2 mr-2 text-dark-black text-sm bg-dark-blue-10 rounded-lg text-center inline-flex flex-col items-center justify-center">
+        <p class="p-3 text-dark-blue"><span class="pl-2 font-bold text-dark-black" id="no_of_trainees"></span><br>No of
+            Trainees </p>
+    </div>
 </div>
 {% endblock %}
 
 {% block body %}
 <div class="flex justify-between items-center">
+    {% comment %}
     <div class="bg-white rounded-xl p-5 mr-4">
-        {% comment %}
         <h3 class="mb-1.5">Status</h3>
         <div class="flex justify-between items-center">
             <div class="rounded-md bg-mild-green-10 mr-4">
@@ -62,8 +67,8 @@ Sub Batch details
                 <p class="p-3 text-dark-red">Left <span class="pl-2 font-bold text-dark-black">10</span></p>
             </div>
         </div>
-        {% endcomment %}
     </div>
+    {% endcomment %}
     <div class="bg-white rounded-xl p-5">
         <h3 class="mb-1.5">Performance
             <i class="fa fa-info-circle tooltip">
@@ -73,26 +78,34 @@ Sub Batch details
                     <li><span style="color: #7dd3fc">&#8226;</span> Above Average &ge; 65</li>
                     <li><span class="text-orange-700">&#8226;</span> Average &ge; 50</li>
                     <li><span class="text-dark-red">&#8226;</span> Poor &lt; 50 </li>
-
+                    <li><span class="text-dark-black-10">&#8226;</span> Not Yet started</li>
                 </ul>
             </i> 
         </h3>
         <div class="flex justify-between items-center">
-            <div class="rounded-md bg-mild-green-10 mr-4">
-                <p class="p-3 text-mild-green">Good <span class="pl-2 font-bold text-dark-black" id="good_performance"></span></p>
+            <div
+                class="px-4 py-2 mr-2 text-dark-black text-sm bg-mild-green-10 rounded-lg text-center inline-flex flex-col items-center justify-center">
+                <p class="p-3 text-mild-green"><span class="pl-2 font-bold text-dark-black" id="good_performance"></span><br>Good </p>
             </div>
-            <div class="rounded-md bg-dark-blue-10 mr-4">
-                <p class="p-3 text-dark-blue">Meet Expectation <span class="pl-2 font-bold text-dark-black" id="meet_expectations_performance"></span>
-                </p>
+            <div
+                class="px-4 py-2 mr-2 text-dark-black text-sm bg-dark-blue-10 rounded-lg text-center inline-flex flex-col items-center justify-center">
+                <p class="p-3 text-dark-blue"><span class="pl-2 font-bold text-dark-black" id="meet_expectations_performance"></span><br>Meet Expectation </p>
             </div>
-            <div class="rounded-md bg-mild-green-10 mr-4">
-                <p class="p-3 text-mild-green">Above Average <span class="pl-2 font-bold text-dark-black" id="above_average_performance"></span></p>
+            <div
+                class="px-4 py-2 mr-2 text-dark-black text-sm bg-mild-green-10 rounded-lg text-center inline-flex flex-col items-center justify-center">
+                <p class="p-3 text-mild-green"><span class="pl-2 font-bold text-dark-black" id="above_average_performance"></span><br>Above Average </p>
             </div>
-            <div class="rounded-md bg-orange-100 mr-4">
-                <p class="p-3 text-orange-700">Average <span class="pl-2 font-bold text-dark-black" id="average_performance"></span></p>
+            <div
+                class="px-4 py-2 mr-2 text-dark-black text-sm bg-orange-100 rounded-lg text-center inline-flex flex-col items-center justify-center">
+                <p class="p-3 text-orange-700"><span class="pl-2 font-bold text-dark-black" id="average_performance"></span><br>Average </p>
             </div>
-            <div class="rounded-md bg-dark-red-10">
-                <p class="p-3 text-dark-red">Poor <span class="pl-2 font-bold text-dark-black" id="poor_performance"></span></p>
+            <div
+                class="px-4 py-2 mr-2 text-dark-black text-sm bg-dark-red-10 rounded-lg text-center inline-flex flex-col items-center justify-center">
+                <p class="p-3 text-dark-red"><span class="pl-2 font-bold text-dark-black" id="poor_performance"></span><br>Poor </p>
+            </div>
+            <div
+                class="px-4 py-2 mr-2 text-dark-black text-sm bg-dark-black/10 rounded-lg text-center inline-flex flex-col items-center justify-center">
+                <p class="p-3 text-dark-black"><span class="pl-2 font-bold text-dark-black" id="not_yet_started"></span><br>Not Yet Started </p>
             </div>
         </div>
     </div>
@@ -168,11 +181,13 @@ Sub Batch details
         });
     $(document).ready(function () {
         $('#sub-batch-trainees-table').on('xhr.dt', function (e, settings, json, xhr) {
-            $("#good_performance").text(json['extra_data']["Good"]);
-            $("#meet_expectations_performance").text(json['extra_data']["Meet Expectation"]);
-            $("#above_average_performance").text(json['extra_data']["Above Average"]);
-            $("#average_performance").text(json['extra_data']["Average"]);
-            $("#poor_performance").text(json['extra_data']["Poor"]);
+            $("#good_performance").text(json['extra_data']["performance_report"]["Good"]);
+            $("#meet_expectations_performance").text(json['extra_data']["performance_report"]["Meet Expectation"]);
+            $("#above_average_performance").text(json['extra_data']["performance_report"]["Above Average"]);
+            $("#average_performance").text(json['extra_data']["performance_report"]["Average"]);
+            $("#poor_performance").text(json['extra_data']["performance_report"]["Poor"]);
+            $("#not_yet_started").text(json['extra_data']["performance_report"]["Not Yet Started"]);
+            $("#no_of_trainees").text(json["extra_data"]['no_of_trainees']);
         });
     });
     function openModal() {

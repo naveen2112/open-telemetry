@@ -3,7 +3,8 @@ import logging
 import pandas as pd
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Avg, Count, OuterRef, Q, Subquery, Sum
+from django.db.models import (Avg, Case, Count, F, OuterRef, Q, Subquery, Sum,
+                              Value, When)
 from django.db.models.functions import Coalesce
 from django.forms import model_to_dict
 from django.http import JsonResponse
@@ -13,6 +14,7 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView
 
 from core import template_utils
+from core.constants import TASK_TYPE_ASSESSMENT
 from core.utils import (CustomDatatable, schedule_timeline_for_sub_batch,
                         validate_authorization)
 from hubble.models import (Batch, InternDetail, SubBatch, SubBatchTaskTimeline,
@@ -305,14 +307,20 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
             "searchable": False,
         },
         {
+            "name": "no_of_retries",
+            "title": "Total Retries (%)",
+            "visible": True,
+            "searchable": False,
+        },
+        {
             "name": "average_marks",
             "title": "Average Score (%)",
             "visible": True,
             "searchable": False,
         },
         {
-            "name": "no_of_retries",
-            "title": "Total Retries (%)",
+            "name": "performance",
+            "title": "Performance",
             "visible": True,
             "searchable": False,
         },
@@ -335,59 +343,67 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
     def get_initial_queryset(self, request=None):
         task_count = (
             SubBatchTaskTimeline.objects.filter(
-                sub_batch_id=request.POST.get("sub_batch")
+                sub_batch_id=request.POST.get("sub_batch"),
+                task_type=TASK_TYPE_ASSESSMENT,
             )
             .values("id")
             .count()
         )
-        retries = (
-            SubBatchTaskTimeline.objects.filter(
-                sub_batch_id=request.POST.get("sub_batch"),
-                assessments__user_id=OuterRef("user_id"),
-                id=OuterRef("user__assessments__task_id"),
-            )
-            .annotate(
-                count=Count("assessments__is_retry") - 1,
-                passed=Count(
-                    "assessments__is_retry", filter=Q(assessments__is_retry=False)
-                ),
-            )
-            .values("assessments__user_id", "id", "count", "passed")
-        )
-        last_attempt = (
-            SubBatchTaskTimeline.objects.filter(
-                id=OuterRef("user__assessments__task_id"),
-                assessments__user_id=OuterRef("user_id"),
-            )
-            .annotate(
-                count=Count(
-                    "assessments__is_retry", filter=Q(assessments__is_retry=True)
-                )
-                - 1
-            )
-            .order_by("-assessments__id")[:1]
-        )
+        last_attempt = SubBatchTaskTimeline.objects.filter(
+            id=OuterRef("user__assessments__task_id"),
+            assessments__user_id=OuterRef("user_id"),
+        ).order_by("-assessments__id")[:1]
         query = (
             self.model.objects.filter(sub_batch__id=request.POST.get("sub_batch"))
             .select_related("user")
             .annotate(
-                average_marks=Coalesce(
-                    Avg(
-                        Subquery(last_attempt.values("assessments__score")),
-                        distinct=True,
+                average_marks=Case(
+                    When(
+                        user_id=F("user__assessments__user_id"),
+                        then=Coalesce(
+                            Avg(
+                                Subquery(last_attempt.values("assessments__score")),
+                                distinct=True,
+                            ),
+                            0.0,
+                        ),
                     ),
-                    0.0,
+                    default=None,
                 ),
                 no_of_retries=Coalesce(
-                    Sum(Subquery(retries.values("count")), distinct=True), 0
+                    Count(
+                        "user__assessments__is_retry", filter=Q(user__assessments__is_retry=True)
+                    ),
+                    0,
                 ),
                 completion=Coalesce(
                     (
-                        Sum(Subquery(retries.values("passed")), distinct=True)
-                        / task_count
+                        Count(
+                            "user__assessments__task_id",
+                            filter=Q(user__assessments__user_id=F("user_id")),
+                            distinct=True,
+                        )
+                        / float(task_count)
                     )
                     * 100,
-                    0,
+                    0.0,
+                ),
+                performance=Case(
+                    When(average_marks__gte=90, then=Value("Good")),
+                    When(
+                        Q(average_marks__lt=90) & Q(average_marks__gte=75),
+                        then=Value("Meet Expectations"),
+                    ),
+                    When(
+                        Q(average_marks__lt=75) & Q(average_marks__gte=65),
+                        then=Value("Above Average"),
+                    ),
+                    When(
+                        Q(average_marks__lt=65) & Q(average_marks__gte=50),
+                        then=Value("Average"),
+                    ),
+                    When(average_marks__lt=65, then=Value("Poor")),
+                    default=Value("Not yet Started"),
                 ),
             )
         )
@@ -408,6 +424,8 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
             "action"
         ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         row["expected_completion"] = obj.expected_completion.strftime("%d %b %Y")
+        if not row["average_marks"]:
+            row["average_marks"] = "-"
         return
 
     def get_response_dict(self, request, paginator, draw_idx, start_pos):
@@ -418,19 +436,26 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
             "Above Average": 0,
             "Average": 0,
             "Poor": 0,
+            "Not Yet Started": 0,
         }
         for performance in response["data"]:
-            if float(performance["average_marks"]) >= 90:
-                performance_report["Good"] += 1
-            elif 90 > float(performance["average_marks"]) >= 75:
-                performance_report["Meet Expectation"] += 1
-            elif 75 > float(performance["average_marks"]) >= 65:
-                performance_report["Above Average"] += 1
-            elif 65 > float(performance["average_marks"]) >= 50:
-                performance_report["Average"] += 1
-            elif float(performance["average_marks"]) < 50:
-                performance_report["Poor"] += 1
-        response["extra_data"] = performance_report
+            if performance["average_marks"] != "-":
+                if float(performance["average_marks"]) >= 90:
+                    performance_report["Good"] += 1
+                elif 90 > float(performance["average_marks"]) >= 75:
+                    performance_report["Meet Expectation"] += 1
+                elif 75 > float(performance["average_marks"]) >= 65:
+                    performance_report["Above Average"] += 1
+                elif 65 > float(performance["average_marks"]) >= 50:
+                    performance_report["Average"] += 1
+                elif float(performance["average_marks"]) < 50:
+                    performance_report["Poor"] += 1
+            else:
+                performance_report["Not Yet Started"] += 1
+        response["extra_data"] = {
+            "performance_report": performance_report,
+            "no_of_trainees": len(response["data"]),
+        }
         return response
 
 
