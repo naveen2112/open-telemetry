@@ -62,7 +62,7 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
             assessments__user_id=OuterRef("user_id"),
         ).order_by("-assessments__id")[:1]
 
-        query = (
+        performance = (
             InternDetail.objects.filter(
                 sub_batch=sub_batch_id, user_id=self.kwargs["pk"]
             )
@@ -149,7 +149,7 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
         context["sub_batch"] = sub_batch_id
         context["form"] = InternScoreForm()
         context["extension_tasks"] = extended_task_summary
-        context["query"] = query[0]
+        context["performance_stats"] = performance[0]
         return context
 
 
