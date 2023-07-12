@@ -14,9 +14,7 @@
                     >
                     {{ batch.name }}
                 </p>
-                <h4 class="text-lg text-black ">
-                    {{ timeline.name|title }}
-                </h3>
+                <h4 class="text-lg text-black ">{{ timeline.name|title }}</h4>
             </div>
             <div class="text-dark-black-50 text-sm">
                 <p class="text-sm">Current you are viewing {{ batch.name }} batch</p>
@@ -43,17 +41,13 @@
                    id="search_project">
             <span class="absolute top-2 left-2"><span class="hbl hbl-search-icon text-dark-black-50 text-2xl"></span></span>
         </div>
-        <div class="rounded-md bg-dark-blue-10 mr-4"
-             style="width:7rem;
-                    height:3rem">
+        <div class="rounded-md bg-dark-blue-10 mr-4 header-data">
             <p class="text-center">
                 <span class="font-bold text-dark-black" id="teams_count"></span>
             </p>
             <p class="text-dark-blue text-center">Teams</p>
         </div>
-        <div class="rounded-md bg-dark-blue-10 mr-4"
-             style="width:7rem;
-                    height:3rem">
+        <div class="rounded-md bg-dark-blue-10 mr-4 header-data">
             <p class="text-center">
                 <span class="font-bold text-dark-black" id="trainees_count"></span>
             </p>
@@ -61,8 +55,7 @@
         </div>
     </div>
     <table id="sub-batch-table"
-           class="display border-0 table-with-no-border dataTable no-footer"
-           style="width: 100%"
+           class="display border-0 table-with-no-border dataTable no-footer w-100"
            role="grid"
            aria-describedby="sub-batch-table_info">
         {% csrf_token %}

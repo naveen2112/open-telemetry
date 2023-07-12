@@ -17,7 +17,9 @@
             <div class="flex items-center mr-10">
                 <div class="pr-4">
                     <img src="{% static 'images/user-profile.svg' %}"
-                         class="w-24 h-24 rounded-full"
+                         width="6rem"
+                         height="6rem"
+                         class="rounded-full w-24 h-24"
                          alt="Profile Icon">
                 </div>
                 <div>
@@ -63,9 +65,7 @@
             </button>
         </div>
         <div class="jquery-modal current hidden" id="modal">
-            <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white"
-                 style="width: 1000px;
-                        display: inline-block">
+            <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white jquery-modal-body">
                 <p class="font-semibold text-lg mb-10">Week</p>
                 <form method="post" class="timeline-form" id="timeline-create-form">
                     <div class="modal-body">
@@ -101,8 +101,7 @@
                         <h4>{{ task.name }}</h4>
                         <div class="flex">
                             {% if not task.inactive_tasks %}
-                                <a href="javascript:void(0)"
-                                   onclick="openCreateModal('{{ task.id }}', null)">
+                                <a onclick="openCreateModal('{{ task.id }}', null)">
                                     <div class="inline mr-1">
                                         <span class="hbl hbl-edit text-2xl text-dark-black/50"></span>
                                     </div>
@@ -168,28 +167,22 @@
                                 {{ task.comment|truncatechars:10 }}
                             {% endif %}
                         </p>
-                        <a href="javascript:void(0)"
-                           class="text-sm text-dark-blue cursor-pointer show-more-btn">Show more</a>
+                        <a class="text-sm text-dark-blue cursor-pointer show-more-btn">Show more</a>
                     </div>
                 </div>
             {% endfor %}
             {% for assessment in extension_tasks %}
                 <div id="assessment-reports-2"
-                     style="width: 420px;
-                            background-color: white;
-                            height: auto"
-                     class="assessment-reports rounded-xl flex justify-between items-center flex-col p-4 mt-4">
+                     class="assessment-reports rounded-xl flex justify-between items-center flex-col p-4 mt-4 assessment-report-week">
                     <div class="w-full flex justify-between items-center mb-5">
                         <h4>Extension Week {{ forloop.counter }}</h4>
                         <div class="flex">
-                            <a href="javascript:void(0)"
-                               onclick="openCreateModal(null, '{{ assessment.id }}')">
+                            <a onclick="openCreateModal(null, '{{ assessment.id }}')">
                                 <div class="inline mr-1">
                                     <span class="hbl hbl-edit text-2xl text-dark-black/50"></span>
                                 </div>
                             </a>
-                            <a href="javascript:void(0)"
-                               onclick="deleteExtension('{{ assessment.id }}')">
+                            <a onclick="deleteExtension('{{ assessment.id }}')">
                                 <div class="inline mr-1">
                                     <span class="hbl hbl-delete text-2xl text-dark-black/50"></span>
                                 </div>
@@ -234,8 +227,7 @@
                     <div class="w-full flex flex-col justify-start bg-dark-blue-10 rounded-md p-2">
                         <h3 class="font-semibold">Comments</h3>
                         <p class="truncate">{{ assessment.comment|truncatechars:10 }}</p>
-                        <a href="javascript:void(0)"
-                           class="text-sm text-dark-blue cursor-pointer show-more-btn">Show more</a>
+                        <a class="text-sm text-dark-blue cursor-pointer show-more-btn">Show more</a>
                     </div>
                 </div>
             {% endfor %}

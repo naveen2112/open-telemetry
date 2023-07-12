@@ -23,9 +23,7 @@
 {% block body %}
     <div class="mb-5 flex justify-end items-center">
         <div class="jquery-modal current hidden" id="modal">
-            <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white"
-                 style="width: 1000px;
-                        display: inline-block">
+            <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white jquery-modal-body">
                 <p class="font-semibold text-lg mb-10" id="form_heading">Create Timeline</p>
                 <form method="post" class="timeline-form" id="timeline-create-form">
                     <input type="hidden" name="timeline_id" id="timeline_id">
@@ -69,8 +67,7 @@
         </div>
     </div>
     <table id="timeline-table"
-           class="display border-0 table-with-no-border dataTable no-footer"
-           style="width: 100%"
+           class="display border-0 table-with-no-border dataTable no-footer w-100"
            role="grid"
            aria-describedby="timeline-table_info">
     </table>

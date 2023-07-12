@@ -11,14 +11,14 @@
     height: 9.5rem;
 }
 
-.disabled-container{
+.disabled-container {
     width: 420px;
     background-color: #D3D3D3;
     height: auto;
-    opacity:0.5;
+    opacity: 0.5;
 }
 
-.enabled-container{
+.enabled-container {
     width: 420px;
     background-color: white;
     height: auto;
@@ -142,10 +142,51 @@
 }
 
 .jquery-modal-body {
-    width: 1000px;
-    display: inline-block;
+    width: 1000px !important;
+    display: inline-block !important;
 }
 
-#batch-table {
+.width-100 {
+    width: 100% !important;
+}
+
+#create-sub-batch {
+    white-space: nowrap;
+}
+
+.text-center {
+    text-align: center !important;
+}
+
+.position-absolute-top-10 {
+    position: absolute;
+    top: -10px;
+}
+
+.header-data {
+    width: 7rem;
+    height: 3rem;
+}
+
+.assessment-report-week {
+    width: 420px;
+    background-color: white;
+    height: auto;
+}
+
+.w-100-auto {
+    width: 100% !important;
+    height: auto !important;
+}
+
+#sign-in-logo {
+    display: inline-block;
+    width: 215px;
+}
+
+.sign-info-msg {
     width: 100%;
+    font-size: 14px;
+    opacity: 0.5;
+    margin-top: 15px;
 }
