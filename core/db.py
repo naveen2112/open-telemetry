@@ -1,5 +1,6 @@
 """
-Module containing custom model fields, managers, and abstract base models for the project
+Module containing custom model fields, managers, and abstract base 
+models for the project
 """
 import datetime
 
@@ -38,7 +39,8 @@ class DateTimeWithoutTZField(models.DateTimeField):
 
 class BaseModel(models.Model):
     """
-    Abstract base model class that provides 'created_at' and 'updated_at' fields
+    Abstract base model class that provides 'created_at' and 'updated_at'
+    fields
     """
 
     created_at = DateTimeWithoutTZField(auto_now_add=True)
@@ -100,7 +102,8 @@ class SoftDeleteWithBaseModel(BaseModel):
     # pylint: disable=unused-argument
     def delete(self, *args, **kwargs):
         """
-        This function sets the "deleted_at" attribute to the current datetime and saves the object.
+        This function sets the "deleted_at" attribute to the current datetime
+        and saves the object.
         """
         self.deleted_at = datetime.datetime.now()
         self.save()
@@ -116,7 +119,8 @@ class SoftDeleteWithBaseModel(BaseModel):
     @classmethod
     def bulk_delete(cls, filters):
         """
-        Performs a bulk delete operation on objects matching the specified filters
+        Performs a bulk delete operation on objects matching the
+        specified filters
         """
         cls.objects.filter(**filters).update(
             deleted_at=datetime.datetime.now()

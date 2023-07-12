@@ -155,6 +155,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
             "task_type": {"required"},
             "order": {"required"},
         }
+
         self.assertEqual(
             self.bytes_cleaner(response.content),
             self.get_ajax_response(field_errors=field_errors),
@@ -825,6 +826,10 @@ class SubBatchTimelineDatatableTest(BaseTestCase):
             self.assertTrue("end_date" in row)
 
         # Check the numbers of rows received is equal to the number of expected rows
+        self.assertTrue(
+            response.json()["recordsTotal"],
+            len(sub_batch_task_timeline),
+        )
         self.assertTrue(
             response.json()["recordsTotal"],
             len(sub_batch_task_timeline),

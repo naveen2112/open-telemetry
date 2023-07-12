@@ -11,11 +11,11 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
-from hubble_report import settings
-from hubble_report.settings import ENV_NAME
 from core import constants
 from hubble import auth_helper
 from hubble.models import User
+from hubble_report import settings
+from hubble_report.settings import ENV_NAME
 
 
 def login(request):
@@ -48,7 +48,7 @@ def signin(request):
                 if user is not None:
                     auth_login(request, user)
                     response_data = redirect(
-                        settings.LOGIN_REDIRECT_URL # pylint: disable=no-member
+                        settings.LOGIN_REDIRECT_URL  # pylint: disable=no-member
                     )
             else:
                 messages.add_message(

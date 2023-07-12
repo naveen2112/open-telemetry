@@ -204,25 +204,35 @@ class TimesheetManager(models.Manager):
         """
         Filter timesheets based on a date range
         """
-        return self.get_queryset.date_range(from_date, to_date)
+        return (
+            self.get_queryset.date_range(  # pylint: disable=no-member
+                from_date, to_date
+            )
+        )
 
     def efficiency_fields(self):
         """
         Get the efficiency fields of timesheets
         """
-        return self.get_queryset.efficiency_fields()
+        return (
+            self.get_queryset.efficiency_fields()  # pylint: disable=no-member
+        )
 
     def monetization_fields(self):
         """
         Get the monetization fields of timesheets
         """
-        return self.get_queryset.monetization_fields()
+        return (
+            self.get_queryset.monetization_fields()  # pylint: disable=no-member
+        )
 
     def kpi_fields(self):
         """
         Get the KPI (Key Performance Indicator) fields of timesheets
         """
-        return self.get_queryset.kpi_fields()
+        return (
+            self.get_queryset.kpi_fields()  # pylint: disable=no-member
+        )
 
 
 class TimesheetEntry(db.BaseModel):

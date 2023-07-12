@@ -14,8 +14,8 @@ register = template.Library()
 @register.simple_tag(takes_context=True)
 def set_active(context, names):
     """
-    Determines the active state of a sidebar item based on the current route name
-    and  returns the CSS class 'sidebar-active'
+    Determines the active state of a sidebar item based on the current route
+    name and  returns the CSS class 'sidebar-active'
     """
     current_route_name = resolve(
         context["request"].path_info
@@ -37,7 +37,8 @@ def set_active(context, names):
 @register.simple_tag
 def get_constant(name):
     """
-    Retrieves a constant value from the 'constants' module based on the provided name
+    Retrieves a constant value from the 'constants' module based on
+    the provided name
     """
     return getattr(constants, name)
 
@@ -82,7 +83,7 @@ def show_label(field):
     if field.field.required:  # Check the field is required or not
         required = '<span class="text-red-600">*</span>'
     return mark_safe(
-        f'<label for="{field.label}" class="mb-3.6 text-sm text-dark-black-50">\
-            {field.label} {required}\
+        f'<label for="{field.label}" class="mb-3.6 text-sm \
+            text-dark-black-50">{field.label} {required}\
         </label>'
     )

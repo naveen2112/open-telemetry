@@ -61,7 +61,9 @@ class BatchDataTable(LoginRequiredMixin, CustomDatatable):
         },
     ]
 
-    def get_initial_queryset(self, request=None):
+    def get_initial_queryset(
+        self, request=None  # pylint: disable=unused-argument
+    ):
         """
         The function returns an annotated queryset with the total number of
         trainees and the number of sub-batches for each object in the model.
@@ -141,16 +143,14 @@ def create_batch(request):
 
 @login_required()
 @validate_authorization()
-def batch_data(request, primary_key):
+def batch_data(request, pk):  # pylint: disable=unused-argument
     """
     The function batch_data retrieves batch data from the database and
     returns it as a JSON response.
     """
     try:
         data = {
-            "batch": model_to_dict(
-                get_object_or_404(Batch, id=primary_key)
-            )
+            "batch": model_to_dict(get_object_or_404(Batch, id=pk))
         }  # Covert django queryset object to dict,which can be easily
         # serialized and sent as a JSON response
         return JsonResponse(data, safe=False)
@@ -167,13 +167,13 @@ def batch_data(request, primary_key):
 
 @login_required()
 @validate_authorization()
-def update_batch(request, primary_key):
+def update_batch(request, pk):
     """
     The function update_batch updates a batch object with the data provided
     in the request and returns a JSON response indicating the success or
     failure of the update operation.
     """
-    batch = get_object_or_404(Batch, id=primary_key)
+    batch = get_object_or_404(Batch, id=pk)
     form = BatchForm(request.POST, instance=batch)
     if form.is_valid():  # Check if the valid or not
         form.save()
@@ -195,17 +195,17 @@ def update_batch(request, primary_key):
     ["DELETE"]
 )  # This decorator ensures that the view function is only accessible through the
 # DELETE HTTP method
-def delete_batch(request, primary_key):
+def delete_batch(request, pk):  # pylint: disable=unused-argument
     """
     Delete Batch
     Soft delete the batch and record the deletion time in deleted_at field
     """
     try:
-        batch = get_object_or_404(Batch, id=primary_key)
+        batch = get_object_or_404(Batch, id=pk)
         intern_details = list(
             batch.sub_batches.all().values_list("id", flat=True)
         )
-        SubBatch.bulk_delete({"batch_id": primary_key})
+        SubBatch.bulk_delete({"batch_id": pk})
         InternDetail.bulk_delete({"sub_batch_id__in": intern_details})
         batch.delete()
         return JsonResponse({"message": "Batch deleted succcessfully"})
@@ -226,4 +226,3 @@ class BatchDetails(LoginRequiredMixin, DetailView):
 
     model = Batch
     template_name = "sub_batch/sub_batch.html"
-    pk_url_kwarg = "primary_key"

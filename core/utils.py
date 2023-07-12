@@ -47,7 +47,8 @@ class CustomDatatable(AjaxDatatableView):
         return result
 
     def render_dict_column(self, row, column):
-        """This function is responsible for assigning values to the respective columns in a row"""
+        """This function is responsible for assigning values to the respective
+        columns in a row"""
         return row.get(column, None)
 
     def prepare_results(self, request, qs):

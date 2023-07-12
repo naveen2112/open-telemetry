@@ -27,8 +27,8 @@ class AddInternTest(BaseTestCase):
 
     def update_valid_input(self):
         """
-        This function is responsible for updating the valid inputs and creating 
-        data in databases as reqiured
+        This function is responsible for updating the valid inputs and
+        creating data in databases as reqiured
         """
         intern = baker.make(
             "hubble.User", is_employed=False, _fill_optional=["email"]

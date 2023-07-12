@@ -16,20 +16,10 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView
 
 from core import template_utils
-from core.utils import (
-    CustomDatatable,
-    schedule_timeline_for_sub_batch,
-    validate_authorization,
-)
-from hubble.models import (
-    Batch,
-    InternDetail,
-    SubBatch,
-    SubBatchTaskTimeline,
-    Timeline,
-    TimelineTask,
-    User,
-)
+from core.utils import (CustomDatatable, schedule_timeline_for_sub_batch,
+                        validate_authorization)
+from hubble.models import (Batch, InternDetail, SubBatch, SubBatchTaskTimeline,
+                           Timeline, TimelineTask, User)
 from training.forms import AddInternForm, SubBatchForm
 
 
@@ -159,7 +149,7 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
 
 @login_required()
 @validate_authorization()
-def create_sub_batch(request, primary_key):
+def create_sub_batch(request, pk):
     """
     Create Sub-batch View
     """
@@ -206,7 +196,7 @@ def create_sub_batch(request, primary_key):
             if TimelineTask.objects.filter(
                 timeline=sub_batch.timeline.id
             ):
-                sub_batch.batch = Batch.objects.get(id=primary_key)
+                sub_batch.batch = Batch.objects.get(id=pk)
                 sub_batch.created_by = request.user
                 sub_batch.primary_mentor_id = request.POST.get(
                     "primary_mentor_id"
@@ -238,16 +228,14 @@ def create_sub_batch(request, primary_key):
                         created_by=request.user,
                     )
 
-                return redirect(
-                    reverse("batch.detail", args=[primary_key])
-                )
+                return redirect(reverse("batch.detail", args=[pk]))
             sub_batch_form.add_error(
                 None,
                 "The Selected Team's Active Timeline doesn't have any tasks",
             )
     context = {
         "form": sub_batch_form,
-        "sub_batch_id": primary_key,
+        "sub_batch_id": pk,
     }
     return render(request, "sub_batch/create_sub_batch.html", context)
 
@@ -281,12 +269,12 @@ def get_timeline(request):
 
 @login_required()
 @validate_authorization()
-def update_sub_batch(request, primary_key):
+def update_sub_batch(request, pk):
     """
     Update Sub-batch View
     """
     try:
-        sub_batch = SubBatch.objects.get(id=primary_key)
+        sub_batch = SubBatch.objects.get(id=pk)
     except Exception:
         return JsonResponse(
             {"message": "Invalid SubBatch id", "status": "error"}
@@ -306,9 +294,7 @@ def update_sub_batch(request, primary_key):
                 int(request.POST.get("timeline"))
                 != sub_batch.timeline.id
             ):
-                SubBatchTaskTimeline.bulk_delete(
-                    {"sub_batch_id": primary_key}
-                )
+                SubBatchTaskTimeline.bulk_delete({"sub_batch_id": pk})
                 schedule_timeline_for_sub_batch(sub_batch, request.user)
             else:
                 schedule_timeline_for_sub_batch(
@@ -322,7 +308,7 @@ def update_sub_batch(request, primary_key):
         return render(
             request, "sub_batch/update_sub_batch.html", context
         )
-    sub_batch = SubBatch.objects.get(id=primary_key)
+    sub_batch = SubBatch.objects.get(id=pk)
     context = {
         "form": SubBatchForm(instance=sub_batch),
         "sub_batch": sub_batch,
@@ -336,15 +322,15 @@ def update_sub_batch(request, primary_key):
     ["DELETE"]
 )  # This decorator ensures that the view function is only accessible
 # through the DELETE HTTP method
-def delete_sub_batch(request, primary_key):
+def delete_sub_batch(request, pk):
     """
     Delete Batch
     Soft delete the batch and record the deletion time in deleted_at field
     """
     try:
-        sub_batch = get_object_or_404(SubBatch, id=primary_key)
-        InternDetail.bulk_delete({"sub_batch_id": primary_key})
-        SubBatchTaskTimeline.bulk_delete({"sub_batch_id": primary_key})
+        sub_batch = get_object_or_404(SubBatch, id=pk)
+        InternDetail.bulk_delete({"sub_batch_id": pk})
+        SubBatchTaskTimeline.bulk_delete({"sub_batch_id": pk})
         sub_batch.delete()
         return JsonResponse(
             {"message": "Sub-Batch deleted succcessfully"}
@@ -367,7 +353,6 @@ class SubBatchDetail(LoginRequiredMixin, DetailView):
     model = SubBatch
     extra_context = {"form": AddInternForm()}
     template_name = "sub_batch/sub_batch_detail.html"
-    pk_url_kwarg = "primary_key"
 
 
 class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
@@ -455,8 +440,12 @@ def add_trainee(request):
         form = AddInternForm(request.POST)
         if form.is_valid():  # Check if form is valid or not
             try:
-                sub_batch = SubBatch.objects.get(id=request.POST.get("sub_batch_id"))
-                timeline_data = SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch).last()
+                sub_batch = SubBatch.objects.get(
+                    id=request.POST.get("sub_batch_id")
+                )
+                timeline_data = SubBatchTaskTimeline.objects.filter(
+                    sub_batch=sub_batch
+                ).last()
                 trainee = form.save(commit=False)
                 trainee.user_id = request.POST.get("user_id")
                 trainee.sub_batch = sub_batch
@@ -484,13 +473,13 @@ def add_trainee(request):
 @login_required
 @validate_authorization()
 @require_http_methods(["DELETE"])
-def remove_trainee(request, primary_key):
+def remove_trainee(request, pk):
     """
     The function remove_trainee deletes an intern from the database and returns a JSON response
     indicating the success or failure of the operation.
     """
     try:
-        intern_detail = get_object_or_404(InternDetail, id=primary_key)
+        intern_detail = get_object_or_404(InternDetail, id=pk)
         intern_detail.delete()
         return JsonResponse(
             {"message": "Intern has been deleted succssfully"}

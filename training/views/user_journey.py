@@ -27,7 +27,6 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
 
     model = User
     template_name = "sub_batch/user_journey_page.html"
-    pk_url_kwarg = "primary_key"
 
     def get_context_data(self, **kwargs):
         latest_task_report = Assessment.objects.filter(
@@ -105,7 +104,7 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
 
 
 @login_required()
-def update_task_score(request, primary_key):
+def update_task_score(request, pk):
     """
     Update task score
     """
@@ -114,11 +113,11 @@ def update_task_score(request, primary_key):
         form = InternScoreForm(request.POST)
         if form.is_valid():  # Check if form is valid or not
             report = form.save(commit=False)
-            report.user_id = primary_key
+            report.user_id = pk
             report.task_id = request.POST.get("task")
             report.extension_id = request.POST.get("extension")
             report.sub_batch = SubBatch.objects.filter(
-                intern_details__user=primary_key
+                intern_details__user=pk
             ).first()
             report.is_retry = request.POST.get("status") == "true"
             report.created_by = request.user
@@ -136,7 +135,7 @@ def update_task_score(request, primary_key):
 
 
 @login_required()
-def add_extension(request, primary_key):
+def add_extension(request, pk):
     """
     The function add_extension creates a new Extension object with the given primary key and request
     information.
@@ -144,9 +143,9 @@ def add_extension(request, primary_key):
     try:
         Extension.objects.create(
             sub_batch=SubBatch.objects.filter(
-                intern_details__user=primary_key
+                intern_details__user=pk
             ).first(),
-            user_id=primary_key,
+            user_id=pk,
             created_by=request.user,
         )
         return JsonResponse({"status": "success"})
@@ -155,13 +154,13 @@ def add_extension(request, primary_key):
 
 
 @login_required()
-def delete_extension(request, primary_key):
+def delete_extension(request, pk):
     """
     Delete Timeline Template
     Soft delete the template and record the deletion time in deleted_at field
     """
     try:
-        extension = get_object_or_404(Extension, id=primary_key)
+        extension = get_object_or_404(Extension, id=pk)
         extension.delete()
         Assessment.bulk_delete({"extension": extension})
         return JsonResponse(

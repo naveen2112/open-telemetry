@@ -41,22 +41,22 @@ urlpatterns = [
         name="timeline-template.create",
     ),
     path(
-        "timeline-template/<int:primary_key>/show",
+        "timeline-template/<int:pk>/show",
         timeline.timeline_template_data,
         name="timeline-template.show",
     ),
     path(
-        "timeline-template/<int:primary_key>/edit",
+        "timeline-template/<int:pk>/edit",
         timeline.update_timeline_template,
         name="timeline-template.edit",
     ),
     path(
-        "timeline-template/<int:primary_key>/delete",
+        "timeline-template/<int:pk>/delete",
         timeline.delete_timeline_template,
         name="timeline-template.delete",
     ),
     path(
-        "timeline-template/<int:primary_key>",
+        "timeline-template/<int:pk>",
         timeline.TimelineTemplateDetails.as_view(),
         name="timeline-template.detail",
     ),
@@ -72,17 +72,17 @@ urlpatterns = [
         name="timeline-task.create",
     ),
     path(
-        "timeline-task/<int:primary_key>/show",
+        "timeline-task/<int:pk>/show",
         timeline_task.timeline_task_data,
         name="timeline-task.show",
     ),
     path(
-        "timeline-task/<int:primary_key>/edit",
+        "timeline-task/<int:pk>/edit",
         timeline_task.update_timeline_task,
         name="timeline-task.edit",
     ),
     path(
-        "timeline-task/<int:primary_key>/delete",
+        "timeline-task/<int:pk>/delete",
         timeline_task.delete_timeline_task,
         name="timeline-task.delete",
     ),
@@ -99,13 +99,23 @@ urlpatterns = [
         name="batch.datatable",
     ),
     path("batch/create", batch.create_batch, name="batch.create"),
-    path("batch/<int:primary_key>/show", batch.batch_data, name="batch.show"),
-    path("batch/<int:primary_key>/edit", batch.update_batch, name="batch.edit"),
     path(
-        "batch/<int:primary_key>/delete", batch.delete_batch, name="batch.delete"
+        "batch/<int:pk>/show",
+        batch.batch_data,
+        name="batch.show",
     ),
     path(
-        "batch/<int:primary_key>",
+        "batch/<int:pk>/edit",
+        batch.update_batch,
+        name="batch.edit",
+    ),
+    path(
+        "batch/<int:pk>/delete",
+        batch.delete_batch,
+        name="batch.delete",
+    ),
+    path(
+        "batch/<int:pk>",
         batch.BatchDetails.as_view(),
         name="batch.detail",
     ),
@@ -116,7 +126,7 @@ urlpatterns = [
         name="sub-batch-datatable",
     ),
     path(
-        "batch/<int:primary_key>/sub-batch/create",
+        "batch/<int:pk>/sub-batch/create",
         sub_batch.create_sub_batch,
         name="sub-batch.create",
     ),
@@ -126,17 +136,17 @@ urlpatterns = [
         name="sub-batch.get_timeline",
     ),
     path(
-        "sub-batch/<int:primary_key>/edit",
+        "sub-batch/<int:pk>/edit",
         sub_batch.update_sub_batch,
         name="sub-batch.edit",
     ),
     path(
-        "sub-batch/<int:primary_key>",
+        "sub-batch/<int:pk>",
         sub_batch.SubBatchDetail.as_view(),
         name="sub-batch.detail",
     ),
     path(
-        "sub-batch/<int:primary_key>/delete",
+        "sub-batch/<int:pk>/delete",
         sub_batch.delete_sub_batch,
         name="sub-batch.delete",
     ),
@@ -151,13 +161,13 @@ urlpatterns = [
         name="trainees.add",
     ),
     path(
-        "sub-batch/trainee/<int:primary_key>/remove",
+        "sub-batch/trainee/<int:pk>/remove",
         sub_batch.remove_trainee,
         name="trainee.remove",
     ),
     # sub_batch_timeline
     path(
-        "sub-batch/<int:primary_key>/timeline",
+        "sub-batch/<int:pk>/timeline",
         sub_batch_timeline.SubBatchTimeline.as_view(),
         name="sub-batch.timeline",
     ),
@@ -167,17 +177,17 @@ urlpatterns = [
         name="sub-batch.datatable",
     ),
     path(
-        "batch/<int:primary_key>/sub-batch-timeline/create",
+        "batch/<int:pk>/sub-batch-timeline/create",
         sub_batch_timeline.create_sub_batch_timeline,
         name="sub_batch.timeline.create",
     ),
     path(
-        "sub-batch-timeline/<int:primary_key>/show",
+        "sub-batch-timeline/<int:pk>/show",
         sub_batch_timeline.sub_batch_timeline_data,
         name="sub_batch.timeline.show",
     ),
     path(
-        "sub-batch-timeline/<int:primary_key>/edit",
+        "sub-batch-timeline/<int:pk>/edit",
         sub_batch_timeline.update_sub_batch_timeline,
         name="sub_batch.timeline.edit",
     ),
@@ -187,28 +197,28 @@ urlpatterns = [
         name="sub_batch.timeline.reorder",
     ),
     path(
-        "sub-batch-timeline/<int:primary_key>/delete",
+        "sub-batch-timeline/<int:pk>/delete",
         sub_batch_timeline.delete_sub_batch_timeline,
         name="sub_batch.timeline.delete",
     ),
     # user_reports_crud
     path(
-        "user/<int:primary_key>",
+        "user/<int:pk>",
         user_journey.TraineeJourneyView.as_view(),
         name="user_reports",
     ),
     path(
-        "user/<int:primary_key>/update-score",
+        "user/<int:pk>/update-score",
         user_journey.update_task_score,
         name="user.update-score",
     ),
     path(
-        "add-extension/<int:primary_key>",
+        "add-extension/<int:pk>",
         user_journey.add_extension,
         name="extension.create",
     ),
     path(
-        "extension/<int:primary_key>/delete",
+        "extension/<int:pk>/delete",
         user_journey.delete_extension,
         name="extension.delete",
     ),

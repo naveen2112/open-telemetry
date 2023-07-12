@@ -74,7 +74,7 @@ def get_token(request):
             scopes=["user.read"], account=accounts[0]
         )
         save_cache(request, cache)
-        value_access_token =  result["access_token"]
+        value_access_token = result["access_token"]
     return value_access_token
 
 

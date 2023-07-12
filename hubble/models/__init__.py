@@ -1,3 +1,6 @@
+"""
+The code is importing various classes from different modules or files
+"""
 from .assessment import Assessment
 from .batch import Batch
 from .client import Client

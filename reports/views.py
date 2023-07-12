@@ -90,7 +90,7 @@ class EfficiencyDatatable(CustomDatatable):
 
     def customize_row(self, row, obj):
         # This is responsible for adding the view action button
-        buttons = template_utils.show_btn( # pylint: disable=no-member
+        buttons = template_utils.show_btn(  # pylint: disable=no-member
             reverse("detailed_efficiency", args=[obj["pk"]])
         )
         row[

@@ -10,7 +10,7 @@ from core.base_test import BaseTestCase
 
 class UpdateAssessmentTest(BaseTestCase):
     """
-    This class is responsible for testing the updating the scores in 
+    This class is responsible for testing the updating the scores in
     asssesments in user journey page
     """
 
@@ -27,7 +27,7 @@ class UpdateAssessmentTest(BaseTestCase):
 
     def update_valid_input(self):
         """
-        This function is responsible for updating the valid inputs and creating 
+        This function is responsible for updating the valid inputs and creating
         data in databases as reqiured
         """
         sub_batch = baker.make(

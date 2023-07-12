@@ -166,14 +166,14 @@ def create_timeline_template(request):
 
 @login_required()
 @validate_authorization()
-def timeline_template_data(request, primary_key):
+def timeline_template_data(request, pk):
     """
     Timeline Template Update Form Data
     """
     try:
         data = {
             "timeline": model_to_dict(
-                get_object_or_404(Timeline, id=primary_key)
+                get_object_or_404(Timeline, id=pk)
             )
         }  # Covert django queryset object to dict,which can be easily
         # serialized and sent as a JSON response
@@ -190,13 +190,13 @@ def timeline_template_data(request, primary_key):
 
 @login_required()
 @validate_authorization()
-def update_timeline_template(request, primary_key):
+def update_timeline_template(request, pk):
     """
     Update Timeline Template
     """
     form = TimelineForm(
         request.POST,
-        instance=get_object_or_404(Timeline, id=primary_key),
+        instance=get_object_or_404(Timeline, id=pk),
     )
     if form.is_valid():  # check if form is valid or not
         timeline = form.save(commit=False)
@@ -221,14 +221,14 @@ def update_timeline_template(request, primary_key):
 @require_http_methods(
     ["DELETE"]
 )  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
-def delete_timeline_template(request, primary_key):
+def delete_timeline_template(request, pk):
     """
     Delete Timeline Template
     Soft delete the template and record the deletion time in deleted_at field
     """
     try:
-        timeline = get_object_or_404(Timeline, id=primary_key)
-        TimelineTask.bulk_delete({"timeline_id": primary_key})
+        timeline = get_object_or_404(Timeline, id=pk)
+        TimelineTask.bulk_delete({"timeline_id": pk})
         timeline.delete()
         return JsonResponse(
             {"message": "Timeline Template deleted successfully"}
@@ -253,4 +253,3 @@ class TimelineTemplateDetails(LoginRequiredMixin, DetailView):
     model = Timeline
     extra_context = {"form": TimelineTaskForm()}
     template_name = "timeline_template_detail.html"
-    pk_url_kwarg = "primary_key"

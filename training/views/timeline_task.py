@@ -139,14 +139,14 @@ def create_timeline_task(request):
 
 @login_required()
 @validate_authorization()
-def timeline_task_data(request, primary_key):
+def timeline_task_data(request, pk):
     """
     Timeline Template Task Update Form Data
     """
     try:
         data = {
             "timeline_task": model_to_dict(
-                get_object_or_404(TimelineTask, id=primary_key)
+                get_object_or_404(TimelineTask, id=pk)
             )
         }  # Covert django queryset object to dict,which can be easily serialized
         # and sent as a JSON response
@@ -163,13 +163,13 @@ def timeline_task_data(request, primary_key):
 
 @login_required()
 @validate_authorization()
-def update_timeline_task(request, primary_key):
+def update_timeline_task(request, pk):
     """
     Update Timeline Template Task
     """
     form = TimelineTaskForm(
         request.POST,
-        instance=get_object_or_404(TimelineTask, id=primary_key),
+        instance=get_object_or_404(TimelineTask, id=pk),
     )
     if form.is_valid():  # Check if the valid or not
         form.save()
@@ -190,13 +190,13 @@ def update_timeline_task(request, primary_key):
 @require_http_methods(
     ["DELETE"]
 )  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
-def delete_timeline_task(request, primary_key):
+def delete_timeline_task(request, pk):
     """
     Delete Timeline Template Task
     Soft delete the template and record the deletion time in deleted_at field
     """
     try:
-        timeline_task = get_object_or_404(TimelineTask, id=primary_key)
+        timeline_task = get_object_or_404(TimelineTask, id=pk)
         timeline_task.delete()
         return JsonResponse(
             {"message": "Timeline Template Task deleted successfully"}

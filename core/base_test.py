@@ -13,9 +13,9 @@ from django.utils.translation import ngettext_lazy
 from faker import Faker
 from model_bakery import baker
 
+from core.constants import ADMIN_EMAILS
 from hubble.models import User
 from hubble_report.settings import env
-from core.constants import ADMIN_EMAILS
 
 
 # It is used to disable the 'potected access error', the protected member

@@ -28,7 +28,6 @@ class SubBatchTimeline(LoginRequiredMixin, DetailView):
     extra_context = {"form": SubBatchTimelineForm()}
     model = SubBatch
     template_name = "sub_batch/timeline.html"
-    pk_url_kwarg = "primary_key"
 
 
 # The `SubBatchTimelineDataTable` class is a custom datatable for displaying and managing timeline
@@ -102,17 +101,17 @@ class SubBatchTimelineDataTable(LoginRequiredMixin, CustomDatatable):
 
 @login_required()
 @validate_authorization()
-def create_sub_batch_timeline(request, primary_key):
+def create_sub_batch_timeline(request, pk):
     """
     Create Task Timeline
     """
     response_data = {}  # Initialize an empty dictionary
     if request.method == "POST":
         form = SubBatchTimelineForm(request.POST)
-        sub_batch = SubBatch.objects.get(id=primary_key)
+        sub_batch = SubBatch.objects.get(id=pk)
         if form.is_valid():  # Check if the valid or not
             task_list = SubBatchTaskTimeline.objects.filter(
-                sub_batch=primary_key,
+                sub_batch=pk,
                 order__gte=request.POST.get("order"),
             )  # Remaining task after the insertion of intermediate task
             timeline_task = form.save(commit=False)
@@ -141,13 +140,13 @@ def create_sub_batch_timeline(request, primary_key):
 
 @login_required()
 @validate_authorization()
-def sub_batch_timeline_data(request, primary_key):
+def sub_batch_timeline_data(request, pk):
     """
     Sub batch timeline data
     """
     data = {
         "timeline": model_to_dict(
-            get_object_or_404(SubBatchTaskTimeline, id=primary_key)
+            get_object_or_404(SubBatchTaskTimeline, id=pk)
         )
     }  # Covert django queryset object to dict,which can be easily serialized
     # and sent as a JSON response
@@ -156,15 +155,13 @@ def sub_batch_timeline_data(request, primary_key):
 
 @login_required()
 @validate_authorization()
-def update_sub_batch_timeline(request, primary_key):
+def update_sub_batch_timeline(request, pk):
     """
     The function update_sub_batch_timeline updates the timeline of a sub-batch
     task based on user input, and returns a JSON response indicating the
     success or failure of the update.
     """
-    current_task = get_object_or_404(
-        SubBatchTaskTimeline, id=primary_key
-    )
+    current_task = get_object_or_404(SubBatchTaskTimeline, id=pk)
     previous_duration = current_task.days
     sub_batch = SubBatch.objects.get(id=current_task.sub_batch_id)
     if current_task.can_editable():
@@ -236,15 +233,13 @@ def update_task_sequence(request):
     ["DELETE"]
 )  # This decorator ensures that the view function is only accessible
 # through the DELETE HTTP method
-def delete_sub_batch_timeline(request, primary_key):
+def delete_sub_batch_timeline(request, pk):
     """
     Delete Sub Batch Task
     Soft delete the Sub Batch Task and record the deletion time in deleted_at field
     """
     try:
-        timeline = get_object_or_404(
-            SubBatchTaskTimeline, id=primary_key
-        )
+        timeline = get_object_or_404(SubBatchTaskTimeline, id=pk)
         if timeline.can_editable():
             sub_batch = SubBatch.objects.get(id=timeline.sub_batch_id)
             task_list = SubBatchTaskTimeline.objects.filter(
@@ -277,9 +272,9 @@ def delete_sub_batch_timeline(request, primary_key):
                 status=500,
             )
         return JsonResponse(
-                {"message": "This task has been already started!"},
-                status=500,
-            )
+            {"message": "This task has been already started!"},
+            status=500,
+        )
     except Exception as exception:
         logging.error(
             "An error has occurred while deleting the data \n%s",

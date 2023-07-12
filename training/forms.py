@@ -448,7 +448,7 @@ class SubBatchTimelineForm(forms.ModelForm):
         if self.cleaned_data["order"] > maximum_order_value:
             raise ValidationError(
                 f"The current order of the task is invalid. The valid input for order ranges form 1-{maximum_order_value}.",  # pylint: disable=C0301
-                code="invali_order",
+                code="invalid_order",
             )
         if self.cleaned_data["order"] <= 0:
             raise ValidationError(
