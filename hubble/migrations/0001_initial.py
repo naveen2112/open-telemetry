@@ -6,6 +6,7 @@ from django.db import migrations, models
 
 import core.db
 
+IN_TESTING = settings.IS_TESTING
 
 class Migration(migrations.Migration):
     initial = True
@@ -98,7 +99,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "users",
-                "managed": settings.IS_TESTING,
+                "managed": IN_TESTING,
             },
         ),
         migrations.CreateModel(
@@ -156,7 +157,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "clients",
-                "managed": settings.IS_TESTING,
+                "managed": IN_TESTING,
             },
         ),
         migrations.CreateModel(
@@ -185,7 +186,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "currencies",
-                "managed": settings.IS_TESTING,
+                "managed": IN_TESTING,
             },
         ),
         migrations.CreateModel(
@@ -219,7 +220,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "designations",
-                "managed": settings.IS_TESTING,
+                "managed": IN_TESTING,
             },
         ),
         migrations.CreateModel(
@@ -252,7 +253,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "expected_user_efficiencies",
-                "managed": settings.IS_TESTING,
+                "managed": IN_TESTING,
             },
         ),
         migrations.CreateModel(
@@ -288,7 +289,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "holidays",
-                "managed": settings.IS_TESTING,
+                "managed": IN_TESTING,
             },
         ),
         migrations.CreateModel(
@@ -316,7 +317,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "modules",
-                "managed": settings.IS_TESTING,
+                "managed": IN_TESTING,
             },
         ),
         migrations.CreateModel(
@@ -370,7 +371,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "projects",
-                "managed": settings.IS_TESTING,
+                "managed": IN_TESTING,
             },
         ),
         migrations.CreateModel(
@@ -420,7 +421,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "project_resources",
-                "managed": settings.IS_TESTING,
+                "managed": IN_TESTING,
             },
         ),
         migrations.CreateModel(
@@ -456,7 +457,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "project_resource_positions",
-                "managed": settings.IS_TESTING,
+                "managed": IN_TESTING,
             },
         ),
         migrations.CreateModel(
@@ -488,7 +489,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "tasks",
-                "managed": settings.IS_TESTING,
+                "managed": IN_TESTING,
             },
         ),
         migrations.CreateModel(
@@ -523,7 +524,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "teams",
-                "managed": settings.IS_TESTING,
+                "managed": IN_TESTING,
             },
         ),
         migrations.CreateModel(
@@ -553,7 +554,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "timesheet_entries",
-                "managed": settings.IS_TESTING,
+                "managed": IN_TESTING,
             },
         ),
         migrations.CreateModel(
