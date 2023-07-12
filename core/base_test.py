@@ -31,17 +31,12 @@ class UnManagedModelTestRunner(DiscoverRunner):
     to execute the SQL manually to create them.
     """
 
-
     def setup_test_environment(self, *args, **kwargs):
         settings.IS_TESTING = True
-        super().setup_test_environment(
-            *args, **kwargs
-        )
+        super().setup_test_environment(*args, **kwargs)
 
     def teardown_test_environment(self, *args, **kwargs):
-        super().teardown_test_environment(
-            *args, **kwargs
-        )
+        super().teardown_test_environment(*args, **kwargs)
         settings.IS_TESTING = False
 
 

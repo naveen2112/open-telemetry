@@ -27,7 +27,7 @@ def save_cache(request, cache):
 
 def get_msal_app(cache=None):
     """
-    Get the MSAL (Microsoft Authentication Library) 
+    Get the MSAL (Microsoft Authentication Library)
     ConfidentialClientApplication
     """
     return msal.ConfidentialClientApplication(

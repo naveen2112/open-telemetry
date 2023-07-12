@@ -32,7 +32,7 @@ class BatchCreateTest(BaseTestCase):
 
     def update_valid_input(self):
         """
-        This function is responsible for updating the valid inputs and 
+        This function is responsible for updating the valid inputs and
         creating data in databases as reqiured
         """
         self.persisted_valid_inputs = {"name": self.faker.name()}
@@ -269,7 +269,7 @@ class BatchDatatableTest(BaseTestCase):
 
     def update_valid_input(self):
         """
-        This function is responsible for updating the valid inputs and 
+        This function is responsible for updating the valid inputs and
         creating data in databases as reqiured
         """
         self.name = self.faker.name()
@@ -293,7 +293,7 @@ class BatchDatatableTest(BaseTestCase):
 
     def test_datatable(self):
         """
-        To check whether all columns are present in datatable 
+        To check whether all columns are present in datatable
         and length of rows without any filter
         """
         batches = Batch.objects.annotate(
