@@ -174,6 +174,8 @@ def delete_extension(request, pk):
             "An error has occured while deleting an Extension task \n%s",
             exception,
         )
+    except Exception as e:
+        logging.error(f"An error has occured while deleting an Extension task \n{e}")
         return JsonResponse(
             {"message": "Error while deleting week extension!"},
             status=500,

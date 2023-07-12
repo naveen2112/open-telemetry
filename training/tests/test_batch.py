@@ -23,7 +23,8 @@ class BatchCreateTest(BaseTestCase):
 
     def setUp(self):
         """
-        This function will run before every test and makes sure required data are ready
+        This function will run before every test and makes sure required
+        data are ready
         """
         super().setUp()
         self.authenticate()
@@ -31,8 +32,8 @@ class BatchCreateTest(BaseTestCase):
 
     def update_valid_input(self):
         """
-        This function is responsible for updating the valid inputs and creating
-        data in databases as reqiured
+        This function is responsible for updating the valid inputs and 
+        creating data in databases as reqiured
         """
         self.persisted_valid_inputs = {"name": self.faker.name()}
 
@@ -104,7 +105,8 @@ class BatchShowTest(BaseTestCase):
 
     def setUp(self):
         """
-        This function will run before every test and makes sure required data are ready
+        This function will run before every test and makes sure required
+        data are ready
         """
         super().setUp()
         self.authenticate()
@@ -124,7 +126,8 @@ class BatchShowTest(BaseTestCase):
 
     def test_failure(self):
         """
-        To check what happens when invalid id is given as argument for batch update
+        To check what happens when invalid id is given as argument
+        for batch update
         """
         response = self.make_get_request(
             reverse(self.update_show_route_name, args=[0])
@@ -248,7 +251,8 @@ class BatchDeleteTest(BaseTestCase):
 
 class BatchDatatableTest(BaseTestCase):
     """
-    This class is responsible for testing the Datatables present in the Batch module
+    This class is responsible for testing the Datatables present
+    in the Batch module
     """
 
     datatable_route_name = "batch.datatable"
@@ -256,7 +260,8 @@ class BatchDatatableTest(BaseTestCase):
 
     def setUp(self):
         """
-        This function will run before every test and makes sure required data are ready
+        This function will run before every test and makes sure required
+        data are ready
         """
         super().setUp()
         self.authenticate()
@@ -264,8 +269,8 @@ class BatchDatatableTest(BaseTestCase):
 
     def update_valid_input(self):
         """
-        This function is responsible for updating the valid inputs and creating
-        data in databases as reqiured
+        This function is responsible for updating the valid inputs and 
+        creating data in databases as reqiured
         """
         self.name = self.faker.name()
         self.batch = baker.make(
@@ -288,7 +293,8 @@ class BatchDatatableTest(BaseTestCase):
 
     def test_datatable(self):
         """
-        To check whether all columns are present in datatable and length of rows without any filter
+        To check whether all columns are present in datatable 
+        and length of rows without any filter
         """
         batches = Batch.objects.annotate(
             total_trainee=Count(
@@ -343,7 +349,8 @@ class BatchDatatableTest(BaseTestCase):
             self.assertTrue("total_trainee" in row)
             self.assertTrue("action" in row)
 
-        # Check the numbers of rows received is equal to the number of expected rows
+        # Check the numbers of rows received is equal to the
+        # number of expected rows
         self.assertTrue(
             response.json()["recordsTotal"], len(self.batch)
         )

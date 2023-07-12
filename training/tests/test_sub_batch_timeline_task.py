@@ -830,7 +830,3 @@ class SubBatchTimelineDatatableTest(BaseTestCase):
             response.json()["recordsTotal"],
             len(sub_batch_task_timeline),
         )
-        self.assertTrue(
-            response.json()["recordsTotal"],
-            len(sub_batch_task_timeline),
-        )

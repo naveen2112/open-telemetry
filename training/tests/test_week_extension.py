@@ -136,7 +136,6 @@ class ExtensionUpdateTest(BaseTestCase):
             ),
             data=data,
         )
-        print(self.decoded_json(response))
         self.assertJSONEqual(
             self.decoded_json(response), {"status": "success"}
         )

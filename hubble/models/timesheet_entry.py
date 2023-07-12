@@ -2,8 +2,17 @@
 The TimesheetEntry class is a model that represents a timesheet entry
 """
 from django.db import models
-from django.db.models import (Case, CharField, F, FloatField, Func, Q, Sum,
-                              Value, When)
+from django.db.models import (
+    Case,
+    CharField,
+    F,
+    FloatField,
+    Func,
+    Q,
+    Sum,
+    Value,
+    When,
+)
 from django.db.models.functions import Coalesce, Round
 from django.utils import timezone
 
@@ -237,7 +246,8 @@ class TimesheetManager(models.Manager):
 
 class TimesheetEntry(db.BaseModel):
     """
-    Store the timesheet entry data along with projct and module as a foreign key field
+    Store the timesheet entry data along with projct and module
+    as a foreign key field
     """
 
     id = models.BigAutoField(primary_key=True)

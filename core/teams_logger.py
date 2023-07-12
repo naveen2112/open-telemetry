@@ -43,9 +43,9 @@ class TeamsExceptionHandler(AdminEmailHandler):
         if url:
             try:
                 request = record.request
-                subject = f"{record.levelname}\
-                    ({'internal' if request.META.get('REMOTE_ADDR') in settings.INTERNAL_IPS else 'EXTERNAL'} IP): \
-                    {record.getMessage()}"
+                subject = f"{record.levelname} ({'internal' if request.META.get('REMOTE_ADDR') in settings.INTERNAL_IPS else 'EXTERNAL'} IP): {record.getMessage()}" # pylint: disable=C0301
+                # Disabled text too long issue because the f-string
+                # line breakable
             except Exception:
                 subject = f"{record.levelname}: {record.getMessage()}"
                 request = None

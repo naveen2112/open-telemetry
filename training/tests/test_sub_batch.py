@@ -669,7 +669,6 @@ class SubBatchDatatableTest(BaseTestCase):
                 expected_value.start_date.strftime("%d %b %Y"),
                 received_value["start_date"],
             )
-
         for row in response.json()["data"]:
             self.assertTrue("pk" in row)
             self.assertTrue("name" in row)

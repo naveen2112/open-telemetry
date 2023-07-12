@@ -26,23 +26,23 @@ class UnManagedModelTestRunner(DiscoverRunner):
     Test runner that automatically makes all unmanaged models in your Django
     project managed for the duration of the test run, so that one doesn't need
     to execute the SQL manually to create them.
+    Test runner that automatically makes all unmanaged models in your Django
+    project managed for the duration of the test run, so that one doesn't need
+    to execute the SQL manually to create them.
     """
 
+
     def setup_test_environment(self, *args, **kwargs):
-        # It is used to disable the 'attribute-defined-outside-init' the
-        # instance attribute is defines outside the class
-        # pylint: disable=attribute-defined-outside-init
-        self.unmanaged_models = [
-            m for m in apps.get_models() if not m._meta.managed
-        ]
-        for unmanaged_model in self.unmanaged_models:
-            unmanaged_model._meta.concrete_model._meta.managed = True
-        super().setup_test_environment(*args, **kwargs)
+        settings.IS_TESTING = True
+        super().setup_test_environment(
+            *args, **kwargs
+        )
 
     def teardown_test_environment(self, *args, **kwargs):
-        super().teardown_test_environment(*args, **kwargs)
-        for unmanaged_model in self.unmanaged_models:
-            unmanaged_model._meta.managed = False
+        super().teardown_test_environment(
+            *args, **kwargs
+        )
+        settings.IS_TESTING = False
 
 
 class BaseTestCase(TestCase):
