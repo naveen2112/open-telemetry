@@ -1,9 +1,9 @@
-from django.forms.models import model_to_dict
 from django.urls import reverse
 from django.utils import timezone
 from model_bakery import baker
 
 from core.base_test import BaseTestCase
+from core.constants import TASK_TYPE_ASSESSMENT
 
 
 class ExtensionCreateTest(BaseTestCase):
@@ -30,8 +30,14 @@ class ExtensionCreateTest(BaseTestCase):
             "hubble.SubBatch",
             start_date=(timezone.now() + timezone.timedelta(1)),
         )
-        self.trainee = baker.make(
-            "hubble.InternDetail", sub_batch=self.sub_batch
+        self.trainee = baker.make("hubble.InternDetail", sub_batch=self.sub_batch)
+        baker.make(
+            "hubble.SubBatchTaskTimeline",
+            days=10,
+            task_type=TASK_TYPE_ASSESSMENT,
+            sub_batch=self.sub_batch,
+            end_date=(timezone.now() + timezone.timedelta(10)).date(),
+            order=1,
         )
 
     def test_template(self):
@@ -41,9 +47,7 @@ class ExtensionCreateTest(BaseTestCase):
         response = self.make_get_request(
             reverse(self.route_name, args=[self.trainee.user_id])
         )
-        self.assertTemplateUsed(
-            response, "sub_batch/user_journey_page.html"
-        )
+        self.assertTemplateUsed(response, "sub_batch/user_journey_page.html")
         self.assertContains(response, self.trainee.user_id)
 
     def test_success(self):
@@ -51,14 +55,10 @@ class ExtensionCreateTest(BaseTestCase):
         Check what happens when valid data is given as input
         """
         response = self.make_post_request(
-            reverse(
-                self.create_route_name, args=[self.trainee.user_id]
-            ),
+            reverse(self.create_route_name, args=[self.trainee.user_id]),
             data={},
         )
-        self.assertJSONEqual(
-            self.decoded_json(response), {"status": "success"}
-        )
+        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertEqual(response.status_code, 200)
         self.assertDatabaseHas(
             "Extension",
@@ -75,9 +75,7 @@ class ExtensionCreateTest(BaseTestCase):
         response = self.make_post_request(
             reverse(self.create_route_name, args=[0]), data={}
         )
-        self.assertJSONEqual(
-            self.decoded_json(response), {"status": "error"}
-        )
+        self.assertJSONEqual(self.decoded_json(response), {"status": "error"})
         self.assertEqual(response.status_code, 200)
 
 
@@ -104,12 +102,8 @@ class ExtensionUpdateTest(BaseTestCase):
             "hubble.SubBatch",
             start_date=(timezone.now() + timezone.timedelta(1)),
         )
-        extension_task = baker.make(
-            "hubble.Extension", sub_batch=sub_batch
-        )
-        self.trainee = baker.make(
-            "hubble.InternDetail", sub_batch=sub_batch
-        )
+        extension_task = baker.make("hubble.Extension", sub_batch=sub_batch)
+        self.trainee = baker.make("hubble.InternDetail", sub_batch=sub_batch)
         self.persisted_valid_inputs = {
             "score": 50,
             "comment": self.faker.name(),
@@ -125,14 +119,10 @@ class ExtensionUpdateTest(BaseTestCase):
         # Check what happens when is_retry is True
         data = self.get_valid_inputs()
         response = self.make_post_request(
-            reverse(
-                self.update_edit_route_name, args=[self.trainee.user_id]
-            ),
+            reverse(self.update_edit_route_name, args=[self.trainee.user_id]),
             data=data,
         )
-        self.assertJSONEqual(
-            self.decoded_json(response), {"status": "success"}
-        )
+        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertEqual(response.status_code, 200)
         self.assertDatabaseHas(
             "Assessment",
@@ -147,14 +137,10 @@ class ExtensionUpdateTest(BaseTestCase):
         # Check what happens when is_retry is False
         data = self.get_valid_inputs({"status": "false"})
         response = self.make_post_request(
-            reverse(
-                self.update_edit_route_name, args=[self.trainee.user_id]
-            ),
+            reverse(self.update_edit_route_name, args=[self.trainee.user_id]),
             data=data,
         )
-        self.assertJSONEqual(
-            self.decoded_json(response), {"status": "success"}
-        )
+        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertEqual(response.status_code, 200)
         self.assertDatabaseHas(
             "Assessment",
@@ -171,9 +157,7 @@ class ExtensionUpdateTest(BaseTestCase):
         This function checks the required validation for the score and comment fields
         """
         response = self.make_post_request(
-            reverse(
-                self.update_edit_route_name, args=[self.trainee.user_id]
-            ),
+            reverse(self.update_edit_route_name, args=[self.trainee.user_id]),
             data={},
         )
         field_errors = {"score": {"required"}, "comment": {"required"}}
@@ -188,9 +172,7 @@ class ExtensionUpdateTest(BaseTestCase):
         """
         # Check what happens when score is greater than 100
         response = self.make_post_request(
-            reverse(
-                self.update_edit_route_name, args=[self.trainee.user_id]
-            ),
+            reverse(self.update_edit_route_name, args=[self.trainee.user_id]),
             data=self.get_valid_inputs({"score": 101}),
         )
         field_errors = {"score": {"invalid_score"}}
@@ -201,9 +183,7 @@ class ExtensionUpdateTest(BaseTestCase):
 
         # Check what happens when score is negative
         response = self.make_post_request(
-            reverse(
-                self.update_edit_route_name, args=[self.trainee.user_id]
-            ),
+            reverse(self.update_edit_route_name, args=[self.trainee.user_id]),
             data=self.get_valid_inputs({"score": -100}),
         )
         field_errors = {"score": {"invalid_score"}}
@@ -250,9 +230,7 @@ class ExtensionWeekTaskDelete(BaseTestCase):
         """
         To check what happens when invalid id is given for delete
         """
-        response = self.make_delete_request(
-            reverse(self.delete_route_name, args=[0])
-        )
+        response = self.make_delete_request(reverse(self.delete_route_name, args=[0]))
         self.assertJSONEqual(
             response.content,
             {"message": "Error while deleting week extension!"},

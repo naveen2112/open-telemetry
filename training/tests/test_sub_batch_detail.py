@@ -1,4 +1,5 @@
-from django.db.models import Avg, Count, OuterRef, Q, Subquery, Sum, F, Case, When, Value
+from django.db.models import (Avg, Case, Count, F, OuterRef, Q, Subquery,
+                              Value, When)
 from django.db.models.functions import Coalesce
 from django.urls import reverse
 from django.utils import timezone
@@ -6,6 +7,7 @@ from model_bakery import baker
 from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
+from core.constants import TASK_TYPE_ASSESSMENT
 from hubble.models import InternDetail, SubBatchTaskTimeline
 
 
@@ -227,9 +229,10 @@ class TraineeDatatableTest(BaseTestCase):
         )
         baker.make(
             "hubble.SubBatchTaskTimeline",
+            task_type=TASK_TYPE_ASSESSMENT,
             days=seq(0),
             order=seq(0),
-            sub_batch_id=self.sub_batch.id
+            sub_batch_id=self.sub_batch.id,
         )
         self.persisted_valid_inputs = {
             "draw": 1,
@@ -260,29 +263,15 @@ class TraineeDatatableTest(BaseTestCase):
         """
         task_count = (
             SubBatchTaskTimeline.objects.filter(
-                sub_batch_id=self.sub_batch.id
+                sub_batch_id=self.sub_batch.id, task_type=TASK_TYPE_ASSESSMENT
             )
             .values("id")
             .count()
         )
-        retries = (
-            SubBatchTaskTimeline.objects.filter(
-                sub_batch_id=self.sub_batch.id,
-                assessments__user_id=OuterRef("user_id"),
-                id=OuterRef("user__assessments__task_id"),
-            )
-            .annotate(
-                count=Count("assessments__is_retry", filter=Q(assessments__is_retry=True)),
-            )
-            .values("assessments__user_id", "id", "count", "assessments__score")   
-        )
-        last_attempt = (
-            SubBatchTaskTimeline.objects.filter(
-                id=OuterRef("user__assessments__task_id"),
-                assessments__user_id=OuterRef("user_id"),
-            )
-            .order_by("-assessments__id")[:1]
-        )
+        last_attempt_score = SubBatchTaskTimeline.objects.filter(
+            id=OuterRef("user__assessments__task_id"),
+            assessments__user_id=OuterRef("user_id"),
+        ).order_by("-assessments__id")[:1]
         desired_output = (
             InternDetail.objects.filter(sub_batch__id=self.sub_batch.id)
             .select_related("user")
@@ -292,7 +281,7 @@ class TraineeDatatableTest(BaseTestCase):
                         user_id=F("user__assessments__user_id"),
                         then=Coalesce(
                             Avg(
-                                Subquery(last_attempt.values("assessments__score")),
+                                Subquery(last_attempt_score.values("assessments__score")),
                                 distinct=True,
                             ),
                             0.0,
@@ -301,15 +290,40 @@ class TraineeDatatableTest(BaseTestCase):
                     default=None,
                 ),
                 no_of_retries=Coalesce(
-                    Sum(Subquery(retries.values("count")), distinct=True), 0
+                    Count(
+                        "user__assessments__is_retry",
+                        filter=Q(user__assessments__is_retry=True),
+                    ),
+                    0,
                 ),
                 completion=Coalesce(
                     (
-                        Count("user__assessments__task_id", filter=Q(user__assessments__user_id=F("user_id")), distinct=True)
+                        Count(
+                            "user__assessments__task_id",
+                            filter=Q(user__assessments__user_id=F("user_id")),
+                            distinct=True,
+                        )
                         / float(task_count)
                     )
                     * 100,
                     0.0,
+                ),
+                performance=Case(
+                    When(average_marks__gte=90, then=Value("Good")),
+                    When(
+                        Q(average_marks__lt=90) & Q(average_marks__gte=75),
+                        then=Value("Meet Expectations"),
+                    ),
+                    When(
+                        Q(average_marks__lt=75) & Q(average_marks__gte=65),
+                        then=Value("Above Average"),
+                    ),
+                    When(
+                        Q(average_marks__lt=65) & Q(average_marks__gte=50),
+                        then=Value("Average"),
+                    ),
+                    When(average_marks__lt=65, then=Value("Poor")),
+                    default=Value("Not yet Started"),
                 ),
             )
         )
@@ -323,15 +337,16 @@ class TraineeDatatableTest(BaseTestCase):
             self.assertEqual(expected_value.pk, int(received_value["pk"]))
             self.assertEqual(expected_value.user.name, received_value["user"])
             self.assertEqual(expected_value.college, received_value["college"])
-            self.assertEqual(expected_value.completion, float(received_value["completion"]))
+            self.assertEqual(
+                expected_value.completion, float(received_value["completion"])
+            )
             if expected_value.average_marks == None:
-                self.assertEqual(
-                    "-", received_value["average_marks"]
-                )
+                self.assertEqual("-", received_value["average_marks"])
             else:
                 self.assertEqual(
                     expected_value.average_marks, float(received_value["average_marks"])
                 )
+            self.assertEqual(expected_value.performance, received_value["performance"])
             self.assertEqual(
                 expected_value.no_of_retries, int(received_value["no_of_retries"])
             )
@@ -344,6 +359,10 @@ class TraineeDatatableTest(BaseTestCase):
             self.assertTrue("user" in row)
             self.assertTrue("college" in row)
             self.assertTrue("expected_completion" in row)
+            self.assertTrue("performance" in row)
+            self.assertTrue("average_marks" in row)
+            self.assertTrue("completion" in row)
+            self.assertTrue("no_of_retries" in row)
         self.assertTrue(response.json()["recordsTotal"], len(desired_output))
 
     def test_database_search(self):
@@ -371,6 +390,7 @@ class TraineeDatatableTest(BaseTestCase):
             "Above Average": 0,
             "Average": 0,
             "Poor": 0,
+            "Not Yet Started": 0,
         }
         response = self.make_post_request(
             reverse(self.datatable_route_name), data=self.get_valid_inputs()
@@ -387,28 +407,46 @@ class TraineeDatatableTest(BaseTestCase):
                     performance_report["Average"] += 1
                 elif float(performance["average_marks"]) < 50:
                     performance_report["Poor"] += 1
+            else:
+                performance_report["Not Yet Started"] += 1
 
         self.assertTrue("extra_data" in response.json())
-        self.assertTrue("Good" in response.json()["extra_data"])
-        self.assertTrue("Meet Expectation" in response.json()["extra_data"])
-        self.assertTrue("Above Average" in response.json()["extra_data"])
-        self.assertTrue("Average" in response.json()["extra_data"])
-        self.assertTrue("Poor" in response.json()["extra_data"])
+        self.assertTrue("Good" in response.json()["extra_data"]["performance_report"])
+        self.assertTrue(
+            "Meet Expectation" in response.json()["extra_data"]["performance_report"]
+        )
+        self.assertTrue(
+            "Above Average" in response.json()["extra_data"]["performance_report"]
+        )
+        self.assertTrue(
+            "Average" in response.json()["extra_data"]["performance_report"]
+        )
+        self.assertTrue("Poor" in response.json()["extra_data"]["performance_report"])
+        self.assertTrue(
+            "Not Yet Started" in response.json()["extra_data"]["performance_report"]
+        )
 
         self.assertTrue(
-            performance_report["Good"] == response.json()["extra_data"]["Good"]
+            performance_report["Good"]
+            == response.json()["extra_data"]["performance_report"]["Good"]
         )
         self.assertTrue(
             performance_report["Meet Expectation"]
-            == response.json()["extra_data"]["Meet Expectation"]
+            == response.json()["extra_data"]["performance_report"]["Meet Expectation"]
         )
         self.assertTrue(
             performance_report["Above Average"]
-            == response.json()["extra_data"]["Above Average"]
+            == response.json()["extra_data"]["performance_report"]["Above Average"]
         )
         self.assertTrue(
-            performance_report["Average"] == response.json()["extra_data"]["Average"]
+            performance_report["Average"]
+            == response.json()["extra_data"]["performance_report"]["Average"]
         )
         self.assertTrue(
-            performance_report["Poor"] == response.json()["extra_data"]["Poor"]
+            performance_report["Poor"]
+            == response.json()["extra_data"]["performance_report"]["Poor"]
+        )
+        self.assertTrue(
+            performance_report["Not Yet Started"]
+            == response.json()["extra_data"]["performance_report"]["Not Yet Started"]
         )

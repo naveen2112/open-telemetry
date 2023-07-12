@@ -2,8 +2,8 @@ import logging
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import (Avg, BooleanField, Case, Count, OuterRef, Q, F,
-                              Subquery, Sum, Value, When)
+from django.db.models import (Avg, BooleanField, Case, Count, F, OuterRef, Q,
+                              Subquery, Value, When)
 from django.db.models.functions import Coalesce
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -40,24 +40,7 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
             .count()
         )
 
-        retries = (
-            SubBatchTaskTimeline.objects.filter(
-                sub_batch=sub_batch_id,
-                assessments__user_id=OuterRef("user_id"),
-                id=OuterRef("user__assessments__task_id"),
-            )
-            .annotate(
-                count=Count(
-                    "assessments__is_retry", filter=Q(assessments__is_retry=True)
-                ),
-                passed=Count(
-                    "assessments__is_retry", filter=Q(assessments__is_retry=False)
-                ),
-            )
-            .values("assessments__user_id", "id", "count", "passed")
-        )
-
-        last_attempt = SubBatchTaskTimeline.objects.filter(
+        last_attempt_score = SubBatchTaskTimeline.objects.filter(
             id=OuterRef("user__assessments__task_id"),
             assessments__user_id=OuterRef("user_id"),
         ).order_by("-assessments__id")[:1]
@@ -72,7 +55,9 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
                         user_id=F("user__assessments__user_id"),
                         then=Coalesce(
                             Avg(
-                                Subquery(last_attempt.values("assessments__score")),
+                                Subquery(
+                                    last_attempt_score.values("assessments__score")
+                                ),
                                 distinct=True,
                             ),
                             0.0,
@@ -81,7 +66,11 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
                     default=None,
                 ),
                 no_of_retries=Coalesce(
-                    Sum(Subquery(retries.values("count")), distinct=True), 0
+                    Count(
+                        "user__assessments__is_retry",
+                        filter=Q(user__assessments__is_retry=True),
+                    ),
+                    0,
                 ),
                 completion=Coalesce(
                     (
