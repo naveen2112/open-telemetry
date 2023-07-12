@@ -6,10 +6,11 @@ from django.db import migrations, models
 
 import core.db
 
-IN_TESTING = settings.IS_TESTING
 
 class Migration(migrations.Migration):
     initial = True
+
+    in_testing = settings.IS_TESTING
 
     dependencies = []
 
@@ -31,15 +32,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "id",
-                    models.BigAutoField(
-                        primary_key=True, serialize=False
-                    ),
+                    models.BigAutoField(primary_key=True, serialize=False),
                 ),
                 (
                     "employee_id",
-                    models.CharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    models.CharField(blank=True, max_length=255, null=True),
                 ),
                 (
                     "email",
@@ -47,21 +44,15 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "email_verified_at",
-                    core.db.DateTimeWithoutTZField(
-                        blank=True, null=True
-                    ),
+                    core.db.DateTimeWithoutTZField(blank=True, null=True),
                 ),
                 (
                     "password",
-                    models.CharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    models.CharField(blank=True, max_length=255, null=True),
                 ),
                 (
                     "username",
-                    models.CharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    models.CharField(blank=True, max_length=255, null=True),
                 ),
                 ("name", models.CharField(max_length=255)),
                 (
@@ -70,9 +61,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "remember_token",
-                    models.CharField(
-                        blank=True, max_length=100, null=True
-                    ),
+                    models.CharField(blank=True, max_length=100, null=True),
                 ),
                 ("status", models.CharField(max_length=255)),
                 (
@@ -85,21 +74,17 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "first_name",
-                    models.CharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    models.CharField(blank=True, max_length=255, null=True),
                 ),
                 (
                     "last_name",
-                    models.CharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    models.CharField(blank=True, max_length=255, null=True),
                 ),
                 ("is_saturday_working", models.BooleanField()),
             ],
             options={
                 "db_table": "users",
-                "managed": IN_TESTING,
+                "managed": in_testing,
             },
         ),
         migrations.CreateModel(
@@ -119,45 +104,33 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "id",
-                    models.BigAutoField(
-                        primary_key=True, serialize=False
-                    ),
+                    models.BigAutoField(primary_key=True, serialize=False),
                 ),
                 ("name", models.CharField(max_length=255)),
                 (
                     "state",
-                    models.CharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    models.CharField(blank=True, max_length=255, null=True),
                 ),
                 (
                     "country",
-                    models.CharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    models.CharField(blank=True, max_length=255, null=True),
                 ),
                 (
                     "zip",
-                    models.CharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    models.CharField(blank=True, max_length=255, null=True),
                 ),
                 (
                     "street",
-                    models.CharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    models.CharField(blank=True, max_length=255, null=True),
                 ),
                 (
                     "city",
-                    models.CharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    models.CharField(blank=True, max_length=255, null=True),
                 ),
             ],
             options={
                 "db_table": "clients",
-                "managed": IN_TESTING,
+                "managed": in_testing,
             },
         ),
         migrations.CreateModel(
@@ -177,16 +150,14 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "id",
-                    models.BigAutoField(
-                        primary_key=True, serialize=False
-                    ),
+                    models.BigAutoField(primary_key=True, serialize=False),
                 ),
                 ("name", models.CharField(max_length=255)),
                 ("symbol", models.CharField(max_length=255)),
             ],
             options={
                 "db_table": "currencies",
-                "managed": IN_TESTING,
+                "managed": in_testing,
             },
         ),
         migrations.CreateModel(
@@ -206,21 +177,17 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "id",
-                    models.BigAutoField(
-                        primary_key=True, serialize=False
-                    ),
+                    models.BigAutoField(primary_key=True, serialize=False),
                 ),
                 ("name", models.CharField(max_length=255)),
                 (
                     "type",
-                    models.CharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    models.CharField(blank=True, max_length=255, null=True),
                 ),
             ],
             options={
                 "db_table": "designations",
-                "managed": IN_TESTING,
+                "managed": in_testing,
             },
         ),
         migrations.CreateModel(
@@ -240,9 +207,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "id",
-                    models.BigAutoField(
-                        primary_key=True, serialize=False
-                    ),
+                    models.BigAutoField(primary_key=True, serialize=False),
                 ),
                 ("expected_efficiency", models.FloatField()),
                 ("effective_from", models.DateField()),
@@ -253,7 +218,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "expected_user_efficiencies",
-                "managed": IN_TESTING,
+                "managed": in_testing,
             },
         ),
         migrations.CreateModel(
@@ -273,23 +238,19 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "id",
-                    models.BigAutoField(
-                        primary_key=True, serialize=False
-                    ),
+                    models.BigAutoField(primary_key=True, serialize=False),
                 ),
                 ("date_of_holiday", models.DateField()),
                 ("month_year", models.CharField(max_length=255)),
                 (
                     "reason",
-                    models.CharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    models.CharField(blank=True, max_length=255, null=True),
                 ),
                 ("allow_check_in", models.BooleanField()),
             ],
             options={
                 "db_table": "holidays",
-                "managed": IN_TESTING,
+                "managed": in_testing,
             },
         ),
         migrations.CreateModel(
@@ -309,15 +270,13 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "id",
-                    models.BigAutoField(
-                        primary_key=True, serialize=False
-                    ),
+                    models.BigAutoField(primary_key=True, serialize=False),
                 ),
                 ("name", models.CharField(max_length=255)),
             ],
             options={
                 "db_table": "modules",
-                "managed": IN_TESTING,
+                "managed": in_testing,
             },
         ),
         migrations.CreateModel(
@@ -337,41 +296,31 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "id",
-                    models.BigAutoField(
-                        primary_key=True, serialize=False
-                    ),
+                    models.BigAutoField(primary_key=True, serialize=False),
                 ),
                 ("project_id", models.FloatField()),
                 ("name", models.CharField(max_length=255)),
                 (
                     "icon_path",
-                    models.CharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    models.CharField(blank=True, max_length=255, null=True),
                 ),
                 (
                     "icon_updated_at",
-                    core.db.DateTimeWithoutTZField(
-                        blank=True, null=True
-                    ),
+                    core.db.DateTimeWithoutTZField(blank=True, null=True),
                 ),
                 ("status", models.CharField(max_length=255)),
                 (
                     "version",
-                    models.CharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    models.CharField(blank=True, max_length=255, null=True),
                 ),
                 (
                     "billing_frequency",
-                    models.CharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    models.CharField(blank=True, max_length=255, null=True),
                 ),
             ],
             options={
                 "db_table": "projects",
-                "managed": IN_TESTING,
+                "managed": in_testing,
             },
         ),
         migrations.CreateModel(
@@ -391,15 +340,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "id",
-                    models.BigAutoField(
-                        primary_key=True, serialize=False
-                    ),
+                    models.BigAutoField(primary_key=True, serialize=False),
                 ),
                 (
                     "resource_type",
-                    models.CharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    models.CharField(blank=True, max_length=255, null=True),
                 ),
                 (
                     "utilisation",
@@ -421,7 +366,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "project_resources",
-                "managed": IN_TESTING,
+                "managed": in_testing,
             },
         ),
         migrations.CreateModel(
@@ -434,15 +379,11 @@ class Migration(migrations.Migration):
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 (
                     "id",
-                    models.BigAutoField(
-                        primary_key=True, serialize=False
-                    ),
+                    models.BigAutoField(primary_key=True, serialize=False),
                 ),
                 (
                     "name",
-                    models.CharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    models.CharField(blank=True, max_length=255, null=True),
                 ),
                 (
                     "required_reporting_person",
@@ -450,14 +391,12 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "type",
-                    models.CharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    models.CharField(blank=True, max_length=255, null=True),
                 ),
             ],
             options={
                 "db_table": "project_resource_positions",
-                "managed": IN_TESTING,
+                "managed": in_testing,
             },
         ),
         migrations.CreateModel(
@@ -477,9 +416,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "id",
-                    models.BigAutoField(
-                        primary_key=True, serialize=False
-                    ),
+                    models.BigAutoField(primary_key=True, serialize=False),
                 ),
                 ("name", models.CharField(max_length=255)),
                 (
@@ -489,7 +426,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "tasks",
-                "managed": IN_TESTING,
+                "managed": in_testing,
             },
         ),
         migrations.CreateModel(
@@ -509,22 +446,18 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "id",
-                    models.BigAutoField(
-                        primary_key=True, serialize=False
-                    ),
+                    models.BigAutoField(primary_key=True, serialize=False),
                 ),
                 ("name", models.CharField(max_length=255)),
                 (
                     "type",
-                    models.CharField(
-                        blank=True, max_length=255, null=True
-                    ),
+                    models.CharField(blank=True, max_length=255, null=True),
                 ),
                 ("started_at", models.DateField(blank=True, null=True)),
             ],
             options={
                 "db_table": "teams",
-                "managed": IN_TESTING,
+                "managed": in_testing,
             },
         ),
         migrations.CreateModel(
@@ -537,9 +470,7 @@ class Migration(migrations.Migration):
                 ("updated_at", models.DateTimeField(auto_now=True)),
                 (
                     "id",
-                    models.BigAutoField(
-                        primary_key=True, serialize=False
-                    ),
+                    models.BigAutoField(primary_key=True, serialize=False),
                 ),
                 ("description", models.TextField()),
                 ("entry_date", models.DateField()),
@@ -554,7 +485,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "timesheet_entries",
-                "managed": IN_TESTING,
+                "managed": in_testing,
             },
         ),
         migrations.CreateModel(
