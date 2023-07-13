@@ -3,8 +3,18 @@ import logging
 import pandas as pd
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import (Avg, Case, Count, F, OuterRef, Q, Subquery, Sum,
-                              Value, When)
+from django.db.models import (
+    Avg,
+    Case,
+    Count,
+    F,
+    OuterRef,
+    Q,
+    Subquery,
+    Sum,
+    Value,
+    When,
+)
 from django.db.models.functions import Coalesce
 from django.forms import model_to_dict
 from django.http import JsonResponse
@@ -15,10 +25,20 @@ from django.views.generic import DetailView
 
 from core import template_utils
 from core.constants import TASK_TYPE_ASSESSMENT
-from core.utils import (CustomDatatable, schedule_timeline_for_sub_batch,
-                        validate_authorization)
-from hubble.models import (Batch, InternDetail, SubBatch, SubBatchTaskTimeline,
-                           Timeline, TimelineTask, User)
+from core.utils import (
+    CustomDatatable,
+    schedule_timeline_for_sub_batch,
+    validate_authorization,
+)
+from hubble.models import (
+    Batch,
+    InternDetail,
+    SubBatch,
+    SubBatchTaskTimeline,
+    Timeline,
+    TimelineTask,
+    User,
+)
 from training.forms import AddInternForm, SubBatchForm
 
 
@@ -372,7 +392,8 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
                 ),
                 no_of_retries=Coalesce(
                     Count(
-                        "user__assessments__is_retry", filter=Q(user__assessments__is_retry=True)
+                        "user__assessments__is_retry",
+                        filter=Q(user__assessments__is_retry=True),
                     ),
                     0,
                 ),

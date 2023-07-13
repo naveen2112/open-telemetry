@@ -22,7 +22,7 @@ class UnManagedModelTestRunner(DiscoverRunner):
     """
 
     def setup_test_environment(self, *args, **kwargs):
-        settings.IS_TESTING = True
+        settings.IS_TEST_CASE = True
         super(UnManagedModelTestRunner, self).setup_test_environment(
             *args, **kwargs
         )
@@ -31,7 +31,7 @@ class UnManagedModelTestRunner(DiscoverRunner):
         super(UnManagedModelTestRunner, self).teardown_test_environment(
             *args, **kwargs
         )
-        settings.IS_TESTING = False
+        settings.IS_TEST_CASE = False
 
 
 class BaseTestCase(TestCase):
