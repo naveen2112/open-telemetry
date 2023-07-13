@@ -212,4 +212,4 @@ if ENV_NAME == ENVIRONMENT_DEVELOPMENT:
 
 TEST_RUNNER = "core.base_test.UnManagedModelTestRunner"
 
-IS_TESTING = False
+IS_TEST_CASE = False

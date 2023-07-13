@@ -32,12 +32,16 @@ class UnManagedModelTestRunner(DiscoverRunner):
     """
 
     def setup_test_environment(self, *args, **kwargs):
-        settings.IS_TESTING = True
-        super().setup_test_environment(*args, **kwargs)
+        settings.IS_TEST_CASE = True
+        super().setup_test_environment(
+            *args, **kwargs
+        )
 
     def teardown_test_environment(self, *args, **kwargs):
-        super().teardown_test_environment(*args, **kwargs)
-        settings.IS_TESTING = False
+        super().teardown_test_environment(
+            *args, **kwargs
+        )
+        settings.IS_TEST_CASE = False
 
 
 class BaseTestCase(TestCase):
