@@ -347,7 +347,7 @@ class TraineeDatatableTest(BaseTestCase):
                 self.assertEqual(
                     expected_value.average_marks, float(received_value["average_marks"])
                 )
-            self.assertEqual(expected_value.performance, received_value["performance"])
+            self.assertEqual(expected_value.performance, received_value["performance"].split(">")[1].split("<")[0])
             self.assertEqual(
                 expected_value.no_of_retries, int(received_value["no_of_retries"])
             )

@@ -75,7 +75,7 @@
 
     <div class="jquery-modal current hidden" id="modal">
         <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
-            <p class="font-semibold text-lg mb-10">Week</p>
+            <p class="font-semibold text-md mt-8 mb-2" id="assessment_name"></p>
             <form method="post" class="timeline-form" id="timeline-create-form">
                 <div class="modal-body">
                     {% csrf_token %}
@@ -88,8 +88,10 @@
                         {{ form.comment }}
                     </div>
                     <div class="form-group mb-7" id="{{form.status.label|lower}}_group">
-                        <label for="is_retry" class="ml-3 mb-3.6 text-sm text-dark-black-50">Is retry?</label>
+                        <label for="is_retry" class="ml-3 mb-3.6 text-sm text-dark-black-50">Is retry score?</label>
                         {{ form.is_retry }}
+                        <p class="text-dark-red text-xs">Note: Please make sure to check the checkbox when entering the retry score, but do not
+                            select it the first time.</p>
                     </div>
                 </div>
                 <div id="non_field_error"></div>
@@ -103,15 +105,16 @@
         </div>
     </div>
 
-    <div class="card-container grid grid-cols-3 gap-40" id="card_container">
+    <div class="card-container grid grid-cols-3" id="card_container">
         {% for task in assessment_scores %}
         <div id="assessment-reports"
-            class="{% if task.inactive_tasks %}disabled-container{% else %}enabled-container{% endif %} rounded-xl flex justify-between items-center flex-col p-4 mt-5">
+            class="{% if task.inactive_tasks %}disabled-container{% else %}enabled-container{% endif %} rounded-xl flex justify-between items-center flex-col p-4 mt-5"
+            style="width: 90%">
             <div class="w-full flex justify-between items-center mb-5">
                 <h4>{{ task.name }}</h4>
                 <div class="flex">
                     {% if not task.inactive_tasks %}
-                        <a href="javascript:void(0)" onclick="openCreateModal('{{ task.id }}', null)">
+                        <a href="javascript:void(0)" onclick="openCreateModal('{{ task.id }}', '{{task.name}}', null, null)">
                             <div class="inline mr-1"><span class="hbl hbl-edit text-2xl text-dark-black/50"></span></div>
                         </a>
                     <p>
@@ -136,8 +139,8 @@
                     <p>Retries</p>
                 </div>
                 <div class="div flex flex-col justify-center items-center">
-                    <h3 class="font-bold mb-1">{% if task.inactive_tasks %} - {% else %} {% if task.retries == 0 %} No
-                        {% else%} Yes {% endif %} {% endif %}</h3>
+                    <h3 class="font-bold mb-1">{% if task.inactive_tasks %} - {% else %} {% if task.last_entry %} Yes
+                        {% else%} No {% endif %} {% endif %}</h3>
                     <p>Present Status</p>
                 </div>
             </div>
@@ -149,12 +152,12 @@
         </div>
         {% endfor %}
         {% for assessment in extension_tasks %}
-        <div id="assessment-reports-2" style="width: 420px;background-color: white;height: auto;"
+        <div id="assessment-reports-2" style="width: 90%;background-color: white;height: auto;"
             class="assessment-reports rounded-xl flex justify-between items-center flex-col p-4 mt-4">
-            <div class="w-full flex justify-between items-center mb-5">
+            <div class="w-full flex justify-between items-center mb-5" >
                 <h4>Extension Week {{ forloop.counter }}</h4>
                 <div class="flex">
-                        <a href="javascript:void(0)" onclick="openCreateModal(null, '{{ assessment.id }}')">
+                        <a href="javascript:void(0)" onclick="openCreateModal(null, null, '{{ assessment.id }}', 'Extension Week {{ forloop.counter }}')">
                             <div class="inline mr-1"><span class="hbl hbl-edit text-2xl text-dark-black/50"></span></div>
                         </a>
                         <a href="javascript:void(0)" onclick="deleteExtension('{{ assessment.id }}')">
@@ -181,7 +184,7 @@
                     <p>Retries</p>
                 </div>
                 <div class="div flex flex-col justify-center items-center">
-                    <h3 class="font-bold mb-1">{% if assessment.retries == 0 %} No {% else%} Yes {% endif %}</h3>
+                    <h3 class="font-bold mb-1">{% if assessment.last_entry %} Yes {% else%} No {% endif %}</h3>
                     <p>Present Status</p>
                 </div>
             </div>
@@ -199,9 +202,14 @@
 
 {% block script %}
 <script>
-    function openCreateModal(task, extension) {
+    function openCreateModal(task, task_name, extension, extension_name) {
         $('.page-loader').show();
         openBaseModal();
+        if (task){
+            $("#assessment_name").text(task_name);
+        } else {
+            $("#assessment_name").text(extension_name);
+        }
         $('#id_score').val("");
         $('#id_comment').val("");
         $(".form-group").find("span").remove();

@@ -69,15 +69,19 @@ Sub Batch details
                 <ul class="tooltiptext bg-mild-white absolute text-gray-700 text-sm rounded shadow-lg p-2 mt-1 list-disc">
                     <li><span class="text-mild-green">&#8226;</span> {% get_constant "GOOD" %} &ge; 90</li>
                     <li><span class="text-dark-blue">&#8226;</span> {% get_constant "MEET_EXPECTATION" %} &ge; 75</li>
-                    <li><span style="color: #7dd3fc">&#8226;</span> {% get_constant "ABOVE_AVERAGE" %} &ge; 65</li>
+                    <li><span style="color: #eab308">&#8226;</span> {% get_constant "ABOVE_AVERAGE" %} &ge; 65</li>
                     <li><span class="text-orange-700">&#8226;</span> {% get_constant "AVERAGE" %} &ge; 50</li>
                     <li><span class="text-dark-red">&#8226;</span> {% get_constant "POOR" %} &lt; 50 </li>
                     <li><span class="text-dark-black-10">&#8226;</span> {% get_constant "NOT_YET_STARTED" %}</li>
                 </ul>
             </i> 
-            <p class="text-sm pl-1.5">Number of trainees: <span class="text-sm text-dark-black" id="no_of_trainees"></span></p>
+            <p class="text-sm pl-1.5 mb-2">Number of trainees: <span class="text-sm text-dark-black" id="no_of_trainees"></span></p>
         </h3>
         <div class="flex justify-between items-center">
+            <div
+                class="px-4 py-2 mr-2 text-dark-black text-sm bg-dark-black/10 rounded-lg text-center inline-flex flex-col items-center justify-center">
+                <p class="p-3 text-dark-black"><span class="pl-2 font-bold text-dark-black" id="not_yet_started"></span><br>{% get_constant "NOT_YET_STARTED" %} </p>
+            </div>
             <div
                 class="px-4 py-2 mr-2 text-dark-black text-sm bg-mild-green-10 rounded-lg text-center inline-flex flex-col items-center justify-center">
                 <p class="p-3 text-mild-green"><span class="pl-2 font-bold text-dark-black" id="good_performance"></span><br>{% get_constant "GOOD" %} </p>
@@ -87,8 +91,8 @@ Sub Batch details
                 <p class="p-3 text-dark-blue"><span class="pl-2 font-bold text-dark-black" id="meet_expectations_performance"></span><br>{% get_constant "MEET_EXPECTATION" %} </p>
             </div>
             <div
-                class="px-4 py-2 mr-2 text-dark-black text-sm bg-mild-green-10 rounded-lg text-center inline-flex flex-col items-center justify-center">
-                <p class="p-3 text-mild-green"><span class="pl-2 font-bold text-dark-black" id="above_average_performance"></span><br>{% get_constant "ABOVE_AVERAGE" %} </p>
+                class="px-4 py-2 mr-2 text-dark-black text-sm rounded-lg text-center inline-flex flex-col items-center justify-center" style="background-color:#fefce8;">
+                <p class="p-3" style="color: #eab308"><span class="pl-2 font-bold text-dark-black" id="above_average_performance"></span><br>{% get_constant "ABOVE_AVERAGE" %} </p>
             </div>
             <div
                 class="px-4 py-2 mr-2 text-dark-black text-sm bg-orange-100 rounded-lg text-center inline-flex flex-col items-center justify-center">
@@ -97,10 +101,6 @@ Sub Batch details
             <div
                 class="px-4 py-2 mr-2 text-dark-black text-sm bg-dark-red-10 rounded-lg text-center inline-flex flex-col items-center justify-center">
                 <p class="p-3 text-dark-red"><span class="pl-2 font-bold text-dark-black" id="poor_performance"></span><br>{% get_constant "POOR" %} </p>
-            </div>
-            <div
-                class="px-4 py-2 mr-2 text-dark-black text-sm bg-dark-black/10 rounded-lg text-center inline-flex flex-col items-center justify-center">
-                <p class="p-3 text-dark-black"><span class="pl-2 font-bold text-dark-black" id="not_yet_started"></span><br>{% get_constant "NOT_YET_STARTED" %} </p>
             </div>
         </div>
     </div>
