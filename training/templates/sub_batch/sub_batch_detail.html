@@ -80,8 +80,7 @@ Sub Batch details
         <div class="flex justify-between items-center">
             <div
                 class="px-4 py-2 mr-2 text-dark-black text-sm bg-dark-black/10 rounded-lg text-center inline-flex flex-col items-center justify-center">
-                <p class="p-3 text-dark-black"><span class="pl-2 font-bold text-dark-black" id="not_yet_started"></span><br>Not Yet
-                    Started </p>
+                <p class="p-3 text-dark-black"><span class="pl-2 font-bold text-dark-black" id="not_yet_started"></span><br>{% get_constant "NOT_YET_STARTED" %} </p>
             </div>
             <div
                 class="px-4 py-2 mr-2 text-dark-black text-sm bg-mild-green-10 rounded-lg text-center inline-flex flex-col items-center justify-center">
@@ -102,10 +101,6 @@ Sub Batch details
             <div
                 class="px-4 py-2 mr-2 text-dark-black text-sm bg-dark-red-10 rounded-lg text-center inline-flex flex-col items-center justify-center">
                 <p class="p-3 text-dark-red"><span class="pl-2 font-bold text-dark-black" id="poor_performance"></span><br>{% get_constant "POOR" %} </p>
-            </div>
-            <div
-                class="px-4 py-2 mr-2 text-dark-black text-sm bg-dark-black/10 rounded-lg text-center inline-flex flex-col items-center justify-center">
-                <p class="p-3 text-dark-black"><span class="pl-2 font-bold text-dark-black" id="not_yet_started"></span><br>{% get_constant "NOT_YET_STARTED" %} </p>
             </div>
         </div>
     </div>
