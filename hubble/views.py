@@ -37,7 +37,7 @@ def signin(request):
     """
     Authenticates the user
     """
-    response_data = ""
+    redirect_url = ""
     if (
         ENV_NAME == constants.ENVIRONMENT_DEVELOPMENT
     ):  # To ensure the authentication method
@@ -47,7 +47,7 @@ def signin(request):
                 user = User.objects.get(email=user_email)
                 if user is not None:
                     auth_login(request, user)
-                    response_data = redirect(
+                    redirect_url = redirect(
                         settings.LOGIN_REDIRECT_URL  # pylint: disable=no-member
                     )
             else:
@@ -56,9 +56,9 @@ def signin(request):
                     messages.ERROR,
                     f"{user_email} is an invalid mail-id, please enter a valid mail-id.",
                 )
-                response_data = redirect("login")
+                redirect_url = redirect("login")
         else:
-            response_data = redirect("login")
+            redirect_url = redirect("login")
     else:
         flow = auth_helper.get_sign_in_flow(request.get_host())
         try:
@@ -67,8 +67,8 @@ def signin(request):
             logging.error(
                 "An error has been occured while login %s", exception
             )
-        response_data = HttpResponseRedirect(flow["auth_uri"])
-    return response_data
+        redirect_url = HttpResponseRedirect(flow["auth_uri"])
+    return redirect_url
 
 
 def signout(request):

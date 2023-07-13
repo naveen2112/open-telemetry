@@ -22,7 +22,7 @@ class CustomDatatable(AjaxDatatableView):
     # `get_table_row_id` method in the `CustomDatatable` class has a different
     # signature than the method it is overriding from the
     # pylint: disable=arguments-differ
-    def get_table_row_id(self, request, obj, i):
+    def get_table_row_id(self, request, obj, i): # pylint: disable=unused-argument
         """
         Provides a specific ID for the table row; default: "row-ID"
         Override to customize as required.
@@ -195,7 +195,7 @@ def schedule_timeline_for_sub_batch(
     """
     Schedules the timeline for a sub-batch
     """
-    value_end_date = {}
+    value_end_date = None
     holidays = list(
         Holiday.objects.values_list("date_of_holiday", flat=True)
     )

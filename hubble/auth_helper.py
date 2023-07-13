@@ -66,7 +66,7 @@ def get_token(request):
     """
     Get the access token from the token cache
     """
-    value_access_token = {}
+    value_access_token = None
     cache = load_cache(request)
     auth_app = get_msal_app(cache)
     accounts = auth_app.get_accounts()
