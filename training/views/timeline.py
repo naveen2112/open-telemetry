@@ -68,9 +68,7 @@ class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
         The function returns an initial queryset of objects from a model, filtering out
         those with a non-null "deleted_at" field in the related "task_timeline" model.
         """
-        return self.model.objects.filter(
-            task_timeline__deleted_at__isnull=True
-        ).annotate(
+        return self.model.objects.filter(task_timeline__deleted_at__isnull=True).annotate(
             Days=Coalesce(
                 Sum(F("task_timeline__days")),
                 0,
@@ -82,26 +80,16 @@ class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
         """
         The function customize_row customizes a row by adding buttons based on the user's role.
         """
-        buttons = template_utils.show_button(
-            reverse("timeline-template.detail", args=[obj.id])
-        )
+        buttons = template_utils.show_button(reverse("timeline-template.detail", args=[obj.id]))
         if self.request.user.is_admin_user:
             buttons += (
-                template_utils.edit_button(
-                    reverse("timeline-template.show", args=[obj.id])
-                )
+                template_utils.edit_button(reverse("timeline-template.show", args=[obj.id]))
                 + template_utils.delete_button(
-                    "deleteTimeline('"
-                    + reverse("timeline-template.delete", args=[obj.id])
-                    + "')"
+                    "deleteTimeline('" + reverse("timeline-template.delete", args=[obj.id]) + "')"
                 )
-                + template_utils.duplicate_button(
-                    reverse("timeline-template.show", args=[obj.id])
-                )
+                + template_utils.duplicate_button(reverse("timeline-template.show", args=[obj.id]))
             )
-        row[
-            "action"
-        ] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
+        row["action"] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
         return row
 
     def render_column(self, row, column):
@@ -129,17 +117,13 @@ def create_timeline_template(request):
         form = TimelineForm(request.POST)
         if form.is_valid():  # Check if form is valid or not
             timeline = form.save(commit=False)
-            timeline.is_active = (
-                request.POST.get("is_active") == "true"
-            )  # Set is_active to true
+            timeline.is_active = request.POST.get("is_active") == "true"  # Set is_active to true
             # if the input is checked else it will be false
             timeline.created_by = request.user
             timeline.save()
 
             if request.POST.get("id"):
-                timeline_task = TimelineTask.objects.filter(
-                    timeline=request.POST.get("id")
-                )
+                timeline_task = TimelineTask.objects.filter(timeline=request.POST.get("id"))
                 order = 0
                 for task in timeline_task:
                     order += 1
@@ -172,9 +156,7 @@ def timeline_template_data(request, pk):
     """
     try:
         data = {
-            "timeline": model_to_dict(
-                get_object_or_404(Timeline, id=pk)
-            )
+            "timeline": model_to_dict(get_object_or_404(Timeline, id=pk))
         }  # Covert django queryset object to dict,which can be easily
         # serialized and sent as a JSON response
         return JsonResponse(data, safe=False)
@@ -183,9 +165,7 @@ def timeline_template_data(request, pk):
             "An error has occured while fetching the Timeline \n%s",
             exception,
         )
-        return JsonResponse(
-            {"message": "No timeline template found"}, status=500
-        )
+        return JsonResponse({"message": "No timeline template found"}, status=500)
 
 
 @login_required()
@@ -200,9 +180,7 @@ def update_timeline_template(request, pk):
     )
     if form.is_valid():  # check if form is valid or not
         timeline = form.save(commit=False)
-        timeline.is_active = (
-            request.POST.get("is_active") == "true"
-        )  # Set is_active to true
+        timeline.is_active = request.POST.get("is_active") == "true"  # Set is_active to true
         # if the input is checked else it will be false
         timeline.save()
         return JsonResponse({"status": "success"})
@@ -230,9 +208,7 @@ def delete_timeline_template(request, pk):
         timeline = get_object_or_404(Timeline, id=pk)
         TimelineTask.bulk_delete({"timeline_id": pk})
         timeline.delete()
-        return JsonResponse(
-            {"message": "Timeline Template deleted successfully"}
-        )
+        return JsonResponse({"message": "Timeline Template deleted successfully"})
     except Exception as exception:
         logging.error(
             "An error has occured while deleting the Timeline \n%s",

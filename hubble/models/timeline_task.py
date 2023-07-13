@@ -29,9 +29,7 @@ class TimelineTask(db.SoftDeleteWithBaseModel):
         default=constants.TASK_TYPE_TASK,
     )
     order = models.IntegerField(blank=True)
-    created_by = models.ForeignKey(
-        "hubble.User", on_delete=models.CASCADE
-    )
+    created_by = models.ForeignKey("hubble.User", on_delete=models.CASCADE)
 
     class Meta:
         """

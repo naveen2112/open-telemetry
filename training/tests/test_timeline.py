@@ -65,12 +65,8 @@ class TimelineCreateTest(BaseTestCase):
         # Valid scenario 1: Valid inputs for name and team fields
         # and False for is_active field
         data = self.get_valid_inputs()
-        response = self.make_post_request(
-            reverse(self.create_route_name), data=data
-        )
-        self.assertJSONEqual(
-            self.decoded_json(response), {"status": "success"}
-        )
+        response = self.make_post_request(reverse(self.create_route_name), data=data)
+        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertEqual(response.status_code, 200)
         self.assert_database_has(
             "Timeline",
@@ -84,12 +80,8 @@ class TimelineCreateTest(BaseTestCase):
         # Valid scenario 2: Valid inputs for name and team fields
         # and True for is_active field
         data = self.get_valid_inputs({"is_active": "true"})
-        response = self.make_post_request(
-            reverse(self.create_route_name), data=data
-        )
-        self.assertJSONEqual(
-            self.decoded_json(response), {"status": "success"}
-        )
+        response = self.make_post_request(reverse(self.create_route_name), data=data)
+        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertEqual(response.status_code, 200)
         self.assert_database_has(
             "Timeline",
@@ -106,19 +98,11 @@ class TimelineCreateTest(BaseTestCase):
             reverse(self.create_route_name),
             data=self.get_valid_inputs({"id": self.timeline.id}),
         )
-        duplicated_timeline_id = Timeline.objects.order_by(
-            "-id"
-        ).first()
-        self.assertJSONEqual(
-            self.decoded_json(response), {"status": "success"}
-        )
+        duplicated_timeline_id = Timeline.objects.order_by("-id").first()
+        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertEqual(response.status_code, 200)
-        self.assert_database_has(
-            "Timeline", {"id": duplicated_timeline_id.id}
-        )
-        self.assert_database_count(
-            "TimelineTask", {"timeline": duplicated_timeline_id}, 5
-        )
+        self.assert_database_has("Timeline", {"id": duplicated_timeline_id.id})
+        self.assert_database_count("TimelineTask", {"timeline": duplicated_timeline_id}, 5)
 
         # Valid sceanrio 4: Valid inputs for all fields and is_active=True,
         # along with duplicated timeline id
@@ -132,19 +116,11 @@ class TimelineCreateTest(BaseTestCase):
                 }
             ),
         )
-        duplicated_timeline_id = Timeline.objects.order_by(
-            "-id"
-        ).first()
-        self.assertJSONEqual(
-            self.decoded_json(response), {"status": "success"}
-        )
+        duplicated_timeline_id = Timeline.objects.order_by("-id").first()
+        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertEqual(response.status_code, 200)
-        self.assert_database_has(
-            "Timeline", {"id": duplicated_timeline_id.id}
-        )
-        self.assert_database_count(
-            "TimelineTask", {"timeline": duplicated_timeline_id}, 5
-        )
+        self.assert_database_has("Timeline", {"id": duplicated_timeline_id.id})
+        self.assert_database_count("TimelineTask", {"timeline": duplicated_timeline_id}, 5)
 
     def test_required_validation(self):
         """
@@ -164,12 +140,8 @@ class TimelineCreateTest(BaseTestCase):
         """
         To check what happens when name field fails MinlengthValidation
         """
-        data = self.get_valid_inputs(
-            {"name": self.faker.pystr(max_chars=2)}
-        )
-        response = self.make_post_request(
-            reverse(self.create_route_name), data=data
-        )
+        data = self.get_valid_inputs({"name": self.faker.pystr(max_chars=2)})
+        response = self.make_post_request(reverse(self.create_route_name), data=data)
         field_errors = {"name": {"min_length"}}
         validation_paramters = {"name": 3}
         self.assertEqual(
@@ -191,9 +163,7 @@ class TimelineCreateTest(BaseTestCase):
             data=self.get_valid_inputs({"id": 0}),
         )
         field_errors = {"__all__": {""}}
-        error_message = {
-            "": "You are trying to duplicate invalid template"
-        }
+        error_message = {"": "You are trying to duplicate invalid template"}
         non_field_errors = {
             "message": "You are trying to duplicate invalid template",
             "code": "",
@@ -214,21 +184,15 @@ class TimelineCreateTest(BaseTestCase):
         # What happens when is_active field is set True and the team selected
         # currently already has a active teemplate
         response = self.make_post_request(
-            reverse(
-                self.update_edit_route_name, args=[self.timeline.id]
-            ),
+            reverse(self.update_edit_route_name, args=[self.timeline.id]),
             data=self.get_valid_inputs({"is_active": "true"}),
         )
         response = self.make_post_request(
             reverse(self.create_route_name),
-            data=self.get_valid_inputs(
-                {"is_active": "true", "team": self.timeline.team_id}
-            ),
+            data=self.get_valid_inputs({"is_active": "true", "team": self.timeline.team_id}),
         )
         field_errors = {"is_active": {"template_in_use"}}
-        error_message = {
-            "template_in_use": "Team already has an active template."
-        }
+        error_message = {"template_in_use": "Team already has an active template."}
         self.assertEqual(
             self.bytes_cleaner(response.content),
             self.get_ajax_response(
@@ -273,25 +237,17 @@ class TimelineShowTest(BaseTestCase):
         Checks what happens when valid inputs are given for all fields
         """
         timeline = baker.make("hubble.Timeline")
-        response = self.make_get_request(
-            reverse(self.update_show_route_name, args=[timeline.id])
-        )
+        response = self.make_get_request(reverse(self.update_show_route_name, args=[timeline.id]))
         self.assertJSONEqual(
             self.decoded_json(response),
-            {
-                "timeline": model_to_dict(
-                    Timeline.objects.get(id=timeline.id)
-                )
-            },
+            {"timeline": model_to_dict(Timeline.objects.get(id=timeline.id))},
         )
 
     def test_failure(self):
         """
         Checks what happens when we try to access invalid arguments in update
         """
-        response = self.make_get_request(
-            reverse(self.update_show_route_name, args=[0])
-        )
+        response = self.make_get_request(reverse(self.update_show_route_name, args=[0]))
         self.assertEqual(response.status_code, 500)
 
 
@@ -333,14 +289,10 @@ class TimelineUpdateTest(BaseTestCase):
         # Valid scenario 1: Valid inputs for name and team fields and is_active=False
         data = self.get_valid_inputs()
         response = self.make_post_request(
-            reverse(
-                self.update_edit_route_name, args=[self.timeline.id]
-            ),
+            reverse(self.update_edit_route_name, args=[self.timeline.id]),
             data=data,
         )
-        self.assertJSONEqual(
-            self.decoded_json(response), {"status": "success"}
-        )
+        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertEqual(response.status_code, 200)
         self.assert_database_has(
             "Timeline",
@@ -355,14 +307,10 @@ class TimelineUpdateTest(BaseTestCase):
         # Valid scenario 2: Valid inputs for name and team fields and is_active=True
         data = self.get_valid_inputs({"is_active": "true"})
         response = self.make_post_request(
-            reverse(
-                self.update_edit_route_name, args=[self.timeline.id]
-            ),
+            reverse(self.update_edit_route_name, args=[self.timeline.id]),
             data=data,
         )
-        self.assertJSONEqual(
-            self.decoded_json(response), {"status": "success"}
-        )
+        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertEqual(response.status_code, 200)
         self.assert_database_has(
             "Timeline",
@@ -379,9 +327,7 @@ class TimelineUpdateTest(BaseTestCase):
         This function checks the required field validations
         """
         response = self.make_post_request(
-            reverse(
-                self.update_edit_route_name, args=[self.timeline.id]
-            ),
+            reverse(self.update_edit_route_name, args=[self.timeline.id]),
             data=self.get_valid_inputs({"name": "", "team": ""}),
         )
         field_errors = {"name": {"required"}, "team": {"required"}}
@@ -396,9 +342,7 @@ class TimelineUpdateTest(BaseTestCase):
         Check what happens when invalid choice for the respective field is given as input
         """
         response = self.make_post_request(
-            reverse(
-                self.update_edit_route_name, args=[self.timeline.id]
-            ),
+            reverse(self.update_edit_route_name, args=[self.timeline.id]),
             data=self.get_valid_inputs({"team": self.faker.name()}),
         )
         field_errors = {"team": {"invalid_choice"}}
@@ -412,13 +356,9 @@ class TimelineUpdateTest(BaseTestCase):
         """
         Check what happens when a field doesn't meet the limit value of MinlengthValidator
         """
-        data = self.get_valid_inputs(
-            {"name": self.faker.pystr(max_chars=2)}
-        )
+        data = self.get_valid_inputs({"name": self.faker.pystr(max_chars=2)})
         response = self.make_post_request(
-            reverse(
-                self.update_edit_route_name, args=[self.timeline.id]
-            ),
+            reverse(self.update_edit_route_name, args=[self.timeline.id]),
             data=data,
         )
         field_errors = {"name": {"min_length"}}
@@ -439,20 +379,14 @@ class TimelineUpdateTest(BaseTestCase):
         """
         response = self.make_post_request(
             reverse(self.create_route_name),
-            data=self.get_valid_inputs(
-                {"team": self.timeline.team_id, "is_active": "true"}
-            ),
+            data=self.get_valid_inputs({"team": self.timeline.team_id, "is_active": "true"}),
         )
         response = self.make_post_request(
-            reverse(
-                self.update_edit_route_name, args=[self.timeline.id]
-            ),
+            reverse(self.update_edit_route_name, args=[self.timeline.id]),
             data=self.get_valid_inputs({"is_active": "true"}),
         )
         field_errors = {"is_active": {"template_in_use"}}
-        custom_error = {
-            "template_in_use": "Team already has an active template."
-        }
+        custom_error = {"template_in_use": "Team already has an active template."}
         self.assertEqual(
             self.bytes_cleaner(response.content),
             self.get_ajax_response(
@@ -483,9 +417,7 @@ class TimelineDeleteTest(BaseTestCase):
         """
         timeline = baker.make("hubble.Timeline")
         self.assert_database_has("Timeline", {"id": timeline.id})
-        response = self.make_delete_request(
-            reverse(self.delete_route_name, args=[timeline.id])
-        )
+        response = self.make_delete_request(reverse(self.delete_route_name, args=[timeline.id]))
         self.assertJSONEqual(
             response.content,
             {"message": "Timeline Template deleted successfully"},
@@ -497,9 +429,7 @@ class TimelineDeleteTest(BaseTestCase):
         """
         To check what happens when invalid id is given for delete
         """
-        response = self.make_delete_request(
-            reverse(self.delete_route_name, args=[0])
-        )
+        response = self.make_delete_request(reverse(self.delete_route_name, args=[0]))
         self.assertJSONEqual(
             response.content,
             {"message": "Error while deleting Timeline Template!"},
@@ -537,9 +467,7 @@ class TimelineDatatableTest(BaseTestCase):
         """
         name = self.faker.name()
         baker.make("hubble.Timeline", name=seq(name))
-        timeline = Timeline.objects.filter(
-            task_timeline__deleted_at__isnull=True
-        ).annotate(
+        timeline = Timeline.objects.filter(task_timeline__deleted_at__isnull=True).annotate(
             Days=Coalesce(
                 Sum(F("task_timeline__days")),
                 0,
@@ -552,30 +480,19 @@ class TimelineDatatableTest(BaseTestCase):
             "start": 0,
             "length": 10,
         }
-        response = self.make_post_request(
-            reverse(self.datatable_route_name), data=payload
-        )
+        response = self.make_post_request(reverse(self.datatable_route_name), data=payload)
         self.assertEqual(response.status_code, 200)
 
         # Check whether row details are correct
         for row, expected_value in enumerate(timeline):
             received_value = response.json()["data"][row]
-            self.assertEqual(
-                expected_value.pk, int(received_value["pk"])
-            )
-            self.assertEqual(
-                expected_value.name, received_value["name"]
-            )
-            if (
-                received_value["is_active"].split(">")[1].split("<")[0]
-                == "In Active"
-            ):
+            self.assertEqual(expected_value.pk, int(received_value["pk"]))
+            self.assertEqual(expected_value.name, received_value["name"])
+            if received_value["is_active"].split(">")[1].split("<")[0] == "In Active":
                 self.assertEqual(expected_value.is_active, False)
             else:
                 self.assertEqual(expected_value.is_active, True)
-            self.assertEqual(
-                expected_value.team.name, received_value["team"]
-            )
+            self.assertEqual(expected_value.team.name, received_value["team"])
         # Check whether all headers are present
         for row in response.json()["data"]:
             self.assertTrue("pk" in row)

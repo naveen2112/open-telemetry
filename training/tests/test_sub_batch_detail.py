@@ -30,12 +30,8 @@ class AddInternTest(BaseTestCase):
         This function is responsible for updating the valid inputs and
         creating data in databases as reqiured
         """
-        intern = baker.make(
-            "hubble.User", is_employed=False, _fill_optional=["email"]
-        )
-        self.sub_batch = baker.make(
-            "hubble.SubBatch", start_date=timezone.now().date()
-        )
+        intern = baker.make("hubble.User", is_employed=False, _fill_optional=["email"])
+        self.sub_batch = baker.make("hubble.SubBatch", start_date=timezone.now().date())
         baker.make(
             "hubble.SubBatchTaskTimeline",
             days=10,
@@ -53,12 +49,8 @@ class AddInternTest(BaseTestCase):
         """
         To makes sure that the correct template is used
         """
-        response = self.make_get_request(
-            reverse(self.route_name, args=[self.sub_batch.id])
-        )
-        self.assertTemplateUsed(
-            response, "sub_batch/sub_batch_detail.html"
-        )
+        response = self.make_get_request(reverse(self.route_name, args=[self.sub_batch.id]))
+        self.assertTemplateUsed(response, "sub_batch/sub_batch_detail.html")
         self.assertContains(response, self.sub_batch.name)
 
     def test_success(self):
@@ -66,12 +58,8 @@ class AddInternTest(BaseTestCase):
         Check what happens when valid data is given as input
         """
         data = self.get_valid_inputs()
-        response = self.make_post_request(
-            reverse(self.create_route_name), data=data
-        )
-        self.assertJSONEqual(
-            self.decoded_json(response), {"status": "success"}
-        )
+        response = self.make_post_request(reverse(self.create_route_name), data=data)
+        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertEqual(response.status_code, 200)
         self.assert_database_has(
             "InternDetail",
@@ -112,12 +100,8 @@ class AddInternTest(BaseTestCase):
         """
         To check what happens when college field fails MinlengthValidation
         """
-        data = self.get_valid_inputs(
-            {"college": self.faker.pystr(max_chars=2)}
-        )
-        response = self.make_post_request(
-            reverse(self.create_route_name), data=data
-        )
+        data = self.get_valid_inputs({"college": self.faker.pystr(max_chars=2)})
+        response = self.make_post_request(reverse(self.create_route_name), data=data)
         field_errors = {"college": {"min_length"}}
         validation_paramters = {"college": 3}
         self.assertEqual(
@@ -154,9 +138,7 @@ class AddInternTest(BaseTestCase):
             data=self.get_valid_inputs({"sub_batch_id": 0}),
         )
         field_errors = {"__all__": {""}}
-        error_message = {
-            "": "You are trying to add trainees to an invalid SubBatch"
-        }
+        error_message = {"": "You are trying to add trainees to an invalid SubBatch"}
         non_field_errors = {
             "message": "You are trying to add trainees to an invalid SubBatch",
             "code": "",
@@ -191,9 +173,7 @@ class DeleteInternTest(BaseTestCase):
         """
         trainee = baker.make("hubble.InternDetail")
         self.assert_database_has("InternDetail", {"id": trainee.id})
-        response = self.make_delete_request(
-            reverse(self.delete_route_name, args=[trainee.id])
-        )
+        response = self.make_delete_request(reverse(self.delete_route_name, args=[trainee.id]))
         self.assertJSONEqual(
             response.content,
             {"message": "Intern has been deleted succssfully"},
@@ -205,9 +185,7 @@ class DeleteInternTest(BaseTestCase):
         """
         To check what happens when invalid id is given for delete
         """
-        response = self.make_delete_request(
-            reverse(self.delete_route_name, args=[0])
-        )
+        response = self.make_delete_request(reverse(self.delete_route_name, args=[0]))
         self.assertJSONEqual(
             response.content,
             {"message": "Error while deleting Trainee!"},
@@ -229,20 +207,14 @@ class TraineeDatatableTest(BaseTestCase):
         """
         super().setUp()
         self.authenticate()
-        self.sub_batch = baker.make(
-            "hubble.SubBatch", start_date=timezone.now().date()
-        )
+        self.sub_batch = baker.make("hubble.SubBatch", start_date=timezone.now().date())
 
     def test_template(self):
         """
         To makes sure that the correct template is used
         """
-        response = self.make_get_request(
-            reverse(self.route_name, args=[self.sub_batch.id])
-        )
-        self.assertTemplateUsed(
-            response, "sub_batch/sub_batch_detail.html"
-        )
+        response = self.make_get_request(reverse(self.route_name, args=[self.sub_batch.id]))
+        self.assertTemplateUsed(response, "sub_batch/sub_batch_detail.html")
         self.assertContains(response, self.sub_batch.name)
 
     def test_datatable(self):
@@ -261,21 +233,13 @@ class TraineeDatatableTest(BaseTestCase):
             "length": 10,
             "sub_batch": self.sub_batch.id,
         }
-        response = self.make_post_request(
-            reverse(self.datatable_route_name), data=payload
-        )
+        response = self.make_post_request(reverse(self.datatable_route_name), data=payload)
         self.assertEqual(response.status_code, 200)
         for index, expected_value in enumerate(trainees):
             received_value = response.json()["data"][index]
-            self.assertEqual(
-                expected_value.pk, int(received_value["pk"])
-            )
-            self.assertEqual(
-                expected_value.user.name, received_value["user"]
-            )
-            self.assertEqual(
-                expected_value.college, received_value["college"]
-            )
+            self.assertEqual(expected_value.pk, int(received_value["pk"]))
+            self.assertEqual(expected_value.user.name, received_value["user"])
+            self.assertEqual(expected_value.college, received_value["college"])
             self.assertEqual(
                 expected_value.expected_completion.strftime("%d %b %Y"),
                 received_value["expected_completion"],

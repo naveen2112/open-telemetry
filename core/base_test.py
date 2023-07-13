@@ -61,9 +61,7 @@ class BaseTestCase(TestCase):
         This function is responsible for creating an user and giving
         them admin access
         """
-        user = baker.make(
-            User, is_employed=True, _fill_optional=["email"]
-        )
+        user = baker.make(User, is_employed=True, _fill_optional=["email"])
         ADMIN_EMAILS.append(
             user.email
         )  # TODO :: Need to remove this logic after roles and permission
@@ -87,25 +85,19 @@ class BaseTestCase(TestCase):
         """
         This function is responsible for handling the GET requests
         """
-        return self.client.get(
-            url_pattern, SERVER_NAME=self.testcase_server_name
-        )
+        return self.client.get(url_pattern, SERVER_NAME=self.testcase_server_name)
 
     def make_post_request(self, url_pattern, data):
         """
         This function is responsible for handling the POST requests
         """
-        return self.client.post(
-            url_pattern, data, SERVER_NAME=self.testcase_server_name
-        )
+        return self.client.post(url_pattern, data, SERVER_NAME=self.testcase_server_name)
 
     def make_delete_request(self, url_pattern):
         """
         This function is responsible for handling DELETE requests}
         """
-        return self.client.delete(
-            url_pattern, SERVER_NAME=self.testcase_server_name
-        )
+        return self.client.delete(url_pattern, SERVER_NAME=self.testcase_server_name)
 
     # It isn used to disable 'dangerous-default-value'.By default, pylint
     # warns against using mutable objects as default values for function
@@ -170,9 +162,7 @@ class BaseTestCase(TestCase):
         """
         return str(response.decode()).replace('\\"', "'")
 
-    def get_error_message(
-        self, key, value, current_value, validation_parameter
-    ):
+    def get_error_message(self, key, value, current_value, validation_parameter):
         """
         This function is responsible for building the error json
         response dynamically
@@ -221,9 +211,7 @@ class BaseTestCase(TestCase):
         for key, values in field_errors.items():
             temp = []
             for value in values:
-                message = custom_validation_error_message.get(
-                    value
-                ) or self.get_error_message(
+                message = custom_validation_error_message.get(value) or self.get_error_message(
                     key, value, current_value, validation_parameter
                 )
                 error_details = {

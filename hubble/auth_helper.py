@@ -44,9 +44,7 @@ def get_sign_in_flow(callback_module):
     """
     return get_msal_app().initiate_auth_code_flow(
         scopes=["user.read"],
-        redirect_uri="https://"
-        + callback_module
-        + env("REDIRECT_PATH"),
+        redirect_uri="https://" + callback_module + env("REDIRECT_PATH"),
     )
 
 
@@ -71,9 +69,7 @@ def get_token(request):
     auth_app = get_msal_app(cache)
     accounts = auth_app.get_accounts()
     if accounts:
-        result = auth_app.acquire_token_silent(
-            scopes=["user.read"], account=accounts[0]
-        )
+        result = auth_app.acquire_token_silent(scopes=["user.read"], account=accounts[0])
         save_cache(request, cache)
         value_access_token = result["access_token"]
     return value_access_token

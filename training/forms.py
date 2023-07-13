@@ -28,13 +28,9 @@ class TimelineForm(forms.ModelForm):
         """
         cleaned_data = super().clean()
         if self.data.get("id") and (
-            not models.Timeline.objects.filter(
-                id=self.data.get("id")
-            ).exists()
+            not models.Timeline.objects.filter(id=self.data.get("id")).exists()
         ):
-            self.add_error(
-                None, "You are trying to duplicate invalid template"
-            )
+            self.add_error(None, "You are trying to duplicate invalid template")
         return cleaned_data
 
     def clean_is_active(self):
@@ -42,9 +38,7 @@ class TimelineForm(forms.ModelForm):
         This function checks if a team already has an active template
         and raises a validation error if it does.
         """
-        if self.cleaned_data.get("team", None) and (
-            self.cleaned_data["is_active"]
-        ):
+        if self.cleaned_data.get("team", None) and (self.cleaned_data["is_active"]):
             query = models.Timeline.objects.filter(
                 team=self.cleaned_data["team"], is_active=True
             ).values("id")
@@ -211,25 +205,19 @@ class SubBatchForm(forms.ModelForm):
 
         self.fields["team"].empty_label = "Select a Team"
         if self.data.get("team", None):
-            self.fields["team"].widget.attrs[
-                "initialValue"
-            ] = self.data.get("team", None)
+            self.fields["team"].widget.attrs["initialValue"] = self.data.get("team", None)
 
-        self.fields[
-            "primary_mentor_id"
-        ].empty_label = "Select a Primary Mentor"
+        self.fields["primary_mentor_id"].empty_label = "Select a Primary Mentor"
         if self.data.get("primary_mentor_id", None):
-            self.fields["primary_mentor_id"].widget.attrs[
-                "initialValue"
-            ] = self.data.get("primary_mentor_id", None)
+            self.fields["primary_mentor_id"].widget.attrs["initialValue"] = self.data.get(
+                "primary_mentor_id", None
+            )
 
-        self.fields[
-            "secondary_mentor_id"
-        ].empty_label = "Select a Secondary Mentor"
+        self.fields["secondary_mentor_id"].empty_label = "Select a Secondary Mentor"
         if self.data.get("secondary_mentor_id", None):
-            self.fields["secondary_mentor_id"].widget.attrs[
-                "initialValue"
-            ] = self.data.get("secondary_mentor_id", None)
+            self.fields["secondary_mentor_id"].widget.attrs["initialValue"] = self.data.get(
+                "secondary_mentor_id", None
+            )
 
         self.fields["name"].validators.append(MinLengthValidator(3))
         self.fields["primary_mentor_id"].label = "Primary Mentor"
@@ -237,9 +225,7 @@ class SubBatchForm(forms.ModelForm):
 
         if kwargs.get("instance"):
             instance = kwargs.get("instance")
-            self.fields["team"].widget.attrs[
-                "initialValue"
-            ] = instance.team
+            self.fields["team"].widget.attrs["initialValue"] = instance.team
             self.fields["primary_mentor_id"].widget.attrs[
                 "initialValue"
             ] = instance.primary_mentor_id
@@ -252,9 +238,7 @@ class SubBatchForm(forms.ModelForm):
         The function checks if a selected team's active timeline
         has any tasks and raises a validation error if it doesn't.
         """
-        if not models.TimelineTask.objects.filter(
-            timeline=self.cleaned_data["timeline"].id
-        ):
+        if not models.TimelineTask.objects.filter(timeline=self.cleaned_data["timeline"].id):
             raise ValidationError(
                 "The Selected Team's Active Timeline doesn't have any tasks.",
                 code="timeline_has_no_tasks",
@@ -344,9 +328,7 @@ class AddInternForm(forms.ModelForm):
         """
         cleaned_data = super().clean()
         if self.data.get("sub_batch_id") and not (
-            models.SubBatch.objects.filter(
-                id=self.data.get("sub_batch_id")
-            ).exists()
+            models.SubBatch.objects.filter(id=self.data.get("sub_batch_id")).exists()
         ):
             self.add_error(
                 None,
@@ -359,9 +341,7 @@ class AddInternForm(forms.ModelForm):
         The function checks if a user ID already exists in the InternDetail model and raises a
         validation error if it does.
         """
-        if models.InternDetail.objects.filter(
-            user=self.cleaned_data["user_id"]
-        ).exists():
+        if models.InternDetail.objects.filter(user=self.cleaned_data["user_id"]).exists():
             raise ValidationError(
                 "Trainee already added in the another sub-batch",
                 code="trainee_exists",
@@ -369,9 +349,7 @@ class AddInternForm(forms.ModelForm):
 
     user_id = forms.ModelChoiceField(
         queryset=(
-            models.User.objects.exclude(
-                intern_details__isnull=False
-            ).filter(is_employed=False)
+            models.User.objects.exclude(intern_details__isnull=False).filter(is_employed=False)
         ),
         label="User",
     )
@@ -527,9 +505,7 @@ class InternScoreForm(forms.ModelForm):
         `ValidationError` if it is not.
         """
         if not 0 <= self.cleaned_data["score"] <= 100:
-            raise ValidationError(
-                "Score must be between 0 to 100", code="invalid_score"
-            )
+            raise ValidationError("Score must be between 0 to 100", code="invalid_score")
         return self.cleaned_data["score"]
 
     class Meta:

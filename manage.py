@@ -8,9 +8,7 @@ from django.core.management import execute_from_command_line
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault(
-        "DJANGO_SETTINGS_MODULE", "hubble_report.settings"
-    )
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hubble_report.settings")
     try:
         execute_from_command_line(sys.argv)
     except ImportError as exc:

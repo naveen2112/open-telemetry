@@ -18,9 +18,7 @@ class InternDetail(db.SoftDeleteWithBaseModel):
         on_delete=models.CASCADE,
         related_name="intern_details",
     )
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="intern_details"
-    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="intern_details")
     college = models.CharField(max_length=250)
     expected_completion = models.DateField(null=True)
     actual_completion = models.DateField(null=True)

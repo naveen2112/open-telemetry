@@ -29,9 +29,7 @@ class Assessment(db.SoftDeleteWithBaseModel):
         null=True,
         related_name="assessments",
     )
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="assessments"
-    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="assessments")
     score = models.IntegerField()
     is_retry = models.BooleanField(default=False)
     comment = models.TextField()

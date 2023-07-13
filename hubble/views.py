@@ -23,13 +23,9 @@ def login(request):
     To make sure correct authentication method is renderred
     """
     context = {}
-    context[
-        "login_method"
-    ] = ENV_NAME  # This context variable will be used in template to
+    context["login_method"] = ENV_NAME  # This context variable will be used in template to
     # render correct authentication method
-    context[
-        "ENVIRONMENT_DEVELOPMENT"
-    ] = constants.ENVIRONMENT_DEVELOPMENT
+    context["ENVIRONMENT_DEVELOPMENT"] = constants.ENVIRONMENT_DEVELOPMENT
     return render(request, "auth/login.html", context)
 
 
@@ -38,9 +34,7 @@ def signin(request):
     Authenticates the user
     """
     redirect_url = ""
-    if (
-        ENV_NAME == constants.ENVIRONMENT_DEVELOPMENT
-    ):  # To ensure the authentication method
+    if ENV_NAME == constants.ENVIRONMENT_DEVELOPMENT:  # To ensure the authentication method
         if request.method == "POST":
             user_email = request.POST.get("email")
             if User.objects.filter(email=user_email).exists():
@@ -64,9 +58,7 @@ def signin(request):
         try:
             request.session["auth_flow"] = flow
         except Exception as exception:
-            logging.error(
-                "An error has been occured while login %s", exception
-            )
+            logging.error("An error has been occured while login %s", exception)
         redirect_url = HttpResponseRedirect(flow["auth_uri"])
     return redirect_url
 
@@ -91,14 +83,10 @@ def callback(request):
         user = User.objects.get(email=user_crendentials)
     except Exception:
         user = None
-    if (
-        user is not None
-    ):  # Checks whether the authenticated member is form Mallow or no,
+    if user is not None:  # Checks whether the authenticated member is form Mallow or no,
         # by checking with Database
         auth_login(request, user)
-        return redirect(
-            settings.LOGIN_REDIRECT_URL  # pylint: disable=no-member
-        )
+        return redirect(settings.LOGIN_REDIRECT_URL)  # pylint: disable=no-member
 
     messages.add_message(
         request,

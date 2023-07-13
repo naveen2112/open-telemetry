@@ -13,9 +13,7 @@ class Task(db.SoftDeleteWithBaseModel):
 
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=255)
-    module = models.ForeignKey(
-        "hubble.Module", models.CASCADE, related_name="tasks"
-    )
+    module = models.ForeignKey("hubble.Module", models.CASCADE, related_name="tasks")
     description = models.TextField(blank=True, null=True)
     created_by = models.ForeignKey(
         "hubble.User",

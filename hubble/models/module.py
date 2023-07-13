@@ -13,9 +13,7 @@ class Module(db.SoftDeleteWithBaseModel):
 
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=255)
-    project = models.ForeignKey(
-        "hubble.Project", models.CASCADE, related_name="modules"
-    )
+    project = models.ForeignKey("hubble.Project", models.CASCADE, related_name="modules")
     created_by = models.ForeignKey(
         "hubble.User",
         models.CASCADE,

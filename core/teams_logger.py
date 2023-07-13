@@ -56,9 +56,7 @@ class TeamsExceptionHandler(AdminEmailHandler):
             else:
                 exc_info = (None, record.getMessage(), None)
 
-            reporter = ExceptionReporter(
-                request, is_email=False, *exc_info
-            )
+            reporter = ExceptionReporter(request, is_email=False, *exc_info)
 
             message = reporter.get_traceback_text()
 
@@ -76,9 +74,7 @@ class TeamsExceptionHandler(AdminEmailHandler):
                 "summary": subject,
                 "@type": "MessageCard",
                 "@context": "https://schema.org/extensions",
-                "themeColor": COLOR_CODES.get(
-                    record.levelname, "#00e07f"
-                ),
+                "themeColor": COLOR_CODES.get(record.levelname, "#00e07f"),
                 "sections": [
                     {
                         "title": subject,
@@ -90,15 +86,11 @@ class TeamsExceptionHandler(AdminEmailHandler):
                             },
                             {
                                 "name": "Method:",
-                                "value": request.method
-                                if request
-                                else "No Request",
+                                "value": request.method if request else "No Request",
                             },
                             {
                                 "name": "Path:",
-                                "value": request.path
-                                if request
-                                else "No Request",
+                                "value": request.path if request else "No Request",
                             },
                             {
                                 "name": "Status Code:",
@@ -116,15 +108,11 @@ class TeamsExceptionHandler(AdminEmailHandler):
                             },
                             {
                                 "name": "GET Params:",
-                                "value": json.dumps(request.GET)
-                                if request
-                                else "No Request",
+                                "value": json.dumps(request.GET) if request else "No Request",
                             },
                             {
                                 "name": "POST Data:",
-                                "value": json.dumps(request.POST)
-                                if request
-                                else "No Request",
+                                "value": json.dumps(request.POST) if request else "No Request",
                             },
                             {
                                 "name": "Exception Details:",
@@ -135,6 +123,4 @@ class TeamsExceptionHandler(AdminEmailHandler):
                 ],
             }
 
-            requests.post(
-                url, headers=headers, data=json.dumps(data), timeout=10
-            )
+            requests.post(url, headers=headers, data=json.dumps(data), timeout=10)

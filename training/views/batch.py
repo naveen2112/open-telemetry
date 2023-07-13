@@ -61,9 +61,7 @@ class BatchDataTable(LoginRequiredMixin, CustomDatatable):
         },
     ]
 
-    def get_initial_queryset(
-        self, request=None  # pylint: disable=unused-argument
-    ):
+    def get_initial_queryset(self, request=None):  # pylint: disable=unused-argument
         """
         The function returns an annotated queryset with the total number of
         trainees and the number of sub-batches for each object in the model.
@@ -71,21 +69,15 @@ class BatchDataTable(LoginRequiredMixin, CustomDatatable):
         return self.model.objects.annotate(
             total_trainee=Count(
                 "sub_batches__intern_details",
-                filter=Q(
-                    sub_batches__intern_details__deleted_at__isnull=True
-                ),
+                filter=Q(sub_batches__intern_details__deleted_at__isnull=True),
             ),
             number_of_sub_batches=Coalesce(
                 Subquery(
-                    self.model.objects.filter(
-                        sub_batches__batch_id=OuterRef("id")
-                    )
+                    self.model.objects.filter(sub_batches__batch_id=OuterRef("id"))
                     .annotate(
                         number_of_sub_batches=Count(
                             "sub_batches__id",
-                            filter=Q(
-                                sub_batches__deleted_at__isnull=True
-                            ),
+                            filter=Q(sub_batches__deleted_at__isnull=True),
                         )
                     )
                     .values("number_of_sub_batches")
@@ -99,20 +91,14 @@ class BatchDataTable(LoginRequiredMixin, CustomDatatable):
         The function customize_row customizes a row by adding buttons for
         viewing, editing, and deleting a batch object, based on the user's permissions.
         """
-        buttons = template_utils.show_button(
-            reverse("batch.detail", args=[obj.id])
-        )
+        buttons = template_utils.show_button(reverse("batch.detail", args=[obj.id]))
         if self.request.user.is_admin_user:
             buttons += template_utils.edit_button(
                 reverse("batch.show", args=[obj.id])
             ) + template_utils.delete_button(
-                "deleteBatch('"
-                + reverse("batch.delete", args=[obj.id])
-                + "')"
+                "deleteBatch('" + reverse("batch.delete", args=[obj.id]) + "')"
             )
-        row[
-            "action"
-        ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         return row
 
 
@@ -160,9 +146,7 @@ def batch_data(request, pk):  # pylint: disable=unused-argument
             exception,
         )
 
-        return JsonResponse(
-            {"message": "Error while getting the data!"}, status=500
-        )
+        return JsonResponse({"message": "Error while getting the data!"}, status=500)
 
 
 @login_required()
@@ -202,9 +186,7 @@ def delete_batch(request, pk):  # pylint: disable=unused-argument
     """
     try:
         batch = get_object_or_404(Batch, id=pk)
-        intern_details = list(
-            batch.sub_batches.all().values_list("id", flat=True)
-        )
+        intern_details = list(batch.sub_batches.all().values_list("id", flat=True))
         SubBatch.bulk_delete({"batch_id": pk})
         InternDetail.bulk_delete({"sub_batch_id__in": intern_details})
         batch.delete()
@@ -214,9 +196,7 @@ def delete_batch(request, pk):  # pylint: disable=unused-argument
             "An error has occurred while deleting the batch data \n%s",
             exception,
         )
-        return JsonResponse(
-            {"message": "Error while deleting Batch!"}, status=500
-        )
+        return JsonResponse({"message": "Error while deleting Batch!"}, status=500)
 
 
 class BatchDetails(LoginRequiredMixin, DetailView):

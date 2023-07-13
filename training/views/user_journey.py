@@ -32,12 +32,10 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
         latest_task_report = Assessment.objects.filter(
             task=OuterRef("id"), user_id=self.object.id
         ).order_by("-id")[:1]
-        latest_extended_task_report = Assessment.objects.filter(
-            extension=OuterRef("id")
-        ).order_by("-id")[:1]
-        sub_batch_id = SubBatch.objects.filter(
-            intern_details__user=self.object.id
-        ).first()
+        latest_extended_task_report = Assessment.objects.filter(extension=OuterRef("id")).order_by(
+            "-id"
+        )[:1]
+        sub_batch_id = SubBatch.objects.filter(intern_details__user=self.object.id).first()
 
         task_summary = (
             SubBatchTaskTimeline.objects.filter(
@@ -51,9 +49,7 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
                 - 1,
                 last_entry=Subquery(latest_task_report.values("score")),
                 comment=Subquery(latest_task_report.values("comment")),
-                is_retry=Subquery(
-                    latest_task_report.values("is_retry")
-                ),
+                is_retry=Subquery(latest_task_report.values("is_retry")),
                 inactive_tasks=Case(
                     When(
                         start_date__gt=timezone.now(), then=Value(False)
@@ -75,24 +71,14 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
         )
 
         extended_task_summary = (
-            Extension.objects.filter(
-                sub_batch=sub_batch_id, user=self.object
-            )
+            Extension.objects.filter(sub_batch=sub_batch_id, user=self.object)
             .annotate(
                 retries=Count("assessments__is_retry") - 1,
-                last_entry=Subquery(
-                    latest_extended_task_report.values("score")
-                ),
-                comment=Subquery(
-                    latest_extended_task_report.values("comment")
-                ),
-                is_retry=Subquery(
-                    latest_extended_task_report.values("is_retry")
-                ),
+                last_entry=Subquery(latest_extended_task_report.values("score")),
+                comment=Subquery(latest_extended_task_report.values("comment")),
+                is_retry=Subquery(latest_extended_task_report.values("is_retry")),
             )
-            .values(
-                "id", "last_entry", "retries", "comment", "is_retry"
-            )
+            .values("id", "last_entry", "retries", "comment", "is_retry")
         )
 
         context = super().get_context_data(**kwargs)
@@ -116,9 +102,7 @@ def update_task_score(request, pk):
             report.user_id = pk
             report.task_id = request.POST.get("task")
             report.extension_id = request.POST.get("extension")
-            report.sub_batch = SubBatch.objects.filter(
-                intern_details__user=pk
-            ).first()
+            report.sub_batch = SubBatch.objects.filter(intern_details__user=pk).first()
             report.is_retry = request.POST.get("status") == "true"
             report.created_by = request.user
             report.save()
@@ -142,9 +126,7 @@ def add_extension(request, pk):
     """
     try:
         Extension.objects.create(
-            sub_batch=SubBatch.objects.filter(
-                intern_details__user=pk
-            ).first(),
+            sub_batch=SubBatch.objects.filter(intern_details__user=pk).first(),
             user_id=pk,
             created_by=request.user,
         )

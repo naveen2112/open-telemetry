@@ -34,9 +34,7 @@ class SubBatchTaskTimeline(db.SoftDeleteWithBaseModel):
     start_date = db.DateTimeWithoutTZField(null=True)
     end_date = db.DateTimeWithoutTZField(null=True)
     order = models.IntegerField(blank=True)
-    created_by = models.ForeignKey(
-        "hubble.User", on_delete=models.CASCADE
-    )
+    created_by = models.ForeignKey("hubble.User", on_delete=models.CASCADE)
 
     class Meta:
         """

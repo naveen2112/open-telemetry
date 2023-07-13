@@ -64,35 +64,23 @@ class SubBatchTimelineDataTable(LoginRequiredMixin, CustomDatatable):
         The function returns a queryset of objects filtered by the "sub_batch_id" value from the
         request's POST data.
         """
-        return self.model.objects.filter(
-            sub_batch=request.POST.get("sub_batch_id")
-        )
+        return self.model.objects.filter(sub_batch=request.POST.get("sub_batch_id"))
 
     def customize_row(self, row, obj):
         """
         The function customize_row customizes the values of certain fields in a row object based on
         the properties of an input object.
         """
-        row[
-            "action"
-        ] = "<div class='form-inline justify-content-center'>-</div>"
+        row["action"] = "<div class='form-inline justify-content-center'>-</div>"
         if self.request.user.is_admin_user:
-            row[
-                "action"
-            ] = "<div class='form-inline justify-content-center'>-</div>"
+            row["action"] = "<div class='form-inline justify-content-center'>-</div>"
             if obj.can_editable():
                 buttons = template_utils.edit_button(
                     reverse("sub_batch.timeline.show", args=[obj.id])
                 ) + template_utils.delete_button(
-                    "deleteTimeline('"
-                    + reverse(
-                        "sub_batch.timeline.delete", args=[obj.id]
-                    )
-                    + "')"
+                    "deleteTimeline('" + reverse("sub_batch.timeline.delete", args=[obj.id]) + "')"
                 )
-                row[
-                    "action"
-                ] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
+                row["action"] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
         row["start_date"] = obj.start_date.strftime("%d %b %Y")
         row["end_date"] = obj.end_date.strftime("%d %b %Y")
         row["order"] = f"<span data-id='{obj.id}'>{obj.order}</span>"
@@ -145,9 +133,7 @@ def sub_batch_timeline_data(request, pk):
     Sub batch timeline data
     """
     data = {
-        "timeline": model_to_dict(
-            get_object_or_404(SubBatchTaskTimeline, id=pk)
-        )
+        "timeline": model_to_dict(get_object_or_404(SubBatchTaskTimeline, id=pk))
     }  # Covert django queryset object to dict,which can be easily serialized
     # and sent as a JSON response
     return JsonResponse(data, safe=False)
@@ -172,9 +158,7 @@ def update_sub_batch_timeline(request, pk):
                 timeline_task.sub_batch = sub_batch
                 timeline_task.created_by = request.user
             form.save()
-            schedule_timeline_for_sub_batch(
-                sub_batch=sub_batch, is_create=False
-            )
+            schedule_timeline_for_sub_batch(sub_batch=sub_batch, is_create=False)
             return JsonResponse({"status": "success"})
         field_errors = form.errors.as_json()
         non_field_errors = form.non_field_errors().as_json()
@@ -206,18 +190,14 @@ def update_task_sequence(request):
         sub_batch_id=request.POST.get("sub_batch_id"), id__in=task_order
     ).count()
     if check_valid_tasks == len(task_order):
-        sub_batch_task = SubBatchTaskTimeline.objects.get(
-            id=task_order[0]
-        )
+        sub_batch_task = SubBatchTaskTimeline.objects.get(id=task_order[0])
         order = 0
         for task_id in task_order:
             task = SubBatchTaskTimeline.objects.get(id=task_id)
             order += 1
             task.order = order
             task.save()
-        schedule_timeline_for_sub_batch(
-            sub_batch_task.sub_batch, is_create=False
-        )
+        schedule_timeline_for_sub_batch(sub_batch_task.sub_batch, is_create=False)
         return JsonResponse({"status": "success"})
     return JsonResponse(
         {
@@ -246,11 +226,7 @@ def delete_sub_batch_timeline(request, pk):
                 sub_batch=sub_batch.id,
                 order__gt=timeline.order,
             )  # Remaining task after the deletion of the task
-            if (
-                SubBatchTaskTimeline.objects.filter(
-                    sub_batch=sub_batch.id
-                ).count()
-            ) > 1:
+            if (SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch.id).count()) > 1:
                 # Check whether multiple tasks are available before deleting
                 order = timeline.order - 1
                 timeline.delete()
@@ -258,12 +234,8 @@ def delete_sub_batch_timeline(request, pk):
                     order += 1
                     task.order = order
                     task.save()
-                schedule_timeline_for_sub_batch(
-                    sub_batch=sub_batch, is_create=False
-                )
-                return JsonResponse(
-                    {"message": "Task deleted succcessfully"}
-                )
+                schedule_timeline_for_sub_batch(sub_batch=sub_batch, is_create=False)
+                return JsonResponse({"message": "Task deleted succcessfully"})
             return JsonResponse(
                 {
                     "message": "This is the last task, Atleast one"
@@ -281,6 +253,4 @@ def delete_sub_batch_timeline(request, pk):
             exception,
         )
 
-        return JsonResponse(
-            {"message": "Error while deleting Task!"}, status=500
-        )
+        return JsonResponse({"message": "Error while deleting Task!"}, status=500)

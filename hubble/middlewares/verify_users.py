@@ -19,9 +19,6 @@ class VerifiedUser:
         """
         Verifies the user's authentication and employment status
         """
-        if (
-            request.user.is_authenticated
-            and not request.user.is_employed
-        ):
+        if request.user.is_authenticated and not request.user.is_employed:
             return HttpResponseForbidden()
         return self.get_response(request)

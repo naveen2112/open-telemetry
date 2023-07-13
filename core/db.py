@@ -19,20 +19,11 @@ class DateTimeWithoutTZField(models.DateTimeField):
 
     def db_type(self, connection):
         # Use the appropriate database-specific column type
-        if (
-            connection.settings_dict["ENGINE"]
-            == "django.db.backends.postgresql"
-        ):
+        if connection.settings_dict["ENGINE"] == "django.db.backends.postgresql":
             return "timestamp without time zone"
-        if (
-            connection.settings_dict["ENGINE"]
-            == "django.db.backends.mysql"
-        ):
+        if connection.settings_dict["ENGINE"] == "django.db.backends.mysql":
             return "datetime"
-        if (
-            connection.settings_dict["ENGINE"]
-            == "django.db.backends.sqlite3"
-        ):
+        if connection.settings_dict["ENGINE"] == "django.db.backends.sqlite3":
             return "datetime"
         return super().db_type(connection)
 
@@ -122,6 +113,4 @@ class SoftDeleteWithBaseModel(BaseModel):
         Performs a bulk delete operation on objects matching the
         specified filters
         """
-        cls.objects.filter(**filters).update(
-            deleted_at=datetime.datetime.now()
-        )
+        cls.objects.filter(**filters).update(deleted_at=datetime.datetime.now())

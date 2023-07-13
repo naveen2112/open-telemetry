@@ -22,7 +22,7 @@ class CustomDatatable(AjaxDatatableView):
     # `get_table_row_id` method in the `CustomDatatable` class has a different
     # signature than the method it is overriding from the
     # pylint: disable=arguments-differ
-    def get_table_row_id(self, request, obj, i): # pylint: disable=unused-argument
+    def get_table_row_id(self, request, obj, i):  # pylint: disable=unused-argument
         """
         Provides a specific ID for the table row; default: "row-ID"
         Override to customize as required.
@@ -113,9 +113,7 @@ def update_expected_end_date_of_intern_details(sub_batch):
     latest sub-batch task timeline
     """
     expected_completion_day = (
-        SubBatchTaskTimeline.objects.filter(sub_batch_id=sub_batch)
-        .order_by("-order")
-        .first()
+        SubBatchTaskTimeline.objects.filter(sub_batch_id=sub_batch).order_by("-order").first()
     )
     InternDetail.objects.filter(sub_batch_id=sub_batch).update(
         expected_completion=expected_completion_day.end_date
@@ -126,14 +124,10 @@ def is_leave_day(holidays, start_date):
     """
     Checks if a given date is a leave day (holiday or Sunday)
     """
-    return (start_date.date() in holidays) or (
-        start_date.date().weekday() == 6
-    )
+    return (start_date.date() in holidays) or (start_date.date().weekday() == 6)
 
 
-def calculate_duration_for_task(
-    holidays, start_date, is_half_day, number_of_days
-):
+def calculate_duration_for_task(holidays, start_date, is_half_day, number_of_days):
     """
     Calculates the start and end date/time for a task, taking into
     account holidays, half-day status, and the number of days
@@ -146,13 +140,9 @@ def calculate_duration_for_task(
         start_date += datetime.timedelta(1)
 
     if is_half_day:
-        start_date_time = datetime.datetime.combine(
-            start_date, datetime.time(hour=14, minute=0)
-        )
+        start_date_time = datetime.datetime.combine(start_date, datetime.time(hour=14, minute=0))
     else:
-        start_date_time = datetime.datetime.combine(
-            start_date, datetime.time(hour=9, minute=0)
-        )
+        start_date_time = datetime.datetime.combine(start_date, datetime.time(hour=9, minute=0))
 
     having_half_day_at_end = False
     end_time = datetime.time(hour=18, minute=0)
@@ -189,28 +179,18 @@ def calculate_duration_for_task(
     }
 
 
-def schedule_timeline_for_sub_batch(
-    sub_batch, user=None, is_create=True
-):
+def schedule_timeline_for_sub_batch(sub_batch, user=None, is_create=True):
     """
     Schedules the timeline for a sub-batch
     """
     value_end_date = None
-    holidays = list(
-        Holiday.objects.values_list("date_of_holiday", flat=True)
-    )
-    start_date = datetime.datetime.strptime(
-        str(sub_batch.start_date), "%Y-%m-%d"
-    )
+    holidays = list(Holiday.objects.values_list("date_of_holiday", flat=True))
+    start_date = datetime.datetime.strptime(str(sub_batch.start_date), "%Y-%m-%d")
     is_half_day = False
     order = 0
     if is_create:
-        for task in TimelineTask.objects.filter(
-            timeline=sub_batch.timeline.id
-        ):
-            values = calculate_duration_for_task(
-                holidays, start_date, is_half_day, task.days
-            )
+        for task in TimelineTask.objects.filter(timeline=sub_batch.timeline.id):
+            values = calculate_duration_for_task(holidays, start_date, is_half_day, task.days)
 
             order += 1
             SubBatchTaskTimeline.objects.create(
@@ -229,12 +209,8 @@ def schedule_timeline_for_sub_batch(
         value_end_date = values["end_date_time"]
 
     else:
-        for task in SubBatchTaskTimeline.objects.filter(
-            sub_batch=sub_batch
-        ).order_by("order"):
-            values = calculate_duration_for_task(
-                holidays, start_date, is_half_day, task.days
-            )
+        for task in SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch).order_by("order"):
+            values = calculate_duration_for_task(holidays, start_date, is_half_day, task.days)
             start_date = values["end_date_time"]
             is_half_day = values["ends_afternoon"]
             task.start_date = values["start_date_time"]

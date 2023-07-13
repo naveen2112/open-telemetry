@@ -21,9 +21,7 @@ class Client(db.SoftDeleteWithBaseModel):
     zip = models.CharField(max_length=255, blank=True, null=True)
     street = models.CharField(max_length=255, blank=True, null=True)
     city = models.CharField(max_length=255, blank=True, null=True)
-    currency = models.ForeignKey(
-        Currency, models.CASCADE, blank=True, null=True
-    )
+    currency = models.ForeignKey(Currency, models.CASCADE, blank=True, null=True)
 
     class Meta:
         """

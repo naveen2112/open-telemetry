@@ -34,9 +34,7 @@ class ProjectResource(db.SoftDeleteWithBaseModel):
         null=True,
         related_name="resource_reporting_persons",
     )
-    resource_type = models.CharField(
-        max_length=255, blank=True, null=True
-    )
+    resource_type = models.CharField(max_length=255, blank=True, null=True)
     utilisation = models.IntegerField(blank=True, null=True)
     charge_by_hour = models.FloatField(blank=True, null=True)
     primary_project = models.BooleanField(blank=True, null=True)

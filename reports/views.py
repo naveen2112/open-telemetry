@@ -93,9 +93,7 @@ class EfficiencyDatatable(CustomDatatable):
         buttons = template_utils.show_btn(  # pylint: disable=no-member
             reverse("detailed_efficiency", args=[obj["pk"]])
         )
-        row[
-            "action"
-        ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         return row
 
     def get_initial_queryset(self, request=None):
@@ -112,11 +110,7 @@ class EfficiencyDatatable(CustomDatatable):
                     Avg(
                         100
                         * (F("authorized_hours"))
-                        / (
-                            F(
-                                "user__expected_user_efficiencies__expected_efficiency"
-                            )
-                        )
+                        / (F("user__expected_user_efficiencies__expected_efficiency"))
                     ),
                     2,
                 ),
@@ -351,19 +345,13 @@ class DetaileEfficiencyDatatable(CustomDatatable):
             .values("month")
             .filter(team__id=int(request.REQUEST.get("team_id")))
             .annotate(
-                expected_hours=Sum(
-                    "user__expected_user_efficiencies__expected_efficiency"
-                ),
+                expected_hours=Sum("user__expected_user_efficiencies__expected_efficiency"),
                 actual_hours=Sum("authorized_hours"),
                 capacity=Round(
                     Avg(
                         100
                         * (F("authorized_hours"))
-                        / (
-                            F(
-                                "user__expected_user_efficiencies__expected_efficiency"
-                            )
-                        )
+                        / (F("user__expected_user_efficiencies__expected_efficiency"))
                     )
                 ),
             )

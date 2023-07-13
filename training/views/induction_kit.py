@@ -35,6 +35,4 @@ def induction_kit_detail(request, text):
     """
     static_path = list(settings.STATICFILES_DIRS)
     file_path = f"{static_path[0]}/training/pdf/{text}"
-    return FileResponse(
-        open(file_path, "rb"), content_type="application/pdf"
-    )
+    return FileResponse(open(file_path, "rb"), content_type="application/pdf")

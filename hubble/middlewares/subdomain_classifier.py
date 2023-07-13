@@ -19,16 +19,12 @@ class SubdomainClassifier:
         """
         Classifies the subdomain of the incoming request and modifies the request accordingly.
         """
-        request.subdomain = (request.get_host().split(".")[0]).split(
-            "-"
-        )[
+        request.subdomain = (request.get_host().split(".")[0]).split("-")[
             0
         ]  # Get the sub-domain from request
         if request.subdomain in ("training", "reports"):
             request.urlconf = request.subdomain + ".urls"
         settings.LOGIN_REDIRECT_URL = (
-            "induction-kit"
-            if request.subdomain == "training"
-            else "index"
+            "induction-kit" if request.subdomain == "training" else "index"
         )
         return self.get_response(request)

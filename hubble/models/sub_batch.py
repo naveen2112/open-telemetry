@@ -29,12 +29,8 @@ class SubBatch(db.SoftDeleteWithBaseModel):
         related_name="secondary_sub_batches",
     )
     start_date = models.DateField()
-    timeline = models.ForeignKey(
-        "hubble.Timeline", on_delete=models.CASCADE
-    )
-    created_by = models.ForeignKey(
-        "hubble.User", on_delete=models.CASCADE
-    )
+    timeline = models.ForeignKey("hubble.Timeline", on_delete=models.CASCADE)
+    created_by = models.ForeignKey("hubble.User", on_delete=models.CASCADE)
 
     class Meta:
         """
@@ -51,6 +47,4 @@ class SubBatch(db.SoftDeleteWithBaseModel):
         """
         Get the names of the primary and secondary mentors as a string
         """
-        return " / ".join(
-            [self.primary_mentor.name, self.secondary_mentor.name]
-        )
+        return " / ".join([self.primary_mentor.name, self.secondary_mentor.name])
