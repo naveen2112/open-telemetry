@@ -10,7 +10,7 @@ import core.db
 class Migration(migrations.Migration):
     initial = True
 
-    in_testing = settings.IS_TESTING
+    is_test_case = settings.IS_TEST_CASE
 
     dependencies = []
 
@@ -84,7 +84,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "users",
-                "managed": in_testing,
+                "managed": is_test_case,
             },
         ),
         migrations.CreateModel(
@@ -130,7 +130,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "clients",
-                "managed": in_testing,
+                "managed": is_test_case,
             },
         ),
         migrations.CreateModel(
@@ -157,7 +157,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "currencies",
-                "managed": in_testing,
+                "managed": is_test_case,
             },
         ),
         migrations.CreateModel(
@@ -187,7 +187,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "designations",
-                "managed": in_testing,
+                "managed": is_test_case,
             },
         ),
         migrations.CreateModel(
@@ -218,7 +218,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "expected_user_efficiencies",
-                "managed": in_testing,
+                "managed": is_test_case,
             },
         ),
         migrations.CreateModel(
@@ -250,7 +250,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "holidays",
-                "managed": in_testing,
+                "managed": is_test_case,
             },
         ),
         migrations.CreateModel(
@@ -276,7 +276,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "modules",
-                "managed": in_testing,
+                "managed": is_test_case,
             },
         ),
         migrations.CreateModel(
@@ -320,7 +320,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "projects",
-                "managed": in_testing,
+                "managed": is_test_case,
             },
         ),
         migrations.CreateModel(
@@ -366,7 +366,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "project_resources",
-                "managed": in_testing,
+                "managed": is_test_case,
             },
         ),
         migrations.CreateModel(
@@ -396,7 +396,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "project_resource_positions",
-                "managed": in_testing,
+                "managed": is_test_case,
             },
         ),
         migrations.CreateModel(
@@ -426,7 +426,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "tasks",
-                "managed": in_testing,
+                "managed": is_test_case,
             },
         ),
         migrations.CreateModel(
@@ -457,7 +457,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "teams",
-                "managed": in_testing,
+                "managed": is_test_case,
             },
         ),
         migrations.CreateModel(
@@ -485,7 +485,7 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "timesheet_entries",
-                "managed": in_testing,
+                "managed": is_test_case,
             },
         ),
         migrations.CreateModel(

@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
         )
     ]
 
-    if settings.IS_TESTING:
+    if settings.IS_TEST_CASE:
         operations.append(
             migrations.AddField(
                 model_name="user",
