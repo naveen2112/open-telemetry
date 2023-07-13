@@ -7,7 +7,8 @@ from model_bakery import baker
 from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
-from core.constants import TASK_TYPE_ASSESSMENT
+from core.constants import (ABOVE_AVERAGE, AVERAGE, GOOD, MEET_EXPECTATION,
+                            NOT_YET_STARTED, POOR, TASK_TYPE_ASSESSMENT)
 from hubble.models import InternDetail, SubBatchTaskTimeline
 
 
@@ -251,11 +252,11 @@ class TraineeDatatableTest(BaseTestCase):
         self.assertTemplateUsed(response, "sub_batch/sub_batch_detail.html")
         self.assertContains(response, self.sub_batch.name)
         self.assertContains(response, "Performance")
-        self.assertContains(response, "Good")
-        self.assertContains(response, "Meet Expectation")
-        self.assertContains(response, "Above Average")
-        self.assertContains(response, "Average")
-        self.assertContains(response, "Poor")
+        self.assertContains(response, GOOD)
+        self.assertContains(response, MEET_EXPECTATION)
+        self.assertContains(response, ABOVE_AVERAGE)
+        self.assertContains(response, AVERAGE)
+        self.assertContains(response, POOR)
 
     def test_datatable(self):
         """
@@ -309,21 +310,21 @@ class TraineeDatatableTest(BaseTestCase):
                     0.0,
                 ),
                 performance=Case(
-                    When(average_marks__gte=90, then=Value("Good")),
+                    When(average_marks__gte=90, then=Value(GOOD)),
                     When(
                         Q(average_marks__lt=90) & Q(average_marks__gte=75),
-                        then=Value("Meet Expectations"),
+                        then=Value(MEET_EXPECTATION),
                     ),
                     When(
                         Q(average_marks__lt=75) & Q(average_marks__gte=65),
-                        then=Value("Above Average"),
+                        then=Value(ABOVE_AVERAGE),
                     ),
                     When(
                         Q(average_marks__lt=65) & Q(average_marks__gte=50),
-                        then=Value("Average"),
+                        then=Value(AVERAGE),
                     ),
-                    When(average_marks__lt=65, then=Value("Poor")),
-                    default=Value("Not yet Started"),
+                    When(average_marks__lt=65, then=Value(POOR)),
+                    default=Value(NOT_YET_STARTED),
                 ),
             )
         )
@@ -385,12 +386,12 @@ class TraineeDatatableTest(BaseTestCase):
         To ensure that the received performance reports are valid
         """
         performance_report = {
-            "Good": 0,
-            "Meet Expectation": 0,
-            "Above Average": 0,
-            "Average": 0,
-            "Poor": 0,
-            "Not Yet Started": 0,
+            GOOD: 0,
+            MEET_EXPECTATION: 0,
+            ABOVE_AVERAGE: 0,
+            AVERAGE: 0,
+            POOR: 0,
+            NOT_YET_STARTED: 0,
         }
         response = self.make_post_request(
             reverse(self.datatable_route_name), data=self.get_valid_inputs()
@@ -398,55 +399,55 @@ class TraineeDatatableTest(BaseTestCase):
         for performance in response.json()["data"]:
             if performance["average_marks"] != "-":
                 if float(performance["average_marks"]) >= 90:
-                    performance_report["Good"] += 1
+                    performance_report[GOOD] += 1
                 elif 90 > float(performance["average_marks"]) >= 75:
-                    performance_report["Meet Expectation"] += 1
+                    performance_report[MEET_EXPECTATION] += 1
                 elif 75 > float(performance["average_marks"]) >= 65:
-                    performance_report["Above Average"] += 1
+                    performance_report[ABOVE_AVERAGE] += 1
                 elif 65 > float(performance["average_marks"]) >= 50:
-                    performance_report["Average"] += 1
+                    performance_report[AVERAGE] += 1
                 elif float(performance["average_marks"]) < 50:
-                    performance_report["Poor"] += 1
+                    performance_report[POOR] += 1
             else:
-                performance_report["Not Yet Started"] += 1
+                performance_report[NOT_YET_STARTED] += 1
 
         self.assertTrue("extra_data" in response.json())
-        self.assertTrue("Good" in response.json()["extra_data"]["performance_report"])
+        self.assertTrue(GOOD in response.json()["extra_data"]["performance_report"])
         self.assertTrue(
-            "Meet Expectation" in response.json()["extra_data"]["performance_report"]
+            MEET_EXPECTATION in response.json()["extra_data"]["performance_report"]
         )
         self.assertTrue(
-            "Above Average" in response.json()["extra_data"]["performance_report"]
+            ABOVE_AVERAGE in response.json()["extra_data"]["performance_report"]
         )
         self.assertTrue(
-            "Average" in response.json()["extra_data"]["performance_report"]
+            AVERAGE in response.json()["extra_data"]["performance_report"]
         )
-        self.assertTrue("Poor" in response.json()["extra_data"]["performance_report"])
+        self.assertTrue(POOR in response.json()["extra_data"]["performance_report"])
         self.assertTrue(
-            "Not Yet Started" in response.json()["extra_data"]["performance_report"]
+            NOT_YET_STARTED in response.json()["extra_data"]["performance_report"]
         )
 
         self.assertTrue(
-            performance_report["Good"]
-            == response.json()["extra_data"]["performance_report"]["Good"]
+            performance_report[GOOD]
+            == response.json()["extra_data"]["performance_report"][GOOD]
         )
         self.assertTrue(
-            performance_report["Meet Expectation"]
-            == response.json()["extra_data"]["performance_report"]["Meet Expectation"]
+            performance_report[MEET_EXPECTATION]
+            == response.json()["extra_data"]["performance_report"][MEET_EXPECTATION]
         )
         self.assertTrue(
-            performance_report["Above Average"]
-            == response.json()["extra_data"]["performance_report"]["Above Average"]
+            performance_report[ABOVE_AVERAGE]
+            == response.json()["extra_data"]["performance_report"][ABOVE_AVERAGE]
         )
         self.assertTrue(
-            performance_report["Average"]
-            == response.json()["extra_data"]["performance_report"]["Average"]
+            performance_report[AVERAGE]
+            == response.json()["extra_data"]["performance_report"][AVERAGE]
         )
         self.assertTrue(
-            performance_report["Poor"]
-            == response.json()["extra_data"]["performance_report"]["Poor"]
+            performance_report[POOR]
+            == response.json()["extra_data"]["performance_report"][POOR]
         )
         self.assertTrue(
-            performance_report["Not Yet Started"]
-            == response.json()["extra_data"]["performance_report"]["Not Yet Started"]
+            performance_report[NOT_YET_STARTED]
+            == response.json()["extra_data"]["performance_report"][NOT_YET_STARTED]
         )
