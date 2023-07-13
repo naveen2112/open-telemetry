@@ -9,4 +9,4 @@ ignore=docker, migrations, docker-compose.yml, pyproject.toml
 
 [BASIC]
 # Good variable names which should always be accepted, separated by a comma.
-good-names=pk, i
+good-names=pk, i, COLOR_CODES

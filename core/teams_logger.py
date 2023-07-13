@@ -64,7 +64,7 @@ class TeamsExceptionHandler(AdminEmailHandler):
 
             headers = {"Content-Type": "application/json"}
 
-            COLOR_CODES = {  # pylint: disable=invalid-name
+            COLOR_CODES = {
                 "DEBUG": "#808080",
                 "INFO": "#00e07f",
                 "WARNING": "#FFFF00",
