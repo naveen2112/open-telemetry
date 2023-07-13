@@ -6,12 +6,19 @@ class SubdomainClassifier:
         self.get_response = get_response
 
     def __call__(self, request):
-        request.subdomain = (request.get_host().split(".")[0]).split("-")[
+        request.subdomain = (request.get_host().split(".")[0]).split(
+            "-"
+        )[
             0
         ]  # Get the sub-domain from request
-        if request.subdomain == "training" or request.subdomain == "reports":
+        if (
+            request.subdomain == "training"
+            or request.subdomain == "reports"
+        ):
             request.urlconf = request.subdomain + ".urls"
         settings.LOGIN_REDIRECT_URL = (
-            "induction-kit" if request.subdomain == "training" else "index"
+            "induction-kit"
+            if request.subdomain == "training"
+            else "index"
         )
         return self.get_response(request)

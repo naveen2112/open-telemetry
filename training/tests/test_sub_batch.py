@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.db.models import Count, Q
 from django.forms.models import model_to_dict
 from django.urls import reverse
 from django.utils import timezone
@@ -7,7 +8,7 @@ from model_bakery import baker
 from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
-from hubble.models import User
+from hubble.models import Batch, SubBatch, User
 from training.forms import SubBatchForm
 
 
@@ -80,9 +81,12 @@ class SubBatchCreateTest(BaseTestCase):
         with open(
             self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
         ) as sample_file:
-            data = self.get_valid_inputs({"users_list_file": sample_file})
+            data = self.get_valid_inputs(
+                {"users_list_file": sample_file}
+            )
             response = self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]), data=data
+                reverse(self.create_route_name, args=[self.batch_id]),
+                data=data,
             )
             self.assertRedirects(
                 response, reverse(self.route_name, args=[self.batch_id])
@@ -107,7 +111,8 @@ class SubBatchCreateTest(BaseTestCase):
         ) as sample_file:
             data = {"users_list_file": sample_file}
             self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]), data=data
+                reverse(self.create_route_name, args=[self.batch_id]),
+                data=data,
             )
             field_errors = {
                 "name": {"required"},
@@ -137,7 +142,8 @@ class SubBatchCreateTest(BaseTestCase):
                 }
             )
             self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]), data=data
+                reverse(self.create_route_name, args=[self.batch_id]),
+                data=data,
             )
             field_errors = {
                 "team": {"invalid_choice"},
@@ -157,10 +163,14 @@ class SubBatchCreateTest(BaseTestCase):
             self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
         ) as sample_file:
             data = self.get_valid_inputs(
-                {"users_list_file": sample_file, "name": self.faker.pystr(max_chars=2)}
+                {
+                    "users_list_file": sample_file,
+                    "name": self.faker.pystr(max_chars=2),
+                }
             )
             self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]), data=data
+                reverse(self.create_route_name, args=[self.batch_id]),
+                data=data,
             )
             field_errors = {"name": {"min_length"}}
             self.validate_form_errors(
@@ -177,24 +187,34 @@ class SubBatchCreateTest(BaseTestCase):
         # When file is not uploaded
         data = self.get_valid_inputs()
         response = self.make_post_request(
-            reverse(self.create_route_name, args=[self.batch_id]), data=data
+            reverse(self.create_route_name, args=[self.batch_id]),
+            data=data,
         )
-        self.assertEqual(strip_tags(response.context["errors"]), "Please upload a file")
+        self.assertEqual(
+            strip_tags(response.context["errors"]),
+            "Please upload a file",
+        )
 
         # Invalid data in file interns belong to another sub-batch
         with open(
             self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
         ) as sample_file:
-            data = self.get_valid_inputs({"users_list_file": sample_file})
+            data = self.get_valid_inputs(
+                {"users_list_file": sample_file}
+            )
             self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]), data=data
+                reverse(self.create_route_name, args=[self.batch_id]),
+                data=data,
             )
         with open(
             self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
         ) as sample_file:
-            data = self.get_valid_inputs({"users_list_file": sample_file})
+            data = self.get_valid_inputs(
+                {"users_list_file": sample_file}
+            )
             response = self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]), data=data
+                reverse(self.create_route_name, args=[self.batch_id]),
+                data=data,
             )
             self.assertEqual(
                 strip_tags(response.context["errors"]),
@@ -205,9 +225,12 @@ class SubBatchCreateTest(BaseTestCase):
         with open(
             self.get_file_path() + "invalid_file_upload1.xlsx", "rb"
         ) as sample_file:
-            data = self.get_valid_inputs({"users_list_file": sample_file})
+            data = self.get_valid_inputs(
+                {"users_list_file": sample_file}
+            )
             response = self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]), data=data
+                reverse(self.create_route_name, args=[self.batch_id]),
+                data=data,
             )
             self.assertEqual(
                 strip_tags(response.context["errors"]),
@@ -218,9 +241,12 @@ class SubBatchCreateTest(BaseTestCase):
         with open(
             self.get_file_path() + "invalid_file_upload2.xlsx", "rb"
         ) as sample_file:
-            data = self.get_valid_inputs({"users_list_file": sample_file})
+            data = self.get_valid_inputs(
+                {"users_list_file": sample_file}
+            )
             response = self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]), data=data
+                reverse(self.create_route_name, args=[self.batch_id]),
+                data=data,
             )
             self.assertEqual(
                 strip_tags(response.context["errors"]),
@@ -249,7 +275,9 @@ class SubBatchUpdateTest(BaseTestCase):
         This function is responsible for updating the valid inputs and creating data in databases as reqiured
         """
         self.batch_id = baker.make("hubble.Batch").id
-        self.sub_batch_id = baker.make("hubble.SubBatch", batch_id=self.batch_id).id
+        self.sub_batch_id = baker.make(
+            "hubble.SubBatch", batch_id=self.batch_id
+        ).id
         baker.make(
             "hubble.User",
             is_employed=True,
@@ -296,9 +324,12 @@ class SubBatchUpdateTest(BaseTestCase):
         """
         data = self.get_valid_inputs()
         response = self.make_post_request(
-            reverse(self.update_route_name, args=[self.sub_batch_id]), data=data
+            reverse(self.update_route_name, args=[self.sub_batch_id]),
+            data=data,
         )
-        self.assertRedirects(response, reverse(self.route_name, args=[self.batch_id]))
+        self.assertRedirects(
+            response, reverse(self.route_name, args=[self.batch_id])
+        )
         self.assertEqual(response.status_code, 302)
         self.assertDatabaseHas(
             "SubBatch",
@@ -316,7 +347,8 @@ class SubBatchUpdateTest(BaseTestCase):
         """
         data = {}
         self.make_post_request(
-            reverse(self.update_route_name, args=[self.sub_batch_id]), data=data
+            reverse(self.update_route_name, args=[self.sub_batch_id]),
+            data=data,
         )
         field_errors = {
             "name": {"required"},
@@ -342,7 +374,8 @@ class SubBatchUpdateTest(BaseTestCase):
             }
         )
         self.make_post_request(
-            reverse(self.update_route_name, args=[self.sub_batch_id]), data=data
+            reverse(self.update_route_name, args=[self.sub_batch_id]),
+            data=data,
         )
         field_errors = {
             "team": {"invalid_choice"},
@@ -358,9 +391,12 @@ class SubBatchUpdateTest(BaseTestCase):
         """
         To check what happens when name field fails MinlengthValidation
         """
-        data = self.get_valid_inputs({"name": self.faker.pystr(max_chars=2)})
+        data = self.get_valid_inputs(
+            {"name": self.faker.pystr(max_chars=2)}
+        )
         self.make_post_request(
-            reverse(self.update_route_name, args=[self.sub_batch_id]), data=data
+            reverse(self.update_route_name, args=[self.sub_batch_id]),
+            data=data,
         )
         field_errors = {"name": {"min_length"}}
         self.validate_form_errors(
@@ -376,9 +412,12 @@ class SubBatchUpdateTest(BaseTestCase):
         """
         team_id = self.create_team().id
         timeline = baker.make("hubble.Timeline", team_id=team_id)
-        data = self.get_valid_inputs({"team": team_id, "timeline": timeline.id})
+        data = self.get_valid_inputs(
+            {"team": team_id, "timeline": timeline.id}
+        )
         self.make_post_request(
-            reverse(self.update_route_name, args=[self.sub_batch_id]), data=data
+            reverse(self.update_route_name, args=[self.sub_batch_id]),
+            data=data,
         )
         field_errors = {
             "timeline": {"timeline_has_no_tasks"},
@@ -411,14 +450,20 @@ class SubBatchShowTest(BaseTestCase):
         response = self.make_get_request(
             reverse(self.update_route_name, args=[sub_batch.id])
         )
-        self.assertIsInstance(response.context.get("form"), SubBatchForm)
-        self.assertEqual(response.context.get("form").instance, sub_batch)
+        self.assertIsInstance(
+            response.context.get("form"), SubBatchForm
+        )
+        self.assertEqual(
+            response.context.get("form").instance, sub_batch
+        )
 
     def test_failure(self):
         """
         Check what happens when invalid data is given as input
         """
-        response = self.make_get_request(reverse(self.update_route_name, args=[0]))
+        response = self.make_get_request(
+            reverse(self.update_route_name, args=[0])
+        )
         self.assertEqual(
             self.bytes_cleaner(response.content),
             '{"message": "Invalid SubBatch id", "status": "error"}',
@@ -444,11 +489,16 @@ class GetTimelineTest(BaseTestCase):
         Check what happens when valid data is given as input
         """
         team_id = baker.make("hubble.Team").id
-        timeline = baker.make("hubble.Timeline", team_id=team_id, is_active=True)
-        response = self.make_post_request(
-            reverse(self.get_timeline_route_name), data={"team_id": team_id}
+        timeline = baker.make(
+            "hubble.Timeline", team_id=team_id, is_active=True
         )
-        self.assertJSONEqual((response.content), {"timeline": model_to_dict(timeline)})
+        response = self.make_post_request(
+            reverse(self.get_timeline_route_name),
+            data={"team_id": team_id},
+        )
+        self.assertJSONEqual(
+            (response.content), {"timeline": model_to_dict(timeline)}
+        )
         self.assertEqual(response.status_code, 200)
 
     def test_failure(self):
@@ -491,7 +541,8 @@ class SubBatchDeleteTest(BaseTestCase):
             reverse(self.delete_route_name, args=[sub_batch.id])
         )
         self.assertJSONEqual(
-            self.decoded_json(response), {"message": "Sub-Batch deleted succcessfully"}
+            self.decoded_json(response),
+            {"message": "Sub-Batch deleted succcessfully"},
         )
         self.assertDatabaseNotHas("SubBatch", {"id": sub_batch.id})
 
@@ -499,7 +550,147 @@ class SubBatchDeleteTest(BaseTestCase):
         """
         Check what happens when invalid data is given as input
         """
-        response = self.make_delete_request(reverse(self.delete_route_name, args=[0]))
+        response = self.make_delete_request(
+            reverse(self.delete_route_name, args=[0])
+        )
         self.assertJSONEqual(
-            self.decoded_json(response), {"message": "Error while deleting Sub-Batch!"}
+            self.decoded_json(response),
+            {"message": "Error while deleting Sub-Batch!"},
+        )
+
+
+class SubBatchDatatableTest(BaseTestCase):
+    """
+    This class is responsible for testing the Datatables present in the Batch module
+    """
+
+    datatable_route_name = "sub-batch-datatable"
+    route_name = "batch.detail"
+
+    def setUp(self):
+        """
+        This function will run before every test and makes sure required data are ready
+        """
+        super().setUp()
+        self.authenticate()
+        self.update_valid_input()
+
+    def update_valid_input(self):
+        """
+        This function is responsible for updating the valid inputs and creating data in databases as reqiured
+        """
+        self.batch = baker.make("hubble.Batch")
+        self.team = baker.make("hubble.Team")
+        self.name = self.faker.name()
+        self.sub_batch = baker.make(
+            "hubble.SubBatch",
+            name=seq(self.name),
+            team_id=self.team.id,
+            batch_id=self.batch.id,
+            _quantity=2,
+        )
+        self.persisted_valid_inputs = {
+            "draw": 1,
+            "start": 0,
+            "length": 10,
+            "search[value]": "",
+            "batch_id": self.batch.id,
+        }
+
+    def test_template(self):
+        """
+        To makes sure that the correct template is used
+        """
+        response = self.make_get_request(
+            reverse(self.route_name, args=[self.batch.id])
+        )
+        self.assertTemplateUsed(response, "sub_batch/sub_batch.html")
+        self.assertContains(response, "SubBatch List")
+
+    def test_datatable(self):
+        """
+        To check whether all columns are present in datatable and length of rows without any filter
+        """
+        no_of_teams = (
+            SubBatch.objects.filter(batch_id=self.batch.id)
+            .values("team")
+            .distinct()
+            .count()
+        )
+        sub_batches = SubBatch.objects.filter(
+            batch=self.batch.id
+        ).annotate(
+            trainee_count=Count(
+                "intern_details",
+                filter=Q(intern_details__deleted_at__isnull=True),
+            )
+        )
+        response = self.make_post_request(
+            reverse(self.datatable_route_name),
+            data=self.get_valid_inputs(),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue("extra_data" in response.json())
+        self.assertTrue(
+            "no_of_teams" in response.json()["extra_data"][0]
+        )
+        self.assertTrue(
+            "no_of_trainees" in response.json()["extra_data"][0]
+        )
+        self.assertEqual(
+            response.json()["extra_data"][0]["no_of_teams"], no_of_teams
+        )
+        for row in range(len(sub_batches)):
+            expected_value = sub_batches[row]
+            received_value = response.json()["data"][row]
+            self.assertEqual(
+                expected_value.pk, int(received_value["pk"])
+            )
+            self.assertEqual(
+                expected_value.name, received_value["name"]
+            )
+            self.assertEqual(
+                expected_value.trainee_count,
+                int(received_value["trainee_count"]),
+            )
+            self.assertEqual(
+                expected_value.timeline.name, received_value["timeline"]
+            )
+            self.assertEqual(
+                expected_value.reporting_persons,
+                received_value["reporting_persons"],
+            )
+            self.assertEqual(
+                expected_value.start_date.strftime("%d %b %Y"),
+                received_value["start_date"],
+            )
+        for row in response.json()["data"]:
+            self.assertTrue("pk" in row)
+            self.assertTrue("name" in row)
+            self.assertTrue("team" in row)
+            self.assertTrue("trainee_count" in row)
+            self.assertTrue("reporting_persons" in row)
+            self.assertTrue("timeline" in row)
+            self.assertTrue("start_date" in row)
+            self.assertTrue("action" in row)
+        self.assertTrue(
+            response.json()["recordsTotal"], len(self.sub_batch)
+        )
+
+    def test_datatable_search(self):
+        """
+        To check what happens when search value is given
+        """
+        name_to_be_searched = self.name + "1"
+        response = self.make_post_request(
+            reverse(self.datatable_route_name),
+            data=self.get_valid_inputs(
+                {"search[value]": name_to_be_searched}
+            ),
+        )
+        self.assertTrue(
+            response.json()["recordsTotal"],
+            SubBatch.objects.filter(
+                name__icontains=name_to_be_searched
+            ).count(),
         )

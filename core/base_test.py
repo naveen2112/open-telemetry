@@ -16,30 +16,31 @@ from hubble_report.settings import env
 
 class UnManagedModelTestRunner(DiscoverRunner):
     """
-        Test runner that automatically makes all unmanaged models in your Django
-        project managed for the duration of the test run, so that one doesn't need
-        to execute the SQL manually to create them.
+    Test runner that automatically makes all unmanaged models in your Django
+    project managed for the duration of the test run, so that one doesn't need
+    to execute the SQL manually to create them.
     """
+
     def setup_test_environment(self, *args, **kwargs):
-        from django.apps import apps
-        get_models = apps.get_models
-        self.unmanaged_models = [m for m in get_models() if not m._meta.managed]
-        for m in self.unmanaged_models:
-            m._meta.managed = True
-        super(UnManagedModelTestRunner, self).setup_test_environment(*args, **kwargs)
+        settings.IS_TEST_CASE = True
+        super(UnManagedModelTestRunner, self).setup_test_environment(
+            *args, **kwargs
+        )
 
     def teardown_test_environment(self, *args, **kwargs):
-        super(UnManagedModelTestRunner, self).teardown_test_environment(*args, **kwargs)
-        for m in self.unmanaged_models:
-            m._meta.managed = False
+        super(UnManagedModelTestRunner, self).teardown_test_environment(
+            *args, **kwargs
+        )
+        settings.IS_TEST_CASE = False
 
 
 class BaseTestCase(TestCase):
     """
     This class helps us to follow DRY principles in Training module testing
     """
+
     persisted_valid_inputs = {}
-    testcase_server_name =  env("TRAINING_TESTCASE_SERVER_NAME")
+    testcase_server_name = env("TRAINING_TESTCASE_SERVER_NAME")
 
     def setUp(self):
         """
@@ -53,7 +54,9 @@ class BaseTestCase(TestCase):
         """
         This function is responsible for creating an user and giving them admi access
         """
-        user = baker.make(User, is_employed=True, _fill_optional=["email"])
+        user = baker.make(
+            User, is_employed=True, _fill_optional=["email"]
+        )
         ADMIN_EMAILS.append(
             user.email
         )  # TODO :: Need to remove this logic after roles and permission
@@ -74,19 +77,25 @@ class BaseTestCase(TestCase):
         """
         This function is responsible for handling the GET requests
         """
-        return self.client.get(url_pattern, SERVER_NAME=self.testcase_server_name)
+        return self.client.get(
+            url_pattern, SERVER_NAME=self.testcase_server_name
+        )
 
     def make_post_request(self, url_pattern, data):
         """
         This function is responsible for handling the POST requests
         """
-        return self.client.post(url_pattern, data, SERVER_NAME=self.testcase_server_name)
+        return self.client.post(
+            url_pattern, data, SERVER_NAME=self.testcase_server_name
+        )
 
     def make_delete_request(self, url_pattern):
         """
         This function is responsible for handling DELETE requests}
         """
-        return self.client.delete(url_pattern, SERVER_NAME=self.testcase_server_name)
+        return self.client.delete(
+            url_pattern, SERVER_NAME=self.testcase_server_name
+        )
 
     def get_valid_inputs(self, override={}):
         """
@@ -141,7 +150,9 @@ class BaseTestCase(TestCase):
         """
         return str(response.decode()).replace('\\"', "'")
 
-    def get_error_message(self, key, value, current_value, validation_parameter):
+    def get_error_message(
+        self, key, value, current_value, validation_parameter
+    ):
         """
         This function is responsible for building the error json response dynamically
         """
@@ -207,9 +218,16 @@ class BaseTestCase(TestCase):
             }
         )
 
-    def validate_form_errors(self, form, field_errors, current_value={}, validation_parameter={}):
+    def validate_form_errors(
+        self,
+        form,
+        field_errors,
+        current_value={},
+        validation_parameter={},
+    ):
         for key, values in field_errors.items():
             for value in values:
-                error_message = self.get_error_message(key, value, current_value, validation_parameter)
+                error_message = self.get_error_message(
+                    key, value, current_value, validation_parameter
+                )
                 self.assertFormError(form, key, error_message)
-

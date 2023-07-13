@@ -26,12 +26,18 @@ class UpdateAssessmentTest(BaseTestCase):
         This function is responsible for updating the valid inputs and creating data in databases as reqiured
         """
         sub_batch = baker.make(
-            "hubble.SubBatch", start_date=(timezone.now() + timezone.timedelta(1))
+            "hubble.SubBatch",
+            start_date=(timezone.now() + timezone.timedelta(1)),
         )
         sub_batch_task_timeline = baker.make(
-            "hubble.SubBatchTaskTimeline", sub_batch=sub_batch, days=1, order=1
+            "hubble.SubBatchTaskTimeline",
+            sub_batch=sub_batch,
+            days=1,
+            order=1,
         )
-        self.trainee = baker.make("hubble.InternDetail", sub_batch=sub_batch)
+        self.trainee = baker.make(
+            "hubble.InternDetail", sub_batch=sub_batch
+        )
         self.persisted_valid_inputs = {
             "score": 50,
             "comment": self.faker.name(),
@@ -47,7 +53,9 @@ class UpdateAssessmentTest(BaseTestCase):
         response = self.make_get_request(
             reverse(self.route_name, args=[self.trainee.user_id])
         )
-        self.assertTemplateUsed(response, "sub_batch/user_journey_page.html")
+        self.assertTemplateUsed(
+            response, "sub_batch/user_journey_page.html"
+        )
         self.assertContains(response, self.trainee.user.employee_id)
 
     def test_success(self):
@@ -57,9 +65,14 @@ class UpdateAssessmentTest(BaseTestCase):
         # Check what happens when is_retry is True
         data = self.get_valid_inputs()
         response = self.make_post_request(
-            reverse(self.update_edit_route_name, args=[self.trainee.user_id]), data=data
+            reverse(
+                self.update_edit_route_name, args=[self.trainee.user_id]
+            ),
+            data=data,
         )
-        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
+        self.assertJSONEqual(
+            self.decoded_json(response), {"status": "success"}
+        )
         self.assertEqual(response.status_code, 200)
         self.assertDatabaseHas(
             "Assessment",
@@ -74,9 +87,14 @@ class UpdateAssessmentTest(BaseTestCase):
         # Check what happens when is_retry is False
         data = self.get_valid_inputs({"status": "false"})
         response = self.make_post_request(
-            reverse(self.update_edit_route_name, args=[self.trainee.user_id]), data=data
+            reverse(
+                self.update_edit_route_name, args=[self.trainee.user_id]
+            ),
+            data=data,
         )
-        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
+        self.assertJSONEqual(
+            self.decoded_json(response), {"status": "success"}
+        )
         self.assertEqual(response.status_code, 200)
         self.assertDatabaseHas(
             "Assessment",
@@ -93,8 +111,10 @@ class UpdateAssessmentTest(BaseTestCase):
         This function checks the required validation for the score and comment fields
         """
         response = self.make_post_request(
-            reverse(self.update_edit_route_name, args=[self.trainee.user_id]),
-            data={}
+            reverse(
+                self.update_edit_route_name, args=[self.trainee.user_id]
+            ),
+            data={},
         )
         field_errors = {"score": {"required"}, "comment": {"required"}}
         self.assertEqual(
@@ -109,7 +129,9 @@ class UpdateAssessmentTest(BaseTestCase):
         """
         # Check what happens when score is greater than 100
         response = self.make_post_request(
-            reverse(self.update_edit_route_name, args=[self.trainee.user_id]),
+            reverse(
+                self.update_edit_route_name, args=[self.trainee.user_id]
+            ),
             data=self.get_valid_inputs({"score": 101}),
         )
         field_errors = {"score": {"invalid_score"}}
@@ -121,7 +143,9 @@ class UpdateAssessmentTest(BaseTestCase):
 
         # Check what happens when score is negative
         response = self.make_post_request(
-            reverse(self.update_edit_route_name, args=[self.trainee.user_id]),
+            reverse(
+                self.update_edit_route_name, args=[self.trainee.user_id]
+            ),
             data=self.get_valid_inputs({"score": -100}),
         )
         field_errors = {"score": {"invalid_score"}}

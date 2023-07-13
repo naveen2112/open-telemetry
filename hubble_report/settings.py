@@ -211,3 +211,5 @@ if ENV_NAME == ENVIRONMENT_DEVELOPMENT:
     SILKY_AUTHORISATION = True
 
 TEST_RUNNER = "core.base_test.UnManagedModelTestRunner"
+
+IS_TEST_CASE = False
