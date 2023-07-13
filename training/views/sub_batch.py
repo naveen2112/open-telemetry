@@ -453,7 +453,7 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
                 elif float(performance["average_marks"]) < 50:
                     performance_report[POOR] += 1
             else:
-                performance_report["Not Yet Started"] += 1
+                performance_report[NOT_YET_STARTED] += 1
         response["extra_data"] = {
             "performance_report": performance_report,
             "no_of_trainees": len(response["data"]),
