@@ -3,18 +3,8 @@ import logging
 import pandas as pd
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import (
-    Avg,
-    Case,
-    Count,
-    F,
-    OuterRef,
-    Q,
-    Subquery,
-    Sum,
-    Value,
-    When,
-)
+from django.db.models import (Avg, Case, Count, F, OuterRef, Q, Subquery,
+                              Value, When)
 from django.db.models.functions import Coalesce
 from django.forms import model_to_dict
 from django.http import JsonResponse
@@ -24,21 +14,12 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView
 
 from core import template_utils
-from core.constants import TASK_TYPE_ASSESSMENT
-from core.utils import (
-    CustomDatatable,
-    schedule_timeline_for_sub_batch,
-    validate_authorization,
-)
-from hubble.models import (
-    Batch,
-    InternDetail,
-    SubBatch,
-    SubBatchTaskTimeline,
-    Timeline,
-    TimelineTask,
-    User,
-)
+from core.constants import (ABOVE_AVERAGE, AVERAGE, GOOD, MEET_EXPECTATION,
+                            NOT_YET_STARTED, POOR, TASK_TYPE_ASSESSMENT)
+from core.utils import (CustomDatatable, schedule_timeline_for_sub_batch,
+                        validate_authorization)
+from hubble.models import (Batch, InternDetail, SubBatch, SubBatchTaskTimeline,
+                           Timeline, TimelineTask, User)
 from training.forms import AddInternForm, SubBatchForm
 
 
@@ -410,21 +391,21 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
                     0.0,
                 ),
                 performance=Case(
-                    When(average_marks__gte=90, then=Value("Good")),
+                    When(average_marks__gte=90, then=Value(GOOD)),
                     When(
                         Q(average_marks__lt=90) & Q(average_marks__gte=75),
-                        then=Value("Meet Expectations"),
+                        then=Value(MEET_EXPECTATION),
                     ),
                     When(
                         Q(average_marks__lt=75) & Q(average_marks__gte=65),
-                        then=Value("Above Average"),
+                        then=Value(ABOVE_AVERAGE),
                     ),
                     When(
                         Q(average_marks__lt=65) & Q(average_marks__gte=50),
-                        then=Value("Average"),
+                        then=Value(AVERAGE),
                     ),
-                    When(average_marks__lt=65, then=Value("Poor")),
-                    default=Value("Not yet Started"),
+                    When(average_marks__lt=65, then=Value(POOR)),
+                    default=Value(NOT_YET_STARTED),
                 ),
             )
         )
@@ -452,25 +433,25 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
     def get_response_dict(self, request, paginator, draw_idx, start_pos):
         response = super().get_response_dict(request, paginator, draw_idx, start_pos)
         performance_report = {
-            "Good": 0,
-            "Meet Expectation": 0,
-            "Above Average": 0,
-            "Average": 0,
-            "Poor": 0,
-            "Not Yet Started": 0,
+            GOOD: 0,
+            MEET_EXPECTATION: 0,
+            ABOVE_AVERAGE: 0,
+            AVERAGE: 0,
+            POOR: 0,
+            NOT_YET_STARTED: 0,
         }
         for performance in response["data"]:
             if performance["average_marks"] != "-":
                 if float(performance["average_marks"]) >= 90:
-                    performance_report["Good"] += 1
+                    performance_report[GOOD] += 1
                 elif 90 > float(performance["average_marks"]) >= 75:
-                    performance_report["Meet Expectation"] += 1
+                    performance_report[MEET_EXPECTATION] += 1
                 elif 75 > float(performance["average_marks"]) >= 65:
-                    performance_report["Above Average"] += 1
+                    performance_report[ABOVE_AVERAGE] += 1
                 elif 65 > float(performance["average_marks"]) >= 50:
-                    performance_report["Average"] += 1
+                    performance_report[AVERAGE] += 1
                 elif float(performance["average_marks"]) < 50:
-                    performance_report["Poor"] += 1
+                    performance_report[POOR] += 1
             else:
                 performance_report["Not Yet Started"] += 1
         response["extra_data"] = {
