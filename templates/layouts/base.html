@@ -41,6 +41,8 @@
         {% include 'layouts/'|add:request.subdomain|add:'_sidebar.html' %}
 
         <div class="overflow-hidden max-h-screen flex main-screen grow flex-col">
+            {% block container %}
+            {% endblock %}
             <div class="header bg-white">
                 <div class="px-5 pt-9 bg-mild-violet pb-7">
                     {% block header %}

@@ -1,4 +1,4 @@
-from django.db.models import (Avg, Case, Count, F, OuterRef, Q, Subquery, Sum,
+from django.db.models import (Avg, Case, Count, F, OuterRef, Q, Subquery,
                               Value, When)
 from django.db.models.functions import Coalesce
 from django.urls import reverse
@@ -269,7 +269,7 @@ class TraineeDatatableTest(BaseTestCase):
             .values("id")
             .count()
         )
-        last_attempt = SubBatchTaskTimeline.objects.filter(
+        last_attempt_score = SubBatchTaskTimeline.objects.filter(
             id=OuterRef("user__assessments__task_id"),
             assessments__user_id=OuterRef("user_id"),
         ).order_by("-assessments__id")[:1]
@@ -282,7 +282,7 @@ class TraineeDatatableTest(BaseTestCase):
                         user_id=F("user__assessments__user_id"),
                         then=Coalesce(
                             Avg(
-                                Subquery(last_attempt.values("assessments__score")),
+                                Subquery(last_attempt_score.values("assessments__score")),
                                 distinct=True,
                             ),
                             0.0,

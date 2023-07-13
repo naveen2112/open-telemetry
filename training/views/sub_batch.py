@@ -350,7 +350,7 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
             .values("id")
             .count()
         )
-        last_attempt = SubBatchTaskTimeline.objects.filter(
+        last_attempt_score = SubBatchTaskTimeline.objects.filter(
             id=OuterRef("user__assessments__task_id"),
             assessments__user_id=OuterRef("user_id"),
         ).order_by("-assessments__id")[:1]
@@ -363,7 +363,7 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
                         user_id=F("user__assessments__user_id"),
                         then=Coalesce(
                             Avg(
-                                Subquery(last_attempt.values("assessments__score")),
+                                Subquery(last_attempt_score.values("assessments__score")),
                                 distinct=True,
                             ),
                             0.0,
