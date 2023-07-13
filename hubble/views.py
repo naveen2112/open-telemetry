@@ -16,6 +16,7 @@ from hubble_report.settings import ENV_NAME
 
 # To make sure correct authentication method is renderred
 def login(request):
+    request.session["desired_redirect_url"] = request.GET.get("next")
     context = {}
     context[
         "login_method"
@@ -78,6 +79,8 @@ def callback(request):
         user is not None
     ):  # Checks whether the authenticated member is form Mallow or no, by checking with Database
         auth_login(request, user)
+        if request.session["desired_redirect_url"]:
+            return redirect(request.session["desired_redirect_url"])
         return redirect(settings.LOGIN_REDIRECT_URL)
     else:
         messages.add_message(
