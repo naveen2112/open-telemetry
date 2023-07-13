@@ -427,6 +427,18 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
         row["expected_completion"] = obj.expected_completion.strftime("%d %b %Y")
         if not row["average_marks"]:
             row["average_marks"] = "-"
+        if obj.performance == "Good":
+            row["performance"] = '<span class="bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm">Good</span>'
+        if obj.performance == "Meet Expectations":
+            row["performance"] = '<span class="bg-dark-blue-10 text-dark-black py-0.5 px-1.5 rounded-xl text-sm">Meet Expectations</span>'
+        if obj.performance == "Above Average":
+            row["performance"] = '<span style="background-color:#fefce8; color: #eab308;" class="py-0.5 px-1.5 rounded-xl text-sm">Above Average</span>'
+        if obj.performance == "Average":
+            row["performance"] = '<span class="bg-orange-100 text-orange-700 py-0.5 px-1.5 rounded-xl text-sm">Average</span>'
+        if obj.performance == "Poor":
+            row["performance"] = '<span class="bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm">Poor</span>'
+        if obj.performance == "Not yet Started":
+            row["performance"] = '<span class="bg-dark-black/10 text-dark-black py-0.5 px-1.5 rounded-xl text-sm">Not yet Started</span>'
         return
 
     def get_response_dict(self, request, paginator, draw_idx, start_pos):
