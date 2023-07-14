@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.utils.html import strip_tags
 from model_bakery import baker
 from model_bakery.recipe import seq
+import random
 
 from core.base_test import BaseTestCase
 from hubble.models import Batch, SubBatch, User
@@ -48,7 +49,7 @@ class SubBatchCreateTest(BaseTestCase):
             _quantity=5,
         )
         primary_mentor_id = User.objects.get(employee_id=1).id
-        secondary_mentor_id = User.objects.get(employee_id=2).id
+        secondary_mentors_id = User.objects.get(employee_id=2).id
         team_id = self.create_team().id
         timeline = baker.make("hubble.Timeline", team_id=team_id)
         baker.make(
@@ -64,7 +65,7 @@ class SubBatchCreateTest(BaseTestCase):
             "start_date": timezone.now().date(),
             "timeline": timeline.id,
             "primary_mentor_id": primary_mentor_id,
-            "secondary_mentor_id": secondary_mentor_id,
+            "secondary_mentors_id": secondary_mentors_id,
         }
 
     def get_file_path(self):
@@ -102,6 +103,38 @@ class SubBatchCreateTest(BaseTestCase):
                 },
             )
 
+    def test_multiple_mentors(self):
+        """
+        Check what happens when valid data is given as input with multiple secondary mentor
+        """
+        with open(
+            self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
+        ) as sample_file:
+            secondary_mentor1 = self.create_user().id
+            secondary_mentor2 = self.create_user().id
+            data = self.get_valid_inputs(
+                {"users_list_file": sample_file, "secondary_mentors_id": [secondary_mentor1, secondary_mentor2]}
+            )
+            response = self.make_post_request(
+                reverse(self.create_route_name, args=[self.batch_id]),
+                data=data,
+            )
+            self.assertRedirects(
+                response, reverse(self.route_name, args=[self.batch_id])
+            )
+            self.assertEqual(response.status_code, 302)
+            self.assertDatabaseHas(
+                "SubBatch",
+                {
+                    "name": data["name"],
+                    "team_id": data["team"],
+                    "timeline_id": data["timeline"],
+                    "start_date": data["start_date"],
+                    "secondary_mentors": secondary_mentor1,
+                    "secondary_mentors": secondary_mentor2,
+                },
+            )
+
     def test_required_validation(self):
         """
         This function checks the required validation for the team and name fields
@@ -119,7 +152,7 @@ class SubBatchCreateTest(BaseTestCase):
                 "team": {"required"},
                 "timeline": {"required"},
                 "primary_mentor_id": {"required"},
-                "secondary_mentor_id": {"required"},
+                "secondary_mentors_id": {"required"},
             }
             self.validate_form_errors(
                 field_errors=field_errors, form=SubBatchForm(data=data)
@@ -138,7 +171,7 @@ class SubBatchCreateTest(BaseTestCase):
                     "team": self.faker.name(),
                     "timeline": self.faker.name(),
                     "primary_mentor_id": self.faker.name(),
-                    "secondary_mentor_id": self.faker.name(),
+                    "secondary_mentors_id": [self.faker.unique.random_int(1,10), self.faker.unique.random_int(1,10)],
                 }
             )
             self.make_post_request(
@@ -149,7 +182,7 @@ class SubBatchCreateTest(BaseTestCase):
                 "team": {"invalid_choice"},
                 "timeline": {"invalid_choice"},
                 "primary_mentor_id": {"invalid_choice"},
-                "secondary_mentor_id": {"invalid_choice"},
+                "secondary_mentors_id": {"invalid_choice"},
             }
             self.validate_form_errors(
                 field_errors=field_errors, form=SubBatchForm(data=data)
@@ -293,7 +326,7 @@ class SubBatchUpdateTest(BaseTestCase):
             _quantity=5,
         )
         primary_mentor_id = User.objects.get(employee_id=1).id
-        secondary_mentor_id = User.objects.get(employee_id=2).id
+        secondary_mentors_id = User.objects.get(employee_id=2).id
         team_id = self.create_team().id
         timeline = baker.make("hubble.Timeline", team_id=team_id)
         baker.make(
@@ -315,7 +348,7 @@ class SubBatchUpdateTest(BaseTestCase):
             "start_date": timezone.now().date(),
             "timeline": timeline.id,
             "primary_mentor_id": primary_mentor_id,
-            "secondary_mentor_id": secondary_mentor_id,
+            "secondary_mentors_id": secondary_mentors_id,
         }
 
     def test_success(self):
@@ -340,6 +373,33 @@ class SubBatchUpdateTest(BaseTestCase):
                 "start_date": data["start_date"],
             },
         )
+        
+        # Check whether multiple secondary mentors are added
+        secondary_mentor1 = self.create_user().id
+        secondary_mentor2 = self.create_user().id
+        data = self.get_valid_inputs(
+            {"secondary_mentors_id": [secondary_mentor1, secondary_mentor2]}
+        )
+        response = self.make_post_request(
+            reverse(self.update_route_name, args=[self.sub_batch_id]),
+            data=data,
+        )
+        self.assertRedirects(
+            response, reverse(self.route_name, args=[self.batch_id])
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertDatabaseHas(
+            "SubBatch",
+            {
+                "name": data["name"],
+                "team_id": data["team"],
+                "timeline_id": data["timeline"],
+                "start_date": data["start_date"],
+                "secondary_mentors": secondary_mentor1,
+                "secondary_mentors": secondary_mentor2,
+            },
+        )
+
 
     def test_required_validation(self):
         """
@@ -355,7 +415,7 @@ class SubBatchUpdateTest(BaseTestCase):
             "team": {"required"},
             "timeline": {"required"},
             "primary_mentor_id": {"required"},
-            "secondary_mentor_id": {"required"},
+            "secondary_mentors_id": {"required"},
         }
         self.validate_form_errors(
             field_errors=field_errors, form=SubBatchForm(data=data)
@@ -370,7 +430,7 @@ class SubBatchUpdateTest(BaseTestCase):
                 "team": self.faker.name(),
                 "timeline": self.faker.name(),
                 "primary_mentor_id": self.faker.name(),
-                "secondary_mentor_id": self.faker.name(),
+                "secondary_mentors_id": [self.faker.unique.random_int(1, 10)],
             }
         )
         self.make_post_request(
@@ -381,7 +441,7 @@ class SubBatchUpdateTest(BaseTestCase):
             "team": {"invalid_choice"},
             "timeline": {"invalid_choice"},
             "primary_mentor_id": {"invalid_choice"},
-            "secondary_mentor_id": {"invalid_choice"},
+            "secondary_mentors_id": {"invalid_choice"},
         }
         self.validate_form_errors(
             field_errors=field_errors, form=SubBatchForm(data=data)
@@ -657,8 +717,8 @@ class SubBatchDatatableTest(BaseTestCase):
                 expected_value.timeline.name, received_value["timeline"]
             )
             self.assertEqual(
-                expected_value.reporting_persons,
-                received_value["reporting_persons"],
+                expected_value.primary_mentor.name,
+                received_value["primary_mentor"],
             )
             self.assertEqual(
                 expected_value.start_date.strftime("%d %b %Y"),
@@ -669,7 +729,7 @@ class SubBatchDatatableTest(BaseTestCase):
             self.assertTrue("name" in row)
             self.assertTrue("team" in row)
             self.assertTrue("trainee_count" in row)
-            self.assertTrue("reporting_persons" in row)
+            self.assertTrue("primary_mentor" in row)
             self.assertTrue("timeline" in row)
             self.assertTrue("start_date" in row)
             self.assertTrue("action" in row)
