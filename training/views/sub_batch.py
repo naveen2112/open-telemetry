@@ -47,10 +47,11 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
             "searchable": False,
         },
         {
-            "name": "reporting_persons",
+            "name": "primary_mentor",
             "title": "Reporting Persons",
             "visible": True,
             "searchable": False,
+            "foreign_field": "primary_mentor__name",
         },
         {"name": "start_date", "visible": True, "searchable": False},
         {
@@ -163,8 +164,8 @@ def create_sub_batch(request, pk):
                 sub_batch.batch = Batch.objects.get(id=pk)
                 sub_batch.created_by = request.user
                 sub_batch.primary_mentor_id = request.POST.get("primary_mentor_id")
-                sub_batch.secondary_mentor_id = request.POST.get("secondary_mentor_id")
                 sub_batch.save()
+                sub_batch.secondary_mentors.set(request.POST.getlist("secondary_mentors_id"))
                 timeline_task_end_date = schedule_timeline_for_sub_batch(
                     sub_batch=sub_batch, user=request.user
                 )
@@ -236,7 +237,7 @@ def update_sub_batch(request, pk):
             # validation start date
             active_form = sub_batch_form.save(commit=False)
             sub_batch.primary_mentor_id = request.POST.get("primary_mentor_id")
-            sub_batch.secondary_mentor_id = request.POST.get("secondary_mentor_id")
+            sub_batch.secondary_mentors.set(request.POST.getlist("secondary_mentors_id"))
             active_form = sub_batch_form.save()
             if int(request.POST.get("timeline")) != sub_batch.timeline.id:
                 SubBatchTaskTimeline.bulk_delete({"sub_batch_id": pk})

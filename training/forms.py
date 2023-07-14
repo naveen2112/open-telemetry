@@ -150,8 +150,11 @@ class SubBatchForm(forms.ModelForm):
         queryset=models.User.objects.filter(is_employed=True)
     )
 
-    secondary_mentor_id = forms.ModelChoiceField(
-        queryset=models.User.objects.filter(is_employed=True)
+    secondary_mentors_id = forms.ModelMultipleChoiceField(
+        queryset=models.User.objects.filter(is_employed=True),
+        error_messages={
+            "invalid_choice": "Select a valid choice. That choice is not one of the available choices."
+        },
     )
 
     def __init__(self, *args, **kwargs):
@@ -171,17 +174,20 @@ class SubBatchForm(forms.ModelForm):
                 "initialValue"
             ] = self.data.get("primary_mentor_id", None)
 
-        self.fields[
-            "secondary_mentor_id"
-        ].empty_label = "Select a Secondary Mentor"
-        if self.data.get("secondary_mentor_id", None):
-            self.fields["secondary_mentor_id"].widget.attrs[
+        # self.fields[
+        #     "secondary_mentors_id"
+        # ].empty_label = "Select a Secondary Mentor"
+        if self.data.get("secondary_mentors_id", None):
+            self.fields["secondary_mentors_id"].widget.attrs[
                 "initialValue"
-            ] = self.data.get("secondary_mentor_id", None)
+            ] = self.data.get("secondary_mentors_id", None)
 
         self.fields["name"].validators.append(MinLengthValidator(3))
         self.fields["primary_mentor_id"].label = "Primary Mentor"
-        self.fields["secondary_mentor_id"].label = "Secondary Mentor"
+        self.fields["secondary_mentors_id"].label = "Secondary Mentor"
+        self.fields["secondary_mentors_id"].widget.attrs[
+                "subtitle"
+            ] = "Secondary Mentors"
 
         if kwargs.get("instance"):
             instance = kwargs.get("instance")
@@ -191,9 +197,9 @@ class SubBatchForm(forms.ModelForm):
             self.fields["primary_mentor_id"].widget.attrs[
                 "initialValue"
             ] = instance.primary_mentor_id
-            self.fields["secondary_mentor_id"].widget.attrs[
+            self.fields["secondary_mentors_id"].widget.attrs[
                 "initialValue"
-            ] = instance.secondary_mentor_id
+            ] = instance.secondary_mentors.all().values_list("id", flat=True)
 
     def clean_timeline(self):
         if not models.TimelineTask.objects.filter(
@@ -213,7 +219,7 @@ class SubBatchForm(forms.ModelForm):
             "start_date",
             "timeline",
             "primary_mentor_id",
-            "secondary_mentor_id",
+            "secondary_mentors_id",
         )
 
         widgets = {
@@ -246,7 +252,7 @@ class SubBatchForm(forms.ModelForm):
                     "placeholder": "Primary Mentor...",
                 }
             ),
-            "secondary_mentor_id": forms.Select(
+            "secondary_mentors_id": forms.SelectMultiple(
                 attrs={
                     "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
                     "placeholder": "Secondary Mentor...",
