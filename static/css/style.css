@@ -120,13 +120,10 @@
 
 .tooltip .tooltiptext {
     visibility: hidden;
-    width: 130px;
-    background-color: #fff;
-    color: #000;
-    text-align: center;
     border-radius: 6px;
     padding: 5px 0;
     position: absolute;
+    white-space: nowrap;
     z-index: 1;
     padding: 10px;
     left: 20px;
@@ -189,4 +186,39 @@
     font-size: 14px;
     opacity: 0.5;
     margin-top: 15px;
+}
+
+.width-180 {
+    width: 180px;
+}
+
+.height-120 {
+    height: 90px;
+}
+
+.textspace-nowrap {
+    white-space: nowrap !important;
+}
+
+#ssessment-reports-2 {
+    width: 90%;
+    background-color: white;
+    height: auto;
+}
+
+.w-90 {
+    width: 90% !important;
+}
+
+.w-250-h10{
+    width: 250px;
+    height: 10px;
+}
+
+.light-yellow{
+    background-color: #fefce8 !important;
+}
+
+.dark-orange{
+    color: #eab308 !important;
 }

@@ -4,15 +4,8 @@
 
 {% block title %}{{ object.name }}{% endblock %}
 
-{% block header %}
+{% block container %}
     <div class="px-5 pt-9 bg-white pb-7">
-        <a href="{% url 'sub-batch.detail' sub_batch.id %}"
-           class="flex items-center text-sm text-dark-blue">
-            <div class="inline mr-1">
-                <span class="hbl hbl-left text-2xl text-dark-black/50"></span>
-            </div>
-            Back to {{ sub_batch.name|title }}
-        </a>
         <div class="flex items-center my-5">
             <div class="flex items-center mr-10">
                 <div class="pr-4">
@@ -31,30 +24,46 @@
                     </div>
                 </div>
             </div>
-            {% comment %}
-        <div class="rounded-xl bg-mild-green-10 flex justify-center items-center flex-col mr-6" style="width: 180px;height: 90px;">
-            <h3 class="font-bold mb-2">10</h3>
-            <p class="text-mild-green text-base">Average Score %</p>
-        </div>
-        <div class="rounded-xl bg-dark-blue-10 flex justify-center items-center flex-col mr-6" style="width: 180px;height: 90px;">
-            <h3 class="font-bold mb-2">4</h3>
-            <p class="text-dark-blue text-base">Total Retries %</p>
-        </div>
-        <div class=" flex justify-between items-start flex-col" style="width: 180px;height: 90px;">
-            <h3 class="font-bold mb-2">Overall Completion</h3>
-            <div style="width: 250px;height: 10px;" class="rounded-xl bg-dark-blue-10">
-                <div class="rounded-xl bg-dark-blue" style="width: 70%;height: 100%;"></div>
+            <div class="rounded-xl bg-mild-green-10 flex justify-center items-center flex-col mr-6 width-180 height-120">
+                <h3 class="font-bold mb-2">{{ performance_stats.average_marks|default_if_none:"-" }}</h3>
+                <p class="text-mild-green text-base">Average Score %</p>
             </div>
-            <p class="text-sm text-gray-400">53% Completed</p>
+            <div class="rounded-xl bg-dark-blue-10 flex justify-center items-center flex-col mr-6 width-180 height-120">
+                <h3 class="font-bold mb-2">{{ performance_stats.no_of_retries }}</h3>
+                <p class="text-dark-blue text-base">Total Retries</p>
+            </div>
+            <div class=" flex justify-between items-start flex-col width-180 height-120">
+                <h3 class="font-bold mb-2">Overall Completion</h3>
+                <div class="rounded-xl bg-dark-blue-10 w-250-h10">
+                    {# djlint:off H021 #}
+                    <div class="rounded-xl bg-dark-blue"
+                         style="width: {{ performance_stats.completion }}%;
+                                height: 100%">{# djlint:on #}</div>
+                </div>
+                <p class="text-sm text-gray-400">{{ performance_stats.completion }}% Completed</p>
+            </div>
         </div>
-            {% endcomment %}
+    </div>
+    <div class="px-3 pt-5">
+        <div class="text-dark-black text-lg mb-1 leading-none">
+            <p class="text-sm">
+                <a href="{% url 'batch' %}" class="text-sm text-dark-blue">Batch List</a>
+                >
+                <a href="{% url 'batch.detail' sub_batch.batch.id %}"
+                   class="text-sm text-dark-blue">{{ sub_batch.batch.name }}</a>
+                >
+                <a href="{% url 'sub-batch.detail' sub_batch.id %}"
+                   class="text-sm text-dark-blue">{{ sub_batch.name|title }}</a>
+                >
+                {{ object.name }}
+            </p>
         </div>
     </div>
 {% endblock %}
 
 {% block body %}
     <div>
-        <div class="flex justify-between items-center my-6">
+        <div class="flex justify-between items-center">
             <h3 class="font-semibold">Assignment Journey</h3>
             <button onclick="addWeekExtensionCard('{{ object.id }}')"
                     class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal">
@@ -66,7 +75,7 @@
         </div>
         <div class="jquery-modal current hidden" id="modal">
             <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white jquery-modal-body">
-                <p class="font-semibold text-lg mb-10">Week</p>
+                <p class="font-semibold text-md mt-8 mb-2" id="assessment_name"></p>
                 <form method="post" class="timeline-form" id="timeline-create-form">
                     <div class="modal-body">
                         {% csrf_token %}
@@ -79,8 +88,13 @@
                             {{ form.comment }}
                         </div>
                         <div class="form-group mb-7" id="{{ form.status.label|lower }}_group">
+                            <label for="is_retry" class="ml-3 mb-3.6 text-sm text-dark-black-50">Is retry score?</label>
                             {{ form.is_retry }}
-                            <label for="is_retry" class="ml-3 mb-3.6 text-sm text-dark-black-50">Mark as retry</label>
+                            <p class="text-dark-red text-xs">
+                                Note: Please make sure to check the checkbox when entering the
+                                retry score, but do not
+                                select it the first time.
+                            </p>
                         </div>
                     </div>
                     <div id="non_field_error"></div>
@@ -93,21 +107,21 @@
                 </form>
             </div>
         </div>
-        <div class="card-container grid grid-cols-3 gap-40" id="card_container">
+        <div class="card-container grid grid-cols-3" id="card_container">
             {% for task in assessment_scores %}
                 <div id="assessment-reports"
-                     class="{% if task.inactive_tasks %}disabled-container{% else %}enabled-container{% endif %} rounded-xl flex justify-between items-center flex-col p-4 mt-5">
+                     class="{% if task.inactive_tasks %}disabled-container{% else %}enabled-container{% endif %} rounded-xl flex justify-between items-center flex-col p-4 mt-5 w-90">
                     <div class="w-full flex justify-between items-center mb-5">
                         <h4>{{ task.name }}</h4>
                         <div class="flex">
                             {% if not task.inactive_tasks %}
-                                <a onclick="openCreateModal('{{ task.id }}', null)">
+                                <a onclick="openCreateModal('{{ task.id }}', '{{ task.name }}', null, null)">
                                     <div class="inline mr-1">
                                         <span class="hbl hbl-edit text-2xl text-dark-black/50"></span>
                                     </div>
                                 </a>
                                 <p>
-                                    {% if task.retries != -1 %}
+                                    {% if task.retries != 0 %}
                                         {% if task.is_retry %}
                                             <span class="bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm">Retry</span>
                                         {% else %}
@@ -134,11 +148,7 @@
                                 {% if task.inactive_tasks %}
                                     -
                                 {% else %}
-                                    {% if task.retries == -1 %}
-                                        -
-                                    {% else %}
-                                        {{ task.retries|default:"-" }}
-                                    {% endif %}
+                                    {{ task.retries|default:"-" }}
                                 {% endif %}
                             </h3>
                             <p>Retries</p>
@@ -148,10 +158,10 @@
                                 {% if task.inactive_tasks %}
                                     -
                                 {% else %}
-                                    {% if task.retries == -1 %}
-                                        No
-                                    {% else %}
+                                    {% if task.last_entry %}
                                         Yes
+                                    {% else %}
+                                        No
                                     {% endif %}
                                 {% endif %}
                             </h3>
@@ -173,11 +183,11 @@
             {% endfor %}
             {% for assessment in extension_tasks %}
                 <div id="assessment-reports-2"
-                     class="assessment-reports rounded-xl flex justify-between items-center flex-col p-4 mt-4 assessment-report-week">
+                     class="assessment-reports rounded-xl flex justify-between items-center flex-col p-4 mt-4">
                     <div class="w-full flex justify-between items-center mb-5">
                         <h4>Extension Week {{ forloop.counter }}</h4>
                         <div class="flex">
-                            <a onclick="openCreateModal(null, '{{ assessment.id }}')">
+                            <a onclick="openCreateModal(null, null, '{{ assessment.id }}', 'Extension Week {{ forloop.counter }}')">
                                 <div class="inline mr-1">
                                     <span class="hbl hbl-edit text-2xl text-dark-black/50"></span>
                                 </div>
@@ -188,7 +198,7 @@
                                 </div>
                             </a>
                             <p>
-                                {% if assessment.retries != -1 %}
+                                {% if assessment.retries != 0 %}
                                     {% if assessment.is_retry %}
                                         <span class="bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm">Retry</span>
                                     {% else %}
@@ -205,7 +215,7 @@
                         </div>
                         <div class="div flex flex-col justify-center items-center">
                             <h3 class="font-bold mb-1">
-                                {% if assessment.retries == -1 %}
+                                {% if assessment.retries == 0 %}
                                     -
                                 {% else %}
                                     {{ assessment.retries|default:"-" }}
@@ -215,10 +225,10 @@
                         </div>
                         <div class="div flex flex-col justify-center items-center">
                             <h3 class="font-bold mb-1">
-                                {% if assessment.retries == -1 %}
-                                    No
-                                {% else %}
+                                {% if assessment.last_entry %}
                                     Yes
+                                {% else %}
+                                    No
                                 {% endif %}
                             </h3>
                             <p>Present Status</p>
@@ -237,9 +247,14 @@
 
 {% block script %}
     <script>
-        function openCreateModal(task, extension) {
+        function openCreateModal(task, task_name, extension, extension_name) {
             $('.page-loader').show();
             openBaseModal();
+            if (task) {
+                $("#assessment_name").text(task_name);
+            } else {
+                $("#assessment_name").text(extension_name);
+            }
             $('#id_score').val("");
             $('#id_comment').val("");
             $(".form-group").find("span").remove();

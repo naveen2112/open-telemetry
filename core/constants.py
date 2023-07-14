@@ -39,3 +39,10 @@ ADMIN_EMAILS = [
     "anandraj@mallow-tech.com",
     "sanjay@mallow-tech.com",
 ]
+
+GOOD = "Good"
+MEET_EXPECTATION = "Meet Expectation"
+ABOVE_AVERAGE = "Above Average"
+AVERAGE = "Average"
+POOR = "Poor"
+NOT_YET_STARTED = "Not Yet Started"

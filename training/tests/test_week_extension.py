@@ -6,6 +6,7 @@ from django.utils import timezone
 from model_bakery import baker
 
 from core.base_test import BaseTestCase
+from core.constants import TASK_TYPE_ASSESSMENT
 
 
 class ExtensionCreateTest(BaseTestCase):
@@ -34,6 +35,14 @@ class ExtensionCreateTest(BaseTestCase):
             start_date=(timezone.now() + timezone.timedelta(1)),
         )
         self.trainee = baker.make("hubble.InternDetail", sub_batch=self.sub_batch)
+        baker.make(
+            "hubble.SubBatchTaskTimeline",
+            days=10,
+            task_type=TASK_TYPE_ASSESSMENT,
+            sub_batch=self.sub_batch,
+            end_date=(timezone.now() + timezone.timedelta(10)).date(),
+            order=1,
+        )
 
     def test_template(self):
         """

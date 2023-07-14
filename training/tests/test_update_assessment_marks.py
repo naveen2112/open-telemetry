@@ -1,11 +1,17 @@
 """
 Django test cases for updating the assessment details
 """
+from django.db.models import (Avg, BooleanField, Case, Count, F, OuterRef, Q,
+                              Subquery, Value, When)
+from django.db.models.functions import Coalesce
 from django.urls import reverse
 from django.utils import timezone
 from model_bakery import baker
+from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
+from core.constants import TASK_TYPE_ASSESSMENT
+from hubble.models import Assessment, InternDetail, SubBatchTaskTimeline
 
 
 class UpdateAssessmentTest(BaseTestCase):
@@ -36,8 +42,10 @@ class UpdateAssessmentTest(BaseTestCase):
         )
         sub_batch_task_timeline = baker.make(
             "hubble.SubBatchTaskTimeline",
+            days=10,
+            task_type=TASK_TYPE_ASSESSMENT,
             sub_batch=sub_batch,
-            days=1,
+            end_date=(timezone.now() + timezone.timedelta(10)).date(),
             order=1,
         )
         self.trainee = baker.make("hubble.InternDetail", sub_batch=sub_batch)
@@ -139,3 +147,160 @@ class UpdateAssessmentTest(BaseTestCase):
             self.get_ajax_response(field_errors=field_errors),
         )
         self.assertEqual(response.status_code, 200)
+
+
+class TaskSummaryTest(BaseTestCase):
+    """
+    This class is responsible for testing the header stats in user journey page
+    """
+
+    route_name = "user_reports"
+
+    def setUp(self):
+        """
+        This function will run before every test and makes sure required data are ready
+        """
+        super().setUp()
+        self.authenticate()
+        self.sub_batch = baker.make(
+            "hubble.SubBatch",
+            start_date=(timezone.now() + timezone.timedelta(1)),
+        )
+        baker.make(
+            "hubble.SubBatchTaskTimeline",
+            days=seq(1),
+            task_type=TASK_TYPE_ASSESSMENT,
+            sub_batch=self.sub_batch,
+            end_date=(timezone.now() + timezone.timedelta(10)).date(),
+            order=seq(0),
+            _quantity=5,
+        )
+        self.trainee = baker.make("hubble.InternDetail", sub_batch=self.sub_batch)
+
+    def test_assessment_summary(self):
+        """
+        To ensure correct scores and comments are received
+        """
+        latest_task_report = Assessment.objects.filter(
+            task=OuterRef("id"), user_id=self.trainee.user_id
+        ).order_by("-id")[:1]
+        desired_output = list(
+            SubBatchTaskTimeline.objects.filter(
+                sub_batch=self.sub_batch, task_type=TASK_TYPE_ASSESSMENT
+            )
+            .annotate(
+                retries=Count(
+                    "assessments__is_retry",
+                    filter=Q(
+                        Q(assessments__user=self.trainee.user_id) & Q(assessments__is_retry=True)
+                    ),
+                ),
+                last_entry=Subquery(latest_task_report.values("score")),
+                comment=Subquery(latest_task_report.values("comment")),
+                is_retry=Subquery(latest_task_report.values("is_retry")),
+                inactive_tasks=Case(
+                    When(start_date__gt=timezone.now(), then=Value(False)),
+                    default=Value(False),
+                    output_field=BooleanField(),
+                ),
+            )
+            .values(
+                "id",
+                "last_entry",
+                "retries",
+                "comment",
+                "name",
+                "is_retry",
+                "inactive_tasks",
+            )
+            .order_by("order")
+        )
+        response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
+        for row, desired_score in enumerate(desired_output):
+            self.assertEqual(desired_score, response.context["assessment_scores"][row])
+
+
+class HeaderStatsTest(BaseTestCase):
+    """
+    This class is responsible for testing the header stats in user journey page
+    """
+
+    route_name = "user_reports"
+
+    def setUp(self):
+        """
+        This function will run before every test and makes sure required data are ready
+        """
+        super().setUp()
+        self.authenticate()
+        self.sub_batch = baker.make(
+            "hubble.SubBatch",
+            start_date=(timezone.now() + timezone.timedelta(1)),
+        )
+        baker.make(
+            "hubble.SubBatchTaskTimeline",
+            days=10,
+            task_type=TASK_TYPE_ASSESSMENT,
+            sub_batch=self.sub_batch,
+            end_date=(timezone.now() + timezone.timedelta(10)).date(),
+            order=1,
+        )
+        self.trainee = baker.make("hubble.InternDetail", sub_batch=self.sub_batch)
+
+    def test_header_stats(self):
+        """
+        To check whether the received stats are right or wrong
+        """
+        task_count = (
+            SubBatchTaskTimeline.objects.filter(
+                sub_batch=self.sub_batch, task_type=TASK_TYPE_ASSESSMENT
+            )
+            .values("id")
+            .count()
+        )
+
+        last_attempt_score = SubBatchTaskTimeline.objects.filter(
+            id=OuterRef("user__assessments__task_id"),
+            assessments__user_id=OuterRef("user_id"),
+        ).order_by("-assessments__id")[:1]
+
+        desired_output = (
+            InternDetail.objects.filter(sub_batch=self.sub_batch, user_id=self.trainee.user_id)
+            .annotate(
+                average_marks=Case(
+                    When(
+                        user_id=F("user__assessments__user_id"),
+                        then=Coalesce(
+                            Avg(
+                                Subquery(last_attempt_score.values("assessments__score")),
+                                distinct=True,
+                            ),
+                            0.0,
+                        ),
+                    ),
+                    default=None,
+                ),
+                no_of_retries=Coalesce(
+                    Count(
+                        "user__assessments__is_retry",
+                        filter=Q(user__assessments__is_retry=True),
+                    ),
+                    0,
+                ),
+                completion=Coalesce(
+                    (
+                        Count(
+                            "user__assessments__task_id",
+                            filter=Q(user__assessments__user_id=F("user_id")),
+                            distinct=True,
+                        )
+                        / float(task_count)
+                    )
+                    * 100,
+                    0.0,
+                ),
+            )
+            .values("average_marks", "no_of_retries", "completion")
+        )
+        response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
+        self.assertEqual(list(desired_output)[0], response.context["performance_stats"])

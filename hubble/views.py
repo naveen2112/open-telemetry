@@ -22,6 +22,7 @@ def login(request):
     """
     To make sure correct authentication method is renderred
     """
+    request.session["desired_redirect_url"] = request.GET.get("next")
     context = {}
     context["login_method"] = ENV_NAME  # This context variable will be used in template to
     # render correct authentication method
@@ -86,8 +87,9 @@ def callback(request):
     if user is not None:  # Checks whether the authenticated member is form Mallow or no,
         # by checking with Database
         auth_login(request, user)
+        if request.session["desired_redirect_url"]:
+            return redirect(request.session["desired_redirect_url"])
         return redirect(settings.LOGIN_REDIRECT_URL)  # pylint: disable=no-member
-
     messages.add_message(
         request,
         messages.ERROR,

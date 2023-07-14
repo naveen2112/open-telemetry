@@ -9,8 +9,7 @@
 {% block header %}
     <div class="flex justify-between items-center">
         <div>
-            <div class="text-dark-black text-lg mb-1 leading-none"
-                 id="create-sub-batch">Create Sub Batch</div>
+            <div class="text-dark-black text-lg mb-1 leading-none textspace-nowrap">Create Sub Batch</div>
             <div class="text-dark-black-50 text-sm"></div>
         </div>
         <div class=" w-full flex justify-end items-center batch-btn">
@@ -79,12 +78,12 @@
                     <label class="w-64 flex justify-center border-dashed border-2 border-dark-black-35 rounded-md items-center cursor-pointer "
                            for="file_upload"
                            id="profileImageUpload">
-                        <span class="text-center text-dark-black-35 text-clip overflow-hidden text-sm file_input_text">
+                        <span class="text-dark-black-35 text-clip overflow-hidden text-sm file_input_text text-center">
                             Click Here To Upload File
                             <br>
                             Excel File Only
                         </span>
-                        <span class="text-center hidden text-dark-black-35 text-clip overflow-hidden text-sm file_input_name"></span>
+                        <span class="hidden text-dark-black-35 text-clip overflow-hidden text-sm file_input_name text-center"></span>
                     </label>
                     <div class="text-dark-red ml-10 mt-7 text-sm font-normal mb-7 inline-flex items-center cursor-pointer remove-file">
                         Remove File
@@ -183,11 +182,9 @@
         });
 
         $(function() {
-            var date = new Date()
             $('input[name="start_date"]').daterangepicker({
                 singleDatePicker: true,
                 showDropdowns: true,
-                minDate: date,
                 locale: {
                     format: 'YYYY-MM-DD',
                 }
