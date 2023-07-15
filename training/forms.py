@@ -174,9 +174,6 @@ class SubBatchForm(forms.ModelForm):
                 "initialValue"
             ] = self.data.get("primary_mentor_id", None)
 
-        # self.fields[
-        #     "secondary_mentors_id"
-        # ].empty_label = "Select a Secondary Mentor"
         if self.data.get("secondary_mentors_id", None):
             self.fields["secondary_mentors_id"].widget.attrs[
                 "initialValue"
