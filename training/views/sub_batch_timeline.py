@@ -14,8 +14,11 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView
 
 from core import template_utils
-from core.utils import (CustomDatatable, schedule_timeline_for_sub_batch,
-                        validate_authorization)
+from core.utils import (
+    CustomDatatable,
+    schedule_timeline_for_sub_batch,
+    validate_authorization,
+)
 from hubble.models import SubBatch, SubBatchTaskTimeline
 from training.forms import SubBatchTimelineForm
 
@@ -128,7 +131,7 @@ def create_sub_batch_timeline(request, pk):
 
 @login_required()
 @validate_authorization()
-def sub_batch_timeline_data(request, pk):
+def sub_batch_timeline_data(request, pk):  # pylint: disable=unused-argument
     """
     Sub batch timeline data
     """
@@ -213,7 +216,7 @@ def update_task_sequence(request):
     ["DELETE"]
 )  # This decorator ensures that the view function is only accessible
 # through the DELETE HTTP method
-def delete_sub_batch_timeline(request, pk):
+def delete_sub_batch_timeline(request, pk):  # pylint: disable=unused-argument
     """
     Delete Sub Batch Task
     Soft delete the Sub Batch Task and record the deletion time in deleted_at field

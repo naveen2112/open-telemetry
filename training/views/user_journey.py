@@ -6,8 +6,18 @@ import logging
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import (Avg, BooleanField, Case, Count, F, OuterRef, Q,
-                              Subquery, Value, When)
+from django.db.models import (
+    Avg,
+    BooleanField,
+    Case,
+    Count,
+    F,
+    OuterRef,
+    Q,
+    Subquery,
+    Value,
+    When,
+)
 from django.db.models.functions import Coalesce
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -15,9 +25,14 @@ from django.utils import timezone
 from django.views.generic import DetailView
 
 from core.constants import TASK_TYPE_ASSESSMENT
-from core.utils import validate_authorization
-from hubble.models import (Assessment, Extension, InternDetail, SubBatch,
-                           SubBatchTaskTimeline, User)
+from hubble.models import (
+    Assessment,
+    Extension,
+    InternDetail,
+    SubBatch,
+    SubBatchTaskTimeline,
+    User,
+)
 from training.forms import InternScoreForm
 
 
@@ -31,6 +46,10 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
     template_name = "sub_batch/user_journey_page.html"
 
     def get_context_data(self, **kwargs):
+        """
+        The `get_context_data` function retrieves data related to assessments, task timelines
+        and performance statistics for a given user.
+        """
         latest_task_report = Assessment.objects.filter(
             task=OuterRef("id"), user_id=self.object.id
         ).order_by("-id")[:1]
@@ -173,8 +192,8 @@ def update_task_score(request, pk):
 @login_required()
 def add_extension(request, pk):
     """
-    The function add_extension creates a new Extension object with the given primary key and request
-    information.
+    The function add_extension creates a new Extension object with the given
+    primary key and request information.
     """
     try:
         Extension.objects.create(
@@ -188,7 +207,7 @@ def add_extension(request, pk):
 
 
 @login_required()
-def delete_extension(request, pk):
+def delete_extension(request, pk):  # pylint: disable=unused-argument
     """
     Delete Timeline Template
     Soft delete the template and record the deletion time in deleted_at field

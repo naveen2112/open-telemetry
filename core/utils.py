@@ -6,8 +6,7 @@ import datetime
 from ajax_datatable import AjaxDatatableView
 from django.http import HttpResponseForbidden
 
-from hubble.models import (Holiday, InternDetail, SubBatchTaskTimeline,
-                           TimelineTask)
+from hubble.models import Holiday, InternDetail, SubBatchTaskTimeline, TimelineTask
 
 
 class CustomDatatable(AjaxDatatableView):

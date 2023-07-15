@@ -29,7 +29,7 @@ class InductionKit(LoginRequiredMixin, TemplateView):
 
 
 @login_required()
-def induction_kit_detail(request, text):
+def induction_kit_detail(request, text):  # pylint: disable=unused-argument
     """
     Induction Kit Detail
     """

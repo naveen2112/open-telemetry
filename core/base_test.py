@@ -32,10 +32,18 @@ class UnManagedModelTestRunner(DiscoverRunner):
     """
 
     def setup_test_environment(self, *args, **kwargs):
+        """
+        The function sets up the test environment by setting a flag and calling
+        the parent class's setup_test_environment method.
+        """
         settings.IS_TEST_CASE = True
         super().setup_test_environment(*args, **kwargs)
 
     def teardown_test_environment(self, *args, **kwargs):
+        """
+        The function `teardown_test_environment` sets the `IS_TEST_CASE` setting
+        to `False` after calling the parent class's `teardown_test_environment` method.
+        """
         super().teardown_test_environment(*args, **kwargs)
         settings.IS_TEST_CASE = False
 
