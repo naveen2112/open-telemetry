@@ -9,7 +9,9 @@ class SubBatchTaskTimeline(db.SoftDeleteWithBaseModel):
     name = models.CharField(max_length=255)
     days = models.FloatField()
     sub_batch = models.ForeignKey(
-        SubBatch, on_delete=models.CASCADE, related_name="task_timelines"
+        SubBatch,
+        on_delete=models.CASCADE,
+        related_name="task_timelines",
     )
     present_type = models.CharField(
         max_length=255,
@@ -17,7 +19,9 @@ class SubBatchTaskTimeline(db.SoftDeleteWithBaseModel):
         default=constants.PRESENT_TYPE_REMOTE,
     )
     task_type = models.CharField(
-        max_length=255, choices=constants.TASK_TYPES, default=constants.TASK_TYPE_TASK
+        max_length=255,
+        choices=constants.TASK_TYPES,
+        default=constants.TASK_TYPE_TASK,
     )
     start_date = db.DateTimeWithoutTZField(null=True)
     end_date = db.DateTimeWithoutTZField(null=True)

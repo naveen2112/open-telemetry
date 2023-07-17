@@ -2,6 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator
 
+from core.constants import PRESENT_TYPES, TASK_TYPES
 from hubble import models
 from hubble.models import Assessment
 
@@ -12,17 +13,34 @@ class TimelineForm(forms.ModelForm):
         self.fields["team"].empty_label = "Select a Team"
         self.fields["name"].validators.append(MinLengthValidator(3))
 
+    def clean(self):
+        cleaned_data = super().clean()
+        if self.data.get("id") and (
+            not models.Timeline.objects.filter(
+                id=self.data.get("id")
+            ).exists()
+        ):
+            self.add_error(
+                None, "You are trying to duplicate invalid template"
+            )
+        return cleaned_data
+
     def clean_is_active(self):
         """
         This function checks if a team already has an active template and raises a validation error if
         it does.
         """
-        if self.cleaned_data.get("team", None) and (self.cleaned_data["is_active"]):
+        if self.cleaned_data.get("team", None) and (
+            self.cleaned_data["is_active"]
+        ):
             query = models.Timeline.objects.filter(
                 team=self.cleaned_data["team"], is_active=True
             ).values("id")
             if (len(query)) and (query[0]["id"] != (self.instance.id)):
-                raise ValidationError("Team already has an active template.")
+                raise ValidationError(
+                    "Team already has an active template.",
+                    code="template_in_use",
+                )
 
     class Meta:
         model = models.Timeline
@@ -60,9 +78,15 @@ class TimelineTaskForm(forms.ModelForm):
         raises a validation error.
         """
         if value <= 0:
-            raise ValidationError("Value must be greater than 0")
+            raise ValidationError(
+                "Value must be greater than 0",
+                code="value_cannot_be_zero",
+            )
         if value % 0.5 != 0:
-            raise ValidationError("Value must be a multiple of 0.5")
+            raise ValidationError(
+                "Value must be a multiple of 0.5",
+                code="is_not_divisible_by_0.5",
+            )
 
     days = forms.FloatField(
         widget=forms.NumberInput(
@@ -72,6 +96,20 @@ class TimelineTaskForm(forms.ModelForm):
             }
         ),
         validators=[validate_days],
+    )
+    present_type = forms.ChoiceField(
+        error_messages={
+            "invalid_choice": "Select a valid choice. That choice is not one of the available choices."
+        },
+        widget=forms.RadioSelect,
+        choices=PRESENT_TYPES,
+    )
+    task_type = forms.ChoiceField(
+        error_messages={
+            "invalid_choice": "Select a valid choice. That choice is not one of the available choices."
+        },
+        widget=forms.RadioSelect,
+        choices=TASK_TYPES,
     )
 
     class Meta:
@@ -85,8 +123,6 @@ class TimelineTaskForm(forms.ModelForm):
                     "placeholder": "Timeline name...",
                 }
             ),
-            "present_type": forms.RadioSelect(),
-            "task_type": forms.RadioSelect(),
         }
 
 
@@ -123,17 +159,21 @@ class SubBatchForm(forms.ModelForm):
 
         self.fields["team"].empty_label = "Select a Team"
         if self.data.get("team", None):
-            self.fields["team"].widget.attrs["initialValue"] = self.data.get(
-                "team", None
-            )
+            self.fields["team"].widget.attrs[
+                "initialValue"
+            ] = self.data.get("team", None)
 
-        self.fields["primary_mentor_id"].empty_label = "Select a Primary Mentor"
+        self.fields[
+            "primary_mentor_id"
+        ].empty_label = "Select a Primary Mentor"
         if self.data.get("primary_mentor_id", None):
             self.fields["primary_mentor_id"].widget.attrs[
                 "initialValue"
             ] = self.data.get("primary_mentor_id", None)
 
-        self.fields["secondary_mentor_id"].empty_label = "Select a Secondary Mentor"
+        self.fields[
+            "secondary_mentor_id"
+        ].empty_label = "Select a Secondary Mentor"
         if self.data.get("secondary_mentor_id", None):
             self.fields["secondary_mentor_id"].widget.attrs[
                 "initialValue"
@@ -145,13 +185,25 @@ class SubBatchForm(forms.ModelForm):
 
         if kwargs.get("instance"):
             instance = kwargs.get("instance")
-            self.fields["team"].widget.attrs["initialValue"] = instance.team
+            self.fields["team"].widget.attrs[
+                "initialValue"
+            ] = instance.team
             self.fields["primary_mentor_id"].widget.attrs[
                 "initialValue"
             ] = instance.primary_mentor_id
             self.fields["secondary_mentor_id"].widget.attrs[
                 "initialValue"
             ] = instance.secondary_mentor_id
+
+    def clean_timeline(self):
+        if not models.TimelineTask.objects.filter(
+            timeline=self.cleaned_data["timeline"].id
+        ):
+            raise ValidationError(
+                "The Selected Team's Active Timeline doesn't have any tasks.",
+                code="timeline_has_no_tasks",
+            )
+        return self.cleaned_data["timeline"]
 
     class Meta:
         model = models.SubBatch
@@ -209,11 +261,33 @@ class AddInternForm(forms.ModelForm):
         self.fields["college"].validators.append(MinLengthValidator(3))
         self.fields["user_id"].empty_label = "Select a Trainee"
 
+    def clean(self):
+        cleaned_data = super().clean()
+        if self.data.get("sub_batch_id") and not (
+            models.SubBatch.objects.filter(
+                id=self.data.get("sub_batch_id")
+            ).exists()
+        ):
+            self.add_error(
+                None,
+                "You are trying to add trainees to an invalid SubBatch",
+            )
+        return cleaned_data
+
+    def clean_user_id(self):
+        if models.InternDetail.objects.filter(
+            user=self.cleaned_data["user_id"]
+        ).exists():
+            raise ValidationError(
+                "Trainee already added in the another sub-batch",
+                code="trainee_exists",
+            )
+
     user_id = forms.ModelChoiceField(
         queryset=(
-            models.User.objects.exclude(intern_details__isnull=False).filter(
-                is_employed=False
-            )
+            models.User.objects.exclude(
+                intern_details__isnull=False
+            ).filter(is_employed=False)
         ),
         label="User",
     )
@@ -249,9 +323,38 @@ class SubBatchTimelineForm(forms.ModelForm):
         raises a validation error.
         """
         if value <= 0:
-            raise ValidationError("Value must be greater than 0")
+            raise ValidationError(
+                "Value must be greater than 0",
+                code="value_cannot_be_zero",
+            )
         if value % 0.5 != 0:
-            raise ValidationError("Value must be a multiple of 0.5")
+            raise ValidationError(
+                "Value must be a multiple of 0.5",
+                code="is_not_divisible_by_0.5",
+            )
+
+    def clean_order(self):
+        maximum_order_value = (
+            [
+                models.SubBatchTaskTimeline.objects.filter(
+                    sub_batch_id=self.data.get("sub_batch_id")
+                )
+                .values_list("order", flat=True)
+                .last()
+            ][0]
+            or 0
+        ) + 1
+        if self.cleaned_data["order"] > maximum_order_value:
+            raise ValidationError(
+                f"The current order of the task is invalid. The valid input for order ranges form 1-{maximum_order_value}.",
+                code="invalid_order",
+            )
+        if self.cleaned_data["order"] <= 0:
+            raise ValidationError(
+                "Order value must be greater than zero.",
+                code="zero_order_error",
+            )
+        return self.cleaned_data["order"]
 
     days = forms.FloatField(
         widget=forms.NumberInput(
@@ -271,6 +374,20 @@ class SubBatchTimelineForm(forms.ModelForm):
             }
         ),
     )
+    present_type = forms.ChoiceField(
+        error_messages={
+            "invalid_choice": "Select a valid choice. That choice is not one of the available choices."
+        },
+        widget=forms.RadioSelect,
+        choices=PRESENT_TYPES,
+    )
+    task_type = forms.ChoiceField(
+        error_messages={
+            "invalid_choice": "Select a valid choice. That choice is not one of the available choices."
+        },
+        widget=forms.RadioSelect,
+        choices=TASK_TYPES,
+    )
 
     class Meta:
         model = models.SubBatchTaskTimeline
@@ -283,12 +400,17 @@ class SubBatchTimelineForm(forms.ModelForm):
                     "placeholder": "Task Name...",
                 }
             ),
-            "present_type": forms.RadioSelect(),
-            "task_type": forms.RadioSelect(),
         }
 
 
 class InternScoreForm(forms.ModelForm):
+    def clean_score(self):
+        if not (0 <= self.cleaned_data["score"] <= 100):
+            raise ValidationError(
+                "Score must be between 0 to 100", code="invalid_score"
+            )
+        return self.cleaned_data["score"]
+
     class Meta:
         model = Assessment
         fields = ("score", "is_retry", "comment")

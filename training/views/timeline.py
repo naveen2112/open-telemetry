@@ -63,7 +63,11 @@ class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
         return self.model.objects.filter(
             task_timeline__deleted_at__isnull=True
         ).annotate(
-            Days=Coalesce(Sum(F("task_timeline__days")), 0, output_field=FloatField())
+            Days=Coalesce(
+                Sum(F("task_timeline__days")),
+                0,
+                output_field=FloatField(),
+            )
         )  # TODO :: should we need '-' incase we need to CAST here
 
     def customize_row(self, row, obj):
@@ -109,7 +113,9 @@ def create_timeline_template(request):
         if form.is_valid():  # Check if form is valid or not
             timeline = form.save(commit=False)
             timeline.is_active = (
-                True if request.POST.get("is_active") == "true" else False
+                True
+                if request.POST.get("is_active") == "true"
+                else False
             )  # Set is_active to true if the input is checked else it will be false
             timeline.created_by = request.user
             timeline.save()
@@ -151,12 +157,18 @@ def timeline_template_data(request, pk):
     """
     try:
         data = {
-            "timeline": model_to_dict(get_object_or_404(Timeline, id=pk))
+            "timeline": model_to_dict(
+                get_object_or_404(Timeline, id=pk)
+            )
         }  # Covert django queryset object to dict,which can be easily serialized and sent as a JSON response
         return JsonResponse(data, safe=False)
     except Exception as e:
-        logging.error(f"An error has occured while fetching the Timeline \n{e}")
-        return JsonResponse({"message": "No timeline template found"}, status=500)
+        logging.error(
+            f"An error has occured while fetching the Timeline \n{e}"
+        )
+        return JsonResponse(
+            {"message": "No timeline template found"}, status=500
+        )
 
 
 @login_required()
@@ -165,7 +177,9 @@ def update_timeline_template(request, pk):
     """
     Update Timeline Template
     """
-    form = TimelineForm(request.POST, instance=get_object_or_404(Timeline, id=pk))
+    form = TimelineForm(
+        request.POST, instance=get_object_or_404(Timeline, id=pk)
+    )
     if form.is_valid():  # check if form is valid or not
         timeline = form.save(commit=False)
         timeline.is_active = (
@@ -198,11 +212,16 @@ def delete_timeline_template(request, pk):
         timeline = get_object_or_404(Timeline, id=pk)
         TimelineTask.bulk_delete({"timeline_id": pk})
         timeline.delete()
-        return JsonResponse({"message": "Timeline Template deleted succcessfully"})
-    except Exception as e:
-        logging.error(f"An error has occured while deleting the Timeline \n{e}")
         return JsonResponse(
-            {"message": "Error while deleting Timeline Template!"}, status=500
+            {"message": "Timeline Template deleted successfully"}
+        )
+    except Exception as e:
+        logging.error(
+            f"An error has occured while deleting the Timeline \n{e}"
+        )
+        return JsonResponse(
+            {"message": "Error while deleting Timeline Template!"},
+            status=500,
         )
 
 

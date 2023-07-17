@@ -120,6 +120,7 @@ Timeline Template
                 removeErrors();
                 $('.page-loader').hide();
                 if (data.status === 'success') {
+                    $("#timeline_id").val("");
                     $('#timeline-table').DataTable().ajax.reload();
                     closeModal('modal');
                 } else {

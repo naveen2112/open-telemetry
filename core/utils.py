@@ -95,13 +95,14 @@ def update_expected_end_date_of_intern_details(sub_batch):
 
 
 def is_leave_day(holidays, start_date):
-    return (
-        (start_date.date() in holidays)
-        or (start_date.date().weekday() == 6)
+    return (start_date.date() in holidays) or (
+        start_date.date().weekday() == 6
     )
 
 
-def calculate_duration_for_task(holidays, start_date, is_half_day, number_of_days):
+def calculate_duration_for_task(
+    holidays, start_date, is_half_day, number_of_days
+):
     if start_date.time() == datetime.time(hour=18, minute=0):
         start_date += datetime.timedelta(1)
         start_date = start_date.replace(hour=9, minute=0)
@@ -153,13 +154,21 @@ def calculate_duration_for_task(holidays, start_date, is_half_day, number_of_day
     }
 
 
-def schedule_timeline_for_sub_batch(sub_batch, user=None, is_create=True):
-    holidays = list(Holiday.objects.values_list("date_of_holiday", flat=True))
-    start_date = datetime.datetime.strptime(str(sub_batch.start_date), "%Y-%m-%d")
+def schedule_timeline_for_sub_batch(
+    sub_batch, user=None, is_create=True
+):
+    holidays = list(
+        Holiday.objects.values_list("date_of_holiday", flat=True)
+    )
+    start_date = datetime.datetime.strptime(
+        str(sub_batch.start_date), "%Y-%m-%d"
+    )
     is_half_day = False
     order = 0
     if is_create:
-        for task in TimelineTask.objects.filter(timeline=sub_batch.timeline.id):
+        for task in TimelineTask.objects.filter(
+            timeline=sub_batch.timeline.id
+        ):
             values = calculate_duration_for_task(
                 holidays, start_date, is_half_day, task.days
             )
@@ -181,9 +190,9 @@ def schedule_timeline_for_sub_batch(sub_batch, user=None, is_create=True):
         return values["end_date_time"]
 
     else:
-        for task in SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch).order_by(
-            "order"
-        ):
+        for task in SubBatchTaskTimeline.objects.filter(
+            sub_batch=sub_batch
+        ).order_by("order"):
             values = calculate_duration_for_task(
                 holidays, start_date, is_half_day, task.days
             )
