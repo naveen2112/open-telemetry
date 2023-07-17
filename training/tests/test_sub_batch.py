@@ -41,6 +41,7 @@ class SubBatchCreateTest(BaseTestCase):
             "hubble.User",
             is_employed=True,
             _fill_optional=["email"],
+            status="intern",
             employee_id=seq(0),
             _quantity=5,
         )
@@ -48,6 +49,7 @@ class SubBatchCreateTest(BaseTestCase):
             "hubble.User",
             is_employed=False,
             _fill_optional=["email"],
+            status="probationer",
             employee_id=seq(5),
             _quantity=5,
         )
@@ -182,6 +184,24 @@ class SubBatchCreateTest(BaseTestCase):
             strip_tags(response.context["errors"]),
             "Please upload a file",
         )
+
+        # Invalid data in file interns should be a type of intern
+        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
+            data = self.get_valid_inputs({"users_list_file": sample_file})
+            self.make_post_request(
+                reverse(self.create_route_name, args=[self.batch_id]),
+                data=data,
+            )
+        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
+            data = self.get_valid_inputs({"users_list_file": sample_file})
+            response = self.make_post_request(
+                reverse(self.create_route_name, args=[self.batch_id]),
+                data=data,
+            )
+            self.assertEqual(
+                strip_tags(response.context["errors"]),
+                "Some of the users are not an intern",
+            )
 
         # Invalid data in file interns belong to another sub-batch
         with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:

@@ -167,7 +167,14 @@ def create_sub_batch(request, pk):
                 if User.objects.filter(employee_id__in=data_frame["employee_id"]).count() == len(
                     data_frame["employee_id"]
                 ):
-                    if InternDetail.objects.filter(
+                    if User.objects.filter(
+                        employee_id__in=data_frame["employee_id"], status="intern"
+                    ).count() != len(data_frame["employee_id"]):
+                        sub_batch_form.add_error(
+                            None,
+                            "Some of the users are not an intern",
+                        )
+                    elif InternDetail.objects.filter(
                         user__employee_id__in=data_frame["employee_id"]
                     ).exists():
                         sub_batch_form.add_error(
