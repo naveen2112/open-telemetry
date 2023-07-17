@@ -376,7 +376,7 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
                 no_of_retries=Coalesce(
                     Count(
                         "user__assessments__is_retry",
-                        filter=Q(user__assessments__is_retry=True),
+                        filter=Q(Q(user__assessments__is_retry=True) & Q(user__assessments__extension__isnull=True)),
                     ),
                     0,
                 ),
