@@ -7,6 +7,7 @@ from .user import User
 
 
 class Extension(db.SoftDeleteWithBaseModel):
+    name = models.CharField(max_length=255, blank=True)
     sub_batch = models.ForeignKey(
         "SubBatch", on_delete=models.CASCADE, related_name="extensions"
     )

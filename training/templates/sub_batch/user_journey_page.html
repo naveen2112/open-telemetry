@@ -155,9 +155,9 @@
         <div id="assessment-reports-2" style="width: 90%;background-color: white;height: auto;"
             class="assessment-reports rounded-xl flex justify-between items-center flex-col p-4 mt-4">
             <div class="w-full flex justify-between items-center mb-5" >
-                <h4>Extension Week {{ forloop.counter }}</h4>
+                <h4>{{ assessment.name }}</h4>
                 <div class="flex">
-                        <a href="javascript:void(0)" onclick="openCreateModal(null, null, '{{ assessment.id }}', 'Extension Week {{ forloop.counter }}')">
+                        <a href="javascript:void(0)" onclick="openCreateModal(null, null, '{{ assessment.id }}', '{{ assessment.name }}')">
                             <div class="inline mr-1"><span class="hbl hbl-edit text-2xl text-dark-black/50"></span></div>
                         </a>
                         <a href="javascript:void(0)" onclick="deleteExtension('{{ assessment.id }}')">

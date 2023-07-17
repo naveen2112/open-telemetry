@@ -174,7 +174,12 @@ def update_task_score(request, pk):
 @login_required()
 def add_extension(request, pk):
     try:
+        extension_name = Extension.objects.filter(
+            sub_batch=SubBatch.objects.filter(intern_details__user=pk).first(),
+            user_id=pk
+        ).count()
         Extension.objects.create(
+            name = f"Extension Week {extension_name+1}",
             sub_batch=SubBatch.objects.filter(intern_details__user=pk).first(),
             user_id=pk,
             created_by=request.user,
@@ -192,8 +197,16 @@ def delete_extension(request, pk):
     """
     try:
         extension = get_object_or_404(Extension, id=pk)
+        extension_names_to_be_changed = Extension.objects.filter(
+            sub_batch=SubBatch.objects.filter(intern_details__user=extension.user_id).first(),
+            id__gt=pk,
+            user_id=extension.user_id
+        )
         extension.delete()
         Assessment.bulk_delete({"extension": extension})
+        for extension_week in extension_names_to_be_changed:
+            extension_week.name = "Extension Week " + str(int(extension_week.name.split()[2]) - 1)
+            extension_week.save()
         return JsonResponse(
             {
                 "message": "Week extension deleted succcessfully",
