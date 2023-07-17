@@ -349,7 +349,9 @@ class AddInternForm(forms.ModelForm):
 
     user_id = forms.ModelChoiceField(
         queryset=(
-            models.User.objects.exclude(intern_details__isnull=False).filter(is_employed=False)
+            models.User.objects.exclude(intern_details__isnull=False).filter(
+                is_employed=False, status="intern"
+            )
         ),
         label="User",
     )
