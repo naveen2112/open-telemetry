@@ -350,6 +350,8 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
             .values("id")
             .count()
         )
+        if task_count == 0:
+            task_count = 1
         last_attempt_score = SubBatchTaskTimeline.objects.filter(
             id=OuterRef("user__assessments__task_id"),
             assessments__user_id=OuterRef("user_id"),
