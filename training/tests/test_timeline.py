@@ -566,6 +566,9 @@ class TimelineDatatableTest(BaseTestCase):
             self.assertEqual(
                 expected_value.team.name, received_value["team"]
             )
+            self.assertEqual(
+                expected_value.sub_batches_count, int(received_value["sub_batches_count"])
+            )
 
         # Check whether all headers are present
         for row in response.json()["data"]:
@@ -573,6 +576,7 @@ class TimelineDatatableTest(BaseTestCase):
             self.assertTrue("name" in row)
             self.assertTrue("is_active" in row)
             self.assertTrue("team" in row)
+            self.assertTrue("sub_batches_count" in row)
             self.assertTrue("action" in row)
 
         # Check the numbers of rows received is equal to the number of expected rows
