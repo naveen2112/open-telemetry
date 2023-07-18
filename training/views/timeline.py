@@ -2,7 +2,7 @@ import logging
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import F, FloatField, Sum
+from django.db.models import Count, FloatField, Q, Sum, OuterRef, Subquery
 from django.db.models.functions import Coalesce
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
@@ -13,7 +13,7 @@ from django.views.generic import DetailView, FormView
 
 from core import template_utils
 from core.utils import CustomDatatable, validate_authorization
-from hubble.models import Timeline, TimelineTask
+from hubble.models import Timeline, TimelineTask, SubBatch
 from training.forms import TimelineForm, TimelineTaskForm
 
 
@@ -66,15 +66,21 @@ class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
     ]
 
     def get_initial_queryset(self, request=None):
-        return self.model.objects.filter(
-            task_timeline__deleted_at__isnull=True
-        ).annotate(
-            Days=Coalesce(
-                Sum(F("task_timeline__days")),
-                0,
-                output_field=FloatField(),
+        no_of_sub_batches_subquery = (
+            SubBatch.objects
+            .filter(timeline_id=OuterRef('id'), deleted_at__isnull=True)
+            .values('timeline')
+            .annotate(no_of_sub_batches=Count('id', distinct=True))
+            .values('no_of_sub_batches')
+        )
+        return (
+            self.model.objects
+            .filter(deleted_at__isnull=True)
+            .annotate(
+                Days=Coalesce(Sum('task_timeline__days', filter=Q(task_timeline__deleted_at__isnull=True)), 0, output_field=FloatField()),
+                no_of_sub_batches=Coalesce(Subquery(no_of_sub_batches_subquery), 0)
             )
-        )  # TODO :: should we need '-' incase we need to CAST here
+        )
 
     def customize_row(self, row, obj):
         buttons = template_utils.show_button(
