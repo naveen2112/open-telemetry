@@ -17,3 +17,7 @@ class Timeline(db.SoftDeleteWithBaseModel):
 
     def __str__(self):
         return self.name
+    
+    @property
+    def sub_batches_count(self):
+        return self.sub_batches.filter(deleted_at__isnull=True).count()

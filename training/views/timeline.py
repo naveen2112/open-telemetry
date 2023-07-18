@@ -36,6 +36,12 @@ class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
     column_defs = [
         {"name": "id", "visible": False, "searchable": False},
         {"name": "name", "visible": True, "searchable": True},
+        {
+            "name": "sub_batches_count",
+            "title": "No. of Sub Batches",
+            "visible": True,
+            "searchable": False,
+        },
         {"name": "Days", "visible": True, "searchable": True},
         {
             "name": "is_active",
