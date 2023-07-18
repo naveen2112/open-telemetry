@@ -350,6 +350,8 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
             .values("id")
             .count()
         )
+        if task_count == 0:
+            task_count = 1
         last_attempt_score = SubBatchTaskTimeline.objects.filter(
             id=OuterRef("user__assessments__task_id"),
             assessments__user_id=OuterRef("user_id"),
@@ -374,7 +376,7 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
                 no_of_retries=Coalesce(
                     Count(
                         "user__assessments__is_retry",
-                        filter=Q(user__assessments__is_retry=True),
+                        filter=Q(Q(user__assessments__is_retry=True) & Q(user__assessments__extension__isnull=True)),
                     ),
                     0,
                 ),
