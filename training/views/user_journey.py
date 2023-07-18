@@ -131,7 +131,7 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
             last_entry=Subquery(latest_extended_task_report.values("score")),
             comment=Subquery(latest_extended_task_report.values("comment")),
             is_retry=Subquery(latest_extended_task_report.values("is_retry")),
-        )
+        ).order_by("id")
 
         context = super().get_context_data(**kwargs)
         context["assessment_scores"] = task_summary
