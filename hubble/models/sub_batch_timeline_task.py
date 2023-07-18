@@ -34,3 +34,11 @@ class SubBatchTaskTimeline(db.SoftDeleteWithBaseModel):
 
     def can_editable(self):
         return self.start_date.date() >= timezone.now().date()
+
+    @property
+    def is_test_week(self):
+        return  self.start_date.date() <= timezone.now().date() <= self.start_date.date() + timezone.timedelta(days=7)
+    
+    @property
+    def is_retry_week(self):
+        return self.start_date.date() + timezone.timedelta(days=7) <= timezone.now().date() <= self.start_date.date() + timezone.timedelta(days=14)

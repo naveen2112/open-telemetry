@@ -33,6 +33,7 @@ class Assessment(db.SoftDeleteWithBaseModel):
         on_delete=models.CASCADE,
         related_name="created_assessments",
     )
+    present_status = models.BooleanField(default=True)
 
     class Meta:
         db_table = "assessments"
