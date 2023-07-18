@@ -404,15 +404,6 @@ class SubBatchTimelineForm(forms.ModelForm):
 
 
 class InternScoreForm(forms.ModelForm):
-    present_status = forms.ChoiceField(
-        error_messages={
-            "invalid_choice": "Select a valid choice. That choice is not one of the available choices."
-        },
-        label="present_type",
-        widget=forms.RadioSelect(),
-        choices=[("True", "Yes"), ("False", "No")],
-        initial=True
-    )
     def clean_score(self):
         if not (0 <= self.cleaned_data["score"] <= 100):
             raise ValidationError(
