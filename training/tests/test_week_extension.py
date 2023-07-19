@@ -242,7 +242,7 @@ class ExtensionWeekTaskDelete(BaseTestCase):
 
 class ExtensionSummaryTest(BaseTestCase):
     """
-    This class is responsible for testing the header stats in user journey page
+    This class is responsible for testing the contents of extension cards in user journey page
     """
 
     route_name = "user_reports"
@@ -257,23 +257,16 @@ class ExtensionSummaryTest(BaseTestCase):
             "hubble.SubBatch",
             start_date=(timezone.now() + timezone.timedelta(1)),
         )
-        baker.make(
-            "hubble.SubBatchTaskTimeline",
-            days=10,
-            task_type=TASK_TYPE_ASSESSMENT,
-            sub_batch=self.sub_batch,
-            end_date=(timezone.now() + timezone.timedelta(10)).date(),
-            order=1,
-        )
-        extension_task = baker.make("hubble.Extension", sub_batch=self.sub_batch)
-        self.persisted_valid_inputs = {
-            "score": 50,
-            "comment": self.faker.name(),
-            "task": "",
-            "extension": extension_task.id,
-            "status": "true",
-        }
         self.trainee = baker.make("hubble.InternDetail", sub_batch=self.sub_batch)
+        extension_task = baker.make(
+            "hubble.Extension", sub_batch=self.sub_batch, user_id=self.trainee.user_id
+        )
+        baker.make(
+            "hubble.Assessment",
+            extension_id=extension_task.id,
+            user_id=self.trainee.user_id,
+            _quantity=2,
+        )
 
     def test_assessment_summary(self):
         """
