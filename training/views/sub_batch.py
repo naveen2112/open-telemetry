@@ -165,7 +165,7 @@ def create_sub_batch(request, pk):
                 sub_batch.created_by = request.user
                 sub_batch.primary_mentor_id = request.POST.get("primary_mentor_id")
                 sub_batch.save()
-                sub_batch.secondary_mentors.set(request.POST.getlist("secondary_mentors_id"))
+                sub_batch.secondary_mentors.set(request.POST.getlist("secondary_mentor_ids"))
                 timeline_task_end_date = schedule_timeline_for_sub_batch(
                     sub_batch=sub_batch, user=request.user
                 )
@@ -237,7 +237,7 @@ def update_sub_batch(request, pk):
             # validation start date
             active_form = sub_batch_form.save(commit=False)
             sub_batch.primary_mentor_id = request.POST.get("primary_mentor_id")
-            sub_batch.secondary_mentors.set(request.POST.getlist("secondary_mentors_id"))
+            sub_batch.secondary_mentors.set(request.POST.getlist("secondary_mentor_ids"))
             active_form = sub_batch_form.save()
             if int(request.POST.get("timeline")) != sub_batch.timeline.id:
                 SubBatchTaskTimeline.bulk_delete({"sub_batch_id": pk})

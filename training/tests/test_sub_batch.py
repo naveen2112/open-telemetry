@@ -49,7 +49,7 @@ class SubBatchCreateTest(BaseTestCase):
             _quantity=5,
         )
         primary_mentor_id = User.objects.get(employee_id=1).id
-        secondary_mentors_id = User.objects.get(employee_id=2).id
+        secondary_mentor_ids = User.objects.get(employee_id=2).id
         team_id = self.create_team().id
         timeline = baker.make("hubble.Timeline", team_id=team_id)
         baker.make(
@@ -65,7 +65,7 @@ class SubBatchCreateTest(BaseTestCase):
             "start_date": timezone.now().date(),
             "timeline": timeline.id,
             "primary_mentor_id": primary_mentor_id,
-            "secondary_mentors_id": secondary_mentors_id,
+            "secondary_mentor_ids": secondary_mentor_ids,
         }
 
     def get_file_path(self):
@@ -113,7 +113,7 @@ class SubBatchCreateTest(BaseTestCase):
             secondary_mentor1 = self.create_user().id
             secondary_mentor2 = self.create_user().id
             data = self.get_valid_inputs(
-                {"users_list_file": sample_file, "secondary_mentors_id": [secondary_mentor1, secondary_mentor2]}
+                {"users_list_file": sample_file, "secondary_mentor_ids": [secondary_mentor1, secondary_mentor2]}
             )
             response = self.make_post_request(
                 reverse(self.create_route_name, args=[self.batch_id]),
@@ -152,7 +152,7 @@ class SubBatchCreateTest(BaseTestCase):
                 "team": {"required"},
                 "timeline": {"required"},
                 "primary_mentor_id": {"required"},
-                "secondary_mentors_id": {"required"},
+                "secondary_mentor_ids": {"required"},
             }
             self.validate_form_errors(
                 field_errors=field_errors, form=SubBatchForm(data=data)
@@ -171,7 +171,7 @@ class SubBatchCreateTest(BaseTestCase):
                     "team": self.faker.name(),
                     "timeline": self.faker.name(),
                     "primary_mentor_id": self.faker.name(),
-                    "secondary_mentors_id": [self.faker.unique.random_int(1,10), self.faker.unique.random_int(1,10)],
+                    "secondary_mentor_ids": [self.faker.unique.random_int(1,10), self.faker.unique.random_int(1,10)],
                 }
             )
             self.make_post_request(
@@ -182,7 +182,7 @@ class SubBatchCreateTest(BaseTestCase):
                 "team": {"invalid_choice"},
                 "timeline": {"invalid_choice"},
                 "primary_mentor_id": {"invalid_choice"},
-                "secondary_mentors_id": {"invalid_choice"},
+                "secondary_mentor_ids": {"invalid_choice"},
             }
             self.validate_form_errors(
                 field_errors=field_errors, form=SubBatchForm(data=data)
@@ -326,7 +326,7 @@ class SubBatchUpdateTest(BaseTestCase):
             _quantity=5,
         )
         primary_mentor_id = User.objects.get(employee_id=1).id
-        secondary_mentors_id = User.objects.get(employee_id=2).id
+        secondary_mentor_ids = User.objects.get(employee_id=2).id
         team_id = self.create_team().id
         timeline = baker.make("hubble.Timeline", team_id=team_id)
         baker.make(
@@ -348,7 +348,7 @@ class SubBatchUpdateTest(BaseTestCase):
             "start_date": timezone.now().date(),
             "timeline": timeline.id,
             "primary_mentor_id": primary_mentor_id,
-            "secondary_mentors_id": secondary_mentors_id,
+            "secondary_mentor_ids": secondary_mentor_ids,
         }
 
     def test_success(self):
@@ -378,7 +378,7 @@ class SubBatchUpdateTest(BaseTestCase):
         secondary_mentor1 = self.create_user().id
         secondary_mentor2 = self.create_user().id
         data = self.get_valid_inputs(
-            {"secondary_mentors_id": [secondary_mentor1, secondary_mentor2]}
+            {"secondary_mentor_ids": [secondary_mentor1, secondary_mentor2]}
         )
         response = self.make_post_request(
             reverse(self.update_route_name, args=[self.sub_batch_id]),
@@ -415,7 +415,7 @@ class SubBatchUpdateTest(BaseTestCase):
             "team": {"required"},
             "timeline": {"required"},
             "primary_mentor_id": {"required"},
-            "secondary_mentors_id": {"required"},
+            "secondary_mentor_ids": {"required"},
         }
         self.validate_form_errors(
             field_errors=field_errors, form=SubBatchForm(data=data)
@@ -430,7 +430,7 @@ class SubBatchUpdateTest(BaseTestCase):
                 "team": self.faker.name(),
                 "timeline": self.faker.name(),
                 "primary_mentor_id": self.faker.name(),
-                "secondary_mentors_id": [self.faker.unique.random_int(1, 10)],
+                "secondary_mentor_ids": [self.faker.unique.random_int(1, 10)],
             }
         )
         self.make_post_request(
@@ -441,7 +441,7 @@ class SubBatchUpdateTest(BaseTestCase):
             "team": {"invalid_choice"},
             "timeline": {"invalid_choice"},
             "primary_mentor_id": {"invalid_choice"},
-            "secondary_mentors_id": {"invalid_choice"},
+            "secondary_mentor_ids": {"invalid_choice"},
         }
         self.validate_form_errors(
             field_errors=field_errors, form=SubBatchForm(data=data)

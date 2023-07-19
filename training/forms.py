@@ -150,7 +150,7 @@ class SubBatchForm(forms.ModelForm):
         queryset=models.User.objects.filter(is_employed=True)
     )
 
-    secondary_mentors_id = forms.ModelMultipleChoiceField(
+    secondary_mentor_ids = forms.ModelMultipleChoiceField(
         queryset=models.User.objects.filter(is_employed=True),
         error_messages={
             "invalid_choice": "Select a valid choice. That choice is not one of the available choices."
@@ -174,15 +174,15 @@ class SubBatchForm(forms.ModelForm):
                 "initialValue"
             ] = self.data.get("primary_mentor_id", None)
 
-        if self.data.get("secondary_mentors_id", None):
-            self.fields["secondary_mentors_id"].widget.attrs[
+        if self.data.get("secondary_mentor_ids", None):
+            self.fields["secondary_mentor_ids"].widget.attrs[
                 "initialValue"
-            ] = self.data.get("secondary_mentors_id", None)
+            ] = self.data.get("secondary_mentor_ids", None)
 
         self.fields["name"].validators.append(MinLengthValidator(3))
         self.fields["primary_mentor_id"].label = "Primary Mentor"
-        self.fields["secondary_mentors_id"].label = "Secondary Mentor"
-        self.fields["secondary_mentors_id"].widget.attrs[
+        self.fields["secondary_mentor_ids"].label = "Secondary Mentors"
+        self.fields["secondary_mentor_ids"].widget.attrs[
                 "subtitle"
             ] = "Secondary Mentors"
 
@@ -194,7 +194,7 @@ class SubBatchForm(forms.ModelForm):
             self.fields["primary_mentor_id"].widget.attrs[
                 "initialValue"
             ] = instance.primary_mentor_id
-            self.fields["secondary_mentors_id"].widget.attrs[
+            self.fields["secondary_mentor_ids"].widget.attrs[
                 "initialValue"
             ] = instance.secondary_mentors.all().values_list("id", flat=True)
 
@@ -216,7 +216,7 @@ class SubBatchForm(forms.ModelForm):
             "start_date",
             "timeline",
             "primary_mentor_id",
-            "secondary_mentors_id",
+            "secondary_mentor_ids",
         )
 
         widgets = {
@@ -249,10 +249,10 @@ class SubBatchForm(forms.ModelForm):
                     "placeholder": "Primary Mentor...",
                 }
             ),
-            "secondary_mentors_id": forms.SelectMultiple(
+            "secondary_mentor_ids": forms.SelectMultiple(
                 attrs={
                     "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
-                    "placeholder": "Secondary Mentor...",
+                    "placeholder": "Secondary Mentors...",
                 }
             ),
         }
