@@ -200,7 +200,7 @@ def delete_extension(request, pk):
     try:
         extension = get_object_or_404(Extension, id=pk)
         extension_names_to_be_changed = Extension.objects.filter(
-            sub_batch=SubBatch.objects.filter(intern_details__user=extension.user_id).first(),
+            sub_batch=extension.sub_batch,
             id__gt=pk,
             user_id=extension.user_id
         )

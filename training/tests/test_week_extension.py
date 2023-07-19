@@ -2,6 +2,7 @@ from django.db.models import Count, OuterRef, Q, Subquery
 from django.urls import reverse
 from django.utils import timezone
 from model_bakery import baker
+from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
 from core.constants import TASK_TYPE_ASSESSMENT
@@ -33,14 +34,6 @@ class ExtensionCreateTest(BaseTestCase):
             start_date=(timezone.now() + timezone.timedelta(1)),
         )
         self.trainee = baker.make("hubble.InternDetail", sub_batch=self.sub_batch)
-        baker.make(
-            "hubble.SubBatchTaskTimeline",
-            days=10,
-            task_type=TASK_TYPE_ASSESSMENT,
-            sub_batch=self.sub_batch,
-            end_date=(timezone.now() + timezone.timedelta(10)).date(),
-            order=1,
-        )
 
     def test_template(self):
         """
@@ -56,6 +49,7 @@ class ExtensionCreateTest(BaseTestCase):
         """
         Check what happens when valid data is given as input
         """
+        desired_extension_name = Extension.objects.filter(user_id=self.trainee.user_id, sub_batch=self.sub_batch).count() + 1
         response = self.make_post_request(
             reverse(self.create_route_name, args=[self.trainee.user_id]),
             data={},
@@ -65,6 +59,7 @@ class ExtensionCreateTest(BaseTestCase):
         self.assertDatabaseHas(
             "Extension",
             {
+                "name": f"Extension Week {desired_extension_name}",
                 "user_id": self.trainee.user_id,
                 "sub_batch": self.sub_batch,
             },
@@ -213,10 +208,12 @@ class ExtensionWeekTaskDelete(BaseTestCase):
         """
         To check what happens when valid id is given for delete
         """
-        extension = baker.make("hubble.Extension")
-        self.assertDatabaseHas("Extension", {"id": extension.id})
+        trainee = baker.make("hubble.User")
+        sub_batch = baker.make("hubble.SubBatch")
+        extension = baker.make("hubble.Extension", user_id=trainee.id, sub_batch=sub_batch, name=seq("Extension Week "), _quantity=2)
+        self.assertDatabaseHas("Extension", {"id": extension[0].id})
         response = self.make_delete_request(
-            reverse(self.delete_route_name, args=[extension.id])
+            reverse(self.delete_route_name, args=[extension[0].id])
         )
         self.assertJSONEqual(
             response.content,
@@ -226,7 +223,8 @@ class ExtensionWeekTaskDelete(BaseTestCase):
             },
         )
         self.assertEqual(response.status_code, 200)
-        self.assertDatabaseNotHas("Extension", {"id": extension.id})
+        self.assertDatabaseNotHas("Extension", {"id": extension[0].id})
+        self.assertDatabaseHas("Extension", {"id": extension[1].id, "name": extension[0].name})
 
     def test_failure(self):
         """
