@@ -461,14 +461,14 @@ class GetTimelineTest(BaseTestCase):
         """
         team_id = baker.make("hubble.Team").id
         baker.make("hubble.Timeline", team_id=team_id, is_active=True)
-        query_output = list(
+        timeline_template = list(
             Timeline.objects.filter(team_id=team_id).values("id", "name", "is_active")
         )
         response = self.make_post_request(
             reverse(self.get_timeline_route_name),
             data={"team_id": team_id},
         )
-        self.assertJSONEqual((response.content), query_output)
+        self.assertJSONEqual((response.content), timeline_template)
         self.assertEqual(response.status_code, 200)
 
     def test_failure(self):
