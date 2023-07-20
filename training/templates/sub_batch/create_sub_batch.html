@@ -141,7 +141,7 @@
                         team_id: $("#id_team").val()
                     },
                     success: function(data) {
-                        let selectDropdown = `<select name="timeline" class="w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250 timeline-input invisible" required="" id="id_timeline"></select>`
+                        let selectDropdown = `<select name="timeline" class="w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250 timeline-input invisible" required="" id="id_timeline"></select>`;
 
                         $("#timeline-template-select").empty()
                         const selectElement = $(selectDropdown);
@@ -153,7 +153,6 @@
                             });
                         }
                         $("#timeline-template-select").append(selectElement)
-                        $("#timeline-template-name").remove();
                         if (initialValue !== null) {
                             $("#id_timeline").attr("initialValue", initialValue);
                         }
@@ -162,8 +161,13 @@
                         $('#id_timeline').siblings().find('#show-value').html(data.find(item => item.is_active === true).name);
                     },
                     error: function(xhr, status, error) {
-                        $('.page-loader').hide();
                         alert(xhr.responseJSON.message);
+                        let selectDropdown = `<select name="timeline" class="w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250 timeline-input invisible" required="" id="id_timeline"></select>`;
+
+                        $("#timeline-template-select").empty();
+                        $("#timeline-template-select").append($(selectDropdown));
+                        dropdown_init();
+                        $('.page-loader').hide();
                     }
                 });
             }

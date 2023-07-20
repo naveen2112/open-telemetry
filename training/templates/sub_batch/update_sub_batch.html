@@ -35,7 +35,7 @@
                 {{ form.name }}
                 {{ form.name|show_field_errors }}
             </div>
-            <div class="work-basic-dropdown form-field">
+            <div class="work-basic-dropdown form-field" id="team_dropdown">
                 {{ form.team|show_label }}
                 <div class="relative">{{ form.team }}</div>
                 {{ form.team|show_field_errors }}
@@ -73,10 +73,6 @@
 
 {% block script %}
     <script>
-        $("#id_team").change(function() {
-            update_timeline_value();
-        })
-
         function update_timeline_value(initialValue = null) {
             if ($("#id_team").val()) {
                 $('.page-loader').show();
@@ -131,6 +127,7 @@
                 e.preventDefault();
                 $('#sub_batch_form').submit();
             })
+            $("#team_dropdown").find(".multi-select-inner").css("pointer-events", "none");
         });
 
         $(function() {
