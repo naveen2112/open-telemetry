@@ -142,9 +142,9 @@
                     },
                     success: function(data) {
                         let selectDropdown = `<select name="timeline" class="w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250 timeline-input invisible" required="" id="id_timeline"></select>`;
-
-                        $("#timeline-template-select").empty()
+                        $("#timeline-template-select").empty();
                         const selectElement = $(selectDropdown);
+
                         if (data.length !== 0) {
                             selectElement.append(`<option value="${0}">Select a Timeline</option>`);
                             data.forEach(function(item) {
@@ -152,10 +152,13 @@
                                 selectElement.append(option);
                             });
                         }
-                        $("#timeline-template-select").append(selectElement)
+
+                        $("#timeline-template-select").append(selectElement);
+
                         if (initialValue !== null) {
                             $("#id_timeline").attr("initialValue", initialValue);
                         }
+
                         dropdown_init();
                         $('.page-loader').hide();
                         $('#id_timeline').siblings().find('#show-value').html(data.find(item => item.is_active === true).name);
@@ -163,7 +166,6 @@
                     error: function(xhr, status, error) {
                         alert(xhr.responseJSON.message);
                         let selectDropdown = `<select name="timeline" class="w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250 timeline-input invisible" required="" id="id_timeline"></select>`;
-
                         $("#timeline-template-select").empty();
                         $("#timeline-template-select").append($(selectDropdown));
                         dropdown_init();

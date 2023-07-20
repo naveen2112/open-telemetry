@@ -478,7 +478,12 @@ class GetTimelineTest(BaseTestCase):
         response = self.make_post_request(
             reverse(self.get_timeline_route_name), data={"team_id": 0}
         )
-        self.assertJSONEqual((response.content), {"message": "No timeline template found"})
+        self.assertJSONEqual(
+            self.decoded_json(response),
+            {
+                "message": "No timeline template found",
+            },
+        )
         self.assertEqual(response.status_code, 404)
 
 
