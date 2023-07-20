@@ -46,3 +46,12 @@ ABOVE_AVERAGE = "Above Average"
 AVERAGE = "Average"
 POOR = "Poor"
 NOT_YET_STARTED = "Not Yet Started"
+
+USER_STATUS = [
+    "intern",
+    "project_intern",
+    "probationer",
+    "working",
+    "in-notice-period",
+    "relieved",
+]
