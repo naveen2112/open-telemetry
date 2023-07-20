@@ -5,7 +5,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator
 
-from core.constants import PRESENT_TYPES, TASK_TYPES
+from core.constants import PRESENT_TYPES, TASK_TYPES, USER_STATUS
 from hubble import models
 from hubble.models import Assessment
 
@@ -350,7 +350,7 @@ class AddInternForm(forms.ModelForm):
     user_id = forms.ModelChoiceField(
         queryset=(
             models.User.objects.exclude(intern_details__isnull=False).filter(
-                is_employed=False, status="intern"
+                is_employed=False, status=USER_STATUS[0]
             )
         ),
         label="User",
