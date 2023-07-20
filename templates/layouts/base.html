@@ -136,7 +136,7 @@
                 });
 
 
-                $(document).ready(function() {
+                function dropdown_init() {
                     var selectTemplate = `
                         <div id="drop-btn" class="cus-dropdown-icon block border border-primary-dark-30 rounded-md mt-2.5 w-full focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 py-1 px-2">
                             <div class="cursor-pointer text-truncate w-11/12 dropdown_selected_value" id="show-value">
@@ -167,6 +167,11 @@
                             })
                         }
                     })
+                }
+
+
+                $(document).ready(function() {
+                    dropdown_init();
                 })
 
                 function renderFormError(data) {

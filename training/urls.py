@@ -138,8 +138,8 @@ urlpatterns = [
     ),
     path(
         "sub-batch/get-timeline",
-        sub_batch.get_timeline,
-        name="sub-batch.get_timeline",
+        sub_batch.get_timelines,
+        name="sub-batch.get_timelines",
     ),
     path(
         "sub-batch/<int:pk>/edit",

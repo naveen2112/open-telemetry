@@ -285,11 +285,12 @@ class SubBatchForm(forms.ModelForm):
                     "placeholder": "Start Date...",
                 }
             ),
-            "timeline": forms.TextInput(
+            "timeline": forms.Select(
                 attrs={
-                    "class": "w-full block border border-primary-dark-30 mt-2.5 \
+                    "class": "w-full block border border-primary-dark-30 \
                         rounded-md focus:outline-none focus:ring-transparent \
-                            focus:ring-offset-0 h-9 p-2 bg-transparent w-250 timeline-input",
+                            focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250\
+                                timeline-input invisible",
                 }
             ),
             "primary_mentor_id": forms.Select(

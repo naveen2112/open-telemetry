@@ -47,10 +47,10 @@
             </div>
             <div class="work-basic-dropdown form-field">
                 {{ form.timeline|show_label }}
-                <div class="relative">
-                    <div class="w-full block border border-primary-dark-30 mt-2.5 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 bg-transparent w-250 position-absolute-top-10"
-                         id="timeline-name"></div>
-                    {{ form.timeline }}
+                <div class="relative" id="timeline-template-select">
+                    <select name="timeline"
+                        class="w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250 timeline-input invisible"
+                        required="" id="id_timeline"></select>
                 </div>
                 {{ form.timeline|show_field_errors }}
             </div>
@@ -77,17 +77,39 @@
             update_timeline_value();
         })
 
-        function update_timeline_value() {
+        function update_timeline_value(initialValue = null) {
             if ($("#id_team").val()) {
                 $('.page-loader').show();
                 $("#id_timeline").val("");
                 $.ajax({
                     type: "POST",
-                    url: "{% url 'sub-batch.get_timeline' %}",
+                    url: "{% url 'sub-batch.get_timelines' %}",
                     data: {
                         team_id: $("#id_team").val()
                     },
                     success: function(data) {
+                        let selectDropdown = `<select name="timeline" class="w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250 timeline-input invisible" required="" id="id_timeline"></select>`
+
+                        $("#timeline-template-select").empty()
+                        const selectElement = $(selectDropdown);
+
+                        if (data.length !== 0) {
+                            selectElement.append(`<option value="${0}">Select a Timeline</option>`);
+                            data.forEach(function (item) {
+                                const option = `<option value="${item.id}" ${item.is_active ? "selected" : ""}>${item.name}</option>`;
+                                selectElement.append(option);
+                            });
+                        }
+                        $("#timeline-template-select").append(selectElement)
+                        $("#timeline-template-name").remove();
+                        if (initialValue !== null) {
+                            $("#id_timeline").attr("initialValue", initialValue);
+                        }
+                        dropdown_init();
+                        $('.page-loader').hide();
+                        $('#id_timeline').siblings().find('#show-value').html(data.find(item => item.is_active === true).name);
+
+
                         $('.page-loader').hide();
                         $("#id_timeline").val(data.timeline.id);
                         $("#timeline-name").html(data.timeline.name);
@@ -102,7 +124,9 @@
         };
 
         $(document).ready(function() {
-            update_timeline_value();
+            var timeline = `{{ form.timeline }}`
+            let timeline_id = $(timeline).val();
+            update_timeline_value(initialValue = timeline_id);
             $('#update_sub_batch').click(function(e) {
                 e.preventDefault();
                 $('#sub_batch_form').submit();

@@ -3,7 +3,6 @@ Django test cases for create, update, delete and django datatable for the Sub ba
 """
 from django.conf import settings
 from django.db.models import Count, Q
-from django.forms.models import model_to_dict
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import strip_tags
@@ -11,7 +10,7 @@ from model_bakery import baker
 from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
-from hubble.models import SubBatch, User
+from hubble.models import SubBatch, Timeline, User
 from training.forms import SubBatchForm
 
 
@@ -446,7 +445,7 @@ class GetTimelineTest(BaseTestCase):
     This class is responsible for testing whether correct timeline is fetched or not
     """
 
-    get_timeline_route_name = "sub-batch.get_timeline"
+    get_timeline_route_name = "sub-batch.get_timelines"
 
     def setUp(self):
         """
@@ -460,12 +459,15 @@ class GetTimelineTest(BaseTestCase):
         Check what happens when valid data is given as input
         """
         team_id = baker.make("hubble.Team").id
-        timeline = baker.make("hubble.Timeline", team_id=team_id, is_active=True)
+        baker.make("hubble.Timeline", team_id=team_id, is_active=True)
+        query_output = list(
+            Timeline.objects.filter(team_id=team_id).values("id", "name", "is_active")
+        )
         response = self.make_post_request(
             reverse(self.get_timeline_route_name),
             data={"team_id": team_id},
         )
-        self.assertJSONEqual((response.content), {"timeline": model_to_dict(timeline)})
+        self.assertJSONEqual((response.content), query_output)
         self.assertEqual(response.status_code, 200)
 
     def test_failure(self):
@@ -475,12 +477,7 @@ class GetTimelineTest(BaseTestCase):
         response = self.make_post_request(
             reverse(self.get_timeline_route_name), data={"team_id": 0}
         )
-        self.assertJSONEqual(
-            self.decoded_json(response),
-            {
-                "message": "No active timeline template found",
-            },
-        )
+        self.assertJSONEqual((response.content), {"message": "No timeline template found"})
         self.assertEqual(response.status_code, 404)
 
 
