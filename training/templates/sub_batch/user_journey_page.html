@@ -35,11 +35,11 @@
             <div style="width: 250px;height: 10px;" class="rounded-xl bg-dark-blue-10">
                 <div class="rounded-xl bg-dark-blue" style="width: {{ performance_stats.completion }}%;height: 100%;"></div>
             </div>
-            <p class="text-sm text-gray-400">{{ performance_stats.completion }}% Completed</p>
+            <p class="text-sm text-gray-400">{{ performance_stats.completion|floatformat:2 }}% Completed</p>
         </div>
     </div>
 </div>
-<div class="px-3 pt-5">
+<div class="px-3 pt-5 bg-light-violet">
     <div class="text-dark-black text-lg mb-1 leading-none">
         <p class="text-sm">
             <a href="{% url 'batch' %}" class="text-sm text-dark-blue">
@@ -146,7 +146,7 @@
             </div>
             <div class="w-full flex flex-col justify-start bg-dark-blue-10 rounded-md p-2">
                 <h3 class="font-semibold">Comments</h3>
-                <p class="truncate">{% if task.inactive_tasks %} - {% else %} {{ task.comment }} {% endif %}</p>
+                <p class="truncate">{% if task.inactive_tasks %} - {% else %} {{ task.comment|truncatechars:10 }} {% endif %}</p>
                 <a href="javascript:void(0)" class="text-sm text-dark-blue cursor-pointer show-more-btn">Show more</a>
             </div>
         </div>
@@ -190,7 +190,7 @@
             </div>
             <div class="w-full flex flex-col justify-start bg-dark-blue-10 rounded-md p-2">
                 <h3 class="font-semibold">Comments</h3>
-                <p class="truncate">{% if assessment.last_entry %} {{ assessment.comment }} {% else %} - {% endif %}</p>
+                <p class="truncate">{% if assessment.last_entry %} {{ assessment.comment|truncatechars:10 }} {% else %} - {% endif %}</p>
                 <a href="javascript:void(0)" class="text-sm text-dark-blue cursor-pointer show-more-btn">Show more</a>
             </div>
         </div>

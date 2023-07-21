@@ -235,33 +235,6 @@ class TraineeDatatableTest(BaseTestCase):
             order=seq(0),
             sub_batch_id=self.sub_batch.id,
         )
-        self.persisted_valid_inputs = {
-            "draw": 1,
-            "start": 0,
-            "length": 10,
-            "sub_batch": self.sub_batch.id,
-        }
-
-    def test_template(self):
-        """
-        To makes sure that the correct template is used
-        """
-        response = self.make_get_request(
-            reverse(self.route_name, args=[self.sub_batch.id])
-        )
-        self.assertTemplateUsed(response, "sub_batch/sub_batch_detail.html")
-        self.assertContains(response, self.sub_batch.name)
-        self.assertContains(response, "Performance")
-        self.assertContains(response, GOOD)
-        self.assertContains(response, MEET_EXPECTATION)
-        self.assertContains(response, ABOVE_AVERAGE)
-        self.assertContains(response, AVERAGE)
-        self.assertContains(response, POOR)
-
-    def test_datatable(self):
-        """
-        To check whether all columns are present in datatable and length of rows without any filter
-        """
         task_count = (
             SubBatchTaskTimeline.objects.filter(
                 sub_batch_id=self.sub_batch.id, task_type=TASK_TYPE_ASSESSMENT
@@ -275,7 +248,7 @@ class TraineeDatatableTest(BaseTestCase):
             id=OuterRef("user__assessments__task_id"),
             assessments__user_id=OuterRef("user_id"),
         ).order_by("-assessments__id")[:1]
-        desired_output = (
+        self.desired_output = (
             InternDetail.objects.filter(sub_batch__id=self.sub_batch.id)
             .select_related("user")
             .annotate(
@@ -330,12 +303,39 @@ class TraineeDatatableTest(BaseTestCase):
                 ),
             )
         )
+        self.persisted_valid_inputs = {
+            "draw": 1,
+            "start": 0,
+            "length": 10,
+            "sub_batch": self.sub_batch.id,
+        }
+
+    def test_template(self):
+        """
+        To makes sure that the correct template is used
+        """
+        response = self.make_get_request(
+            reverse(self.route_name, args=[self.sub_batch.id])
+        )
+        self.assertTemplateUsed(response, "sub_batch/sub_batch_detail.html")
+        self.assertContains(response, self.sub_batch.name)
+        self.assertContains(response, "Performance")
+        self.assertContains(response, GOOD)
+        self.assertContains(response, MEET_EXPECTATION)
+        self.assertContains(response, ABOVE_AVERAGE)
+        self.assertContains(response, AVERAGE)
+        self.assertContains(response, POOR)
+
+    def test_datatable(self):
+        """
+        To check whether all columns are present in datatable and length of rows without any filter
+        """
         response = self.make_post_request(
             reverse(self.datatable_route_name), data=self.get_valid_inputs()
         )
         self.assertEqual(response.status_code, 200)
-        for row in range(len(desired_output)):
-            expected_value = desired_output[row]
+        for row in range(len(self.desired_output)):
+            expected_value = self.desired_output[row]
             received_value = response.json()["data"][row]
             self.assertEqual(expected_value.pk, int(received_value["pk"]))
             self.assertEqual(expected_value.user.name, received_value["user"])
@@ -347,7 +347,7 @@ class TraineeDatatableTest(BaseTestCase):
                 self.assertEqual("-", received_value["average_marks"])
             else:
                 self.assertEqual(
-                    expected_value.average_marks, float(received_value["average_marks"])
+                    round(expected_value.average_marks, 2), float(received_value["average_marks"])
                 )
             self.assertEqual(expected_value.performance, received_value["performance"].split(">")[1].split("<")[0])
             self.assertEqual(
@@ -366,7 +366,7 @@ class TraineeDatatableTest(BaseTestCase):
             self.assertTrue("average_marks" in row)
             self.assertTrue("completion" in row)
             self.assertTrue("no_of_retries" in row)
-        self.assertEqual(response.json()["recordsTotal"], len(desired_output))
+        self.assertEqual(response.json()["recordsTotal"], len(self.desired_output))
 
     def test_database_search(self):
         """
@@ -398,17 +398,17 @@ class TraineeDatatableTest(BaseTestCase):
         response = self.make_post_request(
             reverse(self.datatable_route_name), data=self.get_valid_inputs()
         )
-        for performance in response.json()["data"]:
-            if performance["average_marks"] != "-":
-                if float(performance["average_marks"]) >= 90:
+        for performance in self.desired_output:
+            if performance.average_marks != None:
+                if float(performance.average_marks) >= 90:
                     performance_report[GOOD] += 1
-                elif 90 > float(performance["average_marks"]) >= 75:
+                elif 90 > float(performance.average_marks) >= 75:
                     performance_report[MEET_EXPECTATION] += 1
-                elif 75 > float(performance["average_marks"]) >= 65:
+                elif 75 > float(performance.average_marks) >= 65:
                     performance_report[ABOVE_AVERAGE] += 1
-                elif 65 > float(performance["average_marks"]) >= 50:
+                elif 65 > float(performance.average_marks) >= 50:
                     performance_report[AVERAGE] += 1
-                elif float(performance["average_marks"]) < 50:
+                elif float(performance.average_marks) < 50:
                     performance_report[POOR] += 1
             else:
                 performance_report[NOT_YET_STARTED] += 1

@@ -429,10 +429,13 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
                 ),
             )
         )
+        request.trainee_performance = query
         return query
 
     def customize_row(self, row, obj):
         row["completion"] = round(obj.completion, 2)
+        if obj.average_marks != None:
+            row["average_marks"] = round(obj.average_marks, 2)
         buttons = template_utils.show_button(
             reverse("user_reports", args=[obj.user.id])
         )
@@ -485,23 +488,23 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
             POOR: 0,
             NOT_YET_STARTED: 0,
         }
-        for performance in response["data"]:
-            if performance["average_marks"] != "-":
-                if float(performance["average_marks"]) >= 90:
+        for performance in request.trainee_performance:
+            if performance.average_marks != None:
+                if float(performance.average_marks) >= 90:
                     performance_report[GOOD] += 1
-                elif 90 > float(performance["average_marks"]) >= 75:
+                elif 90 > float(performance.average_marks) >= 75:
                     performance_report[MEET_EXPECTATION] += 1
-                elif 75 > float(performance["average_marks"]) >= 65:
+                elif 75 > float(performance.average_marks) >= 65:
                     performance_report[ABOVE_AVERAGE] += 1
-                elif 65 > float(performance["average_marks"]) >= 50:
+                elif 65 > float(performance.average_marks) >= 50:
                     performance_report[AVERAGE] += 1
-                elif float(performance["average_marks"]) < 50:
+                elif float(performance.average_marks) < 50:
                     performance_report[POOR] += 1
             else:
                 performance_report[NOT_YET_STARTED] += 1
         response["extra_data"] = {
             "performance_report": performance_report,
-            "no_of_trainees": len(response["data"]),
+            "no_of_trainees": len(request.trainee_performance),
         }
         return response
 
