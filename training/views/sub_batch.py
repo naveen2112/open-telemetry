@@ -222,9 +222,6 @@ def get_timeline(request):
             {"timeline": model_to_dict(timeline)}
         )  # Return the response with active template for a team
     except Exception as e:
-        logging.error(
-            f"An error has occured while fetching an active timeline template for the team \n{e}"
-        )
         return JsonResponse(
             {
                 "message": "No active timeline template found",
