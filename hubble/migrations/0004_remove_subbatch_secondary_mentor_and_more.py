@@ -14,11 +14,4 @@ class Migration(migrations.Migration):
             model_name="subbatch",
             name="secondary_mentor",
         ),
-        migrations.AlterField(
-            model_name="subbatch",
-            name="secondary_mentors",
-            field=models.ManyToManyField(
-                related_name="secondary_sub_batches", to=settings.AUTH_USER_MODEL
-            ),
-        ),
     ]
