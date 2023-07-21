@@ -341,7 +341,7 @@ class TraineeDatatableTest(BaseTestCase):
             self.assertEqual(expected_value.user.name, received_value["user"])
             self.assertEqual(expected_value.college, received_value["college"])
             self.assertEqual(
-                expected_value.completion, float(received_value["completion"])
+                round(expected_value.completion, 2), float(received_value["completion"])
             )
             if expected_value.average_marks == None:
                 self.assertEqual("-", received_value["average_marks"])
@@ -366,7 +366,7 @@ class TraineeDatatableTest(BaseTestCase):
             self.assertTrue("average_marks" in row)
             self.assertTrue("completion" in row)
             self.assertTrue("no_of_retries" in row)
-        self.assertTrue(response.json()["recordsTotal"], len(desired_output))
+        self.assertEqual(response.json()["recordsTotal"], len(desired_output))
 
     def test_database_search(self):
         """

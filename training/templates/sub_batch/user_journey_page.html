@@ -90,8 +90,8 @@
                     <div class="form-group mb-7" id="{{form.status.label|lower}}_group">
                         <label for="is_retry" class="ml-3 mb-3.6 text-sm text-dark-black-50">Is retry score?</label>
                         {{ form.is_retry }}
-                        <p class="text-dark-red text-xs">Note: Please make sure to check the checkbox when entering the retry score, but do not
-                            select it the first time.</p>
+                        <p class="text-dark-red text-xs">Note: Please make sure to check the checkbox when entering the retry score, but do not 
+                            select it for the first time.</p>
                     </div>
                 </div>
                 <div id="non_field_error"></div>
@@ -146,7 +146,7 @@
             </div>
             <div class="w-full flex flex-col justify-start bg-dark-blue-10 rounded-md p-2">
                 <h3 class="font-semibold">Comments</h3>
-                <p class="truncate">{% if task.inactive_tasks %} - {% else %} {{ task.comment|truncatechars:10 }} {% endif %}</p>
+                <p class="truncate">{% if task.inactive_tasks %} - {% else %} {{ task.comment }} {% endif %}</p>
                 <a href="javascript:void(0)" class="text-sm text-dark-blue cursor-pointer show-more-btn">Show more</a>
             </div>
         </div>
@@ -190,7 +190,7 @@
             </div>
             <div class="w-full flex flex-col justify-start bg-dark-blue-10 rounded-md p-2">
                 <h3 class="font-semibold">Comments</h3>
-                <p class="truncate">{{ assessment.comment|truncatechars:10 }}</p>
+                <p class="truncate">{% if assessment.last_entry %} {{ assessment.comment }} {% else %} - {% endif %}</p>
                 <a href="javascript:void(0)" class="text-sm text-dark-blue cursor-pointer show-more-btn">Show more</a>
             </div>
         </div>

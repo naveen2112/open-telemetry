@@ -137,3 +137,10 @@
 .mr-2 {
     margin-right: 0.5rem;
 }
+
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    position: relative;
+}

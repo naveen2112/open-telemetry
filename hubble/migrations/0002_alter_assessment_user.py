@@ -47,3 +47,15 @@ class Migration(migrations.Migration):
                 ),
             )
         )
+        operations.append(
+            migrations.AddField(
+                model_name="holiday",
+                name="updated_by",
+                field=models.ForeignKey(
+                    blank=True,
+                    null=True,
+                    on_delete=django.db.models.deletion.CASCADE,
+                    to="hubble.user",
+                ),
+            )
+        )
