@@ -32,7 +32,7 @@ Sub Batch timeline
 {% block body %}
 <div class="jquery-modal current hidden" id="modal">
     <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
-        <p class="font-semibold text-lg mb-10" id="openModal">Create Task</p>
+        <p class="font-semibold text-lg mb-10" id="openModal"></p>
         <form method="post" class="timeline-task-form" id="timeline-task-create-form">
             <div class="modal-body">
                 {% csrf_token %}
@@ -128,34 +128,34 @@ Sub Batch timeline
         $('#submit-btn').attr("onclick", "createTimelineTask()");
     }
 
-        function createTimelineTask() {
-            $('.page-loader').show();
-            $.ajax({
-                type: "POST",
-                url: "{% url 'sub_batch.timeline.create' object.id %}",
-                headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
-                data: {
-                    name: $('#id_name').val(),
-                    days: $('#id_days').val(),
-                    order: $('#id_order').val(),
-                    present_type: $('input[name="present_type"]:checked').val(),
-                    task_type: $('input[name="task_type"]:checked').val(),
-                    sub_batch_id: "{{ object.id }}",
-                    start_date: $("#date_range").attr('start-date'),
-                    end_date: $("#date_range").attr('end-date')
-                },
-                success: function(data) {
-                    removeErrors();
-                    $('.page-loader').hide();
-                    if (data.status === 'success') {
-                        $('#sub-batch-timeline-table').DataTable().ajax.reload();
-                        closeModal('modal');
-                    }else {
-                        renderFormError(data);
-                    }
+    function createTimelineTask() {
+        $('.page-loader').show();
+        $.ajax({
+            type: "POST",
+            url: "{% url 'sub_batch.timeline.create' object.id %}",
+            headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
+            data: {
+                name: $('#id_name').val(),
+                days: $('#id_days').val(),
+                order: $('#id_order').val(),
+                present_type: $('input[name="present_type"]:checked').val(),
+                task_type: $('input[name="task_type"]:checked').val(),
+                sub_batch_id: "{{ object.id }}",
+                start_date: $("#date_range").attr('start-date'),
+                end_date: $("#date_range").attr('end-date')
+            },
+            success: function(data) {
+                removeErrors();
+                $('.page-loader').hide();
+                if (data.status === 'success') {
+                    $('#sub-batch-timeline-table').DataTable().ajax.reload();
+                    closeModal('modal');
+                }else {
+                    renderFormError(data);
                 }
-            });
-        }
+            }
+        });
+    }
 
     function openUpdateModel(url) {
         $('.page-loader').show();
@@ -214,6 +214,7 @@ Sub Batch timeline
                 name: $('#id_name').val(),
                 days: $('#id_days').val(),
                 order: $('#id_order').val(),
+                sub_batch_id: "{{ object.id }}",
                 present_type: $('input[name="present_type"]:checked').val(),
                 task_type: $('input[name="task_type"]:checked').val(),
             },

@@ -1,5 +1,6 @@
 import logging
 
+import numpy as np
 import pandas as pd
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -51,8 +52,14 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
             "title": "Reporting Persons",
             "visible": True,
             "searchable": False,
+            "orderable": False,
         },
-        {"name": "start_date", "visible": True, "searchable": False},
+        {
+            "name": "start_date",
+            "visible": True,
+            "searchable": False,
+            "orderable": False,
+        },
         {
             "name": "timeline",
             "title": "Assigned Timeline Template",
@@ -97,16 +104,19 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
         response["extra_data"] = list(
             Batch.objects.filter(id=request.POST.get("batch_id"))
             .annotate(
-                no_of_teams=Subquery(
-                    Batch.objects.filter(sub_batches__batch_id=OuterRef("id"))
-                    .annotate(
-                        count_of_teams=Count(
-                            "sub_batches__team",
-                            distinct=True,
-                            filter=Q(sub_batches__deleted_at__isnull=True),
+                no_of_teams=Coalesce(
+                    Subquery(
+                        Batch.objects.filter(sub_batches__batch_id=OuterRef("id"))
+                        .annotate(
+                            count_of_teams=Count(
+                                "sub_batches__team",
+                                distinct=True,
+                                filter=Q(sub_batches__deleted_at__isnull=True),
+                            )
                         )
-                    )
-                    .values("count_of_teams")
+                        .values("count_of_teams")
+                    ),
+                    0,
                 ),
                 no_of_trainees=Count(
                     "sub_batches__intern_details",
@@ -132,6 +142,9 @@ def create_sub_batch(request, pk):
         if "users_list_file" in request.FILES:
             excel_file = request.FILES["users_list_file"]
             df = pd.read_excel(excel_file)
+            df.replace(chr(160), np.nan, inplace=True)
+            df = df.dropna(how="all")
+            df["employee_id"] = df["employee_id"].astype(int)
             if (df.columns[0] == "employee_id") and (df.columns[1] == "college"):
                 if User.objects.filter(
                     employee_id__in=df["employee_id"]
@@ -209,9 +222,6 @@ def get_timeline(request):
             {"timeline": model_to_dict(timeline)}
         )  # Return the response with active template for a team
     except Exception as e:
-        logging.error(
-            f"An error has occured while fetching an active timeline template for the team \n{e}"
-        )
         return JsonResponse(
             {
                 "message": "No active timeline template found",
@@ -295,8 +305,8 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
         {"name": "pk", "visible": False, "searchable": False},
         {
             "name": "user",
+            "title": "Trainee's",
             "foreign_field": "user__name",
-            "title": "User",
             "visible": True,
             "searchable": True,
         },
@@ -365,7 +375,9 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
                         user_id=F("user__assessments__user_id"),
                         then=Coalesce(
                             Avg(
-                                Subquery(last_attempt_score.values("assessments__score")),
+                                Subquery(
+                                    last_attempt_score.values("assessments__score")
+                                ),
                                 distinct=True,
                             ),
                             0.0,
@@ -376,7 +388,10 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
                 no_of_retries=Coalesce(
                     Count(
                         "user__assessments__is_retry",
-                        filter=Q(Q(user__assessments__is_retry=True) & Q(user__assessments__extension__isnull=True)),
+                        filter=Q(
+                            Q(user__assessments__is_retry=True)
+                            & Q(user__assessments__extension__isnull=True)
+                        ),
                     ),
                     0,
                 ),
@@ -411,9 +426,13 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
                 ),
             )
         )
+        request.trainee_performance = query
         return query
 
     def customize_row(self, row, obj):
+        row["completion"] = round(obj.completion, 2)
+        if obj.average_marks != None:
+            row["average_marks"] = round(obj.average_marks, 2)
         buttons = template_utils.show_button(
             reverse("user_reports", args=[obj.user.id])
         )
@@ -431,17 +450,29 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
         if not row["average_marks"]:
             row["average_marks"] = "-"
         if obj.performance == GOOD:
-            row["performance"] = f'<span class="bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm">{GOOD}</span>'
+            row[
+                "performance"
+            ] = f'<span class="bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm">{GOOD}</span>'
         if obj.performance == MEET_EXPECTATION:
-            row["performance"] = f'<span class="bg-dark-blue-10 text-dark-black py-0.5 px-1.5 rounded-xl text-sm">{MEET_EXPECTATION}</span>'
+            row[
+                "performance"
+            ] = f'<span class="bg-dark-blue-10 text-dark-blue py-0.5 px-1.5 rounded-xl text-sm">{MEET_EXPECTATION}</span>'
         if obj.performance == ABOVE_AVERAGE:
-            row["performance"] = f'<span style="background-color:#fefce8; color: #eab308;" class="py-0.5 px-1.5 rounded-xl text-sm">{ABOVE_AVERAGE}</span>'
+            row[
+                "performance"
+            ] = f'<span style="background-color:#fefce8; color: #eab308;" class="py-0.5 px-1.5 rounded-xl text-sm">{ABOVE_AVERAGE}</span>'
         if obj.performance == AVERAGE:
-            row["performance"] = f'<span class="bg-orange-100 text-orange-700 py-0.5 px-1.5 rounded-xl text-sm">{AVERAGE}</span>'
+            row[
+                "performance"
+            ] = f'<span class="bg-orange-100 text-orange-700 py-0.5 px-1.5 rounded-xl text-sm">{AVERAGE}</span>'
         if obj.performance == POOR:
-            row["performance"] = f'<span class="bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm">{POOR}</span>'
+            row[
+                "performance"
+            ] = f'<span class="bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm">{POOR}</span>'
         if obj.performance == NOT_YET_STARTED:
-            row["performance"] = f'<span class="bg-dark-black/10 text-dark-black py-0.5 px-1.5 rounded-xl text-sm">{NOT_YET_STARTED}</span>'
+            row[
+                "performance"
+            ] = f'<span class="bg-dark-black/10 text-dark-black py-0.5 px-1.5 rounded-xl text-sm">{NOT_YET_STARTED}</span>'
         return
 
     def get_response_dict(self, request, paginator, draw_idx, start_pos):
@@ -454,23 +485,23 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
             POOR: 0,
             NOT_YET_STARTED: 0,
         }
-        for performance in response["data"]:
-            if performance["average_marks"] != "-":
-                if float(performance["average_marks"]) >= 90:
+        for performance in request.trainee_performance:
+            if performance.average_marks != None:
+                if float(performance.average_marks) >= 90:
                     performance_report[GOOD] += 1
-                elif 90 > float(performance["average_marks"]) >= 75:
+                elif 90 > float(performance.average_marks) >= 75:
                     performance_report[MEET_EXPECTATION] += 1
-                elif 75 > float(performance["average_marks"]) >= 65:
+                elif 75 > float(performance.average_marks) >= 65:
                     performance_report[ABOVE_AVERAGE] += 1
-                elif 65 > float(performance["average_marks"]) >= 50:
+                elif 65 > float(performance.average_marks) >= 50:
                     performance_report[AVERAGE] += 1
-                elif float(performance["average_marks"]) < 50:
+                elif float(performance.average_marks) < 50:
                     performance_report[POOR] += 1
             else:
                 performance_report[NOT_YET_STARTED] += 1
         response["extra_data"] = {
             "performance_report": performance_report,
-            "no_of_trainees": len(response["data"]),
+            "no_of_trainees": len(request.trainee_performance),
         }
         return response
 

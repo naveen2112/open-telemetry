@@ -16,13 +16,9 @@ class TimelineForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         if self.data.get("id") and (
-            not models.Timeline.objects.filter(
-                id=self.data.get("id")
-            ).exists()
+            not models.Timeline.objects.filter(id=self.data.get("id")).exists()
         ):
-            self.add_error(
-                None, "You are trying to duplicate invalid template"
-            )
+            self.add_error(None, "You are trying to duplicate invalid template")
         return cleaned_data
 
     def clean_is_active(self):
@@ -30,9 +26,7 @@ class TimelineForm(forms.ModelForm):
         This function checks if a team already has an active template and raises a validation error if
         it does.
         """
-        if self.cleaned_data.get("team", None) and (
-            self.cleaned_data["is_active"]
-        ):
+        if self.cleaned_data.get("team", None) and (self.cleaned_data["is_active"]):
             query = models.Timeline.objects.filter(
                 team=self.cleaned_data["team"], is_active=True
             ).values("id")
@@ -159,21 +153,17 @@ class SubBatchForm(forms.ModelForm):
 
         self.fields["team"].empty_label = "Select a Team"
         if self.data.get("team", None):
-            self.fields["team"].widget.attrs[
-                "initialValue"
-            ] = self.data.get("team", None)
+            self.fields["team"].widget.attrs["initialValue"] = self.data.get(
+                "team", None
+            )
 
-        self.fields[
-            "primary_mentor_id"
-        ].empty_label = "Select a Primary Mentor"
+        self.fields["primary_mentor_id"].empty_label = "Select a Primary Mentor"
         if self.data.get("primary_mentor_id", None):
             self.fields["primary_mentor_id"].widget.attrs[
                 "initialValue"
             ] = self.data.get("primary_mentor_id", None)
 
-        self.fields[
-            "secondary_mentor_id"
-        ].empty_label = "Select a Secondary Mentor"
+        self.fields["secondary_mentor_id"].empty_label = "Select a Secondary Mentor"
         if self.data.get("secondary_mentor_id", None):
             self.fields["secondary_mentor_id"].widget.attrs[
                 "initialValue"
@@ -185,9 +175,7 @@ class SubBatchForm(forms.ModelForm):
 
         if kwargs.get("instance"):
             instance = kwargs.get("instance")
-            self.fields["team"].widget.attrs[
-                "initialValue"
-            ] = instance.team
+            self.fields["team"].widget.attrs["initialValue"] = instance.team
             self.fields["primary_mentor_id"].widget.attrs[
                 "initialValue"
             ] = instance.primary_mentor_id
@@ -204,6 +192,19 @@ class SubBatchForm(forms.ModelForm):
                 code="timeline_has_no_tasks",
             )
         return self.cleaned_data["timeline"]
+
+    def clean_start_date(self):
+        if (
+            models.Holiday.objects.filter(
+                date_of_holiday=self.cleaned_data["start_date"]
+            ).exists()
+            or self.cleaned_data["start_date"].weekday() == 6
+        ):
+            raise ValidationError(
+                "The Selected date falls on a holiday, please reconsider the start date",
+                code="invalid_date",
+            )
+        return self.cleaned_data["start_date"]
 
     class Meta:
         model = models.SubBatch
@@ -264,9 +265,7 @@ class AddInternForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         if self.data.get("sub_batch_id") and not (
-            models.SubBatch.objects.filter(
-                id=self.data.get("sub_batch_id")
-            ).exists()
+            models.SubBatch.objects.filter(id=self.data.get("sub_batch_id")).exists()
         ):
             self.add_error(
                 None,
@@ -286,7 +285,7 @@ class AddInternForm(forms.ModelForm):
     user_id = forms.ModelChoiceField(
         queryset=(
             models.User.objects.exclude(
-                intern_details__isnull=False
+                intern_details__isnull=False, intern_details__deleted_at__isnull=True
             ).filter(is_employed=False)
         ),
         label="User",

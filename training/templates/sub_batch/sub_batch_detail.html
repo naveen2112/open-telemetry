@@ -206,6 +206,7 @@ Sub Batch details
                 if (data.status === 'success') {
                     $('#sub-batch-trainees-table').DataTable().ajax.reload();
                     closeModal('modal');
+                    location.reload();
                 } else {
                     renderFormError(data);
                 }
@@ -223,6 +224,7 @@ Sub Batch details
                     removeErrors();
                     $('.page-loader').hide();
                     $('#sub-batch-trainees-table').DataTable().ajax.reload();
+                    location.reload();
                 },
                 error: function() {
                     $('.page-loader').hide();

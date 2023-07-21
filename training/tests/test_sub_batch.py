@@ -58,6 +58,10 @@ class SubBatchCreateTest(BaseTestCase):
             _quantity=5,
             days=2,
         )
+        baker.make(
+            "hubble.Holiday",
+            date_of_holiday=timezone.now().date() + timezone.timedelta(days=1),
+        )
         self.persisted_valid_inputs = {
             "name": self.faker.name(),
             "team": team_id,
@@ -81,9 +85,7 @@ class SubBatchCreateTest(BaseTestCase):
         with open(
             self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
         ) as sample_file:
-            data = self.get_valid_inputs(
-                {"users_list_file": sample_file}
-            )
+            data = self.get_valid_inputs({"users_list_file": sample_file})
             response = self.make_post_request(
                 reverse(self.create_route_name, args=[self.batch_id]),
                 data=data,
@@ -180,6 +182,25 @@ class SubBatchCreateTest(BaseTestCase):
                 form=SubBatchForm(data=data),
             )
 
+    def test_invalid_start_date(self):
+        """
+        To check what happens when start_date is invalid
+        """
+        with open(
+            self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
+        ) as sample_file:
+            data = self.get_valid_inputs(
+                {
+                    "users_list_file": sample_file,
+                    "start_date": timezone.now().date() + timezone.timedelta(days=1),
+                }
+            )
+            self.assertFormError(
+                SubBatchForm(data=data),
+                "start_date",
+                "The Selected date falls on a holiday, please reconsider the start date",
+            )
+
     def test_file_validation(self):
         """
         To check what happens when file input isn't valid
@@ -199,9 +220,7 @@ class SubBatchCreateTest(BaseTestCase):
         with open(
             self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
         ) as sample_file:
-            data = self.get_valid_inputs(
-                {"users_list_file": sample_file}
-            )
+            data = self.get_valid_inputs({"users_list_file": sample_file})
             self.make_post_request(
                 reverse(self.create_route_name, args=[self.batch_id]),
                 data=data,
@@ -209,9 +228,7 @@ class SubBatchCreateTest(BaseTestCase):
         with open(
             self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
         ) as sample_file:
-            data = self.get_valid_inputs(
-                {"users_list_file": sample_file}
-            )
+            data = self.get_valid_inputs({"users_list_file": sample_file})
             response = self.make_post_request(
                 reverse(self.create_route_name, args=[self.batch_id]),
                 data=data,
@@ -225,9 +242,7 @@ class SubBatchCreateTest(BaseTestCase):
         with open(
             self.get_file_path() + "invalid_file_upload1.xlsx", "rb"
         ) as sample_file:
-            data = self.get_valid_inputs(
-                {"users_list_file": sample_file}
-            )
+            data = self.get_valid_inputs({"users_list_file": sample_file})
             response = self.make_post_request(
                 reverse(self.create_route_name, args=[self.batch_id]),
                 data=data,
@@ -241,9 +256,7 @@ class SubBatchCreateTest(BaseTestCase):
         with open(
             self.get_file_path() + "invalid_file_upload2.xlsx", "rb"
         ) as sample_file:
-            data = self.get_valid_inputs(
-                {"users_list_file": sample_file}
-            )
+            data = self.get_valid_inputs({"users_list_file": sample_file})
             response = self.make_post_request(
                 reverse(self.create_route_name, args=[self.batch_id]),
                 data=data,
@@ -275,9 +288,7 @@ class SubBatchUpdateTest(BaseTestCase):
         This function is responsible for updating the valid inputs and creating data in databases as reqiured
         """
         self.batch_id = baker.make("hubble.Batch").id
-        self.sub_batch_id = baker.make(
-            "hubble.SubBatch", batch_id=self.batch_id
-        ).id
+        self.sub_batch_id = baker.make("hubble.SubBatch", batch_id=self.batch_id).id
         baker.make(
             "hubble.User",
             is_employed=True,
@@ -309,6 +320,10 @@ class SubBatchUpdateTest(BaseTestCase):
             order=1,
             sub_batch_id=self.sub_batch_id,
         )
+        baker.make(
+            "hubble.Holiday",
+            date_of_holiday=timezone.now().date() + timezone.timedelta(days=1),
+        )
         self.persisted_valid_inputs = {
             "name": self.faker.name(),
             "team": team_id,
@@ -327,9 +342,7 @@ class SubBatchUpdateTest(BaseTestCase):
             reverse(self.update_route_name, args=[self.sub_batch_id]),
             data=data,
         )
-        self.assertRedirects(
-            response, reverse(self.route_name, args=[self.batch_id])
-        )
+        self.assertRedirects(response, reverse(self.route_name, args=[self.batch_id]))
         self.assertEqual(response.status_code, 302)
         self.assertDatabaseHas(
             "SubBatch",
@@ -391,9 +404,7 @@ class SubBatchUpdateTest(BaseTestCase):
         """
         To check what happens when name field fails MinlengthValidation
         """
-        data = self.get_valid_inputs(
-            {"name": self.faker.pystr(max_chars=2)}
-        )
+        data = self.get_valid_inputs({"name": self.faker.pystr(max_chars=2)})
         self.make_post_request(
             reverse(self.update_route_name, args=[self.sub_batch_id]),
             data=data,
@@ -406,15 +417,26 @@ class SubBatchUpdateTest(BaseTestCase):
             form=SubBatchForm(data=data),
         )
 
+    def test_invalid_start_date(self):
+        """
+        To check what happens when start_date is invalid
+        """
+        data = self.get_valid_inputs(
+            {"start_date": timezone.now().date() + timezone.timedelta(days=1)}
+        )
+        self.assertFormError(
+            SubBatchForm(data=data),
+            "start_date",
+            "The Selected date falls on a holiday, please reconsider the start date",
+        )
+
     def test_timeline_has_no_tasks(self):
         """
         Check what happpens when a timeline with no task is selected
         """
         team_id = self.create_team().id
         timeline = baker.make("hubble.Timeline", team_id=team_id)
-        data = self.get_valid_inputs(
-            {"team": team_id, "timeline": timeline.id}
-        )
+        data = self.get_valid_inputs({"team": team_id, "timeline": timeline.id})
         self.make_post_request(
             reverse(self.update_route_name, args=[self.sub_batch_id]),
             data=data,
@@ -450,20 +472,14 @@ class SubBatchShowTest(BaseTestCase):
         response = self.make_get_request(
             reverse(self.update_route_name, args=[sub_batch.id])
         )
-        self.assertIsInstance(
-            response.context.get("form"), SubBatchForm
-        )
-        self.assertEqual(
-            response.context.get("form").instance, sub_batch
-        )
+        self.assertIsInstance(response.context.get("form"), SubBatchForm)
+        self.assertEqual(response.context.get("form").instance, sub_batch)
 
     def test_failure(self):
         """
         Check what happens when invalid data is given as input
         """
-        response = self.make_get_request(
-            reverse(self.update_route_name, args=[0])
-        )
+        response = self.make_get_request(reverse(self.update_route_name, args=[0]))
         self.assertEqual(
             self.bytes_cleaner(response.content),
             '{"message": "Invalid SubBatch id", "status": "error"}',
@@ -489,16 +505,12 @@ class GetTimelineTest(BaseTestCase):
         Check what happens when valid data is given as input
         """
         team_id = baker.make("hubble.Team").id
-        timeline = baker.make(
-            "hubble.Timeline", team_id=team_id, is_active=True
-        )
+        timeline = baker.make("hubble.Timeline", team_id=team_id, is_active=True)
         response = self.make_post_request(
             reverse(self.get_timeline_route_name),
             data={"team_id": team_id},
         )
-        self.assertJSONEqual(
-            (response.content), {"timeline": model_to_dict(timeline)}
-        )
+        self.assertJSONEqual((response.content), {"timeline": model_to_dict(timeline)})
         self.assertEqual(response.status_code, 200)
 
     def test_failure(self):
@@ -550,9 +562,7 @@ class SubBatchDeleteTest(BaseTestCase):
         """
         Check what happens when invalid data is given as input
         """
-        response = self.make_delete_request(
-            reverse(self.delete_route_name, args=[0])
-        )
+        response = self.make_delete_request(reverse(self.delete_route_name, args=[0]))
         self.assertJSONEqual(
             self.decoded_json(response),
             {"message": "Error while deleting Sub-Batch!"},
@@ -601,9 +611,7 @@ class SubBatchDatatableTest(BaseTestCase):
         """
         To makes sure that the correct template is used
         """
-        response = self.make_get_request(
-            reverse(self.route_name, args=[self.batch.id])
-        )
+        response = self.make_get_request(reverse(self.route_name, args=[self.batch.id]))
         self.assertTemplateUsed(response, "sub_batch/sub_batch.html")
         self.assertContains(response, "SubBatch List")
 
@@ -612,14 +620,22 @@ class SubBatchDatatableTest(BaseTestCase):
         To check whether all columns are present in datatable and length of rows without any filter
         """
         no_of_teams = (
-            SubBatch.objects.filter(batch_id=self.batch.id)
-            .values("team")
+            Batch.objects.filter(id=self.batch.id)
+            .values("sub_batches__team")
             .distinct()
             .count()
         )
-        sub_batches = SubBatch.objects.filter(
-            batch=self.batch.id
-        ).annotate(
+        no_of_trainees = (
+            Batch.objects.filter(id=self.batch.id)
+            .annotate(
+                no_of_trainees=Count(
+                    "sub_batches__intern_details",
+                    filter=Q(sub_batches__intern_details__deleted_at__isnull=True),
+                ),
+            )
+            .values("no_of_trainees")
+        )[0]["no_of_trainees"]
+        sub_batches = SubBatch.objects.filter(batch=self.batch.id).annotate(
             trainee_count=Count(
                 "intern_details",
                 filter=Q(intern_details__deleted_at__isnull=True),
@@ -631,31 +647,22 @@ class SubBatchDatatableTest(BaseTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertTrue("extra_data" in response.json())
-        self.assertTrue(
-            "no_of_teams" in response.json()["extra_data"][0]
-        )
-        self.assertTrue(
-            "no_of_trainees" in response.json()["extra_data"][0]
-        )
+        self.assertTrue("no_of_teams" in response.json()["extra_data"][0])
+        self.assertTrue("no_of_trainees" in response.json()["extra_data"][0])
+        self.assertEqual(response.json()["extra_data"][0]["no_of_teams"], no_of_teams)
         self.assertEqual(
-            response.json()["extra_data"][0]["no_of_teams"], no_of_teams
+            response.json()["extra_data"][0]["no_of_trainees"], no_of_trainees
         )
         for row in range(len(sub_batches)):
             expected_value = sub_batches[row]
             received_value = response.json()["data"][row]
-            self.assertEqual(
-                expected_value.pk, int(received_value["pk"])
-            )
-            self.assertEqual(
-                expected_value.name, received_value["name"]
-            )
+            self.assertEqual(expected_value.pk, int(received_value["pk"]))
+            self.assertEqual(expected_value.name, received_value["name"])
             self.assertEqual(
                 expected_value.trainee_count,
                 int(received_value["trainee_count"]),
             )
-            self.assertEqual(
-                expected_value.timeline.name, received_value["timeline"]
-            )
+            self.assertEqual(expected_value.timeline.name, received_value["timeline"])
             self.assertEqual(
                 expected_value.reporting_persons,
                 received_value["reporting_persons"],
@@ -673,9 +680,7 @@ class SubBatchDatatableTest(BaseTestCase):
             self.assertTrue("timeline" in row)
             self.assertTrue("start_date" in row)
             self.assertTrue("action" in row)
-        self.assertTrue(
-            response.json()["recordsTotal"], len(self.sub_batch)
-        )
+        self.assertTrue(response.json()["recordsTotal"], len(self.sub_batch))
 
     def test_datatable_search(self):
         """
@@ -684,13 +689,9 @@ class SubBatchDatatableTest(BaseTestCase):
         name_to_be_searched = self.name + "1"
         response = self.make_post_request(
             reverse(self.datatable_route_name),
-            data=self.get_valid_inputs(
-                {"search[value]": name_to_be_searched}
-            ),
+            data=self.get_valid_inputs({"search[value]": name_to_be_searched}),
         )
         self.assertTrue(
             response.json()["recordsTotal"],
-            SubBatch.objects.filter(
-                name__icontains=name_to_be_searched
-            ).count(),
+            SubBatch.objects.filter(name__icontains=name_to_be_searched).count(),
         )
