@@ -23,14 +23,10 @@ class UnManagedModelTestRunner(DiscoverRunner):
 
     def setup_test_environment(self, *args, **kwargs):
         settings.IS_TEST_CASE = True
-        super(UnManagedModelTestRunner, self).setup_test_environment(
-            *args, **kwargs
-        )
+        super(UnManagedModelTestRunner, self).setup_test_environment(*args, **kwargs)
 
     def teardown_test_environment(self, *args, **kwargs):
-        super(UnManagedModelTestRunner, self).teardown_test_environment(
-            *args, **kwargs
-        )
+        super(UnManagedModelTestRunner, self).teardown_test_environment(*args, **kwargs)
         settings.IS_TEST_CASE = False
 
 
@@ -54,9 +50,7 @@ class BaseTestCase(TestCase):
         """
         This function is responsible for creating an user and giving them admi access
         """
-        user = baker.make(
-            User, is_employed=True, _fill_optional=["email"]
-        )
+        user = baker.make(User, is_employed=True, _fill_optional=["email"])
         ADMIN_EMAILS.append(
             user.email
         )  # TODO :: Need to remove this logic after roles and permission
@@ -77,9 +71,7 @@ class BaseTestCase(TestCase):
         """
         This function is responsible for handling the GET requests
         """
-        return self.client.get(
-            url_pattern, SERVER_NAME=self.testcase_server_name
-        )
+        return self.client.get(url_pattern, SERVER_NAME=self.testcase_server_name)
 
     def make_post_request(self, url_pattern, data):
         """
@@ -93,9 +85,7 @@ class BaseTestCase(TestCase):
         """
         This function is responsible for handling DELETE requests}
         """
-        return self.client.delete(
-            url_pattern, SERVER_NAME=self.testcase_server_name
-        )
+        return self.client.delete(url_pattern, SERVER_NAME=self.testcase_server_name)
 
     def get_valid_inputs(self, override={}):
         """
@@ -150,9 +140,7 @@ class BaseTestCase(TestCase):
         """
         return str(response.decode()).replace('\\"', "'")
 
-    def get_error_message(
-        self, key, value, current_value, validation_parameter
-    ):
+    def get_error_message(self, key, value, current_value, validation_parameter):
         """
         This function is responsible for building the error json response dynamically
         """
@@ -170,7 +158,10 @@ class BaseTestCase(TestCase):
         elif value == "invalid_choice":
             message = "Select a valid choice. That choice is not one of the available choices."
         elif value == "invalid_order":
-            message = f"The current order of the task is invalid. The valid input for order ranges form 1-{validation_parameter[key]}."
+            message = (
+                f"The current order of the task is invalid. "
+                f"The valid input for order ranges form {validation_parameter[key][0]}-{validation_parameter[key][-1] + 1}."
+            )
         elif value == "zero_order_error":
             message = "Order value must be greater than zero."
         elif value == "timeline_has_no_tasks":
