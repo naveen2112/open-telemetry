@@ -30,7 +30,7 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
         ).order_by("-id")[:1]
         sub_batch_id = SubBatch.objects.filter(
             intern_details__user=self.object.id
-        ).first()
+        ).last()
 
         task_count = (
             SubBatchTaskTimeline.objects.filter(
@@ -45,6 +45,7 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
         last_attempt_score = SubBatchTaskTimeline.objects.filter(
             id=OuterRef("user__assessments__task_id"),
             assessments__user_id=OuterRef("user_id"),
+            sub_batch_id=OuterRef("sub_batch_id"),
         ).order_by("-assessments__id")[:1]
 
         performance = (
@@ -70,7 +71,12 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
                 no_of_retries=Coalesce(
                     Count(
                         "user__assessments__is_retry",
-                        filter=Q(Q(user__assessments__is_retry=True) & Q(user__assessments__extension__isnull=True)),
+                        filter=Q(
+                            Q(user__assessments__is_retry=True)
+                            & Q(user__assessments__extension__isnull=True)
+                            & Q(user__assessments__task_id__deleted_at__isnull=True)
+                            & Q(user__assessments__sub_batch_id=F("sub_batch_id"))
+                        ),
                     ),
                     0,
                 ),
@@ -78,7 +84,11 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
                     (
                         Count(
                             "user__assessments__task_id",
-                            filter=Q(user__assessments__user_id=F("user_id")),
+                            filter=Q(
+                                Q(user__assessments__user_id=F("user_id"))
+                                & Q(user__assessments__task_id__deleted_at__isnull=True)
+                                & Q(user__assessments__sub_batch_id=F("sub_batch_id"))
+                            ),
                             distinct=True,
                         )
                         / float(task_count)

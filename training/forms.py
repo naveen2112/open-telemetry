@@ -1,6 +1,7 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator
+from django.utils import timezone
 
 from core.constants import PRESENT_TYPES, TASK_TYPES
 from hubble import models
@@ -333,19 +334,20 @@ class SubBatchTimelineForm(forms.ModelForm):
             )
 
     def clean_order(self):
-        maximum_order_value = (
-            [
-                models.SubBatchTaskTimeline.objects.filter(
-                    sub_batch_id=self.data.get("sub_batch_id")
-                )
-                .values_list("order", flat=True)
-                .last()
-            ][0]
-            or 0
-        ) + 1
-        if self.cleaned_data["order"] > maximum_order_value:
+        valid_order_value = list(
+            models.SubBatchTaskTimeline.objects.filter(
+                start_date__gt=timezone.now(),
+                sub_batch_id=self.data.get("sub_batch_id"),
+            ).values_list("order", flat=True)
+        ) or [0]
+        if (valid_order_value[0] > self.cleaned_data["order"] > 0) or (
+            self.cleaned_data["order"] > valid_order_value[-1] + 1
+        ):
             raise ValidationError(
-                f"The current order of the task is invalid. The valid input for order ranges form 1-{maximum_order_value}.",
+                (
+                    f"The current order of the task is invalid. "
+                    f"The valid input for order ranges form {valid_order_value[0]}-{valid_order_value[-1] + 1}."
+                ),
                 code="invalid_order",
             )
         if self.cleaned_data["order"] <= 0:
