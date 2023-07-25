@@ -6,6 +6,7 @@ from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView
 
@@ -43,6 +44,7 @@ class SubBatchTimelineDataTable(LoginRequiredMixin, CustomDatatable):
         {"name": "start_date", "visible": True, "searchable": False},
         {"name": "end_date", "visible": True, "searchable": False},
         {"name": "created_at", "visible": False, "searchable": False},
+        {"name": "disabled", "visible": False, "searchable": False},
         {
             "name": "action",
             "title": "Action",
@@ -59,6 +61,7 @@ class SubBatchTimelineDataTable(LoginRequiredMixin, CustomDatatable):
         )
 
     def customize_row(self, row, obj):
+        row["disabled"] = (obj.start_date.date() <= timezone.now().date())
         row[
             "action"
         ] = f"<div class='form-inline justify-content-center'>-</div>"
