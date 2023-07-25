@@ -365,6 +365,7 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
         last_attempt_score = SubBatchTaskTimeline.objects.filter(
             id=OuterRef("user__assessments__task_id"),
             assessments__user_id=OuterRef("user_id"),
+            sub_batch_id=OuterRef("sub_batch_id"),
         ).order_by("-assessments__id")[:1]
         query = (
             self.model.objects.filter(sub_batch__id=request.POST.get("sub_batch"))
@@ -373,14 +374,13 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
                 average_marks=Case(
                     When(
                         user_id=F("user__assessments__user_id"),
-                        then=Coalesce(
+                        then=(
                             Avg(
                                 Subquery(
                                     last_attempt_score.values("assessments__score")
                                 ),
                                 distinct=True,
-                            ),
-                            0.0,
+                            )
                         ),
                     ),
                     default=None,
@@ -391,6 +391,8 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
                         filter=Q(
                             Q(user__assessments__is_retry=True)
                             & Q(user__assessments__extension__isnull=True)
+                            & Q(user__assessments__task_id__deleted_at__isnull=True)
+                            & Q(user__assessments__sub_batch_id=F("sub_batch_id"))
                         ),
                     ),
                     0,
@@ -399,7 +401,11 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
                     (
                         Count(
                             "user__assessments__task_id",
-                            filter=Q(user__assessments__user_id=F("user_id")),
+                            filter=Q(
+                                Q(user__assessments__user_id=F("user_id"))
+                                & Q(user__assessments__task_id__deleted_at__isnull=True)
+                                & Q(user__assessments__sub_batch_id=F("sub_batch_id"))
+                            ),
                             distinct=True,
                         )
                         / float(task_count)
@@ -421,7 +427,7 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
                         Q(average_marks__lt=65) & Q(average_marks__gte=50),
                         then=Value(AVERAGE),
                     ),
-                    When(average_marks__lt=65, then=Value(POOR)),
+                    When(average_marks__lt=50, then=Value(POOR)),
                     default=Value(NOT_YET_STARTED),
                 ),
             )

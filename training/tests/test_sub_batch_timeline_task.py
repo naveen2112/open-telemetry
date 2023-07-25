@@ -246,13 +246,13 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
         }
         validation_parameters = {
             "order": [
-                SubBatchTaskTimeline.objects.filter(
-                    sub_batch_id=self.sub_batch.id
+                (SubBatchTaskTimeline.objects.filter(
+                    sub_batch_id=self.sub_batch.id,
+                    start_date__gt=timezone.now(),
                 )
-                .values_list("order", flat=True)
-                .last()
-            ][0]
-            or 0 + 1
+                .values_list("order", flat=True))
+            or 0
+            ]
         }
         self.assertEqual(
             self.bytes_cleaner(response.content),
