@@ -47,11 +47,9 @@ AVERAGE = "Average"
 POOR = "Poor"
 NOT_YET_STARTED = "Not Yet Started"
 
-USER_STATUS = [
-    "intern",
-    "project_intern",
-    "probationer",
-    "working",
-    "in-notice-period",
-    "relieved",
-]
+USER_STATUS_INTERN = "intern"
+USER_STATUS_PROJECT_INTERN = "project_intern"
+USER_STATUS_PROBATIONER = "probationer"
+USER_STATUS_WORKING = "working"
+USER_STATUS_NOTICE_PERIOD = "in-notice-period"
+USER_STATUS_RELIEVED = "relieved"
