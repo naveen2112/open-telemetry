@@ -22,7 +22,7 @@
         </div>
         <div class="rounded-xl bg-mild-green-10 flex justify-center items-center flex-col mr-6"
             style="width: 180px;height: 90px;">
-            <h3 class="font-bold mb-2">{{ performance_stats.average_marks|default_if_none:"-" }}</h3>
+            <h3 class="font-bold mb-2">{{ performance_stats.average_marks|floatformat:2|default_if_none:"-" }}</h3>
             <p class="text-mild-green text-base">Average Score %</p>
         </div>
         <div class="rounded-xl bg-dark-blue-10 flex justify-center items-center flex-col mr-6"
