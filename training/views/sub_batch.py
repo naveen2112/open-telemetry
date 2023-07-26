@@ -392,7 +392,7 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
                             Q(user__assessments__is_retry=True)
                             & Q(user__assessments__extension__isnull=True)
                             & Q(user__assessments__task_id__deleted_at__isnull=True)
-                            & Q(user__assessments__sub_batch_id=F("sub_batch_id"))
+                            & Q(user__assessments__sub_batch_id=request.POST.get("sub_batch"))
                         ),
                     ),
                     0,
@@ -404,7 +404,7 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
                             filter=Q(
                                 Q(user__assessments__user_id=F("user_id"))
                                 & Q(user__assessments__task_id__deleted_at__isnull=True)
-                                & Q(user__assessments__sub_batch_id=F("sub_batch_id"))
+                                & Q(user__assessments__sub_batch_id=request.POST.get("sub_batch"))
                             ),
                             distinct=True,
                         )
