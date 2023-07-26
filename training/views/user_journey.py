@@ -75,7 +75,7 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
                             Q(user__assessments__is_retry=True)
                             & Q(user__assessments__extension__isnull=True)
                             & Q(user__assessments__task_id__deleted_at__isnull=True)
-                            & Q(user__assessments__sub_batch_id=F("sub_batch_id"))
+                            & Q(user__assessments__sub_batch_id=sub_batch_id)
                         ),
                     ),
                     0,
@@ -87,7 +87,7 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
                             filter=Q(
                                 Q(user__assessments__user_id=F("user_id"))
                                 & Q(user__assessments__task_id__deleted_at__isnull=True)
-                                & Q(user__assessments__sub_batch_id=F("sub_batch_id"))
+                                & Q(user__assessments__sub_batch_id=sub_batch_id)
                             ),
                             distinct=True,
                         )
@@ -166,7 +166,7 @@ def update_task_score(request, pk):
             report.user_id = pk
             report.task_id = request.POST.get("task")
             report.extension_id = request.POST.get("extension")
-            report.sub_batch = SubBatch.objects.filter(intern_details__user=pk).first()
+            report.sub_batch = SubBatch.objects.filter(intern_details__user=pk).last()
             report.is_retry = True if request.POST.get("status") == "true" else False
             report.created_by = request.user
             report.save()
