@@ -35,7 +35,6 @@ from hubble.models import (
     InternDetail,
     SubBatch,
     SubBatchTaskTimeline,
-    Team,
     Timeline,
     TimelineTask,
     User,
@@ -275,11 +274,8 @@ def update_sub_batch(request, pk):
             return redirect(reverse("batch.detail", args=[sub_batch.batch.id]))
         context = {"form": sub_batch_form, "sub_batch": sub_batch}
         return render(request, "sub_batch/update_sub_batch.html", context)
-    sub_batch = SubBatch.objects.get(id=pk)
-    form = SubBatchForm(instance=sub_batch)
-    form.fields["team"].queryset = Team.objects.filter(id=sub_batch.team.id)
     context = {
-        "form": form,
+        "form": SubBatchForm(instance=sub_batch),
         "sub_batch": sub_batch,
     }
     return render(request, "sub_batch/update_sub_batch.html", context)

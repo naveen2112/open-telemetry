@@ -7,7 +7,7 @@ from django.core.validators import MinLengthValidator
 
 from core.constants import PRESENT_TYPES, TASK_TYPES, USER_STATUS
 from hubble import models
-from hubble.models import Assessment
+from hubble.models import Assessment, Team
 
 
 class TimelineForm(forms.ModelForm):
@@ -202,6 +202,9 @@ class SubBatchForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        instance = kwargs.get("instance")
+        if instance:
+            self.fields["team"].queryset = Team.objects.filter(id=instance.team.id)
 
         self.fields["team"].empty_label = "Select a Team"
         if self.data.get("team", None):

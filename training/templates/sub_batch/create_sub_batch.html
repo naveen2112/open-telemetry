@@ -196,7 +196,7 @@
         });
 
         $(document).ready(function() {
-            var timeline = `{{ form.timeline }}`
+            var timeline = `{{ form.timeline }}`;
             let timeline_id = $(timeline).val();
             update_timeline_value(initialValue = timeline_id);
             $('#create_sub_batch').click(function(e) {
