@@ -7,10 +7,15 @@ from hubble.models import Module, User
 class Task(db.SoftDeleteWithBaseModel):
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=255)
-    module = models.ForeignKey(Module, models.CASCADE, related_name="tasks")
+    module = models.ForeignKey(
+        Module, models.CASCADE, related_name="tasks"
+    )
     description = models.TextField(blank=True, null=True)
     created_by = models.ForeignKey(
-        User, models.CASCADE, db_column="created_by", related_name="created_by"
+        User,
+        models.CASCADE,
+        db_column="created_by",
+        related_name="created_by",
     )
 
     class Meta:

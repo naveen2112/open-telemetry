@@ -31,7 +31,7 @@ Timeline Template Detail
 {% block body %}
 <div class="jquery-modal current hidden" id="modal">
     <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
-        <p class="font-semibold text-lg mb-10">Create Task</p>
+        <p class="font-semibold text-lg mb-10" id="modalName"></p>
         <form method="post" class="timeline-task-form" id="timeline-task-create-form">
             <input type="hidden" name="timeline-task" id="timeline-task">
             <div class="modal-body">
@@ -83,8 +83,7 @@ Timeline Template Detail
                 autoWidth: false,
                 scrollX: false,
                 order: [],
-                dom: 't',
-                pageLength: 50
+                bPaginate: false
             }, {
             'timeline_id': '{{ timeline.id }}',
         }
@@ -123,6 +122,7 @@ Timeline Template Detail
             url: "{% url 'timeline-task.reorder' %}",
             data: {
                 data: data,
+                timeline_id: "{{ timeline.id }}",
             },
             success: function(data) {
                 if (data.status === 'success') {
@@ -140,42 +140,44 @@ Timeline Template Detail
 
     function openTaskCreateModal() {
         openBaseModal();
+        $("#modalName").text('Create Task');
         $('#id_name').val('');
         $('#id_days').val('');
         $('#submit-btn').attr("onclick", "createTimelineTask()");
     }
 
-        function createTimelineTask() {
-            $('.page-loader').show();
-            $.ajax({
-                type: "POST",
-                url: "{% url 'timeline-task.create' %}",
-                data: {
-                    name: $('#id_name').val(),
-                    days: $('#id_days').val(),
-                    present_type: $('input[name="present_type"]:checked').val(),
-                    task_type: $('input[name="task_type"]:checked').val(),
-                    timeline_id: $('#timeline_id').val(),
-                },
-                success: function(data) {
-                    removeErrors();
-                    $('.page-loader').hide();
-                    if (data.status === 'success') {
-                        $('#timeline-table').DataTable().ajax.reload();
-                        closeModal('modal');
-                    } else {
-                        renderFormError(data);
-                    }
-                },
-                error: function() {
-                    $('.page-loader').hide();
-                    alert("Something went wrong");
-                },
-            });
-        }
+    function createTimelineTask() {
+        $('.page-loader').show();
+        $.ajax({
+            type: "POST",
+            url: "{% url 'timeline-task.create' %}",
+            data: {
+                name: $('#id_name').val(),
+                days: $('#id_days').val(),
+                present_type: $('input[name="present_type"]:checked').val(),
+                task_type: $('input[name="task_type"]:checked').val(),
+                timeline_id: $('#timeline_id').val(),
+            },
+            success: function(data) {
+                removeErrors();
+                $('.page-loader').hide();
+                if (data.status === 'success') {
+                    $('#timeline-table').DataTable().ajax.reload();
+                    closeModal('modal');
+                } else {
+                    renderFormError(data);
+                }
+            },
+            error: function() {
+                $('.page-loader').hide();
+                alert("Something went wrong");
+            },
+        });
+    }
 
     function openUpdateModel(url) {
         removeErrors();
+        $("#modalName").text('Update Task');
         $('.page-loader').show();
         $('.update-form-fields-container').empty();
         $.ajax({
@@ -201,51 +203,51 @@ Timeline Template Detail
         document.getElementById("modal").classList.add("blocker");
     }
 
-        function updateTimeline() {
+    function updateTimeline() {
+        $('.page-loader').show();
+        $.ajax({
+            type: "POST",
+            url: "/timeline-task/"+ $("#timeline-task").val() +"/edit", //TODO
+            data: {
+                name: $('#id_name').val(),
+                days: $('#id_days').val(),
+                present_type: $('input[name="present_type"]:checked').val(),
+                task_type: $('input[name="task_type"]:checked').val(),
+            },
+            success: function(data) {
+                removeErrors();
+                $('.page-loader').hide();
+                if (data.status === 'success') {
+                    $('#timeline-table').DataTable().ajax.reload();
+                    closeModal('modal');
+                } else {
+                    renderFormError(data);
+                }
+            },
+            error: function() {
+                $('.page-loader').hide();
+                alert("Something went wrong");
+            },
+        });
+    }
+
+    function deleteTimeline(url) {
+        let text = 'Are you sure do you want to delete';
+        if (confirm(text) == true) {
             $('.page-loader').show();
             $.ajax({
-                type: "POST",
-                url: "/timeline-task/"+ $("#timeline-task").val() +"/edit", //TODO
-                data: {
-                    name: $('#id_name').val(),
-                    days: $('#id_days').val(),
-                    present_type: $('input[name="present_type"]:checked').val(),
-                    task_type: $('input[name="task_type"]:checked').val(),
-                },
+                type: "DELETE",
+                url: url,
                 success: function(data) {
-                    removeErrors();
+                    $('#timeline-table').DataTable().ajax.reload();
                     $('.page-loader').hide();
-                    if (data.status === 'success') {
-                        $('#timeline-table').DataTable().ajax.reload();
-                        closeModal('modal');
-                    } else {
-                        renderFormError(data);
-                    }
                 },
-                error: function() {
+                error: function(jqXHR, textStatus, errorThrown) {
+                    alert(jqXHR.responseJSON.message);
                     $('.page-loader').hide();
-                    alert("Something went wrong");
                 },
             });
         }
-
-        function deleteTimeline(url) {
-            let text = 'Are you sure do you want to delete';
-            if (confirm(text) == true) {
-                $('.page-loader').show();
-                $.ajax({
-                    type: "DELETE",
-                    url: url,
-                    success: function(data) {
-                        $('#timeline-table').DataTable().ajax.reload();
-                        $('.page-loader').hide();
-                    },
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        alert(jqXHR.responseJSON.message);
-                        $('.page-loader').hide();
-                    },
-                });
-            }
-        }
-    </script>
+    }
+</script>
 {% endblock %}

@@ -97,6 +97,7 @@ Timeline Template
     function openModal() {
         openBaseModal();
         $('#id_team').val('');
+        $('#timeline_id').val('');
         $('.dropdown_selected_value').html('');
         $('#id_name').val('');
         $('#id_is_active').prop('checked', false);
@@ -120,6 +121,7 @@ Timeline Template
                 removeErrors();
                 $('.page-loader').hide();
                 if (data.status === 'success') {
+                    $("#timeline_id").val("");
                     $('#timeline-table').DataTable().ajax.reload();
                     closeModal('modal');
                 } else {
