@@ -1,9 +1,12 @@
 import logging
 
+import numpy as np
 import pandas as pd
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count, Q
+from django.db.models import (Avg, Case, Count, F, OuterRef, Q, Subquery,
+                              Value, When)
+from django.db.models.functions import Coalesce
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -12,6 +15,8 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView
 
 from core import template_utils
+from core.constants import (ABOVE_AVERAGE, AVERAGE, GOOD, MEET_EXPECTATION,
+                            NOT_YET_STARTED, POOR, TASK_TYPE_ASSESSMENT)
 from core.utils import (CustomDatatable, schedule_timeline_for_sub_batch,
                         validate_authorization)
 from hubble.models import (Batch, InternDetail, SubBatch, SubBatchTaskTimeline,
@@ -28,20 +33,38 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
 
     column_defs = [
         {"name": "id", "visible": False, "searchable": False},
-        {"name": "name", "visible": True, "searchable": False},
-        {"name": "team", "visible": True, "searchable": False},
+        {"name": "name", "visible": True, "searchable": True},
+        {
+            "name": "team",
+            "foreign_field": "team__name",
+            "title": "Teams",
+            "visible": True,
+            "searchable": True,
+        },
         {
             "name": "trainee_count",
             "title": "No. of Trainees",
             "visible": True,
             "searchable": False,
         },
-        {"name": "start_date", "visible": True, "searchable": False},
+        {
+            "name": "reporting_persons",
+            "title": "Reporting Persons",
+            "visible": True,
+            "searchable": False,
+            "orderable": False,
+        },
+        {
+            "name": "start_date",
+            "visible": True,
+            "searchable": False,
+            "orderable": False,
+        },
         {
             "name": "timeline",
             "title": "Assigned Timeline Template",
             "visible": True,
-            "searchable": False,
+            "searchable": True,
             "foreign_field": "timeline__name",
         },
         {
@@ -76,6 +99,34 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
         row["start_date"] = obj.start_date.strftime("%d %b %Y")
         return
 
+    def get_response_dict(self, request, paginator, draw_idx, start_pos):
+        response = super().get_response_dict(request, paginator, draw_idx, start_pos)
+        response["extra_data"] = list(
+            Batch.objects.filter(id=request.POST.get("batch_id"))
+            .annotate(
+                no_of_teams=Coalesce(
+                    Subquery(
+                        Batch.objects.filter(sub_batches__batch_id=OuterRef("id"))
+                        .annotate(
+                            count_of_teams=Count(
+                                "sub_batches__team",
+                                distinct=True,
+                                filter=Q(sub_batches__deleted_at__isnull=True),
+                            )
+                        )
+                        .values("count_of_teams")
+                    ),
+                    0,
+                ),
+                no_of_trainees=Count(
+                    "sub_batches__intern_details",
+                    filter=Q(sub_batches__intern_details__deleted_at__isnull=True),
+                ),
+            )
+            .values("no_of_teams", "no_of_trainees")
+        )
+        return response
+
 
 @login_required()
 @validate_authorization()
@@ -91,6 +142,9 @@ def create_sub_batch(request, pk):
         if "users_list_file" in request.FILES:
             excel_file = request.FILES["users_list_file"]
             df = pd.read_excel(excel_file)
+            df.replace(chr(160), np.nan, inplace=True)
+            df = df.dropna(how="all")
+            df["employee_id"] = df["employee_id"].astype(int)
             if (df.columns[0] == "employee_id") and (df.columns[1] == "college"):
                 if User.objects.filter(
                     employee_id__in=df["employee_id"]
@@ -144,7 +198,8 @@ def create_sub_batch(request, pk):
                 return redirect(reverse("batch.detail", args=[pk]))
             else:
                 sub_batch_form.add_error(
-                    None, "The Selected Team's Active Timeline doesn't have any tasks"
+                    None,
+                    "The Selected Team's Active Timeline doesn't have any tasks",
                 )
     context = {
         "form": sub_batch_form,
@@ -162,14 +217,11 @@ def get_timeline(request):
     """
     team_id = request.POST.get("team_id")
     try:
-        timeline = Timeline.objects.get(team=team_id, is_active=True)
+        timeline = Timeline.objects.get(team_id=team_id, is_active=True)
         return JsonResponse(
             {"timeline": model_to_dict(timeline)}
         )  # Return the response with active template for a team
     except Exception as e:
-        logging.error(
-            f"An error has occured while fetching an active timeline template for the team {team_id}\n{e}"
-        )
         return JsonResponse(
             {
                 "message": "No active timeline template found",
@@ -184,29 +236,27 @@ def update_sub_batch(request, pk):
     """
     Update Sub-batch View
     """
-    sub_batch = SubBatch.objects.get(id=pk)
+    try:
+        sub_batch = SubBatch.objects.get(id=pk)
+    except Exception as e:
+        return JsonResponse({"message": "Invalid SubBatch id", "status": "error"})
     if request.method == "POST":
         sub_batch_form = SubBatchForm(request.POST, instance=sub_batch)
         if sub_batch_form.is_valid():
             # validation start date
             active_form = sub_batch_form.save(commit=False)
-            if TimelineTask.objects.filter(timeline=active_form.timeline.id):
-                sub_batch.primary_mentor_id = request.POST.get("primary_mentor_id")
-                sub_batch.secondary_mentor_id = request.POST.get("secondary_mentor_id")
-                active_form = sub_batch_form.save()
-                if int(request.POST.get("timeline")) != sub_batch.timeline.id:
-                    SubBatchTaskTimeline.bulk_delete({"sub_batch_id": pk})
-                    schedule_timeline_for_sub_batch(sub_batch, request.user)
-                else:
-                    schedule_timeline_for_sub_batch(
-                        sub_batch,
-                        is_create=False,
-                    )
-                return redirect(reverse("batch.detail", args=[sub_batch.batch.id]))
+            sub_batch.primary_mentor_id = request.POST.get("primary_mentor_id")
+            sub_batch.secondary_mentor_id = request.POST.get("secondary_mentor_id")
+            active_form = sub_batch_form.save()
+            if int(request.POST.get("timeline")) != sub_batch.timeline.id:
+                SubBatchTaskTimeline.bulk_delete({"sub_batch_id": pk})
+                schedule_timeline_for_sub_batch(sub_batch, request.user)
             else:
-                sub_batch_form.add_error(
-                    None, "The Selected Team's Active Timeline doesn't have any tasks"
+                schedule_timeline_for_sub_batch(
+                    sub_batch,
+                    is_create=False,
                 )
+            return redirect(reverse("batch.detail", args=[sub_batch.batch.id]))
         context = {"form": sub_batch_form, "sub_batch": sub_batch}
         return render(request, "sub_batch/update_sub_batch.html", context)
     sub_batch = SubBatch.objects.get(id=pk)
@@ -253,8 +303,38 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
 
     column_defs = [
         {"name": "pk", "visible": False, "searchable": False},
-        {"name": "user", "title": "User", "visible": True, "searchable": False},
+        {
+            "name": "user",
+            "title": "Trainee's",
+            "foreign_field": "user__name",
+            "visible": True,
+            "searchable": True,
+        },
         {"name": "college", "title": "College", "visible": True, "searchable": False},
+        {
+            "name": "completion",
+            "title": "Completion (%)",
+            "visible": True,
+            "searchable": False,
+        },
+        {
+            "name": "no_of_retries",
+            "title": "Total Retries (%)",
+            "visible": True,
+            "searchable": False,
+        },
+        {
+            "name": "average_marks",
+            "title": "Average Score (%)",
+            "visible": True,
+            "searchable": False,
+        },
+        {
+            "name": "performance",
+            "title": "Performance",
+            "visible": True,
+            "searchable": False,
+        },
         {
             "name": "expected_completion",
             "title": "Expected Completion",
@@ -272,9 +352,93 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
     ]
 
     def get_initial_queryset(self, request=None):
-        return self.model.objects.filter(sub_batch__id=request.POST.get("sub_batch"))
+        task_count = (
+            SubBatchTaskTimeline.objects.filter(
+                sub_batch_id=request.POST.get("sub_batch"),
+                task_type=TASK_TYPE_ASSESSMENT,
+            )
+            .values("id")
+            .count()
+        )
+        if task_count == 0:
+            task_count = 1
+        last_attempt_score = SubBatchTaskTimeline.objects.filter(
+            id=OuterRef("user__assessments__task_id"),
+            assessments__user_id=OuterRef("user_id"),
+            sub_batch_id=OuterRef("sub_batch_id"),
+        ).order_by("-assessments__id")[:1]
+        query = (
+            self.model.objects.filter(sub_batch__id=request.POST.get("sub_batch"))
+            .select_related("user")
+            .annotate(
+                average_marks=Case(
+                    When(
+                        user_id=F("user__assessments__user_id"),
+                        then=(
+                            Avg(
+                                Subquery(
+                                    last_attempt_score.values("assessments__score")
+                                ),
+                                distinct=True,
+                            )
+                        ),
+                    ),
+                    default=None,
+                ),
+                no_of_retries=Coalesce(
+                    Count(
+                        "user__assessments__is_retry",
+                        filter=Q(
+                            Q(user__assessments__is_retry=True)
+                            & Q(user__assessments__extension__isnull=True)
+                            & Q(user__assessments__task_id__deleted_at__isnull=True)
+                            & Q(user__assessments__sub_batch_id=request.POST.get("sub_batch"))
+                        ),
+                    ),
+                    0,
+                ),
+                completion=Coalesce(
+                    (
+                        Count(
+                            "user__assessments__task_id",
+                            filter=Q(
+                                Q(user__assessments__user_id=F("user_id"))
+                                & Q(user__assessments__task_id__deleted_at__isnull=True)
+                                & Q(user__assessments__sub_batch_id=request.POST.get("sub_batch"))
+                            ),
+                            distinct=True,
+                        )
+                        / float(task_count)
+                    )
+                    * 100,
+                    0.0,
+                ),
+                performance=Case(
+                    When(average_marks__gte=90, then=Value(GOOD)),
+                    When(
+                        Q(average_marks__lt=90) & Q(average_marks__gte=75),
+                        then=Value(MEET_EXPECTATION),
+                    ),
+                    When(
+                        Q(average_marks__lt=75) & Q(average_marks__gte=65),
+                        then=Value(ABOVE_AVERAGE),
+                    ),
+                    When(
+                        Q(average_marks__lt=65) & Q(average_marks__gte=50),
+                        then=Value(AVERAGE),
+                    ),
+                    When(average_marks__lt=50, then=Value(POOR)),
+                    default=Value(NOT_YET_STARTED),
+                ),
+            )
+        )
+        request.trainee_performance = query
+        return query
 
     def customize_row(self, row, obj):
+        row["completion"] = round(obj.completion, 2)
+        if obj.average_marks != None:
+            row["average_marks"] = round(obj.average_marks, 2)
         buttons = template_utils.show_button(
             reverse("user_reports", args=[obj.user.id])
         )
@@ -289,7 +453,63 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
             "action"
         ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         row["expected_completion"] = obj.expected_completion.strftime("%d %b %Y")
+        if not row["average_marks"]:
+            row["average_marks"] = "-"
+        if obj.performance == GOOD:
+            row[
+                "performance"
+            ] = f'<span class="bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm">{GOOD}</span>'
+        if obj.performance == MEET_EXPECTATION:
+            row[
+                "performance"
+            ] = f'<span class="bg-dark-blue-10 text-dark-blue py-0.5 px-1.5 rounded-xl text-sm">{MEET_EXPECTATION}</span>'
+        if obj.performance == ABOVE_AVERAGE:
+            row[
+                "performance"
+            ] = f'<span style="background-color:#fefce8; color: #eab308;" class="py-0.5 px-1.5 rounded-xl text-sm">{ABOVE_AVERAGE}</span>'
+        if obj.performance == AVERAGE:
+            row[
+                "performance"
+            ] = f'<span class="bg-orange-100 text-orange-700 py-0.5 px-1.5 rounded-xl text-sm">{AVERAGE}</span>'
+        if obj.performance == POOR:
+            row[
+                "performance"
+            ] = f'<span class="bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm">{POOR}</span>'
+        if obj.performance == NOT_YET_STARTED:
+            row[
+                "performance"
+            ] = f'<span class="bg-dark-black/10 text-dark-black py-0.5 px-1.5 rounded-xl text-sm">{NOT_YET_STARTED}</span>'
         return
+
+    def get_response_dict(self, request, paginator, draw_idx, start_pos):
+        response = super().get_response_dict(request, paginator, draw_idx, start_pos)
+        performance_report = {
+            GOOD: 0,
+            MEET_EXPECTATION: 0,
+            ABOVE_AVERAGE: 0,
+            AVERAGE: 0,
+            POOR: 0,
+            NOT_YET_STARTED: 0,
+        }
+        for performance in request.trainee_performance:
+            if performance.average_marks != None:
+                if float(performance.average_marks) >= 90:
+                    performance_report[GOOD] += 1
+                elif 90 > float(performance.average_marks) >= 75:
+                    performance_report[MEET_EXPECTATION] += 1
+                elif 75 > float(performance.average_marks) >= 65:
+                    performance_report[ABOVE_AVERAGE] += 1
+                elif 65 > float(performance.average_marks) >= 50:
+                    performance_report[AVERAGE] += 1
+                elif float(performance.average_marks) < 50:
+                    performance_report[POOR] += 1
+            else:
+                performance_report[NOT_YET_STARTED] += 1
+        response["extra_data"] = {
+            "performance_report": performance_report,
+            "no_of_trainees": len(request.trainee_performance),
+        }
+        return response
 
 
 @login_required()
@@ -300,23 +520,23 @@ def add_trainee(request):
     """
     if request.method == "POST":
         form = AddInternForm(request.POST)
-        if request.POST.get("user_id"):
-            if InternDetail.objects.filter(user=request.POST.get("user_id")).exists():
-                form.add_error(
-                    "user_id", "Trainee already added in the another sub-batch"
-                )  # Adding form error if the trainees is already added in another
         if form.is_valid():  # Check if form is valid or not
-            sub_batch = SubBatch.objects.get(id=request.POST.get("sub_batch_id"))
-            timeline_data = SubBatchTaskTimeline.objects.filter(
-                sub_batch=sub_batch
-            ).last()
-            trainee = form.save(commit=False)
-            trainee.user_id = request.POST.get("user_id")
-            trainee.sub_batch = sub_batch
-            trainee.expected_completion = timeline_data.end_date
-            trainee.created_by = request.user
-            trainee.save()
-            return JsonResponse({"status": "success"})
+            try:
+                sub_batch = SubBatch.objects.get(id=request.POST.get("sub_batch_id"))
+                timeline_data = SubBatchTaskTimeline.objects.filter(
+                    sub_batch=sub_batch
+                ).last()
+                trainee = form.save(commit=False)
+                trainee.user_id = request.POST.get("user_id")
+                trainee.sub_batch = sub_batch
+                trainee.expected_completion = timeline_data.end_date
+                trainee.created_by = request.user
+                trainee.save()
+                return JsonResponse({"status": "success"})
+            except Exception as e:
+                return JsonResponse(
+                    {"message": "Invalid SubBatch id", "status": "error"}
+                )
         else:
             field_errors = form.errors.as_json()
             non_field_errors = form.non_field_errors().as_json()
@@ -339,6 +559,4 @@ def remove_trainee(request, pk):
         return JsonResponse({"message": "Intern has been deleted succssfully"})
     except Exception as e:
         logging.error(f"An error has occured while deleting an intern \n{e}")
-        return JsonResponse(
-            {"message": "Error while deleting Timeline Template!"}, status=500
-        )
+        return JsonResponse({"message": "Error while deleting Trainee!"}, status=500)

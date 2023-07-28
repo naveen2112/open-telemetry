@@ -12,9 +12,15 @@ class Project(db.SoftDeleteWithBaseModel):
     icon_updated_at = db.DateTimeWithoutTZField(blank=True, null=True)
     status = models.CharField(max_length=255)
     version = models.CharField(max_length=255, blank=True, null=True)
-    billing_frequency = models.CharField(max_length=255, blank=True, null=True)
+    billing_frequency = models.CharField(
+        max_length=255, blank=True, null=True
+    )
     client = models.ForeignKey(
-        Client, models.CASCADE, blank=True, null=True, related_name="project_clients"
+        Client,
+        models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="project_clients",
     )
     currency = models.ForeignKey(
         Currency,

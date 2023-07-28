@@ -6,7 +6,6 @@ from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
-from django.utils.decorators import method_decorator
 from django.views.decorators.http import require_http_methods
 
 from core import template_utils
@@ -15,7 +14,9 @@ from hubble.models import Timeline, TimelineTask
 from training.forms import TimelineTaskForm
 
 
-class TimelineTemplateTaskDataTable(LoginRequiredMixin, CustomDatatable):
+class TimelineTemplateTaskDataTable(
+    LoginRequiredMixin, CustomDatatable
+):
     """
     Timeline Template Task Datatable
     """
@@ -40,10 +41,14 @@ class TimelineTemplateTaskDataTable(LoginRequiredMixin, CustomDatatable):
     ]
 
     def get_initial_queryset(self, request=None):
-        return self.model.objects.filter(timeline=request.POST.get("timeline_id"))
+        return self.model.objects.filter(
+            timeline=request.POST.get("timeline_id")
+        )
 
     def customize_row(self, row, obj):
-        row["action"] = f"<div class='form-inline justify-content-center'>-</div>"
+        row[
+            "action"
+        ] = f"<div class='form-inline justify-content-center'>-</div>"
         if self.request.user.is_admin_user:
             buttons = template_utils.edit_button(
                 reverse("timeline-task.show", args=[obj.id])
@@ -63,11 +68,21 @@ class TimelineTemplateTaskDataTable(LoginRequiredMixin, CustomDatatable):
 @validate_authorization()
 def update_order(request):
     data = request.POST.getlist("data[]")
-    for order, id in enumerate(data):
-        task = TimelineTask.objects.get(id=id)
-        task.order = order + 1
-        task.save()
-    return JsonResponse({"status": "success"})
+    check_valid_tasks = TimelineTask.objects.filter(
+        timeline_id=request.POST.get("timeline_id"), id__in=data
+    ).count()
+    if check_valid_tasks == len(data):
+        for order, id in enumerate(data):
+            task = TimelineTask.objects.get(id=id)
+            task.order = order + 1
+            task.save()
+        return JsonResponse({"status": "success"})
+    return JsonResponse(
+        {
+            "message": "Some of the tasks doesn't belong to the current timeline",
+            "status": "error",
+        }
+    )
 
 
 @login_required()
@@ -78,8 +93,12 @@ def create_timeline_task(request):
     """
     if request.method == "POST":
         form = TimelineTaskForm(request.POST)
-        timeline = Timeline.objects.get(id=request.POST.get("timeline_id"))
-        task = TimelineTask.objects.filter(timeline=request.POST.get("timeline_id"))
+        timeline = Timeline.objects.get(
+            id=request.POST.get("timeline_id")
+        )
+        task = TimelineTask.objects.filter(
+            timeline=request.POST.get("timeline_id")
+        )
         if form.is_valid():  # Check if the valid or not
             timeline_task = form.save(commit=False)
             timeline_task.timeline = timeline
@@ -107,12 +126,18 @@ def timeline_task_data(request, pk):
     """
     try:
         data = {
-            "timeline_task": model_to_dict(get_object_or_404(TimelineTask, id=pk))
+            "timeline_task": model_to_dict(
+                get_object_or_404(TimelineTask, id=pk)
+            )
         }  # Covert django queryset object to dict,which can be easily serialized and sent as a JSON response
         return JsonResponse(data, safe=False)
     except Exception as e:
-        logging.error(f"An error has occured while fetching the Timeline Task \n{e}")
-        return JsonResponse({"message": "No timeline template task found"}, status=500)
+        logging.error(
+            f"An error has occured while fetching the Timeline Task \n{e}"
+        )
+        return JsonResponse(
+            {"message": "No timeline template task found"}, status=500
+        )
 
 
 @login_required()
@@ -152,9 +177,14 @@ def delete_timeline_task(request, pk):
     try:
         timeline_task = get_object_or_404(TimelineTask, id=pk)
         timeline_task.delete()
-        return JsonResponse({"message": "Timeline Template Task deleted succcessfully"})
-    except Exception as e:
-        logging.error(f"An error has occured while deleting the Timeline Task \n{e}")
         return JsonResponse(
-            {"message": "Error while deleting Timeline Template Task!"}, status=500
+            {"message": "Timeline Template Task deleted successfully"}
+        )
+    except Exception as e:
+        logging.error(
+            f"An error has occured while deleting the Timeline Task \n{e}"
+        )
+        return JsonResponse(
+            {"message": "Error while deleting Timeline Template Task!"},
+            status=500,
         )

@@ -1,6 +1,15 @@
 from django.db import models
-from django.db.models import (Case, CharField, F, FloatField, Func, Q, Sum,
-                              Value, When)
+from django.db.models import (
+    Case,
+    CharField,
+    F,
+    FloatField,
+    Func,
+    Q,
+    Sum,
+    Value,
+    When,
+)
 from django.db.models.functions import Coalesce, Round
 from django.utils import timezone
 
@@ -15,9 +24,13 @@ class TimesheetCustomQuerySet(models.QuerySet):
         return self.filter(
             Q(
                 entry_date__range=(
-                    F("user__expected_user_efficiencies__effective_from"),
+                    F(
+                        "user__expected_user_efficiencies__effective_from"
+                    ),
                     Coalesce(
-                        F("user__expected_user_efficiencies__effective_to"),
+                        F(
+                            "user__expected_user_efficiencies__effective_to"
+                        ),
                         timezone.now(),
                     ),
                 )
@@ -28,14 +41,20 @@ class TimesheetCustomQuerySet(models.QuerySet):
     def efficiency_fields(self):
         return self.annotate(
             capacity=Coalesce(
-                Sum(F("user__expected_user_efficiencies__expected_efficiency")),
+                Sum(
+                    F(
+                        "user__expected_user_efficiencies__expected_efficiency"
+                    )
+                ),
                 0,
                 output_field=FloatField(),
             ),
             efficiency=Coalesce(
                 Sum(F("authorized_hours")), 0, output_field=FloatField()
             ),
-            productivity=Coalesce(Sum(F("billed_hours")), 0, output_field=FloatField()),
+            productivity=Coalesce(
+                Sum(F("billed_hours")), 0, output_field=FloatField()
+            ),
             efficiency_gap=Coalesce(
                 Round(
                     100
@@ -48,7 +67,9 @@ class TimesheetCustomQuerySet(models.QuerySet):
                             )
                             - Sum(F("authorized_hours"))
                         )
-                        / Sum("user__expected_user_efficiencies__expected_efficiency")
+                        / Sum(
+                            "user__expected_user_efficiencies__expected_efficiency"
+                        )
                     ),
                     2,
                 ),
@@ -67,7 +88,9 @@ class TimesheetCustomQuerySet(models.QuerySet):
                             )
                             - Sum(F("billed_hours"))
                         )
-                        / Sum("user__expected_user_efficiencies__expected_efficiency")
+                        / Sum(
+                            "user__expected_user_efficiencies__expected_efficiency"
+                        )
                     ),
                     2,
                 ),
@@ -146,7 +169,9 @@ class TimesheetCustomQuerySet(models.QuerySet):
                 ),
                 efficiency_capacity=Sum(F("authorized_hours")),
                 monetization_capacity=Sum(
-                    F("user__expected_user_efficiencies__expected_efficiency")
+                    F(
+                        "user__expected_user_efficiencies__expected_efficiency"
+                    )
                 ),
                 ratings=Sum(F("authorized_hours")),
             )
@@ -173,15 +198,25 @@ class TimesheetManager(models.Manager):
 class TimesheetEntry(db.BaseModel):
     id = models.BigAutoField(primary_key=True)
     user = models.ForeignKey(
-        User, models.CASCADE, related_name="timesheet_entries", db_column="user_id"
+        User,
+        models.CASCADE,
+        related_name="timesheet_entries",
+        db_column="user_id",
     )
     project = models.ForeignKey(
         Project, models.CASCADE, related_name="timesheet_entries"
     )
-    module = models.ForeignKey(Module, models.CASCADE, related_name="timesheet_entries")
-    task = models.ForeignKey(Task, models.CASCADE, related_name="timesheet_entries")
+    module = models.ForeignKey(
+        Module, models.CASCADE, related_name="timesheet_entries"
+    )
+    task = models.ForeignKey(
+        Task, models.CASCADE, related_name="timesheet_entries"
+    )
     team = models.ForeignKey(
-        Team, models.CASCADE, related_name="timesheet_entries", db_column="team_id"
+        Team,
+        models.CASCADE,
+        related_name="timesheet_entries",
+        db_column="team_id",
     )
     description = models.TextField()
     entry_date = models.DateField()
