@@ -108,8 +108,7 @@
     <div class="card-container grid grid-cols-3" id="card_container">
         {% for task in assessment_scores %}
         <div id="assessment-reports"
-            class="{% if task.inactive_tasks %}disabled-container{% else %}enabled-container{% endif %} rounded-xl flex justify-between items-center flex-col p-4 mt-5"
-            style="width: 90%">
+            class="{% if task.inactive_tasks %}disabled-container{% else %}enabled-container{% endif %} rounded-xl flex justify-between items-center flex-col p-4 mt-5 assessment-card">
             <div class="w-full flex justify-between items-center mb-5">
                 <h4>{{ task.name }}</h4>
                 <div class="flex">
@@ -146,14 +145,14 @@
             </div>
             <div class="w-full flex flex-col justify-start bg-dark-blue-10 rounded-md p-2">
                 <h3 class="font-semibold">Comments</h3>
-                <p class="truncate">{% if task.inactive_tasks %} - {% else %} {{ task.comment|truncatechars:10 }} {% endif %}</p>
+                <p class="truncate">{% if task.inactive_tasks %} - {% else %} {{ task.comment }} {% endif %}</p>
                 <a href="javascript:void(0)" class="text-sm text-dark-blue cursor-pointer show-more-btn">Show more</a>
             </div>
         </div>
         {% endfor %}
         {% for assessment in extension_tasks %}
-        <div id="assessment-reports-2" style="width: 90%;background-color: white;height: auto;"
-            class="assessment-reports rounded-xl flex justify-between items-center flex-col p-4 mt-4">
+        <div id="assessment-reports-2"
+            class="assessment-reports rounded-xl flex justify-between items-center flex-col p-4 mt-4 assessment-card">
             <div class="w-full flex justify-between items-center mb-5" >
                 <h4>Extension Week {{ forloop.counter }}</h4>
                 <div class="flex">
@@ -190,7 +189,7 @@
             </div>
             <div class="w-full flex flex-col justify-start bg-dark-blue-10 rounded-md p-2">
                 <h3 class="font-semibold">Comments</h3>
-                <p class="truncate">{% if assessment.last_entry %} {{ assessment.comment|truncatechars:10 }} {% else %} - {% endif %}</p>
+                <p class="truncate">{% if assessment.last_entry %} {{ assessment.comment }} {% else %} - {% endif %}</p>
                 <a href="javascript:void(0)" class="text-sm text-dark-blue cursor-pointer show-more-btn">Show more</a>
             </div>
         </div>

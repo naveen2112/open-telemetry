@@ -137,3 +137,15 @@
 .mr-2 {
     margin-right: 0.5rem;
 }
+
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.assessment-card {
+    width: 90%;
+    background-color: white;
+    height: fit-content;
+}
