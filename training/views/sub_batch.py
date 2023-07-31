@@ -101,20 +101,15 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
 
     def get_response_dict(self, request, paginator, draw_idx, start_pos):
         response = super().get_response_dict(request, paginator, draw_idx, start_pos)
-        response["extra_data"] = list(
-            Batch.objects.filter(id=request.POST.get("batch_id"))
+        batch_id = request.POST.get("batch_id")
+        extra_data = (
+            Batch.objects.filter(id=batch_id)
             .annotate(
                 no_of_teams=Coalesce(
-                    Subquery(
-                        Batch.objects.filter(sub_batches__batch_id=OuterRef("id"))
-                        .annotate(
-                            count_of_teams=Count(
-                                "sub_batches__team",
-                                distinct=True,
-                                filter=Q(sub_batches__deleted_at__isnull=True),
-                            )
-                        )
-                        .values("count_of_teams")
+                    Count(
+                        "sub_batches__team",
+                        distinct=True,
+                        filter=Q(sub_batches__deleted_at__isnull=True),
                     ),
                     0,
                 ),
@@ -125,6 +120,7 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
             )
             .values("no_of_teams", "no_of_trainees")
         )
+        response["extra_data"] = list(extra_data)
         return response
 
 
@@ -371,62 +367,33 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
             self.model.objects.filter(sub_batch__id=request.POST.get("sub_batch"))
             .select_related("user")
             .annotate(
-                average_marks=Case(
-                    When(
-                        user_id=F("user__assessments__user_id"),
-                        then=(
-                            Avg(
-                                Subquery(
-                                    last_attempt_score.values("assessments__score")
-                                ),
-                                distinct=True,
-                            )
-                        ),
+                average_marks=Avg(
+                    Subquery(last_attempt_score.values("assessments__score")),
+                    distinct=True,
+                ),
+                no_of_retries=Count(
+                    "user__assessments__is_retry",
+                    filter=Q(
+                        user__assessments__is_retry=True,
+                        user__assessments__extension__isnull=True,
+                        user__assessments__task_id__deleted_at__isnull=True,
+                        user__assessments__sub_batch_id=request.POST.get("sub_batch")
                     ),
-                    default=None,
                 ),
-                no_of_retries=Coalesce(
-                    Count(
-                        "user__assessments__is_retry",
-                        filter=Q(
-                            Q(user__assessments__is_retry=True)
-                            & Q(user__assessments__extension__isnull=True)
-                            & Q(user__assessments__task_id__deleted_at__isnull=True)
-                            & Q(user__assessments__sub_batch_id=request.POST.get("sub_batch"))
-                        ),
+                completion=Count(
+                    "user__assessments__task_id",
+                    filter=Q(
+                        user__assessments__user_id=F("user_id"),
+                        user__assessments__task_id__deleted_at__isnull=True,
+                        user__assessments__sub_batch_id=request.POST.get("sub_batch")
                     ),
-                    0,
-                ),
-                completion=Coalesce(
-                    (
-                        Count(
-                            "user__assessments__task_id",
-                            filter=Q(
-                                Q(user__assessments__user_id=F("user_id"))
-                                & Q(user__assessments__task_id__deleted_at__isnull=True)
-                                & Q(user__assessments__sub_batch_id=request.POST.get("sub_batch"))
-                            ),
-                            distinct=True,
-                        )
-                        / float(task_count)
-                    )
-                    * 100,
-                    0.0,
-                ),
+                    distinct=True,
+                ) * 100.0 / task_count,
                 performance=Case(
                     When(average_marks__gte=90, then=Value(GOOD)),
-                    When(
-                        Q(average_marks__lt=90) & Q(average_marks__gte=75),
-                        then=Value(MEET_EXPECTATION),
-                    ),
-                    When(
-                        Q(average_marks__lt=75) & Q(average_marks__gte=65),
-                        then=Value(ABOVE_AVERAGE),
-                    ),
-                    When(
-                        Q(average_marks__lt=65) & Q(average_marks__gte=50),
-                        then=Value(AVERAGE),
-                    ),
+                    When(average_marks__lt=90, average_marks__gte=75, then=Value(MEET_EXPECTATION)),
+                    When(average_marks__lt=75, average_marks__gte=65, then=Value(ABOVE_AVERAGE)),
+                    When(average_marks__lt=65, average_marks__gte=50, then=Value(AVERAGE)),
                     When(average_marks__lt=50, then=Value(POOR)),
                     default=Value(NOT_YET_STARTED),
                 ),
