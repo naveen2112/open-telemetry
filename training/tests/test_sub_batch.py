@@ -404,7 +404,6 @@ class SubBatchUpdateTest(BaseTestCase):
                 "start_date": data["start_date"],
             },
         )
-        print(data["timeline"])
         
         # check what happens when a timeline is not updated
         data = self.get_valid_inputs({"name": self.faker.name()})
