@@ -274,15 +274,6 @@ class AddInternForm(forms.ModelForm):
             )
         return cleaned_data
 
-    def clean_user_id(self):
-        if models.InternDetail.objects.filter(
-            user=self.cleaned_data["user_id"]
-        ).exists():
-            raise ValidationError(
-                "Trainee already added in the another sub-batch",
-                code="trainee_exists",
-            )
-
     user_id = forms.ModelChoiceField(
         queryset=(
             models.User.objects.exclude(
