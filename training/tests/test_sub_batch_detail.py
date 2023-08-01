@@ -226,14 +226,23 @@ class TraineeDatatableTest(BaseTestCase):
             user__name=seq(self.name),
             sub_batch_id=self.sub_batch.id,
             _fill_optional=["expected_completion"],
-            _quantity=5,
+            _quantity=7,
         )
-        baker.make(
+        task = baker.make(
             "hubble.SubBatchTaskTimeline",
             task_type=TASK_TYPE_ASSESSMENT,
             days=seq(0),
             order=seq(0),
             sub_batch_id=self.sub_batch.id,
+        )
+        intern_details_iterator = InternDetail.objects.values_list("user__id", flat=True).iterator()
+        baker.make(
+            "hubble.assessment",
+            task=task,
+            user_id=intern_details_iterator,
+            score=seq(start=40, increment_by=10, value=0),
+            sub_batch_id=self.sub_batch.id,
+            _quantity=6
         )
         task_count = (
             SubBatchTaskTimeline.objects.filter(
