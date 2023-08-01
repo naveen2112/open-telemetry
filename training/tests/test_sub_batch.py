@@ -230,6 +230,32 @@ class SubBatchCreateTest(BaseTestCase):
             "The Selected date falls on a holiday, please reconsider the start date",
         )
 
+    def test_validate_no_timeline_task(self):
+        """
+        Check what happpens when a timeline with no task is selected
+        """
+        team_id = self.create_team().id
+        timeline = baker.make("hubble.Timeline", team_id=team_id)
+        data = self.get_valid_inputs(
+            {
+                "users_list_file": self.create_valid_file_input(),
+                "team": team_id,
+                "timeline": timeline.id,
+            }
+        )
+        self.make_post_request(
+            reverse(self.create_route_name, args=[self.batch_id]),
+            data=data,
+        )
+        field_errors = {
+            "timeline": {"timeline_has_no_tasks"},
+        }
+        self.validate_form_errors(
+            field_errors=field_errors, form=SubBatchForm(data=data)
+        )
+
+
+
     def test_file_validation(self):
         """
         To check what happens when file input isn't valid
