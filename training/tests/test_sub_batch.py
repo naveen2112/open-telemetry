@@ -404,6 +404,25 @@ class SubBatchUpdateTest(BaseTestCase):
                 "start_date": data["start_date"],
             },
         )
+        print(data["timeline"])
+        
+        # check what happens when a timeline is not updated
+        data = self.get_valid_inputs({"name": self.faker.name()})
+        response = self.make_post_request(
+            reverse(self.update_route_name, args=[self.sub_batch_id]),
+            data=data,
+        )
+        self.assertRedirects(response, reverse(self.route_name, args=[self.batch_id]))
+        self.assertEqual(response.status_code, 302)
+        self.assertDatabaseHas(
+            "SubBatch",
+            {
+                "name": data["name"],
+                "team_id": data["team"],
+                "timeline_id": data["timeline"],
+                "start_date": data["start_date"],
+            },
+        )
 
     def test_required_validation(self):
         """

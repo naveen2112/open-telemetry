@@ -232,17 +232,18 @@ def update_sub_batch(request, pk):
     """
     try:
         sub_batch = SubBatch.objects.get(id=pk)
+        old_timeline_id = sub_batch.timeline.id
     except Exception as e:
         return JsonResponse({"message": "Invalid SubBatch id", "status": "error"})
     if request.method == "POST":
         sub_batch_form = SubBatchForm(request.POST, instance=sub_batch)
         if sub_batch_form.is_valid():
             # validation start date
-            active_form = sub_batch_form.save(commit=False)
+            sub_batch_form.save(commit=False)
             sub_batch.primary_mentor_id = request.POST.get("primary_mentor_id")
             sub_batch.secondary_mentor_id = request.POST.get("secondary_mentor_id")
-            active_form = sub_batch_form.save()
-            if int(request.POST.get("timeline")) != sub_batch.timeline.id:
+            sub_batch_form.save()
+            if int(request.POST.get("timeline")) != old_timeline_id:
                 SubBatchTaskTimeline.bulk_delete({"sub_batch_id": pk})
                 schedule_timeline_for_sub_batch(sub_batch, request.user)
             else:
