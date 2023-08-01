@@ -172,7 +172,12 @@ class TaskSummaryTest(BaseTestCase):
             order=seq(0),
             _quantity=5,
         )
+        self.another_sub_batch = baker.make(
+            "hubble.SubBatch",
+            start_date=(timezone.now() + timezone.timedelta(1)),
+        )
         self.trainee = baker.make("hubble.InternDetail", sub_batch=self.sub_batch)
+        self.another_trainee = baker.make("hubble.InternDetail", sub_batch=self.another_sub_batch)
 
     def test_assessment_summary(self):
         """
@@ -221,6 +226,50 @@ class TaskSummaryTest(BaseTestCase):
                 desired_output[row], response.context["assessment_scores"][row]
             )
 
+    def test_no_assignment(self):
+        """
+        Check what happens when there is no assignment
+        """
+        latest_task_report = Assessment.objects.filter(
+            task=OuterRef("id"), user_id=self.another_trainee.user_id
+        ).order_by("-id")[:1]
+        desired_output = list(
+            SubBatchTaskTimeline.objects.filter(
+                sub_batch=self.another_sub_batch, task_type=TASK_TYPE_ASSESSMENT
+            )
+            .annotate(
+                retries=Count(
+                    "assessments__is_retry",
+                    filter=Q(
+                        Q(assessments__user=self.another_trainee.user_id)
+                        & Q(assessments__is_retry=True)
+                    ),
+                ),
+                last_entry=Subquery(latest_task_report.values("score")),
+                comment=Subquery(latest_task_report.values("comment")),
+                is_retry=Subquery(latest_task_report.values("is_retry")),
+                inactive_tasks=Case(
+                    When(start_date__gt=timezone.now(), then=Value(False)),
+                    default=Value(False),
+                    output_field=BooleanField(),
+                ),
+            )
+            .values(
+                "id",
+                "last_entry",
+                "retries",
+                "comment",
+                "name",
+                "is_retry",
+                "inactive_tasks",
+            )
+            .order_by("order")
+        )
+        response = self.make_get_request(
+            reverse(self.route_name, args=[self.another_trainee.user_id])
+        )
+        self.assertListEqual(desired_output, list(response.context["assessment_scores"]))
+
 
 class HeaderStatsTest(BaseTestCase):
     """
@@ -260,8 +309,6 @@ class HeaderStatsTest(BaseTestCase):
             .values("id")
             .count()
         )
-        if task_count == 0:
-            task_count = 1 
         last_attempt_score = SubBatchTaskTimeline.objects.filter(
             id=OuterRef("user__assessments__task_id"),
             assessments__user_id=OuterRef("user_id"),

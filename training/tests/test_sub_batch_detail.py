@@ -221,10 +221,18 @@ class TraineeDatatableTest(BaseTestCase):
         """
         self.name = self.faker.name()
         self.sub_batch = baker.make("hubble.SubBatch", start_date=timezone.now().date())
+        self.another_sub_batch = baker.make("hubble.SubBatch", start_date=timezone.now().date())
         baker.make(
             "hubble.InternDetail",
             user__name=seq(self.name),
             sub_batch_id=self.sub_batch.id,
+            _fill_optional=["expected_completion"],
+            _quantity=7,
+        )
+        baker.make(
+            "hubble.InternDetail",
+            user__name=seq(self.name),
+            sub_batch_id=self.another_sub_batch.id,
             _fill_optional=["expected_completion"],
             _quantity=7,
         )
@@ -462,3 +470,12 @@ class TraineeDatatableTest(BaseTestCase):
             performance_report[NOT_YET_STARTED]
             == response.json()["extra_data"]["performance_report"][NOT_YET_STARTED]
         )
+
+    def test_no_assignment(self):
+        """
+        To check what happens when no assignment is given
+        """
+        response = self.make_post_request(
+            reverse(self.datatable_route_name), data=self.get_valid_inputs({"sub_batch": self.another_sub_batch.id})
+        )
+        self.assertEqual(response.status_code, 200)
