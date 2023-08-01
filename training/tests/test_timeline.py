@@ -364,7 +364,7 @@ class TimelineUpdateTest(BaseTestCase):
             },
         )
 
-    def teat_required_validation(self):
+    def test_required_validation(self):
         """
         This function checks the required field validations
         """
