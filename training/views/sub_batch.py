@@ -144,8 +144,8 @@ def create_sub_batch(request, pk):
             df = pd.read_excel(excel_file)
             df.replace(chr(160), np.nan, inplace=True)
             df = df.dropna(how="all")
-            df["employee_id"] = df["employee_id"].astype(int)
             if (df.columns[0] == "employee_id") and (df.columns[1] == "college"):
+                df["employee_id"] = df["employee_id"].astype(int)
                 if User.objects.filter(
                     employee_id__in=df["employee_id"]
                 ).count() == len(df["employee_id"]):
