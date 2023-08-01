@@ -61,10 +61,9 @@ def show_non_field_errors(error):
 
 @register.filter()
 def show_label(field):
+    required = ""
     if field.field.required:  # Check the field is required or not
         required = '<span class="text-red-600">*</span>'
-    else:
-        required = ""
     return mark_safe(
         '<label for="{}" class="mb-3.6 text-sm text-dark-black-50">{} {}</label>'.format(
             field.label, field.label, required
