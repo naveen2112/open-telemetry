@@ -23,6 +23,7 @@ psycopg2 = "^2.9.6"
 
 [tool.poetry.group.dev.dependencies]
 django-silk = "^5.0.3"
+coverage = "^7.2.7"
 
 [build-system]
 requires = ["poetry-core"]
