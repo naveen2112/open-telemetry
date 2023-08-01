@@ -347,7 +347,13 @@ class SubBatchTaskTimelineUpdateTest(BaseTestCase):
             order=1,
             start_date=(timezone.now() + timezone.timedelta(1)).date(),
         )
+        started_sub_batch_task_timeline = baker.make(
+            "hubble.SubBatchTaskTimeline",
+            order=1,
+            start_date=(timezone.now() - timezone.timedelta(10)).date(),
+        )
         self.sub_batch_task_timeline_id = sub_batch_task_timeline.id
+        self.started_sub_batch_task_timeline_id = started_sub_batch_task_timeline.id
 
     def validate_response(self, response, data):
         """
@@ -537,6 +543,26 @@ class SubBatchTaskTimelineUpdateTest(BaseTestCase):
         )
         self.assertEqual(response.status_code, 200)
 
+    def test_started_task_validation(self):
+        """
+        Check what happens when we try to edit a task which is already started
+        """
+        response = self.make_post_request(
+            reverse(
+                self.update_edit_route_name,
+                args=[self.started_sub_batch_task_timeline_id],
+            ),
+            data=self.get_valid_inputs(),
+        )
+        self.assertJSONEqual(
+            self.decoded_json(response),
+            {
+                "message": "This task has been already started",
+                "status": "error",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+
 
 class SubBatchTaskTimelineDeleteTest(BaseTestCase):
     """
@@ -554,6 +580,10 @@ class SubBatchTaskTimelineDeleteTest(BaseTestCase):
         self.sub_batch = baker.make(
             "hubble.SubBatch",
             start_date=(timezone.now() + timezone.timedelta(1)).date(),
+        )
+        self.completed_sub_batch = baker.make(
+            "hubble.SubBatch",
+            start_date=(timezone.now() - timezone.timedelta(1)).date(),
         )
 
     def test_success(self):
@@ -626,6 +656,35 @@ class SubBatchTaskTimelineDeleteTest(BaseTestCase):
         self.assertJSONEqual(
             response.content,
             {"message": "Error while deleting Task!"},
+        )
+        self.assertEqual(response.status_code, 500)
+
+    def test_started_task_validation(self):
+        """
+        Check what happens when we try to delete a task which is already started
+        """
+        sub_batch_task_timeline = baker.make(
+            "hubble.SubBatchTaskTimeline",
+            sub_batch=self.completed_sub_batch,
+            order=1,
+            days=1,
+            start_date=(timezone.now() - timezone.timedelta(1)).date(),
+            _quantity=2,
+        )
+        self.assertDatabaseHas(
+            "SubBatchTaskTimeline", {"id": sub_batch_task_timeline[0].id}
+        )
+        response = self.make_delete_request(
+            reverse(
+                self.delete_route_name,
+                args=[sub_batch_task_timeline[0].id],
+            )
+        )
+        self.assertJSONEqual(
+            self.decoded_json(response),
+            {
+                "message": "This task has been already started!",
+            },
         )
         self.assertEqual(response.status_code, 500)
 
