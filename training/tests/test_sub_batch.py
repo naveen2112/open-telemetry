@@ -74,59 +74,26 @@ class SubBatchCreateTest(BaseTestCase):
             "secondary_mentor_id": secondary_mentor_id,
         }
 
-    def create_valid_file_input(self):
+    def create_memory_file(self, data):
         """
         This function is responsible for creating valid file input
         """
         memory_file = io.BytesIO()
-
-        df = pd.DataFrame(
-            {
-                "employee_id": [2, 3],
-                "college": ["college1", "college2"],
-            }
-        )
+        df = pd.DataFrame(data)
         df.to_excel(memory_file, index=False)
         memory_file.seek(0)
         return memory_file
     
-    def create_invalid_file_input1(self):
-        """
-        This function is responsible for creating invalid file input with invalid employee id
-        """
-        memory_file = io.BytesIO()
-
-        df = pd.DataFrame(
-            {
-                "employee_id": [15, 16],
-                "college": ["college1", "college2"],
-            }
-        )
-        df.to_excel(memory_file, index=False)
-        memory_file.seek(0)
-        return memory_file
-    
-    def create_invalid_file_input2(self):
-        """
-        This function is responsible for creating invalid file input with invalid column name
-        """
-        memory_file = io.BytesIO()
-
-        df = pd.DataFrame(
-            {
-                "employee_ids": [2, 3],
-                "colleges": ["college1", "college2"],
-            }
-        )
-        df.to_excel(memory_file, index=False)
-        memory_file.seek(0)
-        return memory_file
-
     def test_success(self):
         """
         Check what happens when valid data is given as input
         """
-        data = self.get_valid_inputs({"users_list_file": self.create_valid_file_input()})
+        file_values = {
+            "employee_id": [2, 3],
+            "college": ["college1", "college2"],
+        }
+        valid_file = self.create_memory_file(file_values)
+        data = self.get_valid_inputs({"users_list_file": valid_file})
         response = self.make_post_request(
             reverse(self.create_route_name, args=[self.batch_id]),
             data=data,
@@ -149,7 +116,12 @@ class SubBatchCreateTest(BaseTestCase):
         """
         This function checks the required validation for the team and name fields
         """
-        data = {"users_list_file": self.create_valid_file_input()}
+        file_values = {
+            "employee_id": [2, 3],
+            "college": ["college1", "college2"],
+        }
+        valid_file = self.create_memory_file(file_values)
+        data = {"users_list_file": valid_file}
         self.make_post_request(
             reverse(self.create_route_name, args=[self.batch_id]),
             data=data,
@@ -169,9 +141,14 @@ class SubBatchCreateTest(BaseTestCase):
         """
         Check what happens when invalid data for team field is given as input
         """
+        file_values = {
+            "employee_id": [2, 3],
+            "college": ["college1", "college2"],
+        }
+        valid_file = self.create_memory_file(file_values)
         data = self.get_valid_inputs(
             {
-                "users_list_file": self.create_valid_file_input(),
+                "users_list_file": valid_file,
                 "team": self.faker.name(),
                 "timeline": self.faker.name(),
                 "primary_mentor_id": self.faker.name(),
@@ -196,9 +173,14 @@ class SubBatchCreateTest(BaseTestCase):
         """
         To check what happens when name field fails MinlengthValidation
         """
+        file_values = {
+            "employee_id": [2, 3],
+            "college": ["college1", "college2"],
+        }
+        valid_file = self.create_memory_file(file_values)
         data = self.get_valid_inputs(
             {
-                "users_list_file": self.create_valid_file_input(),
+                "users_list_file": valid_file,
                 "name": self.faker.pystr(max_chars=2),
             }
         )
@@ -218,9 +200,14 @@ class SubBatchCreateTest(BaseTestCase):
         """
         To check what happens when start_date is invalid
         """
+        file_values = {
+            "employee_id": [2, 3],
+            "college": ["college1", "college2"],
+        }
+        valid_file = self.create_memory_file(file_values)
         data = self.get_valid_inputs(
             {
-                "users_list_file": self.create_valid_file_input(),
+                "users_list_file": valid_file,
                 "start_date": timezone.now().date() + timezone.timedelta(days=1),
             }
         )
@@ -236,9 +223,14 @@ class SubBatchCreateTest(BaseTestCase):
         """
         team_id = self.create_team().id
         timeline = baker.make("hubble.Timeline", team_id=team_id)
+        file_values = {
+            "employee_id": [5, 6],
+            "college": ["college1", "college2"],
+        }
+        valid_file = self.create_memory_file(file_values)
         data = self.get_valid_inputs(
             {
-                "users_list_file": self.create_valid_file_input(),
+                "users_list_file": valid_file,
                 "team": team_id,
                 "timeline": timeline.id,
             }
@@ -272,12 +264,18 @@ class SubBatchCreateTest(BaseTestCase):
         )
 
         # Invalid data in file interns belong to another sub-batch
-        data = self.get_valid_inputs({"users_list_file": self.create_valid_file_input()})
+        file_values = {
+            "employee_id": [2, 3],
+            "college": ["college1", "college2"],
+        }
+        valid_file = self.create_memory_file(file_values)
+        data = self.get_valid_inputs({"users_list_file": valid_file})
         self.make_post_request(
             reverse(self.create_route_name, args=[self.batch_id]),
             data=data,
         )
-        data = self.get_valid_inputs({"users_list_file": self.create_valid_file_input()})
+        valid_file = self.create_memory_file(file_values)
+        data = self.get_valid_inputs({"users_list_file": valid_file})
         response = self.make_post_request(
             reverse(self.create_route_name, args=[self.batch_id]),
             data=data,
@@ -288,7 +286,12 @@ class SubBatchCreateTest(BaseTestCase):
         )
 
         # Invalid data in file, employee_id doesn't match with any employee_id in db
-        data = self.get_valid_inputs({"users_list_file": self.create_invalid_file_input1()})
+        file_values = {
+            "employee_id": [21, 22],
+            "college": ["college1", "college2"],
+        }
+        invalid_file = self.create_memory_file(file_values)
+        data = self.get_valid_inputs({"users_list_file": invalid_file})
         response = self.make_post_request(
             reverse(self.create_route_name, args=[self.batch_id]),
             data=data,
@@ -299,7 +302,12 @@ class SubBatchCreateTest(BaseTestCase):
         )
 
         # Invalid column names are present
-        data = self.get_valid_inputs({"users_list_file": self.create_invalid_file_input2()})
+        file_values = {
+            "employee_ids": [2, 3],
+            "colleges": ["college1", "college2"],
+        }
+        invalid_file = self.create_memory_file(file_values)
+        data = self.get_valid_inputs({"users_list_file": invalid_file})
         response = self.make_post_request(
             reverse(self.create_route_name, args=[self.batch_id]),
             data=data,
