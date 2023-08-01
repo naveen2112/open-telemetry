@@ -1,3 +1,6 @@
+import io
+
+import pandas as pd
 from django.conf import settings
 from django.db.models import Count, Q
 from django.forms.models import model_to_dict
@@ -71,135 +74,161 @@ class SubBatchCreateTest(BaseTestCase):
             "secondary_mentor_id": secondary_mentor_id,
         }
 
-    def get_file_path(self):
+    def create_valid_file_input(self):
         """
-        This function helps us to import the excel sheets from static file
+        This function is responsible for creating valid file input
         """
-        static_path = list(settings.STATICFILES_DIRS)
-        return f"{static_path[0]}/training/pdf/"
+        memory_file = io.BytesIO()
+
+        df = pd.DataFrame(
+            {
+                "employee_id": [2, 3],
+                "college": ["college1", "college2"],
+            }
+        )
+        df.to_excel(memory_file, index=False)
+        memory_file.seek(0)
+        return memory_file
+    
+    def create_invalid_file_input1(self):
+        """
+        This function is responsible for creating invalid file input with invalid employee id
+        """
+        memory_file = io.BytesIO()
+
+        df = pd.DataFrame(
+            {
+                "employee_id": [15, 16],
+                "college": ["college1", "college2"],
+            }
+        )
+        df.to_excel(memory_file, index=False)
+        memory_file.seek(0)
+        return memory_file
+    
+    def create_invalid_file_input2(self):
+        """
+        This function is responsible for creating invalid file input with invalid column name
+        """
+        memory_file = io.BytesIO()
+
+        df = pd.DataFrame(
+            {
+                "employee_ids": [2, 3],
+                "colleges": ["college1", "college2"],
+            }
+        )
+        df.to_excel(memory_file, index=False)
+        memory_file.seek(0)
+        return memory_file
 
     def test_success(self):
         """
         Check what happens when valid data is given as input
         """
-        with open(
-            self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
-        ) as sample_file:
-            data = self.get_valid_inputs({"users_list_file": sample_file})
-            response = self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]),
-                data=data,
-            )
-            self.assertRedirects(
-                response, reverse(self.route_name, args=[self.batch_id])
-            )
-            self.assertEqual(response.status_code, 302)
-            self.assertDatabaseHas(
-                "SubBatch",
-                {
-                    "name": data["name"],
-                    "team_id": data["team"],
-                    "timeline_id": data["timeline"],
-                    "start_date": data["start_date"],
-                },
-            )
+        data = self.get_valid_inputs({"users_list_file": self.create_valid_file_input()})
+        response = self.make_post_request(
+            reverse(self.create_route_name, args=[self.batch_id]),
+            data=data,
+        )
+        self.assertRedirects(
+            response, reverse(self.route_name, args=[self.batch_id])
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertDatabaseHas(
+            "SubBatch",
+            {
+                "name": data["name"],
+                "team_id": data["team"],
+                "timeline_id": data["timeline"],
+                "start_date": data["start_date"],
+            },
+        )
 
     def test_required_validation(self):
         """
         This function checks the required validation for the team and name fields
         """
-        with open(
-            self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
-        ) as sample_file:
-            data = {"users_list_file": sample_file}
-            self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]),
-                data=data,
-            )
-            field_errors = {
-                "name": {"required"},
-                "team": {"required"},
-                "timeline": {"required"},
-                "primary_mentor_id": {"required"},
-                "secondary_mentor_id": {"required"},
-            }
-            self.validate_form_errors(
-                field_errors=field_errors, form=SubBatchForm(data=data)
-            )
+        data = {"users_list_file": self.create_valid_file_input()}
+        self.make_post_request(
+            reverse(self.create_route_name, args=[self.batch_id]),
+            data=data,
+        )
+        field_errors = {
+            "name": {"required"},
+            "team": {"required"},
+            "timeline": {"required"},
+            "primary_mentor_id": {"required"},
+            "secondary_mentor_id": {"required"},
+        }
+        self.validate_form_errors(
+            field_errors=field_errors, form=SubBatchForm(data=data)
+        )
 
     def test_invalid_choice_validation(self):
         """
         Check what happens when invalid data for team field is given as input
         """
-        with open(
-            self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
-        ) as sample_file:
-            data = self.get_valid_inputs(
-                {
-                    "users_list_file": sample_file,
-                    "team": self.faker.name(),
-                    "timeline": self.faker.name(),
-                    "primary_mentor_id": self.faker.name(),
-                    "secondary_mentor_id": self.faker.name(),
-                }
-            )
-            self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]),
-                data=data,
-            )
-            field_errors = {
-                "team": {"invalid_choice"},
-                "timeline": {"invalid_choice"},
-                "primary_mentor_id": {"invalid_choice"},
-                "secondary_mentor_id": {"invalid_choice"},
+        data = self.get_valid_inputs(
+            {
+                "users_list_file": self.create_valid_file_input(),
+                "team": self.faker.name(),
+                "timeline": self.faker.name(),
+                "primary_mentor_id": self.faker.name(),
+                "secondary_mentor_id": self.faker.name(),
             }
-            self.validate_form_errors(
-                field_errors=field_errors, form=SubBatchForm(data=data)
-            )
+        )
+        self.make_post_request(
+            reverse(self.create_route_name, args=[self.batch_id]),
+            data=data,
+        )
+        field_errors = {
+            "team": {"invalid_choice"},
+            "timeline": {"invalid_choice"},
+            "primary_mentor_id": {"invalid_choice"},
+            "secondary_mentor_id": {"invalid_choice"},
+        }
+        self.validate_form_errors(
+            field_errors=field_errors, form=SubBatchForm(data=data)
+        )
 
     def test_minimum_length_validation(self):
         """
         To check what happens when name field fails MinlengthValidation
         """
-        with open(
-            self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
-        ) as sample_file:
-            data = self.get_valid_inputs(
-                {
-                    "users_list_file": sample_file,
-                    "name": self.faker.pystr(max_chars=2),
-                }
-            )
-            self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]),
-                data=data,
-            )
-            field_errors = {"name": {"min_length"}}
-            self.validate_form_errors(
-                field_errors=field_errors,
-                current_value=data,
-                validation_parameter={"name": 3},
-                form=SubBatchForm(data=data),
-            )
+        data = self.get_valid_inputs(
+            {
+                "users_list_file": self.create_valid_file_input(),
+                "name": self.faker.pystr(max_chars=2),
+            }
+        )
+        self.make_post_request(
+            reverse(self.create_route_name, args=[self.batch_id]),
+            data=data,
+        )
+        field_errors = {"name": {"min_length"}}
+        self.validate_form_errors(
+            field_errors=field_errors,
+            current_value=data,
+            validation_parameter={"name": 3},
+            form=SubBatchForm(data=data),
+        )
 
     def test_invalid_start_date(self):
         """
         To check what happens when start_date is invalid
         """
-        with open(
-            self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
-        ) as sample_file:
-            data = self.get_valid_inputs(
-                {
-                    "users_list_file": sample_file,
-                    "start_date": timezone.now().date() + timezone.timedelta(days=1),
-                }
-            )
-            self.assertFormError(
-                SubBatchForm(data=data),
-                "start_date",
-                "The Selected date falls on a holiday, please reconsider the start date",
-            )
+        data = self.get_valid_inputs(
+            {
+                "users_list_file": self.create_valid_file_input(),
+                "start_date": timezone.now().date() + timezone.timedelta(days=1),
+            }
+        )
+        self.assertFormError(
+            SubBatchForm(data=data),
+            "start_date",
+            "The Selected date falls on a holiday, please reconsider the start date",
+        )
 
     def test_file_validation(self):
         """
@@ -217,54 +246,42 @@ class SubBatchCreateTest(BaseTestCase):
         )
 
         # Invalid data in file interns belong to another sub-batch
-        with open(
-            self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
-        ) as sample_file:
-            data = self.get_valid_inputs({"users_list_file": sample_file})
-            self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]),
-                data=data,
-            )
-        with open(
-            self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
-        ) as sample_file:
-            data = self.get_valid_inputs({"users_list_file": sample_file})
-            response = self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]),
-                data=data,
-            )
-            self.assertEqual(
-                strip_tags(response.context["errors"]),
-                "Some of the Users are already added in another sub-batch",
-            )
+        data = self.get_valid_inputs({"users_list_file": self.create_valid_file_input()})
+        self.make_post_request(
+            reverse(self.create_route_name, args=[self.batch_id]),
+            data=data,
+        )
+        data = self.get_valid_inputs({"users_list_file": self.create_valid_file_input()})
+        response = self.make_post_request(
+            reverse(self.create_route_name, args=[self.batch_id]),
+            data=data,
+        )
+        self.assertEqual(
+            strip_tags(response.context["errors"]),
+            "Some of the Users are already added in another sub-batch",
+        )
 
         # Invalid data in file, employee_id doesn't match with any employee_id in db
-        with open(
-            self.get_file_path() + "invalid_file_upload1.xlsx", "rb"
-        ) as sample_file:
-            data = self.get_valid_inputs({"users_list_file": sample_file})
-            response = self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]),
-                data=data,
-            )
-            self.assertEqual(
-                strip_tags(response.context["errors"]),
-                "Some of the employee ids are not present in the database, please check again",
-            )
+        data = self.get_valid_inputs({"users_list_file": self.create_invalid_file_input1()})
+        response = self.make_post_request(
+            reverse(self.create_route_name, args=[self.batch_id]),
+            data=data,
+        )
+        self.assertEqual(
+            strip_tags(response.context["errors"]),
+            "Some of the employee ids are not present in the database, please check again",
+        )
 
         # Invalid column names are present
-        with open(
-            self.get_file_path() + "invalid_file_upload2.xlsx", "rb"
-        ) as sample_file:
-            data = self.get_valid_inputs({"users_list_file": sample_file})
-            response = self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]),
-                data=data,
-            )
-            self.assertEqual(
-                strip_tags(response.context["errors"]),
-                "Invalid keys are present in the file, please check the sample file",
-            )
+        data = self.get_valid_inputs({"users_list_file": self.create_invalid_file_input2()})
+        response = self.make_post_request(
+            reverse(self.create_route_name, args=[self.batch_id]),
+            data=data,
+        )
+        self.assertEqual(
+            strip_tags(response.context["errors"]),
+            "Invalid keys are present in the file, please check the sample file",
+        )
 
 
 class SubBatchUpdateTest(BaseTestCase):
