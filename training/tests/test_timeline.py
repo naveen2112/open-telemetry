@@ -525,7 +525,13 @@ class TimelineDatatableTest(BaseTestCase):
         To check whether all columns are present in datatable and length of rows without any filter
         """
         name = self.faker.name()
-        baker.make("hubble.Timeline", name=seq(name))
+        is_active = [True, False]
+        baker.make(
+            "hubble.Timeline",
+            name=seq(name),
+            is_active=is_active.__iter__(),
+            _quantity=2,
+            )
         timeline = Timeline.objects.filter(
             task_timeline__deleted_at__isnull=True
         ).annotate(
