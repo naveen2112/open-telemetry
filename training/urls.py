@@ -6,6 +6,10 @@ from training.views import (batch, induction_kit, sub_batch,
                             sub_batch_timeline, timeline, timeline_task,
                             user_journey)
 
+
+handler404 = view.error_404
+handler500 = view.error_500
+
 urlpatterns = [
     path("", include("hubble.urls")),
     path("", view.home, name="training.home"),
