@@ -24,4 +24,4 @@ def error_500(request):
     """
     Handles the 500 error (internal server error)
     """
-    return render(request, "induction_kit.html", status=500)
+    return render(request, "induction_kit.html")
