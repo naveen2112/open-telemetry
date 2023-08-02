@@ -28,3 +28,7 @@ coverage = "^7.2.7"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.coverage.run]
+source = ["core", "training"]
+omit = ["teams_logger.py"]
