@@ -17,7 +17,7 @@ def error_404(request, exception):  # pylint: disable=unused-argument
     """
     Handles the 404 error (page not found)
     """
-    return render(request, "induction_kit.html")
+    return render(request, "errors/404.html", status=404)
 
 
 def error_500(request):

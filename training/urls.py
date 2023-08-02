@@ -15,6 +15,8 @@ from training.views import (
     user_journey,
 )
 
+handler404 = view.error_404
+
 urlpatterns = [
     path("", include("hubble.urls")),
     path("", view.home, name="training.home"),
