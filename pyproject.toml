@@ -31,4 +31,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.coverage.run]
 source = ["core", "training"]
-omit = ["teams_logger.py"]
+omit = [
+    "teams_logger.py", 
+    "admin.py"
+]

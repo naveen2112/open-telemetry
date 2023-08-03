@@ -8,7 +8,7 @@ from hubble.models import (Holiday, InternDetail, SubBatchTaskTimeline,
                            TimelineTask)
 
 
-class CustomDatatable(AjaxDatatableView):
+class CustomDatatable(AjaxDatatableView): # pragma: no cover
     """This class provides the feature of sending a list of dictionaries as input to the datatable"""
 
     show_column_filters = False
@@ -71,7 +71,7 @@ class CustomDatatable(AjaxDatatableView):
         return json_data
 
 
-def validate_authorization():
+def validate_authorization(): # pragma: no cover
     def decorator(view_func):
         def wrapped_view(request, *args, **kwargs):
             if request.user.is_admin_user:

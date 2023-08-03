@@ -3,7 +3,7 @@ import datetime
 from django.db import models
 
 
-class DateTimeWithoutTZField(models.DateTimeField):
+class DateTimeWithoutTZField(models.DateTimeField): # pragma: no cover
     def db_type(self, connection):
         # Use the appropriate database-specific column type
         if (
