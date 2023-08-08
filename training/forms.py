@@ -325,22 +325,36 @@ class SubBatchTimelineForm(forms.ModelForm):
             )
 
     def clean_order(self):
-        valid_order_value = list(
+        last_task = (
             models.SubBatchTaskTimeline.objects.filter(
-                start_date__gt=timezone.now(),
-                sub_batch_id=self.data.get("sub_batch_id"),
-            ).values_list("order", flat=True)
-        ) or [0]
-        if (valid_order_value[0] > self.cleaned_data["order"] > 0) or (
-            self.cleaned_data["order"] > valid_order_value[-1] + 1
-        ):
-            raise ValidationError(
-                (
-                    f"The current order of the task is invalid. "
-                    f"The valid input for order ranges form {valid_order_value[0]}-{valid_order_value[-1] + 1}."
-                ),
-                code="invalid_order",
+            sub_batch_id=self.data.get("sub_batch_id")
             )
+            .order_by("-order")
+            .first()
+        )
+        if last_task.end_date < timezone.now():
+            if last_task.order >= self.cleaned_data["order"]:
+                raise ValidationError(
+                    f"The order value must be {last_task.order + 1}",
+                    code="invalid_order",
+                )
+        else:
+            valid_order_value = list(
+                models.SubBatchTaskTimeline.objects.filter(
+                    start_date__gt=timezone.now(),
+                    sub_batch_id=self.data.get("sub_batch_id"),
+                ).values_list("order", flat=True)
+            ) or [0]
+            if (valid_order_value[0] > self.cleaned_data["order"] > 0) or (
+                self.cleaned_data["order"] > valid_order_value[-1] + 1
+            ):
+                raise ValidationError(
+                    (
+                        f"The current order of the task is invalid. "
+                        f"The valid input for order ranges form {valid_order_value[0]}-{valid_order_value[-1] + 1}."
+                    ),
+                    code="invalid_order",
+                )
         if self.cleaned_data["order"] <= 0:
             raise ValidationError(
                 "Order value must be greater than zero.",
