@@ -159,7 +159,7 @@ class BaseTestCase(TestCase):
             message = "Select a valid choice. That choice is not one of the available choices."
         elif value == "invalid_order":
             message = (
-                f"The current order of the task is invalid. "
+                f"The current order of the task is invalid."
                 f"The valid input for order ranges form {validation_parameter[key][0]}-{validation_parameter[key][-1] + 1}."
             )
         elif value == "zero_order_error":

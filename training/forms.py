@@ -327,7 +327,7 @@ class SubBatchTimelineForm(forms.ModelForm):
     def clean_order(self):
         last_task = (
             models.SubBatchTaskTimeline.objects.filter(
-            sub_batch_id=self.data.get("sub_batch_id")
+                sub_batch_id=self.data.get("sub_batch_id")
             )
             .order_by("-order")
             .first()
@@ -350,7 +350,7 @@ class SubBatchTimelineForm(forms.ModelForm):
             ):
                 raise ValidationError(
                     (
-                        f"The current order of the task is invalid. "
+                        f"The current order of the task is invalid."
                         f"The valid input for order ranges form {valid_order_value[0]}-{valid_order_value[-1] + 1}."
                     ),
                     code="invalid_order",
@@ -361,7 +361,6 @@ class SubBatchTimelineForm(forms.ModelForm):
                 code="zero_order_error",
             )
         return self.cleaned_data["order"]
-
     days = forms.FloatField(
         widget=forms.NumberInput(
             attrs={
