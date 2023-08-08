@@ -7,6 +7,7 @@ from .user import User
 
 class Batch(db.SoftDeleteWithBaseModel):
     name = models.CharField(max_length=250)
+    start_date = models.DateField()
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
