@@ -34,14 +34,17 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
         This function is responsible for updating the valid inputs and creating data in databases as reqiured
         """
         self.sub_batch = baker.make(
-            "hubble.SubBatch", start_date=timezone.now().date()
+            "hubble.SubBatch", start_date=timezone.now().date() + timezone.timedelta(1)
         )
+        date = timezone.now() + timezone.timedelta(1)
+        self.order_count = SubBatchTaskTimeline.objects.filter(sub_batch=self.sub_batch).count() + 1
+        baker.make("hubble.SubBatchTaskTimeline", sub_batch=self.sub_batch, days=self.faker.random_int(1,5), order=self.order_count, end_date=date, start_date=date)
         self.persisted_valid_inputs = {
             "name": self.faker.name(),
-            "days": 2,
+            "days": self.faker.random_int(1,5),
             "present_type": PRESENT_TYPE_REMOTE,
             "task_type": TASK_TYPE_TASK,
-            "order": 1,
+            "order": self.order_count,
             "sub_batch_id": self.sub_batch.id,
         }
 
@@ -91,6 +94,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
                 "days": 0.5,
                 "present_type": PRESENT_TYPE_IN_PERSON,
                 "task_type": TASK_TYPE_CULTURAL_MEET,
+                "order": self.order_count,
             }
         )
         response = self.make_post_request(
@@ -245,14 +249,13 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
             "order": {"invalid_order"},
         }
         validation_parameters = {
-            "order": [
-                (SubBatchTaskTimeline.objects.filter(
+            "order": 
+                list(SubBatchTaskTimeline.objects.filter(
                     sub_batch_id=self.sub_batch.id,
                     start_date__gt=timezone.now(),
                 )
                 .values_list("order", flat=True))
-            or 0
-            ]
+            or [0]
         }
         self.assertEqual(
             self.bytes_cleaner(response.content),
@@ -335,21 +338,20 @@ class SubBatchTaskTimelineUpdateTest(BaseTestCase):
             "hubble.SubBatch",
             start_date=(timezone.now() + timezone.timedelta(1)).date(),
         )
+        self.order_count = SubBatchTaskTimeline.objects.filter(sub_batch=self.sub_batch).count() + 1
+        date = timezone.now() + timezone.timedelta(1)
         self.persisted_valid_inputs = {
             "name": self.faker.name(),
-            "days": 2,
+            "days": self.faker.random_int(1,5),
             "present_type": PRESENT_TYPE_REMOTE,
             "task_type": TASK_TYPE_TASK,
-            "order": 1,
+            "order": self.order_count,
+            "sub_batch_id": self.sub_batch.id
         }
-        sub_batch_task_timeline = baker.make(
-            "hubble.SubBatchTaskTimeline",
-            order=1,
-            start_date=(timezone.now() + timezone.timedelta(1)).date(),
-        )
+        sub_batch_task_timeline = baker.make("hubble.SubBatchTaskTimeline", sub_batch=self.sub_batch, days=self.faker.random_int(1,5), order=self.order_count, end_date=date, start_date=date)
         started_sub_batch_task_timeline = baker.make(
             "hubble.SubBatchTaskTimeline",
-            order=1,
+            order=self.order_count,
             start_date=(timezone.now() - timezone.timedelta(10)).date(),
         )
         self.sub_batch_task_timeline_id = sub_batch_task_timeline.id
@@ -581,6 +583,7 @@ class SubBatchTaskTimelineDeleteTest(BaseTestCase):
             "hubble.SubBatch",
             start_date=(timezone.now() + timezone.timedelta(1)).date(),
         )
+        self.order_count = SubBatchTaskTimeline.objects.filter(sub_batch=self.sub_batch).count() + 1
         self.completed_sub_batch = baker.make(
             "hubble.SubBatch",
             start_date=(timezone.now() - timezone.timedelta(1)).date(),
@@ -594,7 +597,7 @@ class SubBatchTaskTimelineDeleteTest(BaseTestCase):
             "hubble.SubBatchTaskTimeline",
             sub_batch=self.sub_batch,
             order=seq(0),
-            days=1,
+            days=self.faker.random_int(1,5),
             start_date=(timezone.now() + timezone.timedelta()).date(),
             _quantity=2,
         )
@@ -625,8 +628,8 @@ class SubBatchTaskTimelineDeleteTest(BaseTestCase):
         sub_batch_task_timeline = baker.make(
             "hubble.SubBatchTaskTimeline",
             sub_batch=self.sub_batch,
-            order=1,
-            days=1,
+            order=self.order_count,
+            days=self.faker.random_int(1,5),
             start_date=(timezone.now() + timezone.timedelta()).date(),
         )
         self.assertDatabaseHas(
@@ -666,8 +669,8 @@ class SubBatchTaskTimelineDeleteTest(BaseTestCase):
         sub_batch_task_timeline = baker.make(
             "hubble.SubBatchTaskTimeline",
             sub_batch=self.completed_sub_batch,
-            order=1,
-            days=1,
+            order=self.order_count,
+            days=self.faker.random_int(1,5),
             start_date=(timezone.now() - timezone.timedelta(1)).date(),
             _quantity=2,
         )
@@ -709,10 +712,11 @@ class SubBatchTaskTimelineReOrderTest(BaseTestCase):
         This function is responsible for updating the valid inputs and creating data in databases as reqiured
         """
         self.sub_batch = baker.make("hubble.SubBatch")
+        self.order_count = SubBatchTaskTimeline.objects.filter(sub_batch=self.sub_batch).count() + 1
         baker.make(
             "hubble.SubBatchTaskTimeline",
             order=seq(0),
-            days=1,
+            days=self.faker.random_int(1,5),
             sub_batch=self.sub_batch,
             _quantity=5,
         )
@@ -808,7 +812,7 @@ class SubBatchTimelineDatatableTest(BaseTestCase):
             "hubble.SubBatchTaskTimeline",
             sub_batch=self.sub_batch,
             order=seq(0),
-            days=1,
+            days=self.faker.random_int(1,5),
             start_date=(timezone.now() + timezone.timedelta(1)).date(),
             end_date=(timezone.now() + timezone.timedelta(2)).date(),
             _quantity=2,

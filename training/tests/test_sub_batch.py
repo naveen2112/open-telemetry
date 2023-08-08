@@ -43,7 +43,7 @@ class SubBatchCreateTest(BaseTestCase):
             employee_id=seq(0),
             _quantity=5,
         )
-        baker.make(
+        self.users = baker.make(
             "hubble.User",
             is_employed=False,
             _fill_optional=["email"],
@@ -89,8 +89,8 @@ class SubBatchCreateTest(BaseTestCase):
         Check what happens when valid data is given as input
         """
         file_values = {
-            "employee_id": [2, 3],
-            "college": ["college1", "college2"],
+            "employee_id": [self.users[1].employee_id, self.users[2].employee_id],
+            "college": [self.faker.name(), self.faker.name()],
         }
         valid_file = self.create_memory_file(file_values)
         data = self.get_valid_inputs({"users_list_file": valid_file})
@@ -117,8 +117,8 @@ class SubBatchCreateTest(BaseTestCase):
         This function checks the required validation for the team and name fields
         """
         file_values = {
-            "employee_id": [2, 3],
-            "college": ["college1", "college2"],
+            "employee_id": [self.users[1].employee_id, self.users[2].employee_id],
+            "college": [self.faker.name(), self.faker.name()],
         }
         valid_file = self.create_memory_file(file_values)
         data = {"users_list_file": valid_file}
@@ -142,8 +142,8 @@ class SubBatchCreateTest(BaseTestCase):
         Check what happens when invalid data for team field is given as input
         """
         file_values = {
-            "employee_id": [2, 3],
-            "college": ["college1", "college2"],
+            "employee_id": [self.users[1].employee_id, self.users[2].employee_id],
+            "college": [self.faker.name(), self.faker.name()],
         }
         valid_file = self.create_memory_file(file_values)
         data = self.get_valid_inputs(
@@ -174,8 +174,8 @@ class SubBatchCreateTest(BaseTestCase):
         To check what happens when name field fails MinlengthValidation
         """
         file_values = {
-            "employee_id": [2, 3],
-            "college": ["college1", "college2"],
+            "employee_id": [self.users[1].employee_id, self.users[2].employee_id],
+            "college": [self.faker.name(), self.faker.name()],
         }
         valid_file = self.create_memory_file(file_values)
         data = self.get_valid_inputs(
@@ -201,8 +201,8 @@ class SubBatchCreateTest(BaseTestCase):
         To check what happens when start_date is invalid
         """
         file_values = {
-            "employee_id": [2, 3],
-            "college": ["college1", "college2"],
+            "employee_id": [self.users[1].employee_id, self.users[2].employee_id],
+            "college": [self.faker.name(), self.faker.name()],
         }
         valid_file = self.create_memory_file(file_values)
         data = self.get_valid_inputs(
@@ -224,8 +224,8 @@ class SubBatchCreateTest(BaseTestCase):
         team_id = self.create_team().id
         timeline = baker.make("hubble.Timeline", team_id=team_id)
         file_values = {
-            "employee_id": [5, 6],
-            "college": ["college1", "college2"],
+            "employee_id": [self.users[1].employee_id, self.users[2].employee_id],
+            "college": [self.faker.name(), self.faker.name()],
         }
         valid_file = self.create_memory_file(file_values)
         data = self.get_valid_inputs(
@@ -246,8 +246,6 @@ class SubBatchCreateTest(BaseTestCase):
             field_errors=field_errors, form=SubBatchForm(data=data)
         )
 
-
-
     def test_file_validation(self):
         """
         To check what happens when file input isn't valid
@@ -265,8 +263,8 @@ class SubBatchCreateTest(BaseTestCase):
 
         # Invalid data in file interns belong to another sub-batch
         file_values = {
-            "employee_id": [2, 3],
-            "college": ["college1", "college2"],
+            "employee_id": [self.users[1].employee_id, self.users[2].employee_id],
+            "college": [self.faker.name(), self.faker.name()],
         }
         valid_file = self.create_memory_file(file_values)
         data = self.get_valid_inputs({"users_list_file": valid_file})
@@ -287,8 +285,8 @@ class SubBatchCreateTest(BaseTestCase):
 
         # Invalid data in file, employee_id doesn't match with any employee_id in db
         file_values = {
-            "employee_id": [21, 22],
-            "college": ["college1", "college2"],
+            "employee_id": [self.faker.random_int(10, 20), self.faker.random_int(10, 20)],
+            "college": [self.faker.name(), self.faker.name()],
         }
         invalid_file = self.create_memory_file(file_values)
         data = self.get_valid_inputs({"users_list_file": invalid_file})
@@ -303,8 +301,8 @@ class SubBatchCreateTest(BaseTestCase):
 
         # Invalid column names are present
         file_values = {
-            "employee_ids": [2, 3],
-            "colleges": ["college1", "college2"],
+            "employee_ids": [self.users[1].employee_id, self.users[2].employee_id],
+            "colleges": [self.faker.name(), self.faker.name()],
         }
         invalid_file = self.create_memory_file(file_values)
         data = self.get_valid_inputs({"users_list_file": invalid_file})
