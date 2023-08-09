@@ -6,7 +6,7 @@ from hubble.models import User, Batch
 
 class TraineeHoliday(db.SoftDeleteWithBaseModel):
     id = models.BigAutoField(primary_key=True)
-    batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
+    batch = models.ForeignKey(Batch, on_delete=models.CASCADE, related_name="holidays")
     date_of_holiday = models.DateField()
     month_year = models.CharField(max_length=255)
     updated_by = models.ForeignKey(User, on_delete=models.CASCADE)

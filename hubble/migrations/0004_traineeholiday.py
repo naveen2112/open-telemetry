@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 ('month_year', models.CharField(max_length=255)),
                 ('reason', models.CharField(blank=True, max_length=255, null=True)),
                 ('allow_check_in', models.BooleanField()),
-                ('batch', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='hubble.batch')),
+                ('batch', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='holidays', to='hubble.batch')),
                 ('updated_by', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={
