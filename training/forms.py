@@ -128,13 +128,19 @@ class BatchForm(forms.ModelForm):
 
     class Meta:
         model = models.Batch
-        fields = ("name",)
+        fields = ("name", "start_date")
 
         widgets = {
             "name": forms.TextInput(
                 attrs={
                     "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
                     "placeholder": "Batch Name...",
+                }
+            ),
+            "start_date": forms.DateInput(
+                attrs={
+                    "class": "block border border-primary-dark-30 rounded-md mt-2.5 w-64 focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 bg-transparent w-250 start_date_input",
+                    "placeholder": "Start Date",
                 }
             )
         }

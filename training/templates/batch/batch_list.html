@@ -35,6 +35,10 @@ Batch
                     {{ form.name|show_label }}
                     {{ form.name }}
                 </div>
+                <div class="form-group mb-7" id="{{ form.start_date.label|lower|replace_spaces }}_group">
+                    {{ form.start_date|show_label }}
+                    {{ form.start_date }}
+                </div>
             </div>
             <div id="non_field_error"></div>
             <div class="text-center mt-10">
@@ -95,6 +99,7 @@ Batch
             url: "{% url 'batch.create' %}",
             data: {
                 name: $('#id_name').val(),
+                start_date: $('#id_start_date').val(),
             },
             success: function(data) {
                 $('.page-loader').hide();
@@ -113,70 +118,90 @@ Batch
         });
     }
 
-        function openUpdateModel(url) {
+    function openUpdateModel(url) {
+        $('.page-loader').show();
+        removeErrors();
+        $("#open_modal").text("Update Batch");
+        $.ajax({
+            type: "GET",
+            url: url,
+            success: function(data) {
+                $('.page-loader').hide();
+                $('#id_name').val(data.batch.name);
+                $('#batch_id').val(data.batch.id);
+                start_date_picker(data.batch.start_date);
+                $('#submit-btn').attr("onclick", "updateBatch(" + data.batch.id + ")");
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                alert(jqXHR.responseJSON.message);
+                $('.page-loader').hide();
+            },
+        });
+        document.getElementById("modal").classList.remove("hidden");
+        document.getElementById("modal").classList.add("blocker");
+    }
+
+    function updateBatch(id) {
+        $('.page-loader').show();
+        $.ajax({
+            type: "POST",
+            url: "batch/"+ id +"/edit", //TODO
+            data: {
+                name: $('#id_name').val(),
+                start_date: $('#id_start_date').val(),
+            },
+            success: function(data) {
+                $('.page-loader').hide();
+                if (data.status === 'success') {
+                    $('#batch-table').DataTable().ajax.reload();
+                    closeModal('modal');
+                }else {
+                    removeErrors();
+                    renderFormError(data);
+                }
+            },
+            error: function() {
+                $('.page-loader').hide();
+                alert("Something went wrong");
+            },
+        });
+    }
+
+    function deleteBatch(url) {
+        let text = 'Are you sure do you want to delete';
+        if (confirm(text) == true) {
             $('.page-loader').show();
-            removeErrors();
-            $("#open_modal").text("Update Batch");
             $.ajax({
-                type: "GET",
+                type: "DELETE",
                 url: url,
                 success: function(data) {
                     $('.page-loader').hide();
-                    $('#id_name').val(data.batch.name);
-                    $('#batch_id').val(data.batch.id);
-                    $('#submit-btn').attr("onclick", "updateBatch(" + data.batch.id + ")");
+                    $('#batch-table').DataTable().ajax.reload();
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     alert(jqXHR.responseJSON.message);
                     $('.page-loader').hide();
                 },
             });
-            document.getElementById("modal").classList.remove("hidden");
-            document.getElementById("modal").classList.add("blocker");
         }
+    }
 
-        function updateBatch(id) {
-            $('.page-loader').show();
-            $.ajax({
-                type: "POST",
-                url: "batch/"+ id +"/edit", //TODO
-                data: {
-                    name: $('#id_name').val(),
-                },
-                success: function(data) {
-                    $('.page-loader').hide();
-                    if (data.status === 'success') {
-                        $('#batch-table').DataTable().ajax.reload();
-                        closeModal('modal');
-                    }else {
-                        removeErrors();
-                        renderFormError(data);
-                    }
-                },
-                error: function() {
-                    $('.page-loader').hide();
-                    alert("Something went wrong");
-                },
-            });
+    function start_date_picker(date=null){
+        if(date == null){
+            date = moment().format('YYYY-MM-DD');
         }
-
-        function deleteBatch(url) {
-            let text = 'Are you sure do you want to delete';
-            if (confirm(text) == true) {
-                $('.page-loader').show();
-                $.ajax({
-                    type: "DELETE",
-                    url: url,
-                    success: function(data) {
-                        $('.page-loader').hide();
-                        $('#batch-table').DataTable().ajax.reload();
-                    },
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        alert(jqXHR.responseJSON.message);
-                        $('.page-loader').hide();
-                    },
-                });
+        $('input[name="start_date"]').daterangepicker({
+            singleDatePicker: true,
+            autoApply: true,
+            startDate: date,
+            locale: {
+                format: 'YYYY-MM-DD',
             }
-        }
-    </script>
+        });
+    }
+
+    $(function() {
+        start_date_picker();
+    });
+</script>
 {% endblock %}
