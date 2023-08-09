@@ -4,7 +4,7 @@ import datetime
 from django.db import migrations, models
 
 
-def initialize_existing_batch_start_date(apps, schema_editor):
+def add_start_date_to_existing_batch(apps, schema_editor):
     Batch = apps.get_model("hubble", "Batch")
     for batch in Batch.objects.all():
         oldest_start_date = batch.sub_batches.order_by("start_date").values_list("start_date", flat=True).first()
@@ -25,5 +25,5 @@ class Migration(migrations.Migration):
             field=models.DateField(default=datetime.datetime(2023, 8, 8, 16, 38, 21, 651420)),
             preserve_default=False,
         ),
-        migrations.RunPython(initialize_existing_batch_start_date),
+        migrations.RunPython(add_start_date_to_existing_batch),
     ]
