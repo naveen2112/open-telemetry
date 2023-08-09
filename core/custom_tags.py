@@ -33,6 +33,11 @@ def get_constant(name):
 
 
 @register.filter()
+def replace_spaces(value):
+    return value.replace(" ", "_")
+
+
+@register.filter()
 def show_field_errors(field):
     if field.errors:
         error_message = ""
@@ -67,6 +72,6 @@ def show_label(field):
         required = ""
     return mark_safe(
         '<label for="{}" class="mb-3.6 text-sm text-dark-black-50">{} {}</label>'.format(
-            field.label, field.label, required
+            field.label.lower().replace(" ", "_"), field.label, required
         )
     )
