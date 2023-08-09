@@ -10,6 +10,7 @@ class Holiday(db.SoftDeleteWithBaseModel):
     month_year = models.CharField(max_length=255)
     updated_by = models.ForeignKey(User, models.CASCADE, db_column="updated_by")
     reason = models.CharField(max_length=255, blank=True, null=True)
+    national_holiday = models.BooleanField()
     allow_check_in = models.BooleanField()
 
     class Meta:

@@ -25,6 +25,7 @@ def add_holidays_to_existing_batches(apps, schema_editor):
                 month_year = holiday.month_year,
                 updated_by = batch.created_by,
                 reason = holiday.reason,
+                national_holiday = holiday.national_holiday,
                 allow_check_in = holiday.allow_check_in
             )
             for holiday in holidays
@@ -38,6 +39,12 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AddField(
+            model_name='holiday',
+            name='national_holiday',
+            field=models.BooleanField(default=True),
+            preserve_default=False,
+        ),
         migrations.CreateModel(
             name='TraineeHoliday',
             fields=[
@@ -48,6 +55,7 @@ class Migration(migrations.Migration):
                 ('date_of_holiday', models.DateField()),
                 ('month_year', models.CharField(max_length=255)),
                 ('reason', models.CharField(blank=True, max_length=255, null=True)),
+                ('national_holiday', models.BooleanField()),
                 ('allow_check_in', models.BooleanField()),
                 ('batch', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='holidays', to='hubble.batch')),
                 ('updated_by', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
