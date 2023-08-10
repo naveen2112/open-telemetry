@@ -8,7 +8,7 @@ Trainee Holiday
 <div class="mb-7">
     <div>
         <div class="text-dark-black text-lg mb-1 leading-none">
-            Trainee Holidays
+            {{ batch.name }} Holidays
         </div>
         <div class="text-dark-black text-lg mb-1 leading-none">
             <p class="text-sm">
@@ -58,8 +58,7 @@ Trainee Holiday
             {% csrf_token %}
             <div class="px-4 rounded-xl">
                 <div class="flex flex-wrap">
-                    <label id="holiday_title">Add Holiday - </label>
-                    <span class="ml-2" id="batch_name_title">{{ object.name }}</span>
+                    <label id="holiday_title">Add Holiday</label>
                     <input type="hidden" value="0" id="holiday_id" />
                 </div>
                 <div class="override-width checkbox-size mt-5 w-286">
@@ -86,7 +85,7 @@ Trainee Holiday
                 <div class="flex flex-wrap justify-center mt-7">
                     <button id="holiday_save_button" type="button"
                         class="text-white bg-dark-blue rounded text-center items-center pr-3 pl-2 py-1 text-base font-normal"
-                        onlick="createHoliday();"
+                        onclick="createHoliday();"
                     >
                         Save
                     </button>
@@ -161,7 +160,7 @@ Trainee Holiday
             url: url,
             success: function(data) {
                 {% comment %} $('.page-loader').hide(); {% endcomment %}
-                $('#holiday_title').text('Update Holiday - ');
+                $('#holiday_title').text('Update Holiday');
                 $('#id_date_of_holiday').val(moment(data.holiday.date_of_holiday).format('DD MMM YYYY'));
                 $('#id_reason').val(data.holiday.reason);
                 $('#id_national_holiday').prop('checked', data.holiday.national_holiday);
@@ -209,7 +208,7 @@ Trainee Holiday
     }
 
     function cancelUpdate() {
-        $('#holiday_title').text('Add Holiday - ');
+        $('#holiday_title').text('Add Holiday');
         $('#id_date_of_holiday').val(moment().format('DD MMM YYYY'));
         $('#id_reason').val('');
         $('#id_national_holiday').prop('checked', false);
@@ -244,7 +243,7 @@ Trainee Holiday
         $('input[name="date_of_holiday"]').daterangepicker({
             singleDatePicker: true,
             autoApply: true,
-            minDate: new Date(),
+            {% comment %} minDate: new Date(), {% endcomment %}
             locale: {
                 format: 'DD MMM YYYY',
             }
