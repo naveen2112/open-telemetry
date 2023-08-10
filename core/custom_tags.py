@@ -70,6 +70,12 @@ def show_label(field):
         required = '<span class="text-red-600">*</span>'
     else:
         required = ""
+    if field.field.widget.__class__.__name__ == "CheckboxInput":
+        return mark_safe(
+            '<label for="id_{}" class="mb-3.6 text-sm text-dark-black cursor-pointer">{}</label>'.format(
+                field.label.lower().replace(" ", "_"), field.label
+            )
+        )
     return mark_safe(
         '<label for="{}" class="mb-3.6 text-sm text-dark-black-50">{} {}</label>'.format(
             field.label.lower().replace(" ", "_"), field.label, required
