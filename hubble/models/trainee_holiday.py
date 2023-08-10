@@ -10,13 +10,14 @@ class TraineeHoliday(db.SoftDeleteWithBaseModel):
     date_of_holiday = models.DateField()
     month_year = models.CharField(max_length=255)
     updated_by = models.ForeignKey(User, on_delete=models.CASCADE)
-    reason = models.CharField(max_length=255, blank=True, null=True)
+    reason = models.CharField(max_length=255)
     national_holiday = models.BooleanField()
     allow_check_in = models.BooleanField()
 
     class Meta:
         managed = True
         db_table = "trainee_holidays"
+        unique_together = ("batch", "date_of_holiday")
 
     def __str__(self):
         return str(self.date_of_holiday)

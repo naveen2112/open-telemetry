@@ -54,7 +54,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(primary_key=True, serialize=False)),
                 ('date_of_holiday', models.DateField()),
                 ('month_year', models.CharField(max_length=255)),
-                ('reason', models.CharField(blank=True, max_length=255, null=True)),
+                ('reason', models.CharField(max_length=255)),
                 ('national_holiday', models.BooleanField()),
                 ('allow_check_in', models.BooleanField()),
                 ('batch', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='holidays', to='hubble.batch')),
@@ -63,6 +63,7 @@ class Migration(migrations.Migration):
             options={
                 'db_table': 'trainee_holidays',
                 'managed': True,
+                'unique_together': {('batch', 'date_of_holiday')},
             },
         ),
         migrations.RunPython(add_holidays_to_existing_batches),
