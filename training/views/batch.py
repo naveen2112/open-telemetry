@@ -129,7 +129,8 @@ def create_batch(request):
                     month_year = holiday.month_year,
                     updated_by = request.user,
                     reason = holiday.reason,
-                    allow_check_in = holiday.allow_check_in
+                    allow_check_in = holiday.allow_check_in,
+                    national_holiday = holiday.national_holiday,
                 )
                 for holiday in holidays
             ]

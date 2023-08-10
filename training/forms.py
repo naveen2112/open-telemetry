@@ -146,6 +146,53 @@ class BatchForm(forms.ModelForm):
         }
 
 
+class TraineeHolidayForm(forms.ModelForm):
+
+    date_of_holiday = forms.DateField(
+        label = "Choose Date",
+        widget = forms.DateInput(
+            attrs={
+                "class": "block border border-primary-dark-30 rounded-md mt-2.5 w-64 focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 bg-transparent w-250 start_date_input",
+                "placeholder": "Choose Date",
+            }
+        ),
+    )
+
+    reason = forms.CharField(
+        widget = forms.TextInput(
+            attrs = {
+                "class": "w-full block border border-primary-dark-30 mt-2.5 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 bg-transparent w-250 ",
+                "placeholder": "Reason For Holiday",
+            }
+        ),
+    )
+
+    national_holiday = forms.BooleanField(
+        required = False,
+        label = "National Holiday",
+        widget = forms.CheckboxInput(
+            attrs = {
+                "class": "checkbox_active cursor-pointer block border border-primary-dark-30 rounded-md w-4 mr-3 focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
+            }
+        ),
+    )
+
+    allow_check_in = forms.BooleanField(
+        required = False,
+        label = "Allow Checkin",
+        widget = forms.CheckboxInput(
+            attrs = {
+                "class": "checkbox_active cursor-pointer block border border-primary-dark-30 rounded-md w-4 mr-3 focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
+                "id": "id_allow_checkin"
+            }
+        ),
+    )
+
+    class Meta:
+        model = models.TraineeHoliday
+        fields = ("date_of_holiday", "reason", "national_holiday", "allow_check_in")
+
+
 class SubBatchForm(forms.ModelForm):
     primary_mentor_id = forms.ModelChoiceField(
         queryset=models.User.objects.filter(is_employed=True)

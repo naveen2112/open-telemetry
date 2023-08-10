@@ -137,3 +137,8 @@
 .mr-2 {
     margin-right: 0.5rem;
 }
+
+.checkbox-size input[type=checkbox] {
+    width: auto;
+    cursor: pointer;
+}

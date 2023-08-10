@@ -4,7 +4,7 @@ from hubble import views as sso_view
 from training import view
 from training.views import (batch, induction_kit, sub_batch,
                             sub_batch_timeline, timeline, timeline_task,
-                            user_journey)
+                            trainee_holiday, user_journey)
 
 urlpatterns = [
     path("", include("hubble.urls")),
@@ -105,6 +105,33 @@ urlpatterns = [
         "batch/<int:pk>",
         batch.BatchDetails.as_view(),
         name="batch.detail",
+    ),
+    # Batch Holiday
+    path("batch/<int:pk>/holiday", trainee_holiday.TraineeHolidayList.as_view(), name="batch.holiday"),
+    path(
+        "trainee-holiday-datatable",
+        trainee_holiday.TraineeHolidayDataTable.as_view(),
+        name="holiday-datatable",
+    ),
+    path(
+        "batch/<int:pk>/holiday/create",
+        trainee_holiday.create_trainee_holiday,
+        name="holiday.create",
+    ),
+    path(
+        "holiday/<int:pk>/show",
+        trainee_holiday.trainee_holiday_data,
+        name="holiday.show",
+    ),
+    path(
+        "holiday/<int:pk>/edit",
+        trainee_holiday.update_trainee_holiday,
+        name="holiday.edit",
+    ),
+    path(
+        "holiday/<int:pk>/delete",
+        trainee_holiday.delete_trainee_holiday,
+        name="holiday.delete",
     ),
     # Sub Batch
     path(
