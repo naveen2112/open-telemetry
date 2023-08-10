@@ -4,7 +4,7 @@ from ajax_datatable import AjaxDatatableView
 from django.http import HttpResponseForbidden
 
 from core.constants import ADMIN_EMAILS
-from hubble.models import (Holiday, InternDetail, SubBatchTaskTimeline,
+from hubble.models import (TraineeHoliday, InternDetail, SubBatchTaskTimeline,
                            TimelineTask)
 
 
@@ -107,7 +107,7 @@ def calculate_duration_for_task(
         start_date += datetime.timedelta(1)
         start_date = start_date.replace(hour=9, minute=0)
 
-    if is_leave_day(holidays, start_date):
+    while is_leave_day(holidays, start_date):
         start_date += datetime.timedelta(1)
 
     if is_half_day:
@@ -158,7 +158,7 @@ def schedule_timeline_for_sub_batch(
     sub_batch, user=None, is_create=True
 ):
     holidays = list(
-        Holiday.objects.values_list("date_of_holiday", flat=True)
+        TraineeHoliday.objects.filter(batch_id=sub_batch.batch.id).values_list("date_of_holiday", flat=True)
     )
     start_date = datetime.datetime.strptime(
         str(sub_batch.start_date), "%Y-%m-%d"
