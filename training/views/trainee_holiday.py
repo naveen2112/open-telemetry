@@ -12,11 +12,10 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView, FormView
 
 from core import template_utils
-from core.constants import BATCH_DURATION
-from core.utils import CustomDatatable, validate_authorization
-from hubble.models import (Batch, Holiday, InternDetail, SubBatch,
-                           TraineeHoliday)
+from core.utils import CustomDatatable, validate_authorization, schedule_timeline_for_sub_batch
+from hubble.models import Batch, TraineeHoliday, SubBatch
 from training.forms import TraineeHolidayForm
+
 
 class TraineeHolidayList(LoginRequiredMixin, FormView, DetailView):
     """
@@ -100,6 +99,9 @@ def create_trainee_holiday(request, pk):
         holiday.updated_by_id = request.user.id
         try:
             holiday.save()
+            sub_batches = SubBatch.objects.filter(batch_id=pk)
+            for sub_batch in sub_batches:
+                schedule_timeline_for_sub_batch(sub_batch, is_create=False)
             return JsonResponse({"status": "success"})
         except IntegrityError:
             form.add_error("date_of_holiday", "Holiday already exists")
@@ -147,6 +149,9 @@ def update_trainee_holiday(request, pk):
         holiday = form.save(commit=False)
         holiday.updated_by_id = request.user.id
         holiday.save()
+        sub_batches = SubBatch.objects.filter(batch_id=trainee_holiday.batch_id)
+        for sub_batch in sub_batches:
+            schedule_timeline_for_sub_batch(sub_batch, is_create=False)
         return JsonResponse({"status": "success"})
     field_errors = form.errors.as_json()
     non_field_errors = form.non_field_errors().as_json()
@@ -169,6 +174,9 @@ def delete_trainee_holiday(request, pk):
     try:
         trainee_holiday = get_object_or_404(TraineeHoliday, id=pk)
         trainee_holiday.delete()
+        sub_batches = SubBatch.objects.filter(batch_id=trainee_holiday.batch_id)
+        for sub_batch in sub_batches:
+            schedule_timeline_for_sub_batch(sub_batch, is_create=False)
         return JsonResponse({"message": "Holiday deleted succcessfully"})
     except Exception as e:
         logging.error(
