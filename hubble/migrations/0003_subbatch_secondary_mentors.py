@@ -20,7 +20,7 @@ def update_many_to_many(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("hubble", "0002_alter_assessment_user"),
+        ("hubble", "0003_extension_name"),
     ]
 
     operations = [
