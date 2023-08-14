@@ -1,3 +1,6 @@
+"""
+Django test cases for updating the assessment details
+"""
 from django.db.models import (Avg, BooleanField, Case, Count, F, OuterRef, Q,
                               Subquery, Value, When)
 from django.db.models.functions import Coalesce
@@ -13,7 +16,8 @@ from hubble.models import Assessment, InternDetail, SubBatchTaskTimeline
 
 class UpdateAssessmentTest(BaseTestCase):
     """
-    This class is responsible for testing the updating the scores in asssesments in user journey page
+    This class is responsible for testing the updating the scores in
+    asssesments in user journey page
     """
 
     route_name = "user_reports"
@@ -29,7 +33,8 @@ class UpdateAssessmentTest(BaseTestCase):
 
     def update_valid_input(self):
         """
-        This function is responsible for updating the valid inputs and creating data in databases as reqiured
+        This function is responsible for updating the valid inputs and creating
+        data in databases as reqiured
         """
         sub_batch = baker.make(
             "hubble.SubBatch",
@@ -56,9 +61,7 @@ class UpdateAssessmentTest(BaseTestCase):
         """
         To makes sure that the correct template is used
         """
-        response = self.make_get_request(
-            reverse(self.route_name, args=[self.trainee.user_id])
-        )
+        response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
         self.assertTemplateUsed(response, "sub_batch/user_journey_page.html")
         self.assertContains(response, self.trainee.user.employee_id)
 
@@ -74,7 +77,7 @@ class UpdateAssessmentTest(BaseTestCase):
         )
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertEqual(response.status_code, 200)
-        self.assertDatabaseHas(
+        self.assert_database_has(
             "Assessment",
             {
                 "score": data["score"],
@@ -92,7 +95,7 @@ class UpdateAssessmentTest(BaseTestCase):
         )
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertEqual(response.status_code, 200)
-        self.assertDatabaseHas(
+        self.assert_database_has(
             "Assessment",
             {
                 "score": data["score"],
@@ -189,8 +192,7 @@ class TaskSummaryTest(BaseTestCase):
                 retries=Count(
                     "assessments__is_retry",
                     filter=Q(
-                        Q(assessments__user=self.trainee.user_id)
-                        & Q(assessments__is_retry=True)
+                        Q(assessments__user=self.trainee.user_id) & Q(assessments__is_retry=True)
                     ),
                 ),
                 last_entry=Subquery(latest_task_report.values("score")),
@@ -213,13 +215,9 @@ class TaskSummaryTest(BaseTestCase):
             )
             .order_by("order")
         )
-        response = self.make_get_request(
-            reverse(self.route_name, args=[self.trainee.user_id])
-        )
-        for row in range(len(desired_output)):
-            self.assertEqual(
-                desired_output[row], response.context["assessment_scores"][row]
-            )
+        response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
+        for row, desired_score in enumerate(desired_output):
+            self.assertEqual(desired_score, response.context["assessment_scores"][row])
 
 
 class HeaderStatsTest(BaseTestCase):
@@ -268,18 +266,14 @@ class HeaderStatsTest(BaseTestCase):
         ).order_by("-assessments__id")[:1]
 
         desired_output = (
-            InternDetail.objects.filter(
-                sub_batch=self.sub_batch, user_id=self.trainee.user_id
-            )
+            InternDetail.objects.filter(sub_batch=self.sub_batch, user_id=self.trainee.user_id)
             .annotate(
                 average_marks=Case(
                     When(
                         user_id=F("user__assessments__user_id"),
                         then=Coalesce(
                             Avg(
-                                Subquery(
-                                    last_attempt_score.values("assessments__score")
-                                ),
+                                Subquery(last_attempt_score.values("assessments__score")),
                                 distinct=True,
                             ),
                             0.0,
@@ -309,7 +303,5 @@ class HeaderStatsTest(BaseTestCase):
             )
             .values("average_marks", "no_of_retries", "completion")
         )
-        response = self.make_get_request(
-            reverse(self.route_name, args=[self.trainee.user_id])
-        )
+        response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
         self.assertEqual(list(desired_output)[0], response.context["performance_stats"])

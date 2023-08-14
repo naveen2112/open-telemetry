@@ -1,70 +1,142 @@
 {% load static %}
 {% load custom_tags %}
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="description" content="Hubble Training">
+        <meta name="keywords" content="Hubble Training">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>
 
-<head>
+            {% block title %}
+            {% endblock title %}
 
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+        | Hubble </title>
+        <!-- Browser tab icon -->
+        <link rel="icon" href="{% static 'images/icon.png' %}" type="image/x-icon">
+        <!-- Fonts -->
+        <link rel="dns-prefetch" href="//fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css?family=Nunito"
+              rel="stylesheet">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet"
+              href="https://fonts.googleapis.com/css?family=Nunito">
+        <link rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+              rel="stylesheet">
+        <!-- Styles -->
+        <link rel="stylesheet"
+              type="text/css"
+              href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" />
+        <link href="{% static 'css/app.css' %}" rel="stylesheet">
+        <link href="{% static 'css/search.css' %}" rel="stylesheet">
+        <link rel="stylesheet" href="{% static 'css/style.css' %}">
+        <!-- Tailwind elements -->
+        <link rel="stylesheet"
+              href="https://cdn.jsdelivr.net/npm/tw-elements/dist/css/index.min.css" />
+        <link rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
+        <link rel="stylesheet"
+              type="text/css"
+              href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+        <link rel="stylesheet"
+              href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    </head>
+    <body class="min-h-screen bg-gray-50">
+        <div class="flex h-screen">
 
-    <title>{% block title %}{% endblock title %} | Hubble </title>
-    <!-- Browser tab icon -->
-    <link rel="icon" href="{% static 'images/icon.png' %}" type="image/x-icon">
-    <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
-        rel="stylesheet">
-    <!-- Styles -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" />
-    <link href="{% static 'css/app.css' %}" rel="stylesheet">
-    <link href="{% static 'css/search.css' %}" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <!-- Tailwind elements -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tw-elements/dist/css/index.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" />
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+            {% include 'layouts/'|add:request.subdomain|add:'_sidebar.html' %}
 
-</head>
+            <div class="overflow-hidden max-h-screen flex main-screen grow flex-col">
 
-<body class="min-h-screen bg-gray-50">
+                {% block container %}{% endblock %}
 
-    <div class="flex h-screen">
+                <div class="header bg-white">
+                    <div class="px-5 pt-9 bg-mild-violet pb-7">
 
-        {% include 'layouts/'|add:request.subdomain|add:'_sidebar.html' %}
+                        {% block header %}{% endblock %}
 
-        <div class="overflow-hidden max-h-screen flex main-screen grow flex-col">
-            {% block container %}
-            {% endblock %}
-            <div class="header bg-white">
-                <div class="px-5 pt-9 bg-mild-violet pb-7">
-                    {% block header %}
-                    {% endblock %}
+                    </div>
+                </div>
+                <div class="text-dark-black-50 px-5 text-sm">
+
+                    {% block table %}{% endblock %}
+
+                </div>
+                <div class="overflow-auto grow bg-light-violet content-page">
+                    <div class="px-5 h-full">
+
+                        {% block body %}{% endblock %}
+
+                    </div>
                 </div>
             </div>
-
-            <div class="text-dark-black-50 px-5 text-sm">
-                {% block table %}
-                {% endblock %}
-            </div>
-
-            <div class="overflow-auto grow bg-light-violet content-page">
-                <div class="px-5 h-full">
-                    {% block body %}
-                    {% endblock %}
+            <!-- Loader -->
+            <div class="page-loader">
+                <div class="gooey">
+                    <span class="dot"></span>
+                    <div class="dots">
+                        <span>-</span>
+                        <span>-</span>
+                        <span>-</span>
+                    </div>
                 </div>
             </div>
+            <!-- Scripts -->
+            <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>
+            <script src="//cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+            <script type="text/javascript"
+                    src="{% static 'ajax_datatable/js/utils.js' %}"></script>
+            <!-- jQuery Modal -->
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+            <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+            <!-- Date range picker -->
+            <script type="text/javascript"
+                    src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+            <script type="text/javascript"
+                    src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+            <!-- jQuery Mask Plugins -->
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.js"></script>
+            <script type="text/javascript"
+                    src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap-collapse.js"></script>
+            <script src="{% static 'js/search.js' %}"></script>
+            <script src="https://cdn.jsdelivr.net/npm/jquery-sortablejs@latest/jquery-sortable.js"></script>
+            <script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
+            <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+            <script>
+                let showLoader = () => {
+                    $('.page-loader').show();
+                    hideLoader()
+                }
+                let hideLoader = () => {
+                    $('.page-loader').hide();
+                }
 
-        </div>
+                $(function() {
+                    $(".sub-category a").accordion();
+                    document.querySelector('.nav-animation').addEventListener('mouseleave', (event) => {
+                        $(".sub-category a").accordion('hide');
+                    });
+                })
+
+                $(function() {
+                    hideLoader();
+                    $('.sub-category .sidebar-active').closest('.sub-category').addClass('sidebar-active');
+                })
+
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val()
+                    },
+                });
 
 
+<<<<<<< HEAD
         <!-- Loader -->
         <div class="page-loader">
             <div class="gooey">
@@ -125,63 +197,68 @@
 
             $(document).ready(function() {
                 var selectTemplate = `
+=======
+                $(document).ready(function() {
+                    var selectTemplate = `
+>>>>>>> pylint_integeration_from_sub_batch_improvements
                         <div id="drop-btn" class="cus-dropdown-icon block border border-primary-dark-30 rounded-md mt-2.5 w-full focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 py-1 px-2">
                             <div class="cursor-pointer text-truncate w-11/12 dropdown_selected_value" id="show-value">
                             </div>
                         </div>`;
 
-                $('.work-basic-dropdown').each(function() {
-                    if ($(this).find('.multi-select').length == 0) {
-                        var elemId = $(this).find("select").attr("id");
-                        $("#" + elemId).customSearch({
-                            closeOnCheck: true,
-                            clickBtnTemplate: selectTemplate,
-                            listStyle: "p-3",
-                            hideClearIcon: true,
-                            targetId: "#show-value",
-                            popupStyles: "z-20 absolute rounded-md bg-white text-dark-black block shadow-md w-64 top-10 left-0 max-h-96 overflow-hidden",
-                            onItemCheck: function(values) {
-                                if (elemId == "work_schedule") {
-                                    hideShowDays();
+                    $('.work-basic-dropdown').each(function() {
+                        if ($(this).find('.multi-select').length == 0) {
+                            var elemId = $(this).find("select").attr("id");
+                            $("#" + elemId).customSearch({
+                                closeOnCheck: true,
+                                clickBtnTemplate: selectTemplate,
+                                listStyle: "p-3",
+                                hideClearIcon: true,
+                                targetId: "#show-value",
+                                popupStyles: "z-20 absolute rounded-md bg-white text-dark-black block shadow-md w-64 top-10 left-0 max-h-96 overflow-hidden",
+                                onItemCheck: function(values) {
+                                    if (elemId == "work_schedule") {
+                                        hideShowDays();
+                                    }
+                                },
+                                onSelectOpen: function() {
+                                    $('.content-page').css("overflow-y", "hidden");
+                                },
+                                onSelectClose: function() {
+                                    $('.content-page').css("overflow-y", "auto");
                                 }
-                            },
-                            onSelectOpen: function() {
-                                $('.content-page').css("overflow-y", "hidden");
-                            },
-                            onSelectClose: function() {
-                                $('.content-page').css("overflow-y", "auto");
-                            }
-                        })
-                    }
+                            })
+                        }
+                    })
                 })
-            })
-            function renderFormError(data) {
-                if (Object.keys(JSON.parse(data.non_field_errors)).length > 0) {
-                    $('#non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + JSON.parse(data.non_field_errors)[0]['message'] + '</span>')
+
+                function renderFormError(data) {
+                    if (Object.keys(JSON.parse(data.non_field_errors)).length > 0) {
+                        $('#non_field_error').html('<span id="reason_error" class="ajax-error form_errors text-red-600">' + JSON.parse(data.non_field_errors)[0]['message'] + '</span>')
+                    }
+                    for (field in JSON.parse(data.field_errors)) {
+                        $('#' + field + '_group').append('<span id="reason_error" class="form_errors ajax-error text-red-600">' + JSON.parse(data.field_errors)[field][0].message + '</span>');
+                    }
                 }
-                for (field in JSON.parse(data.field_errors)) {
-                    $('#' + field + '_group').append('<span id="reason_error" class="form_errors ajax-error text-red-600">' + JSON.parse(data.field_errors)[field][0].message + '</span>');
+
+                function closeModal(name) {
+                    document.getElementById(name).classList.remove("blocker");
+                    document.getElementById(name).classList.add("hidden");
                 }
-            }
-            function closeModal(name) {
-                document.getElementById(name).classList.remove("blocker");
-                document.getElementById(name).classList.add("hidden");
-            }
-            function openBaseModal() {
-                document.getElementById("modal").classList.remove("hidden");
-                document.getElementById("modal").classList.add("blocker");
-                removeErrors();
-            }
-            function removeErrors() {
-                $(".form_errors").text("");
-            }
-        </script>
 
-        {% block script %}
-        {% endblock %}
+                function openBaseModal() {
+                    document.getElementById("modal").classList.remove("hidden");
+                    document.getElementById("modal").classList.add("blocker");
+                    removeErrors();
+                }
 
-    </div>
+                function removeErrors() {
+                    $(".form_errors").text("");
+                }
+            </script>
 
-</body>
+            {% block script %}{% endblock %}
 
+        </div>
+    </body>
 </html>

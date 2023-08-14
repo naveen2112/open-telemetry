@@ -1,40 +1,47 @@
+"""
+Django views and datatables for generating efficiency, monetization, and KPI reports
+"""
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import TemplateView, DetailView
-from django.urls import reverse
-from hubble.models import TimesheetEntry, Team
+from django.db.models import Avg, CharField, F, Func, Sum, Value
 from django.db.models.functions import Round
-from django.db.models import (
-    Avg,
-    F,
-    Sum,
-    Func,
-    Value,
-    CharField,
-)
-from core.utils import CustomDatatable
+from django.urls import reverse
+from django.views.generic import DetailView, TemplateView
+
 from core import template_utils
+from core.utils import CustomDatatable
+from hubble.models import Team, TimesheetEntry
 
 
 class Index(LoginRequiredMixin, TemplateView):
-    """This Class is responsible for checking whether user is authenticated or not, and redirects the user to Efficiency report"""
+    """
+    This Class is responsible for checking whether user is authenticated or not,
+    and redirects the user to Efficiency report
+    """
 
     template_name = "report.html"
 
 
 class MonetizationReport(LoginRequiredMixin, TemplateView):
-    """This Class is responsible for checking whether user is authenticated or not, and redirects the user to MOnetization Gap report"""
+    """
+    This Class is responsible for checking whether user is authenticated or not,
+    and redirects the user to MOnetization Gap report
+    """
 
     template_name = "monetization.html"
 
 
 class KpiReport(LoginRequiredMixin, TemplateView):
-    """This Class is responsible for checking whether user is authenticated or not, and redirects the user to KPI report"""
+    """This Class is responsible for checking whether user is authenticated
+    or not, and redirects the user to KPI report
+    """
 
     template_name = "kpi.html"
 
 
 class DetailedEfficiency(LoginRequiredMixin, DetailView):
-    """This Class is responsible for checking whether user is authenticated or not, and redirects the user to Team specific report"""
+    """This Class is responsible for checking whether user is authenticated
+    or not, and redirects the user to Team specific report
+    """
 
     model = Team
     template_name = "detailed_efficiency.html"
@@ -83,13 +90,11 @@ class EfficiencyDatatable(CustomDatatable):
 
     def customize_row(self, row, obj):
         # This is responsible for adding the view action button
-        buttons = template_utils.show_btn(
+        buttons = template_utils.show_btn(  # pylint: disable=no-member
             reverse("detailed_efficiency", args=[obj["pk"]])
         )
-        row[
-            "action"
-        ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
-        return
+        row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        return row
 
     def get_initial_queryset(self, request=None):
         # To load a queryset into the datatable
@@ -105,11 +110,7 @@ class EfficiencyDatatable(CustomDatatable):
                     Avg(
                         100
                         * (F("authorized_hours"))
-                        / (
-                            F(
-                                "user__expected_user_efficiencies__expected_efficiency"
-                            )
-                        )
+                        / (F("user__expected_user_efficiencies__expected_efficiency"))
                     ),
                     2,
                 ),
@@ -122,11 +123,14 @@ class EfficiencyDatatable(CustomDatatable):
         # Used to differnetiate the data through various colors
         if column == "capacity":
             if int(row["capacity"]) >= 75:
-                return f'<span class="bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm">{row["capacity"]}</span>'
-            elif 50 < int(row["capacity"]) < 75:
-                return f'<span class="bg-yellow-100 text-yellow-800 py-0.5 px-1.5 rounded-xl text-sm">{row["capacity"]}</span>'
-            else:
-                return f'<span class="bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm">{row["capacity"]}</span>'
+                return f'<span class="bg-mild-green-10 text-mild-green py-0.5 \
+                    px-1.5 rounded-xl text-sm">{row["capacity"]}</span>'
+            if 50 < int(row["capacity"]) < 75:
+                return f'<span class="bg-yellow-100 text-yellow-800 py-0.5 \
+                    px-1.5 rounded-xl text-sm">{row["capacity"]}</span>'
+
+            return f'<span class="bg-dark-red-10 text-dark-red py-0.5 \
+                    px-1.5 rounded-xl text-sm">{row["capacity"]}</span>'
         return super().render_dict_column(row, column)
 
 
@@ -200,9 +204,14 @@ class MonetizationDatatable(CustomDatatable):
             return f'{row["gap"]}%'
         if column == "ratings":
             if int(row["gap"]) <= 15:
-                return f'<span class="bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm">Good</span>'
-            else:
-                return f'<span class="bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm">Need Improvements</span>'
+                return (
+                    '<span class="bg-mild-green-10 text-mild-green py-0.5 '
+                    'px-1.5 rounded-xl text-sm">Good</span>'
+                )
+            return (
+                '<span class="bg-dark-red-10 text-dark-red py-0.5 '
+                'px-1.5 rounded-xl text-sm">Need Improvements</span>'
+            )
         return super().render_dict_column(row, column)
 
 
@@ -336,19 +345,13 @@ class DetaileEfficiencyDatatable(CustomDatatable):
             .values("month")
             .filter(team__id=int(request.REQUEST.get("team_id")))
             .annotate(
-                expected_hours=Sum(
-                    "user__expected_user_efficiencies__expected_efficiency"
-                ),
+                expected_hours=Sum("user__expected_user_efficiencies__expected_efficiency"),
                 actual_hours=Sum("authorized_hours"),
                 capacity=Round(
                     Avg(
                         100
                         * (F("authorized_hours"))
-                        / (
-                            F(
-                                "user__expected_user_efficiencies__expected_efficiency"
-                            )
-                        )
+                        / (F("user__expected_user_efficiencies__expected_efficiency"))
                     )
                 ),
             )
@@ -358,9 +361,12 @@ class DetaileEfficiencyDatatable(CustomDatatable):
         # This is responsible for updating the capacity data with various colors based on the value
         if column == "Capacity":
             if int(row["Capacity"]) >= 75:
-                return f'<span class="bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm">{row["Capacity"]}</span>'
-            elif 50 < int(row["Capacity"]) < 75:
-                return f'<span class="bg-yellow-100 text-yellow-800 py-0.5 px-1.5 rounded-xl text-sm">{row["Capacity"]}</span>'
-            else:
-                return f'<span class="bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm">{row["Capacity"]}</span>'
+                return f'<span class="bg-mild-green-10 text-mild-green py-0.5 \
+                    px-1.5 rounded-xl text-sm">{row["Capacity"]}</span>'
+            if 50 < int(row["Capacity"]) < 75:
+                return f'<span class="bg-yellow-100 text-yellow-800 py-0.5 \
+                    px-1.5 rounded-xl text-sm">{row["Capacity"]}</span>'
+
+            return f'<span class="bg-dark-red-10 text-dark-red py-0.5 \
+                    px-1.5 rounded-xl text-sm">{row["Capacity"]}</span>'
         return super().render_dict_column(row, column)

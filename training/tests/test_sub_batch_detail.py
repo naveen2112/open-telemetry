@@ -1,3 +1,7 @@
+"""
+Django test cases for the create, delete and Datatables features in the 
+SubBatchDetail module 
+"""
 from django.db.models import (Avg, Case, Count, F, OuterRef, Q, Subquery,
                               Value, When)
 from django.db.models.functions import Coalesce
@@ -30,7 +34,8 @@ class AddInternTest(BaseTestCase):
 
     def update_valid_input(self):
         """
-        This function is responsible for updating the valid inputs and creating data in databases as reqiured
+        This function is responsible for updating the valid inputs and
+        creating data in databases as reqiured
         """
         intern = baker.make("hubble.User", is_employed=False, _fill_optional=["email"])
         self.sub_batch = baker.make("hubble.SubBatch", start_date=timezone.now().date())
@@ -51,9 +56,7 @@ class AddInternTest(BaseTestCase):
         """
         To makes sure that the correct template is used
         """
-        response = self.make_get_request(
-            reverse(self.route_name, args=[self.sub_batch.id])
-        )
+        response = self.make_get_request(reverse(self.route_name, args=[self.sub_batch.id]))
         self.assertTemplateUsed(response, "sub_batch/sub_batch_detail.html")
         self.assertContains(response, self.sub_batch.name)
 
@@ -65,7 +68,7 @@ class AddInternTest(BaseTestCase):
         response = self.make_post_request(reverse(self.create_route_name), data=data)
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertEqual(response.status_code, 200)
-        self.assertDatabaseHas(
+        self.assert_database_has(
             "InternDetail",
             {
                 "user_id": data["user_id"],
@@ -176,16 +179,14 @@ class DeleteInternTest(BaseTestCase):
         To check what happens when valid id is given for delete
         """
         trainee = baker.make("hubble.InternDetail")
-        self.assertDatabaseHas("InternDetail", {"id": trainee.id})
-        response = self.make_delete_request(
-            reverse(self.delete_route_name, args=[trainee.id])
-        )
+        self.assert_database_has("InternDetail", {"id": trainee.id})
+        response = self.make_delete_request(reverse(self.delete_route_name, args=[trainee.id]))
         self.assertJSONEqual(
             response.content,
             {"message": "Intern has been deleted succssfully"},
         )
         self.assertEqual(response.status_code, 200)
-        self.assertDatabaseNotHas("InternDetail", {"id": trainee.id})
+        self.assert_database_not_has("InternDetail", {"id": trainee.id})
 
     def test_failure(self):
         """
@@ -217,7 +218,8 @@ class TraineeDatatableTest(BaseTestCase):
 
     def update_valid_input(self):
         """
-        This function is responsible for updating the valid inputs and creating data in databases as reqiured
+        This function is responsible for updating the valid inputs and creating
+        data in databases as reqiured
         """
         self.name = self.faker.name()
         self.sub_batch = baker.make("hubble.SubBatch", start_date=timezone.now().date())
@@ -235,6 +237,34 @@ class TraineeDatatableTest(BaseTestCase):
             order=seq(0),
             sub_batch_id=self.sub_batch.id,
         )
+<<<<<<< HEAD
+=======
+        self.persisted_valid_inputs = {
+            "draw": 1,
+            "start": 0,
+            "length": 10,
+            "sub_batch": self.sub_batch.id,
+        }
+
+    def test_template(self):
+        """
+        To makes sure that the correct template is used
+        """
+        response = self.make_get_request(reverse(self.route_name, args=[self.sub_batch.id]))
+        self.assertTemplateUsed(response, "sub_batch/sub_batch_detail.html")
+        self.assertContains(response, self.sub_batch.name)
+        self.assertContains(response, "Performance")
+        self.assertContains(response, GOOD)
+        self.assertContains(response, MEET_EXPECTATION)
+        self.assertContains(response, ABOVE_AVERAGE)
+        self.assertContains(response, AVERAGE)
+        self.assertContains(response, POOR)
+
+    def test_datatable(self):
+        """
+        To check whether all columns are present in datatable and length of rows without any filter
+        """
+>>>>>>> pylint_integeration_from_sub_batch_improvements
         task_count = (
             SubBatchTaskTimeline.objects.filter(
                 sub_batch_id=self.sub_batch.id, task_type=TASK_TYPE_ASSESSMENT
@@ -303,12 +333,17 @@ class TraineeDatatableTest(BaseTestCase):
                 ),
             )
         )
+<<<<<<< HEAD
         self.persisted_valid_inputs = {
+=======
+        payload = {
+>>>>>>> pylint_integeration_from_sub_batch_improvements
             "draw": 1,
             "start": 0,
             "length": 10,
             "sub_batch": self.sub_batch.id,
         }
+<<<<<<< HEAD
 
     def test_template(self):
         """
@@ -337,26 +372,35 @@ class TraineeDatatableTest(BaseTestCase):
         for row in range(len(self.desired_output)):
             expected_value = self.desired_output[row]
             received_value = response.json()["data"][row]
+=======
+        response = self.make_post_request(reverse(self.datatable_route_name), data=payload)
+        self.assertEqual(response.status_code, 200)
+        for index, expected_value in enumerate(desired_output):
+            received_value = response.json()["data"][index]
+>>>>>>> pylint_integeration_from_sub_batch_improvements
             self.assertEqual(expected_value.pk, int(received_value["pk"]))
             self.assertEqual(expected_value.user.name, received_value["user"])
             self.assertEqual(expected_value.college, received_value["college"])
             self.assertEqual(
+<<<<<<< HEAD
                 round(expected_value.completion, 2), float(received_value["completion"])
+=======
+                expected_value.expected_completion.strftime("%d %b %Y"),
+                received_value["expected_completion"],
+>>>>>>> pylint_integeration_from_sub_batch_improvements
             )
-            if expected_value.average_marks == None:
+            if expected_value.average_marks is None:
                 self.assertEqual("-", received_value["average_marks"])
             else:
                 self.assertEqual(
                     round(expected_value.average_marks, 2), float(received_value["average_marks"])
                 )
-            self.assertEqual(expected_value.performance, received_value["performance"].split(">")[1].split("<")[0])
             self.assertEqual(
-                expected_value.no_of_retries, int(received_value["no_of_retries"])
+                expected_value.performance,
+                received_value["performance"].split(">")[1].split("<")[0],
             )
-            self.assertEqual(
-                expected_value.expected_completion.strftime("%d %b %Y"),
-                received_value["expected_completion"],
-            )
+            self.assertEqual(expected_value.no_of_retries, int(received_value["no_of_retries"]))
+
         for row in response.json()["data"]:
             self.assertTrue("pk" in row)
             self.assertTrue("user" in row)
@@ -415,23 +459,14 @@ class TraineeDatatableTest(BaseTestCase):
 
         self.assertTrue("extra_data" in response.json())
         self.assertTrue(GOOD in response.json()["extra_data"]["performance_report"])
-        self.assertTrue(
-            MEET_EXPECTATION in response.json()["extra_data"]["performance_report"]
-        )
-        self.assertTrue(
-            ABOVE_AVERAGE in response.json()["extra_data"]["performance_report"]
-        )
-        self.assertTrue(
-            AVERAGE in response.json()["extra_data"]["performance_report"]
-        )
+        self.assertTrue(MEET_EXPECTATION in response.json()["extra_data"]["performance_report"])
+        self.assertTrue(ABOVE_AVERAGE in response.json()["extra_data"]["performance_report"])
+        self.assertTrue(AVERAGE in response.json()["extra_data"]["performance_report"])
         self.assertTrue(POOR in response.json()["extra_data"]["performance_report"])
-        self.assertTrue(
-            NOT_YET_STARTED in response.json()["extra_data"]["performance_report"]
-        )
+        self.assertTrue(NOT_YET_STARTED in response.json()["extra_data"]["performance_report"])
 
         self.assertTrue(
-            performance_report[GOOD]
-            == response.json()["extra_data"]["performance_report"][GOOD]
+            performance_report[GOOD] == response.json()["extra_data"]["performance_report"][GOOD]
         )
         self.assertTrue(
             performance_report[MEET_EXPECTATION]
@@ -446,8 +481,7 @@ class TraineeDatatableTest(BaseTestCase):
             == response.json()["extra_data"]["performance_report"][AVERAGE]
         )
         self.assertTrue(
-            performance_report[POOR]
-            == response.json()["extra_data"]["performance_report"][POOR]
+            performance_report[POOR] == response.json()["extra_data"]["performance_report"][POOR]
         )
         self.assertTrue(
             performance_report[NOT_YET_STARTED]

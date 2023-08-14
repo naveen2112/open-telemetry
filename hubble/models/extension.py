@@ -1,12 +1,18 @@
+"""
+The Extension class is used to store extension week data for trainees
+"""
 from django.db import models
 
 from core import db
 
-from .sub_batch import SubBatch
 from .user import User
 
 
 class Extension(db.SoftDeleteWithBaseModel):
+    """
+    Store the extension week data of trainee
+    """
+
     name = models.CharField(max_length=255, blank=True)
     sub_batch = models.ForeignKey(
         "SubBatch", on_delete=models.CASCADE, related_name="extensions"
@@ -21,4 +27,8 @@ class Extension(db.SoftDeleteWithBaseModel):
     )
 
     class Meta:
+        """
+        Meta class for defining class behavior and properties.
+        """
+
         db_table = "extensions"

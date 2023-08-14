@@ -1,4 +1,10 @@
+<<<<<<< HEAD
 from django.db.models import Count, OuterRef, Q, Subquery
+=======
+"""
+Django test cases for create, update and delete for the Extension module
+"""
+>>>>>>> pylint_integeration_from_sub_batch_improvements
 from django.urls import reverse
 from django.utils import timezone
 from model_bakery import baker
@@ -27,7 +33,8 @@ class ExtensionCreateTest(BaseTestCase):
 
     def update_valid_input(self):
         """
-        This function is responsible for updating the valid inputs and creating data in databases as reqiured
+        This function is responsible for updating the valid inputs and creating
+        data in databases as reqiured
         """
         self.sub_batch = baker.make(
             "hubble.SubBatch",
@@ -39,9 +46,7 @@ class ExtensionCreateTest(BaseTestCase):
         """
         To makes sure that the correct template is used
         """
-        response = self.make_get_request(
-            reverse(self.route_name, args=[self.trainee.user_id])
-        )
+        response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
         self.assertTemplateUsed(response, "sub_batch/user_journey_page.html")
         self.assertContains(response, self.trainee.user_id)
 
@@ -56,7 +61,7 @@ class ExtensionCreateTest(BaseTestCase):
         )
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertEqual(response.status_code, 200)
-        self.assertDatabaseHas(
+        self.assert_database_has(
             "Extension",
             {
                 "name": f"Extension Week {desired_extension_name}",
@@ -69,16 +74,15 @@ class ExtensionCreateTest(BaseTestCase):
         """
         Check what happens when invalid data is given as input
         """
-        response = self.make_post_request(
-            reverse(self.create_route_name, args=[0]), data={}
-        )
+        response = self.make_post_request(reverse(self.create_route_name, args=[0]), data={})
         self.assertJSONEqual(self.decoded_json(response), {"status": "error"})
         self.assertEqual(response.status_code, 200)
 
 
 class ExtensionUpdateTest(BaseTestCase):
     """
-    This class is responsible for testing the updating the scores in asssesments in user journey page
+    This class is responsible for testing the updating the scores in
+    asssesments in user journey page
     """
 
     update_edit_route_name = "user.update-score"
@@ -93,7 +97,8 @@ class ExtensionUpdateTest(BaseTestCase):
 
     def update_valid_input(self):
         """
-        This function is responsible for updating the valid inputs and creating data in databases as reqiured
+        This function is responsible for updating the valid inputs and creating
+        data in databases as reqiured
         """
         sub_batch = baker.make(
             "hubble.SubBatch",
@@ -115,13 +120,14 @@ class ExtensionUpdateTest(BaseTestCase):
         """
         # Check what happens when is_retry is True
         data = self.get_valid_inputs()
+        print(data)
         response = self.make_post_request(
             reverse(self.update_edit_route_name, args=[self.trainee.user_id]),
             data=data,
         )
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertEqual(response.status_code, 200)
-        self.assertDatabaseHas(
+        self.assert_database_has(
             "Assessment",
             {
                 "score": data["score"],
@@ -139,7 +145,7 @@ class ExtensionUpdateTest(BaseTestCase):
         )
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertEqual(response.status_code, 200)
-        self.assertDatabaseHas(
+        self.assert_database_has(
             "Assessment",
             {
                 "score": data["score"],
@@ -208,6 +214,7 @@ class ExtensionWeekTaskDelete(BaseTestCase):
         """
         To check what happens when valid id is given for delete
         """
+<<<<<<< HEAD
         trainee = baker.make("hubble.User")
         sub_batch = baker.make("hubble.SubBatch")
         extension = baker.make("hubble.Extension", user_id=trainee.id, sub_batch=sub_batch, name=seq("Extension Week "), _quantity=2)
@@ -215,6 +222,11 @@ class ExtensionWeekTaskDelete(BaseTestCase):
         response = self.make_delete_request(
             reverse(self.delete_route_name, args=[extension[0].id])
         )
+=======
+        extension = baker.make("hubble.Extension")
+        self.assert_database_has("Extension", {"id": extension.id})
+        response = self.make_delete_request(reverse(self.delete_route_name, args=[extension.id]))
+>>>>>>> pylint_integeration_from_sub_batch_improvements
         self.assertJSONEqual(
             response.content,
             {
@@ -223,8 +235,12 @@ class ExtensionWeekTaskDelete(BaseTestCase):
             },
         )
         self.assertEqual(response.status_code, 200)
+<<<<<<< HEAD
         self.assertDatabaseNotHas("Extension", {"id": extension[0].id})
         self.assertDatabaseHas("Extension", {"id": extension[1].id, "name": extension[0].name})
+=======
+        self.assert_database_not_has("Extension", {"id": extension.id})
+>>>>>>> pylint_integeration_from_sub_batch_improvements
 
     def test_failure(self):
         """

@@ -1,3 +1,6 @@
+"""
+This module provides a set of classes for building forms in Django
+"""
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator
@@ -9,12 +12,21 @@ from hubble.models import Assessment
 
 
 class TimelineForm(forms.ModelForm):
+    """
+    Timeline form is used to create or update timeline objects,
+    with additional validation and customization for the form fields.
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["team"].empty_label = "Select a Team"
         self.fields["name"].validators.append(MinLengthValidator(3))
 
     def clean(self):
+        """
+        The function checks if a timeline with the given ID exists and
+        returns an error message if it does not.
+        """
         cleaned_data = super().clean()
         if self.data.get("id") and (
             not models.Timeline.objects.filter(id=self.data.get("id")).exists()
@@ -24,8 +36,8 @@ class TimelineForm(forms.ModelForm):
 
     def clean_is_active(self):
         """
-        This function checks if a team already has an active template and raises a validation error if
-        it does.
+        This function checks if a team already has an active template
+        and raises a validation error if it does.
         """
         if self.cleaned_data.get("team", None) and (self.cleaned_data["is_active"]):
             query = models.Timeline.objects.filter(
@@ -38,39 +50,55 @@ class TimelineForm(forms.ModelForm):
                 )
 
     class Meta:
+        """
+        Meta class for defining class behavior and properties.
+        """
+
         model = models.Timeline
         fields = ("name", "team", "is_active")
 
         widgets = {
             "name": forms.TextInput(
                 attrs={
-                    "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
+                    "class": "w-full block border border-primary-dark-30 \
+                        rounded-md focus:outline-none focus:ring-transparent \
+                            focus:ring-offset-0 h-9 p-2",
                     "placeholder": "Timeline name...",
                 }
             ),
             "team": forms.Select(
                 attrs={
-                    "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select",
+                    "class": "w-full block border border-primary-dark-30 \
+                        rounded-md focus:outline-none focus:ring-transparent \
+                            focus:ring-offset-0 h-9 p-2 dropdown_select",
                     "placeholder": "Select Team...",
                 }
             ),
             "is_active": forms.CheckboxInput(
                 attrs={
-                    "class": "checkbox_active cursor-pointer block border border-primary-dark-30 rounded-md w-4 mr-3 focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
+                    "class": "checkbox_active cursor-pointer block border \
+                        border-primary-dark-30 rounded-md w-4 mr-3 focus:outline-none \
+                            focus:ring-transparent focus:ring-offset-0 h-9 p-2",
                 }
             ),
         }
 
 
 class TimelineTaskForm(forms.ModelForm):
+    """
+    Timeline task form is used to add and update the timeline task
+    with the respective with the custom validations
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["name"].validators.append(MinLengthValidator(3))
 
+    @staticmethod
     def validate_days(value):
         """
-        The function validates that a given value is greater than 0 and a multiple of 0.5, otherwise it
-        raises a validation error.
+        The function validates that a given value is greater than 0 and
+        a multiple of 0.5, otherwise it raises a validation error.
         """
         if value <= 0:
             raise ValidationError(
@@ -86,7 +114,9 @@ class TimelineTaskForm(forms.ModelForm):
     days = forms.FloatField(
         widget=forms.NumberInput(
             attrs={
-                "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
+                "class": "w-full block border border-primary-dark-30 \
+                    rounded-md focus:outline-none focus:ring-transparent \
+                        focus:ring-offset-0 h-9 p-2",
                 "placeholder": "No of days...",
             }
         ),
@@ -94,27 +124,35 @@ class TimelineTaskForm(forms.ModelForm):
     )
     present_type = forms.ChoiceField(
         error_messages={
-            "invalid_choice": "Select a valid choice. That choice is not one of the available choices."
+            "invalid_choice": "Select a valid choice. "
+            "That choice is not one of the available choices."
         },
         widget=forms.RadioSelect,
         choices=PRESENT_TYPES,
     )
     task_type = forms.ChoiceField(
         error_messages={
-            "invalid_choice": "Select a valid choice. That choice is not one of the available choices."
+            "invalid_choice": "Select a valid choice. "
+            "That choice is not one of the available choices."
         },
         widget=forms.RadioSelect,
         choices=TASK_TYPES,
     )
 
     class Meta:
+        """
+        Meta class for defining class behavior and properties.
+        """
+
         model = models.TimelineTask
         fields = ("name", "days", "present_type", "task_type")
 
         widgets = {
             "name": forms.TextInput(
                 attrs={
-                    "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
+                    "class": "w-full block border border-primary-dark-30 \
+                        rounded-md focus:outline-none focus:ring-transparent \
+                            focus:ring-offset-0 h-9 p-2",
                     "placeholder": "Timeline name...",
                 }
             ),
@@ -122,18 +160,28 @@ class TimelineTaskForm(forms.ModelForm):
 
 
 class BatchForm(forms.ModelForm):
+    """
+    Batch form is used to create and update the batch data
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["name"].validators.append(MinLengthValidator(3))
 
     class Meta:
+        """
+        Meta class for defining class behavior and properties.
+        """
+
         model = models.Batch
         fields = ("name",)
 
         widgets = {
             "name": forms.TextInput(
                 attrs={
-                    "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
+                    "class": "w-full block border border-primary-dark-30 \
+                        rounded-md focus:outline-none focus:ring-transparent \
+                            focus:ring-offset-0 h-9 p-2",
                     "placeholder": "Batch Name...",
                 }
             )
@@ -141,6 +189,10 @@ class BatchForm(forms.ModelForm):
 
 
 class SubBatchForm(forms.ModelForm):
+    """
+    Sub batch form is used to create and update the sub batch with custom validations
+    """
+
     primary_mentor_id = forms.ModelChoiceField(
         queryset=models.User.objects.filter(is_employed=True)
     )
@@ -157,20 +209,18 @@ class SubBatchForm(forms.ModelForm):
 
         self.fields["team"].empty_label = "Select a Team"
         if self.data.get("team", None):
-            self.fields["team"].widget.attrs["initialValue"] = self.data.get(
-                "team", None
-            )
+            self.fields["team"].widget.attrs["initialValue"] = self.data.get("team", None)
 
         self.fields["primary_mentor_id"].empty_label = "Select a Primary Mentor"
         if self.data.get("primary_mentor_id", None):
-            self.fields["primary_mentor_id"].widget.attrs[
-                "initialValue"
-            ] = self.data.get("primary_mentor_id", None)
+            self.fields["primary_mentor_id"].widget.attrs["initialValue"] = self.data.get(
+                "primary_mentor_id", None
+            )
 
         if self.data.get("secondary_mentor_ids", None):
-            self.fields["secondary_mentor_ids"].widget.attrs[
-                "initialValue"
-            ] = self.data.get("secondary_mentor_ids", None)
+            self.fields["secondary_mentor_ids"].widget.attrs["initialValue"] = self.data.get(
+                "secondary_mentor_ids", None
+            )
 
         self.fields["name"].validators.append(MinLengthValidator(3))
         self.fields["primary_mentor_id"].label = "Primary Mentor"
@@ -190,9 +240,11 @@ class SubBatchForm(forms.ModelForm):
             ] = instance.secondary_mentors.all().values_list("id", flat=True)
 
     def clean_timeline(self):
-        if not models.TimelineTask.objects.filter(
-            timeline=self.cleaned_data["timeline"].id
-        ):
+        """
+        The function checks if a selected team's active timeline
+        has any tasks and raises a validation error if it doesn't.
+        """
+        if not models.TimelineTask.objects.filter(timeline=self.cleaned_data["timeline"].id):
             raise ValidationError(
                 "The Selected Team's Active Timeline doesn't have any tasks.",
                 code="timeline_has_no_tasks",
@@ -213,6 +265,10 @@ class SubBatchForm(forms.ModelForm):
         return self.cleaned_data["start_date"]
 
     class Meta:
+        """
+        Meta class for defining class behavior and properties.
+        """
+
         model = models.SubBatch
         fields = (
             "name",
@@ -226,36 +282,48 @@ class SubBatchForm(forms.ModelForm):
         widgets = {
             "name": forms.TextInput(
                 attrs={
-                    "class": "w-full block border border-primary-dark-30 mt-2.5 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 bg-transparent w-250 ",
+                    "class": "w-full block border border-primary-dark-30 mt-2.5 \
+                        rounded-md focus:outline-none focus:ring-transparent \
+                            focus:ring-offset-0 h-9 p-2 bg-transparent w-250 ",
                     "placeholder": "Batch Name...",
                 }
             ),
             "team": forms.Select(
                 attrs={
-                    "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
+                    "class": "w-full block border border-primary-dark-30 \
+                        rounded-md focus:outline-none focus:ring-transparent \
+                            focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
                     "placeholder": "Select Team...",
                 }
             ),
             "start_date": forms.DateInput(
                 attrs={
-                    "class": "block border border-primary-dark-30 rounded-md mt-2.5 w-64 focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 bg-transparent w-250 start_date_input",
+                    "class": "block border border-primary-dark-30 \
+                        rounded-md mt-2.5 w-64 focus:outline-none focus:ring-transparent \
+                            focus:ring-offset-0 h-9 p-2 bg-transparent w-250 start_date_input",
                     "placeholder": "Start Date...",
                 }
             ),
             "timeline": forms.TextInput(
                 attrs={
-                    "class": "w-full block border border-primary-dark-30 mt-2.5 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 bg-transparent w-250 timeline-input",
+                    "class": "w-full block border border-primary-dark-30 mt-2.5 \
+                        rounded-md focus:outline-none focus:ring-transparent \
+                            focus:ring-offset-0 h-9 p-2 bg-transparent w-250 timeline-input",
                 }
             ),
             "primary_mentor_id": forms.Select(
                 attrs={
-                    "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
+                    "class": "w-full block border border-primary-dark-30 \
+                        rounded-md focus:outline-none focus:ring-transparent \
+                            focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
                     "placeholder": "Primary Mentor...",
                 }
             ),
             "secondary_mentor_ids": forms.SelectMultiple(
                 attrs={
-                    "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
+                    "class": "w-full block border border-primary-dark-30 \
+                        rounded-md focus:outline-none focus:ring-transparent \
+                            focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
                     "placeholder": "Secondary Mentors...",
                 }
             ),
@@ -263,12 +331,20 @@ class SubBatchForm(forms.ModelForm):
 
 
 class AddInternForm(forms.ModelForm):
+    """
+    Add intern for is used to add the trainee in the sub-batch
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["college"].validators.append(MinLengthValidator(3))
         self.fields["user_id"].empty_label = "Select a Trainee"
 
     def clean(self):
+        """
+        The function checks if a given sub_batch_id exists in the
+        database and adds an error message if it does not.
+        """
         cleaned_data = super().clean()
         if self.data.get("sub_batch_id") and not (
             models.SubBatch.objects.filter(id=self.data.get("sub_batch_id")).exists()
@@ -280,9 +356,11 @@ class AddInternForm(forms.ModelForm):
         return cleaned_data
 
     def clean_user_id(self):
-        if models.InternDetail.objects.filter(
-            user=self.cleaned_data["user_id"]
-        ).exists():
+        """
+        The function checks if a user ID already exists in the InternDetail model and raises a
+        validation error if it does.
+        """
+        if models.InternDetail.objects.filter(user=self.cleaned_data["user_id"]).exists():
             raise ValidationError(
                 "Trainee already added in the another sub-batch",
                 code="trainee_exists",
@@ -298,19 +376,27 @@ class AddInternForm(forms.ModelForm):
     )
 
     class Meta:
+        """
+        Meta class for defining class behavior and properties.
+        """
+
         model = models.InternDetail
         fields = ("user_id", "college")
 
         widgets = {
             "college": forms.TextInput(
                 attrs={
-                    "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
+                    "class": "w-full block border border-primary-dark-30 \
+                        rounded-md focus:outline-none focus:ring-transparent \
+                            focus:ring-offset-0 h-9 p-2",
                     "placeholder": "College name...",
                 }
             ),
             "user_id": forms.Select(
                 attrs={
-                    "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
+                    "class": "w-full block border border-primary-dark-30 \
+                        rounded-md focus:outline-none focus:ring-transparent \
+                            focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250",
                     "placeholder": "Trainee...",
                 }
             ),
@@ -318,13 +404,19 @@ class AddInternForm(forms.ModelForm):
 
 
 class SubBatchTimelineForm(forms.ModelForm):
+    """
+    Sub batch timeline form is used to create and update the sub-batch tasks
+    """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["name"].validators.append(MinLengthValidator(3))
 
+    @staticmethod
     def validate_days(value):
         """
-        The function validates that a given value is greater than 0 and a multiple of 0.5, otherwise it
+        The function validates that a given value is greater than 0 \
+            and a multiple of 0.5, otherwise it
         raises a validation error.
         """
         if value <= 0:
@@ -339,6 +431,9 @@ class SubBatchTimelineForm(forms.ModelForm):
             )
 
     def clean_order(self):
+        """
+        The function clean_order checks if the input order value is valid and returns it if it is.
+        """
         valid_order_value = list(
             models.SubBatchTaskTimeline.objects.filter(
                 start_date__gt=timezone.now(),
@@ -365,7 +460,9 @@ class SubBatchTimelineForm(forms.ModelForm):
     days = forms.FloatField(
         widget=forms.NumberInput(
             attrs={
-                "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
+                "class": "w-full block border border-primary-dark-30 \
+                    rounded-md focus:outline-none focus:ring-transparent \
+                        focus:ring-offset-0 h-9 p-2",
                 "placeholder": "Days...",
             }
         ),
@@ -374,7 +471,9 @@ class SubBatchTimelineForm(forms.ModelForm):
     order = forms.IntegerField(
         widget=forms.NumberInput(
             attrs={
-                "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
+                "class": "w-full block border border-primary-dark-30 \
+                    rounded-md focus:outline-none focus:ring-transparent \
+                        focus:ring-offset-0 h-9 p-2",
                 "placeholder": "Order...",
                 "required": False,
             }
@@ -382,27 +481,35 @@ class SubBatchTimelineForm(forms.ModelForm):
     )
     present_type = forms.ChoiceField(
         error_messages={
-            "invalid_choice": "Select a valid choice. That choice is not one of the available choices."
+            "invalid_choice": "Select a valid choice. "
+            "That choice is not one of the available choices."
         },
         widget=forms.RadioSelect,
         choices=PRESENT_TYPES,
     )
     task_type = forms.ChoiceField(
         error_messages={
-            "invalid_choice": "Select a valid choice. That choice is not one of the available choices."
+            "invalid_choice": "Select a valid choice. "
+            "That choice is not one of the available choices."
         },
         widget=forms.RadioSelect,
         choices=TASK_TYPES,
     )
 
     class Meta:
+        """
+        Meta class for defining class behavior and properties.
+        """
+
         model = models.SubBatchTaskTimeline
         fields = ("name", "days", "present_type", "task_type", "order")
 
         widgets = {
             "name": forms.TextInput(
                 attrs={
-                    "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
+                    "class": "w-full block border border-primary-dark-30 \
+                        rounded-md focus:outline-none focus:ring-transparent \
+                            focus:ring-offset-0 h-9 p-2",
                     "placeholder": "Task Name...",
                 }
             ),
@@ -410,32 +517,48 @@ class SubBatchTimelineForm(forms.ModelForm):
 
 
 class InternScoreForm(forms.ModelForm):
+    """
+    Intenr score form is used to add the assessment mark details for the particular trainee
+    """
+
     def clean_score(self):
-        if not (0 <= self.cleaned_data["score"] <= 100):
-            raise ValidationError(
-                "Score must be between 0 to 100", code="invalid_score"
-            )
+        """
+        The function `clean_score` validates that the score is between 0 and 100 and raises a
+        `ValidationError` if it is not.
+        """
+        if not 0 <= self.cleaned_data["score"] <= 100:
+            raise ValidationError("Score must be between 0 to 100", code="invalid_score")
         return self.cleaned_data["score"]
 
     class Meta:
+        """
+        Meta class for defining class behavior and properties.
+        """
+
         model = Assessment
         fields = ("score", "is_retry", "comment")
 
         widgets = {
             "score": forms.NumberInput(
                 attrs={
-                    "class": "w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
+                    "class": "w-full block border border-primary-dark-30 \
+                        rounded-md focus:outline-none focus:ring-transparent \
+                            focus:ring-offset-0 h-9 p-2",
                     "placeholder": "Enter score...",
                 }
             ),
             "is_retry": forms.CheckboxInput(
                 attrs={
-                    "class": "checkbox_active cursor-pointer block border border-primary-dark-30 rounded-md w-4 mr-3 focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2",
+                    "class": "checkbox_active cursor-pointer block border \
+                        border-primary-dark-30 rounded-md w-4 mr-3 focus:outline-none \
+                            focus:ring-transparent focus:ring-offset-0 h-9 p-2",
                 }
             ),
             "comment": forms.Textarea(
                 attrs={
-                    "class": "w-full block border border-primary-dark-30 rounded-md mt-2.5 w-64 focus:outline-none focus:ring-transparent focus:ring-offset-0 h-20 p-2 ",
+                    "class": "w-full block border border-primary-dark-30 \
+                        rounded-md mt-2.5 w-64 focus:outline-none \
+                            focus:ring-transparent focus:ring-offset-0 h-20 p-2 ",
                     "placeholder": "Enter comment...",
                 }
             ),

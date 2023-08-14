@@ -1,3 +1,7 @@
+"""
+Django view that handles the creation, update, deletion, and retrieval of 
+sub-batches and trainees within a batch management system
+"""
 import logging
 
 import numpy as np
@@ -73,6 +77,10 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
     ]
 
     def get_initial_queryset(self, request=None):
+        """
+        The function returns a queryset of model objects filtered by a batch ID
+        and annotated with the count of related intern details that are not deleted.
+        """
         return self.model.objects.filter(batch=request.POST.get("batch_id")).annotate(
             trainee_count=Count(
                 "intern_details",
@@ -81,6 +89,10 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
         )
 
     def customize_row(self, row, obj):
+        """
+        The function customize_row customizes a row in a table by
+        adding buttons and formatting the start date.
+        """
         buttons = template_utils.show_button(reverse("sub-batch.detail", args=[obj.id]))
         if self.request.user.is_admin_user:
             buttons += template_utils.edit_button_new_page(
@@ -88,13 +100,16 @@ class SubBatchDataTable(LoginRequiredMixin, CustomDatatable):
             ) + template_utils.delete_button(
                 "deleteSubBatch('" + reverse("sub-batch.delete", args=[obj.id]) + "')"
             )
-        row[
-            "action"
-        ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         row["start_date"] = obj.start_date.strftime("%d %b %Y")
-        return
+        return row
 
     def get_response_dict(self, request, paginator, draw_idx, start_pos):
+        """
+        The function `get_response_dict` adds extra data to the response
+        dictionary by querying the database for the number of teams and
+        trainees associated with a specific batch.
+        """
         response = super().get_response_dict(request, paginator, draw_idx, start_pos)
         batch_id = request.POST.get("batch_id")
         extra_data = (
@@ -132,16 +147,16 @@ def create_sub_batch(request, pk):
         # Checking the trainee is already added in the other batch or not
         if "users_list_file" in request.FILES:
             excel_file = request.FILES["users_list_file"]
-            df = pd.read_excel(excel_file)
-            df.replace(chr(160), np.nan, inplace=True)
-            df = df.dropna(how="all")
-            df["employee_id"] = df["employee_id"].astype(int)
-            if (df.columns[0] == "employee_id") and (df.columns[1] == "college"):
-                if User.objects.filter(
-                    employee_id__in=df["employee_id"]
-                ).count() == len(df["employee_id"]):
+            data_frame = pd.read_excel(excel_file)
+            data_frame.replace(chr(160), np.nan, inplace=True)
+            data_frame = data_frame.dropna(how="all")
+            data_frame["employee_id"] = data_frame["employee_id"].astype(int)
+            if (data_frame.columns[0] == "employee_id") and (data_frame.columns[1] == "college"):
+                if User.objects.filter(employee_id__in=data_frame["employee_id"]).count() == len(
+                    data_frame["employee_id"]
+                ):
                     if InternDetail.objects.filter(
-                        user__employee_id__in=df["employee_id"]
+                        user__employee_id__in=data_frame["employee_id"]
                     ).exists():
                         sub_batch_form.add_error(
                             None,
@@ -150,7 +165,8 @@ def create_sub_batch(request, pk):
                 else:
                     sub_batch_form.add_error(
                         None,
-                        "Some of the employee ids are not present in the database, please check again",
+                        "Some of the employee ids are not present in the \
+                            database, please check again",
                     )
             else:
                 sub_batch_form.add_error(
@@ -173,25 +189,24 @@ def create_sub_batch(request, pk):
                     sub_batch=sub_batch, user=request.user
                 )
                 user_details = dict(
-                    User.objects.filter(employee_id__in=df["employee_id"]).values_list(
+                    User.objects.filter(employee_id__in=data_frame["employee_id"]).values_list(
                         "employee_id", "id"
                     )
                 )
-                for row in range(len(df)):  # Iterating over pandas dataframe
+                for row in range(len(data_frame)):  # Iterating over pandas dataframe
                     InternDetail.objects.create(
                         sub_batch=sub_batch,
-                        user_id=user_details[str(df["employee_id"][row])],
+                        user_id=user_details[str(data_frame["employee_id"][row])],
                         expected_completion=timeline_task_end_date,
-                        college=df["college"][row],
+                        college=data_frame["college"][row],
                         created_by=request.user,
                     )
 
                 return redirect(reverse("batch.detail", args=[pk]))
-            else:
-                sub_batch_form.add_error(
-                    None,
-                    "The Selected Team's Active Timeline doesn't have any tasks",
-                )
+            sub_batch_form.add_error(
+                None,
+                "The Selected Team's Active Timeline doesn't have any tasks",
+            )
     context = {
         "form": sub_batch_form,
         "sub_batch_id": pk,
@@ -203,8 +218,9 @@ def create_sub_batch(request, pk):
 @validate_authorization()
 def get_timeline(request):
     """
-    This function retrieves an active timeline template for a given team and returns it as a JSON
-    response, or returns an error message if no active template is found.
+    This function retrieves an active timeline template for a given
+    team and returns it as a JSON response, or returns an error message
+    if no active template is found.
     """
     team_id = request.POST.get("team_id")
     try:
@@ -212,7 +228,11 @@ def get_timeline(request):
         return JsonResponse(
             {"timeline": model_to_dict(timeline)}
         )  # Return the response with active template for a team
-    except Exception as e:
+    except Exception as exception:
+        logging.error(
+            "An error has occurred while fetching an active timeline template for the team\n%s",
+            exception,
+        )
         return JsonResponse(
             {
                 "message": "No active timeline template found",
@@ -229,16 +249,15 @@ def update_sub_batch(request, pk):
     """
     try:
         sub_batch = SubBatch.objects.get(id=pk)
-    except Exception as e:
+    except Exception:
         return JsonResponse({"message": "Invalid SubBatch id", "status": "error"})
     if request.method == "POST":
         sub_batch_form = SubBatchForm(request.POST, instance=sub_batch)
         if sub_batch_form.is_valid():
             # validation start date
-            active_form = sub_batch_form.save(commit=False)
             sub_batch.primary_mentor_id = request.POST.get("primary_mentor_id")
             sub_batch.secondary_mentors.set(request.POST.getlist("secondary_mentor_ids"))
-            active_form = sub_batch_form.save()
+            sub_batch_form.save()
             if int(request.POST.get("timeline")) != sub_batch.timeline.id:
                 SubBatchTaskTimeline.bulk_delete({"sub_batch_id": pk})
                 schedule_timeline_for_sub_batch(sub_batch, request.user)
@@ -262,7 +281,8 @@ def update_sub_batch(request, pk):
 @validate_authorization()
 @require_http_methods(
     ["DELETE"]
-)  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
+)  # This decorator ensures that the view function is only accessible
+# through the DELETE HTTP method
 def delete_sub_batch(request, pk):
     """
     Delete Batch
@@ -274,12 +294,19 @@ def delete_sub_batch(request, pk):
         SubBatchTaskTimeline.bulk_delete({"sub_batch_id": pk})
         sub_batch.delete()
         return JsonResponse({"message": "Sub-Batch deleted succcessfully"})
-    except Exception as e:
-        logging.error(f"An error has occured while deleting the Sub-Batch \n{e}")
+    except Exception as exception:
+        logging.error(
+            "An error has occured while deleting the Sub-Batch \n%s",
+            exception,
+        )
         return JsonResponse({"message": "Error while deleting Sub-Batch!"}, status=500)
 
 
 class SubBatchDetail(LoginRequiredMixin, DetailView):
+    """
+    Sub Batch detail view
+    """
+
     model = SubBatch
     extra_context = {"form": AddInternForm()}
     template_name = "sub_batch/sub_batch_detail.html"
@@ -343,6 +370,10 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
     ]
 
     def get_initial_queryset(self, request=None):
+        """
+        The function returns an initial queryset filtered by the sub_batch id obtained from the
+        request's POST data.
+        """
         task_count = (
             SubBatchTaskTimeline.objects.filter(
                 sub_batch_id=request.POST.get("sub_batch"),
@@ -398,22 +429,23 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
         return query
 
     def customize_row(self, row, obj):
+        """
+        The function customize_row customizes a row in a table by adding buttons and formatting the
+        expected completion date.
+        """
         row["completion"] = round(obj.completion, 2)
         if obj.average_marks != None:
             row["average_marks"] = round(obj.average_marks, 2)
-        buttons = template_utils.show_button(
-            reverse("user_reports", args=[obj.user.id])
-        )
+        buttons = template_utils.show_button(reverse("user_reports", args=[obj.user.id]))
         if self.request.user.is_admin_user:
             buttons += (
-                # template_utils.edit_button_new_page(reverse("batch")) + #need to change in next PR
+                # template_utils.edit_button_new_page(reverse("batch")) +
+                # #need to change in next PR
                 template_utils.delete_button(
                     "removeIntern('" + reverse("trainee.remove", args=[obj.id]) + "')"
                 )
             )
-        row[
-            "action"
-        ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         row["expected_completion"] = obj.expected_completion.strftime("%d %b %Y")
         if not row["average_marks"]:
             row["average_marks"] = "-"
@@ -476,49 +508,57 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
 
 @login_required()
 @validate_authorization()
+# pylint: disable-next=R1710
 def add_trainee(request):
     """
-    Add tranie to sub batch
+    Add trainee to sub batch
     """
+    response_data = {}  # Initialize an empty dictionary
     if request.method == "POST":
         form = AddInternForm(request.POST)
         if form.is_valid():  # Check if form is valid or not
             try:
                 sub_batch = SubBatch.objects.get(id=request.POST.get("sub_batch_id"))
-                timeline_data = SubBatchTaskTimeline.objects.filter(
-                    sub_batch=sub_batch
-                ).last()
+                timeline_data = SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch).last()
                 trainee = form.save(commit=False)
                 trainee.user_id = request.POST.get("user_id")
                 trainee.sub_batch = sub_batch
                 trainee.expected_completion = timeline_data.end_date
                 trainee.created_by = request.user
                 trainee.save()
-                return JsonResponse({"status": "success"})
-            except Exception as e:
-                return JsonResponse(
-                    {"message": "Invalid SubBatch id", "status": "error"}
-                )
-        else:
-            field_errors = form.errors.as_json()
-            non_field_errors = form.non_field_errors().as_json()
-            return JsonResponse(
-                {
+                response_data["status"] = "success"
+            except Exception:
+                response_data = {
+                    "message": "Invalid SubBatch id",
                     "status": "error",
-                    "field_errors": field_errors,
-                    "non_field_errors": non_field_errors,
                 }
-            )
+            return JsonResponse(response_data)
+        field_errors = form.errors.as_json()
+        non_field_errors = form.non_field_errors().as_json()
+        return JsonResponse(
+            {
+                "status": "error",
+                "field_errors": field_errors,
+                "non_field_errors": non_field_errors,
+            }
+        )
 
 
 @login_required
 @validate_authorization()
 @require_http_methods(["DELETE"])
 def remove_trainee(request, pk):
+    """
+    The function remove_trainee deletes an intern from the database and returns a JSON response
+    indicating the success or failure of the operation.
+    """
     try:
         intern_detail = get_object_or_404(InternDetail, id=pk)
         intern_detail.delete()
         return JsonResponse({"message": "Intern has been deleted succssfully"})
-    except Exception as e:
-        logging.error(f"An error has occured while deleting an intern \n{e}")
+    except Exception as exception:
+        logging.error(
+            "An error has occured while deleting an intern \n%s",
+            exception,
+        )
         return JsonResponse({"message": "Error while deleting Trainee!"}, status=500)

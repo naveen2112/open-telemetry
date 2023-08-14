@@ -1,0 +1,15 @@
+[MASTER]
+disable = fixme, too-few-public-methods, broad-exception-caught, import-error, too-many-ancestors, R0801
+
+# Specify the maximum allowed line length
+max-line-length = 99
+
+# Add files or directories matching the regular expressions patterns to the
+# ignore-list. The regex matches against paths and can be in Posix or Windows
+# format. Because '\\' represents the directory delimiter on Windows systems,
+# it can't be used as an escape character.
+ignore=docker, migrations, docker-compose.yml, pyproject.toml
+
+[BASIC]
+# Good variable names which should always be accepted, separated by a comma.
+good-names=pk, i, COLOR_CODES, qs

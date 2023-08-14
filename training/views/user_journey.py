@@ -1,3 +1,7 @@
+"""
+Django view and related functions for managing trainee journey and task 
+scores in a training application
+"""
 import logging
 
 from django.contrib.auth.decorators import login_required
@@ -18,6 +22,11 @@ from training.forms import InternScoreForm
 
 
 class TraineeJourneyView(LoginRequiredMixin, DetailView):
+    """
+    TraineeJourneyView class is a Django view that displays a user's journey page, including their
+    assessment scores and extension tasks
+    """
+
     model = User
     template_name = "sub_batch/user_journey_page.html"
 
@@ -25,12 +34,10 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
         latest_task_report = Assessment.objects.filter(
             task=OuterRef("id"), user_id=self.object.id
         ).order_by("-id")[:1]
-        latest_extended_task_report = Assessment.objects.filter(
-            extension=OuterRef("id")
-        ).order_by("-id")[:1]
-        sub_batch_id = SubBatch.objects.filter(
-            intern_details__user=self.object.id
-        ).last()
+        latest_extended_task_report = Assessment.objects.filter(extension=OuterRef("id")).order_by(
+            "-id"
+        )[:1]
+        sub_batch_id = SubBatch.objects.filter(intern_details__user=self.object.id).last()
 
         task_count = (
             SubBatchTaskTimeline.objects.filter(
@@ -49,9 +56,7 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
         ).order_by("-assessments__id")[:1]
 
         performance = (
-            InternDetail.objects.filter(
-                sub_batch=sub_batch_id, user_id=self.kwargs["pk"]
-            )
+            InternDetail.objects.filter(sub_batch=sub_batch_id, user_id=self.kwargs["pk"])
             .annotate(
                 average_marks=Avg(
                     Subquery(last_attempt_score.values("assessments__score")),
@@ -114,9 +119,7 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
         extended_task_summary = Extension.objects.filter(
             sub_batch=sub_batch_id, user=self.object
         ).annotate(
-            retries=Count(
-                "assessments__is_retry", filter=Q(assessments__is_retry=True)
-            ),
+            retries=Count("assessments__is_retry", filter=Q(assessments__is_retry=True)),
             last_entry=Subquery(latest_extended_task_report.values("score")),
             comment=Subquery(latest_extended_task_report.values("comment")),
             is_retry=Subquery(latest_extended_task_report.values("is_retry")),
@@ -134,8 +137,9 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
 @login_required()
 def update_task_score(request, pk):
     """
-    Create User report
+    Update task score
     """
+    response_data = {}  # Initialize an empty dictionary
     if request.method == "POST":
         form = InternScoreForm(request.POST)
         if form.is_valid():  # Check if form is valid or not
@@ -144,24 +148,27 @@ def update_task_score(request, pk):
             report.task_id = request.POST.get("task")
             report.extension_id = request.POST.get("extension")
             report.sub_batch = SubBatch.objects.filter(intern_details__user=pk).last()
-            report.is_retry = True if request.POST.get("status") == "true" else False
+            report.is_retry = request.POST.get("status") == "true"
             report.created_by = request.user
             report.save()
-            return JsonResponse({"status": "success"})
+            response_data["status"] = "success"
         else:
             field_errors = form.errors.as_json()
             non_field_errors = form.non_field_errors().as_json()
-            return JsonResponse(
-                {
-                    "status": "error",
-                    "field_errors": field_errors,
-                    "non_field_errors": non_field_errors,
-                }
-            )
+            response_data = {
+                "status": "error",
+                "field_errors": field_errors,
+                "non_field_errors": non_field_errors,
+            }
+    return JsonResponse(response_data)
 
 
 @login_required()
 def add_extension(request, pk):
+    """
+    The function add_extension creates a new Extension object with the given primary key and request
+    information.
+    """
     try:
         extension_name = Extension.objects.filter(
             sub_batch=SubBatch.objects.filter(intern_details__user=pk).first(),
@@ -174,7 +181,7 @@ def add_extension(request, pk):
             created_by=request.user,
         )
         return JsonResponse({"status": "success"})
-    except Exception as e:
+    except Exception:
         return JsonResponse({"status": "error"})
 
 
@@ -202,8 +209,11 @@ def delete_extension(request, pk):
                 "status": "success",
             }
         )
-    except Exception as e:
-        logging.error(f"An error has occured while deleting an Extension task \n{e}")
+    except Exception as exception:
+        logging.error(
+            "An error has occured while deleting an Extension task \n%s",
+            exception,
+        )
         return JsonResponse(
             {"message": "Error while deleting week extension!"},
             status=500,

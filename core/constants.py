@@ -1,3 +1,6 @@
+"""
+Module containing constants and configurations for the project.
+"""
 from datetime import datetime
 
 COPY_RIGHTS_TEXT = (

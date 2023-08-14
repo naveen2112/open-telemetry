@@ -1,3 +1,6 @@
+"""
+Hubble application url configuration
+"""
 from django.urls import include, path
 
 from core.constants import ENVIRONMENT_DEVELOPMENT
@@ -13,6 +16,4 @@ urlpatterns = [
 handler404 = views.error_404
 
 if ENV_NAME == ENVIRONMENT_DEVELOPMENT:
-    urlpatterns += [
-        path("silk/", include("silk.urls", namespace="silk"))
-    ]
+    urlpatterns += [path("silk/", include("silk.urls", namespace="silk"))]

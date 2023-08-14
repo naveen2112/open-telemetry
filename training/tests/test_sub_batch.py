@@ -1,3 +1,6 @@
+"""
+Django test cases for create, update, delete and django datatable for the Sub batch
+"""
 from django.conf import settings
 from django.db.models import Count, Q
 from django.forms.models import model_to_dict
@@ -9,7 +12,7 @@ from model_bakery.recipe import seq
 import random
 
 from core.base_test import BaseTestCase
-from hubble.models import Batch, SubBatch, User
+from hubble.models import SubBatch, User
 from training.forms import SubBatchForm
 
 
@@ -31,7 +34,8 @@ class SubBatchCreateTest(BaseTestCase):
 
     def update_valid_input(self):
         """
-        This function is responsible for updating the valid inputs and creating data in databases as reqiured
+        This function is responsible for updating the valid inputs and creating
+        data in databases as reqiured
         """
         self.batch_id = baker.make("hubble.Batch").id
         baker.make(
@@ -83,6 +87,7 @@ class SubBatchCreateTest(BaseTestCase):
         """
         Check what happens when valid data is given as input
         """
+<<<<<<< HEAD
         with open(
             self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
         ) as sample_file:
@@ -117,15 +122,17 @@ class SubBatchCreateTest(BaseTestCase):
             data = self.get_valid_inputs(
                 {"users_list_file": sample_file, "secondary_mentor_ids": [secondary_mentor1, secondary_mentor2]}
             )
+=======
+        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
+            data = self.get_valid_inputs({"users_list_file": sample_file})
+>>>>>>> pylint_integeration_from_sub_batch_improvements
             response = self.make_post_request(
                 reverse(self.create_route_name, args=[self.batch_id]),
                 data=data,
             )
-            self.assertRedirects(
-                response, reverse(self.route_name, args=[self.batch_id])
-            )
+            self.assertRedirects(response, reverse(self.route_name, args=[self.batch_id]))
             self.assertEqual(response.status_code, 302)
-            self.assertDatabaseHas(
+            self.assert_database_has(
                 "SubBatch",
                 {
                     "name": data["name"],
@@ -141,9 +148,7 @@ class SubBatchCreateTest(BaseTestCase):
         """
         This function checks the required validation for the team and name fields
         """
-        with open(
-            self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
-        ) as sample_file:
+        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
             data = {"users_list_file": sample_file}
             self.make_post_request(
                 reverse(self.create_route_name, args=[self.batch_id]),
@@ -156,17 +161,13 @@ class SubBatchCreateTest(BaseTestCase):
                 "primary_mentor_id": {"required"},
                 "secondary_mentor_ids": {"required"},
             }
-            self.validate_form_errors(
-                field_errors=field_errors, form=SubBatchForm(data=data)
-            )
+            self.validate_form_errors(field_errors=field_errors, form=SubBatchForm(data=data))
 
     def test_invalid_choice_validation(self):
         """
         Check what happens when invalid data for team field is given as input
         """
-        with open(
-            self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
-        ) as sample_file:
+        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
             data = self.get_valid_inputs(
                 {
                     "users_list_file": sample_file,
@@ -186,17 +187,13 @@ class SubBatchCreateTest(BaseTestCase):
                 "primary_mentor_id": {"invalid_choice"},
                 "secondary_mentor_ids": {"invalid_choice"},
             }
-            self.validate_form_errors(
-                field_errors=field_errors, form=SubBatchForm(data=data)
-            )
+            self.validate_form_errors(field_errors=field_errors, form=SubBatchForm(data=data))
 
     def test_minimum_length_validation(self):
         """
         To check what happens when name field fails MinlengthValidation
         """
-        with open(
-            self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
-        ) as sample_file:
+        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
             data = self.get_valid_inputs(
                 {
                     "users_list_file": sample_file,
@@ -250,17 +247,25 @@ class SubBatchCreateTest(BaseTestCase):
         )
 
         # Invalid data in file interns belong to another sub-batch
+<<<<<<< HEAD
         with open(
             self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
         ) as sample_file:
+=======
+        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
+>>>>>>> pylint_integeration_from_sub_batch_improvements
             data = self.get_valid_inputs({"users_list_file": sample_file})
             self.make_post_request(
                 reverse(self.create_route_name, args=[self.batch_id]),
                 data=data,
             )
+<<<<<<< HEAD
         with open(
             self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb"
         ) as sample_file:
+=======
+        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
+>>>>>>> pylint_integeration_from_sub_batch_improvements
             data = self.get_valid_inputs({"users_list_file": sample_file})
             response = self.make_post_request(
                 reverse(self.create_route_name, args=[self.batch_id]),
@@ -272,9 +277,13 @@ class SubBatchCreateTest(BaseTestCase):
             )
 
         # Invalid data in file, employee_id doesn't match with any employee_id in db
+<<<<<<< HEAD
         with open(
             self.get_file_path() + "invalid_file_upload1.xlsx", "rb"
         ) as sample_file:
+=======
+        with open(self.get_file_path() + "invalid_file_upload1.xlsx", "rb") as sample_file:
+>>>>>>> pylint_integeration_from_sub_batch_improvements
             data = self.get_valid_inputs({"users_list_file": sample_file})
             response = self.make_post_request(
                 reverse(self.create_route_name, args=[self.batch_id]),
@@ -286,9 +295,13 @@ class SubBatchCreateTest(BaseTestCase):
             )
 
         # Invalid column names are present
+<<<<<<< HEAD
         with open(
             self.get_file_path() + "invalid_file_upload2.xlsx", "rb"
         ) as sample_file:
+=======
+        with open(self.get_file_path() + "invalid_file_upload2.xlsx", "rb") as sample_file:
+>>>>>>> pylint_integeration_from_sub_batch_improvements
             data = self.get_valid_inputs({"users_list_file": sample_file})
             response = self.make_post_request(
                 reverse(self.create_route_name, args=[self.batch_id]),
@@ -318,7 +331,8 @@ class SubBatchUpdateTest(BaseTestCase):
 
     def update_valid_input(self):
         """
-        This function is responsible for updating the valid inputs and creating data in databases as reqiured
+        This function is responsible for updating the valid inputs and creating
+        data in databases as reqiured
         """
         self.batch_id = baker.make("hubble.Batch").id
         self.sub_batch_id = baker.make("hubble.SubBatch", batch_id=self.batch_id).id
@@ -376,6 +390,7 @@ class SubBatchUpdateTest(BaseTestCase):
             data=data,
         )
         self.assertRedirects(response, reverse(self.route_name, args=[self.batch_id]))
+<<<<<<< HEAD
         self.assertEqual(response.status_code, 302)
         self.assertDatabaseHas(
             "SubBatch",
@@ -400,8 +415,10 @@ class SubBatchUpdateTest(BaseTestCase):
         self.assertRedirects(
             response, reverse(self.route_name, args=[self.batch_id])
         )
+=======
+>>>>>>> pylint_integeration_from_sub_batch_improvements
         self.assertEqual(response.status_code, 302)
-        self.assertDatabaseHas(
+        self.assert_database_has(
             "SubBatch",
             {
                 "name": data["name"],
@@ -430,9 +447,7 @@ class SubBatchUpdateTest(BaseTestCase):
             "primary_mentor_id": {"required"},
             "secondary_mentor_ids": {"required"},
         }
-        self.validate_form_errors(
-            field_errors=field_errors, form=SubBatchForm(data=data)
-        )
+        self.validate_form_errors(field_errors=field_errors, form=SubBatchForm(data=data))
 
     def test_invalid_choice_validation(self):
         """
@@ -456,9 +471,7 @@ class SubBatchUpdateTest(BaseTestCase):
             "primary_mentor_id": {"invalid_choice"},
             "secondary_mentor_ids": {"invalid_choice"},
         }
-        self.validate_form_errors(
-            field_errors=field_errors, form=SubBatchForm(data=data)
-        )
+        self.validate_form_errors(field_errors=field_errors, form=SubBatchForm(data=data))
 
     def test_minimum_length_validation(self):
         """
@@ -504,9 +517,7 @@ class SubBatchUpdateTest(BaseTestCase):
         field_errors = {
             "timeline": {"timeline_has_no_tasks"},
         }
-        self.validate_form_errors(
-            field_errors=field_errors, form=SubBatchForm(data=data)
-        )
+        self.validate_form_errors(field_errors=field_errors, form=SubBatchForm(data=data))
 
 
 class SubBatchShowTest(BaseTestCase):
@@ -529,9 +540,13 @@ class SubBatchShowTest(BaseTestCase):
         Check what happens when valid data is given as input
         """
         sub_batch = baker.make("hubble.SubBatch")
+<<<<<<< HEAD
         response = self.make_get_request(
             reverse(self.update_route_name, args=[sub_batch.id])
         )
+=======
+        response = self.make_get_request(reverse(self.update_route_name, args=[sub_batch.id]))
+>>>>>>> pylint_integeration_from_sub_batch_improvements
         self.assertIsInstance(response.context.get("form"), SubBatchForm)
         self.assertEqual(response.context.get("form").instance, sub_batch)
 
@@ -608,15 +623,13 @@ class SubBatchDeleteTest(BaseTestCase):
         Check what happens when valid data is given as input
         """
         sub_batch = baker.make("hubble.SubBatch")
-        self.assertDatabaseHas("SubBatch", {"id": sub_batch.id})
-        response = self.make_delete_request(
-            reverse(self.delete_route_name, args=[sub_batch.id])
-        )
+        self.assert_database_has("SubBatch", {"id": sub_batch.id})
+        response = self.make_delete_request(reverse(self.delete_route_name, args=[sub_batch.id]))
         self.assertJSONEqual(
             self.decoded_json(response),
             {"message": "Sub-Batch deleted succcessfully"},
         )
-        self.assertDatabaseNotHas("SubBatch", {"id": sub_batch.id})
+        self.assert_database_not_has("SubBatch", {"id": sub_batch.id})
 
     def test_failure(self):
         """
@@ -647,7 +660,8 @@ class SubBatchDatatableTest(BaseTestCase):
 
     def update_valid_input(self):
         """
-        This function is responsible for updating the valid inputs and creating data in databases as reqiured
+        This function is responsible for updating the valid inputs and creating
+        data in databases as reqiured
         """
         self.batch = baker.make("hubble.Batch")
         self.team = baker.make("hubble.Team")
@@ -680,6 +694,7 @@ class SubBatchDatatableTest(BaseTestCase):
         To check whether all columns are present in datatable and length of rows without any filter
         """
         no_of_teams = (
+<<<<<<< HEAD
             Batch.objects.filter(id=self.batch.id)
             .values("sub_batches__team")
             .distinct()
@@ -695,6 +710,10 @@ class SubBatchDatatableTest(BaseTestCase):
             )
             .values("no_of_trainees")
         )[0]["no_of_trainees"]
+=======
+            SubBatch.objects.filter(batch_id=self.batch.id).values("team").distinct().count()
+        )
+>>>>>>> pylint_integeration_from_sub_batch_improvements
         sub_batches = SubBatch.objects.filter(batch=self.batch.id).annotate(
             trainee_count=Count(
                 "intern_details",
@@ -710,12 +729,17 @@ class SubBatchDatatableTest(BaseTestCase):
         self.assertTrue("no_of_teams" in response.json()["extra_data"][0])
         self.assertTrue("no_of_trainees" in response.json()["extra_data"][0])
         self.assertEqual(response.json()["extra_data"][0]["no_of_teams"], no_of_teams)
+<<<<<<< HEAD
         self.assertEqual(
             response.json()["extra_data"][0]["no_of_trainees"], no_of_trainees
         )
         for row in range(len(sub_batches)):
             expected_value = sub_batches[row]
             received_value = response.json()["data"][row]
+=======
+        for index, expected_value in enumerate(sub_batches):
+            received_value = response.json()["data"][index]
+>>>>>>> pylint_integeration_from_sub_batch_improvements
             self.assertEqual(expected_value.pk, int(received_value["pk"]))
             self.assertEqual(expected_value.name, received_value["name"])
             self.assertEqual(
@@ -724,8 +748,13 @@ class SubBatchDatatableTest(BaseTestCase):
             )
             self.assertEqual(expected_value.timeline.name, received_value["timeline"])
             self.assertEqual(
+<<<<<<< HEAD
                 expected_value.primary_mentor.name,
                 received_value["primary_mentor"],
+=======
+                expected_value.reporting_persons,
+                received_value["reporting_persons"],
+>>>>>>> pylint_integeration_from_sub_batch_improvements
             )
             self.assertEqual(
                 expected_value.start_date.strftime("%d %b %Y"),

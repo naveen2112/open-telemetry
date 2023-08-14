@@ -1,3 +1,6 @@
+"""
+Training app url configuration
+"""
 from django.urls import include, path
 
 from hubble import views as sso_view
@@ -96,10 +99,20 @@ urlpatterns = [
         name="batch.datatable",
     ),
     path("batch/create", batch.create_batch, name="batch.create"),
-    path("batch/<int:pk>/show", batch.batch_data, name="batch.show"),
-    path("batch/<int:pk>/edit", batch.update_batch, name="batch.edit"),
     path(
-        "batch/<int:pk>/delete", batch.delete_batch, name="batch.delete"
+        "batch/<int:pk>/show",
+        batch.batch_data,
+        name="batch.show",
+    ),
+    path(
+        "batch/<int:pk>/edit",
+        batch.update_batch,
+        name="batch.edit",
+    ),
+    path(
+        "batch/<int:pk>/delete",
+        batch.delete_batch,
+        name="batch.delete",
     ),
     path(
         "batch/<int:pk>",
