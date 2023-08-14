@@ -5,7 +5,7 @@ from django.utils import timezone
 
 from core.constants import PRESENT_TYPES, TASK_TYPES
 from hubble import models
-from hubble.models import Assessment
+from hubble.models import Assessment, TraineeHoliday
 
 
 class TimelineForm(forms.ModelForm):
@@ -147,6 +147,25 @@ class BatchForm(forms.ModelForm):
 
 
 class TraineeHolidayForm(forms.ModelForm):
+
+    def clean_date_of_holiday(self):
+        """
+        This function checks if a holiday already exists for the given date and batch and raises a validation error.
+        """
+        id = self.data.get("id", None)
+        if (
+            TraineeHoliday.objects.filter(
+                date_of_holiday=self.cleaned_data["date_of_holiday"],
+                batch_id=self.data.get("batch_id"),
+            )
+            .exclude(id=id)
+            .exists()
+        ):
+            raise ValidationError(
+                "The date of holiday has already been taken.",
+                code="invalid_date",
+            )
+        return self.cleaned_data["date_of_holiday"]
 
     date_of_holiday = forms.DateField(
         label = "Choose Date",

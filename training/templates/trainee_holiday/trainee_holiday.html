@@ -133,6 +133,7 @@ Trainee Holiday
             url: "{% url 'holiday.create' object.id %}",
             headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
             data: {
+                batch_id: {{ object.id }},
                 date_of_holiday: $('#id_date_of_holiday').val(),
                 reason: $('#id_reason').val(),
                 national_holiday: $('#id_national_holiday').is(':checked'),
@@ -186,6 +187,8 @@ Trainee Holiday
             url: url,
             headers: { 'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val() },
             data: {
+                id: $('#holiday_id').val(),
+                batch_id: {{ object.id }},
                 date_of_holiday: $('#id_date_of_holiday').val(),
                 reason: $('#id_reason').val(),
                 national_holiday: $('#id_national_holiday').is(':checked'),
