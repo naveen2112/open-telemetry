@@ -53,49 +53,28 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
                 sub_batch=sub_batch_id, user_id=self.kwargs["pk"]
             )
             .annotate(
-                average_marks=Case(
-                    When(
-                        user_id=F("user__assessments__user_id"),
-                        then=Coalesce(
-                            Avg(
-                                Subquery(
-                                    last_attempt_score.values("assessments__score")
-                                ),
-                                distinct=True,
-                            ),
-                            0.0,
-                        ),
+                average_marks=Avg(
+                    Subquery(last_attempt_score.values("assessments__score")),
+                    distinct=True,
+                ),
+                no_of_retries=Count(
+                    "user__assessments__is_retry",
+                    filter=Q(
+                        user__assessments__is_retry=True,
+                        user__assessments__extension__isnull=True,
+                        user__assessments__task_id__deleted_at__isnull=True,
+                        user__assessments__sub_batch_id=sub_batch_id,
                     ),
-                    default=None,
                 ),
-                no_of_retries=Coalesce(
-                    Count(
-                        "user__assessments__is_retry",
-                        filter=Q(
-                            Q(user__assessments__is_retry=True)
-                            & Q(user__assessments__extension__isnull=True)
-                            & Q(user__assessments__task_id__deleted_at__isnull=True)
-                            & Q(user__assessments__sub_batch_id=sub_batch_id)
-                        ),
+                completion=Count(
+                    "user__assessments__task_id",
+                    filter=Q(
+                        user__assessments__user_id=F("user_id"),
+                        user__assessments__task_id__deleted_at__isnull=True,
+                        user__assessments__sub_batch_id=sub_batch_id,
                     ),
-                    0,
-                ),
-                completion=Coalesce(
-                    (
-                        Count(
-                            "user__assessments__task_id",
-                            filter=Q(
-                                Q(user__assessments__user_id=F("user_id"))
-                                & Q(user__assessments__task_id__deleted_at__isnull=True)
-                                & Q(user__assessments__sub_batch_id=sub_batch_id)
-                            ),
-                            distinct=True,
-                        )
-                        / float(task_count)
-                    )
-                    * 100,
-                    0.0,
-                ),
+                    distinct=True,
+                ) * 100 / float(task_count)
             )
             .values("average_marks", "no_of_retries", "completion")
         )
@@ -107,9 +86,7 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
             .annotate(
                 retries=Count(
                     "assessments__is_retry",
-                    filter=Q(
-                        Q(assessments__user=self.object) & Q(assessments__is_retry=True)
-                    ),
+                    filter=Q(assessments__user=self.object, assessments__is_retry=True)
                 ),
                 last_entry=Subquery(latest_task_report.values("score")),
                 comment=Subquery(latest_task_report.values("comment")),
