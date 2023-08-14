@@ -1,9 +1,12 @@
+from django.db.models import Count, OuterRef, Q, Subquery
 from django.urls import reverse
 from django.utils import timezone
 from model_bakery import baker
+from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
 from core.constants import TASK_TYPE_ASSESSMENT
+from hubble.models import Assessment, Extension
 
 
 class ExtensionCreateTest(BaseTestCase):
@@ -31,14 +34,6 @@ class ExtensionCreateTest(BaseTestCase):
             start_date=(timezone.now() + timezone.timedelta(1)),
         )
         self.trainee = baker.make("hubble.InternDetail", sub_batch=self.sub_batch)
-        baker.make(
-            "hubble.SubBatchTaskTimeline",
-            days=10,
-            task_type=TASK_TYPE_ASSESSMENT,
-            sub_batch=self.sub_batch,
-            end_date=(timezone.now() + timezone.timedelta(10)).date(),
-            order=1,
-        )
 
     def test_template(self):
         """
@@ -54,6 +49,7 @@ class ExtensionCreateTest(BaseTestCase):
         """
         Check what happens when valid data is given as input
         """
+        desired_extension_name = Extension.objects.filter(user_id=self.trainee.user_id, sub_batch=self.sub_batch).count() + 1
         response = self.make_post_request(
             reverse(self.create_route_name, args=[self.trainee.user_id]),
             data={},
@@ -63,6 +59,7 @@ class ExtensionCreateTest(BaseTestCase):
         self.assertDatabaseHas(
             "Extension",
             {
+                "name": f"Extension Week {desired_extension_name}",
                 "user_id": self.trainee.user_id,
                 "sub_batch": self.sub_batch,
             },
@@ -102,13 +99,13 @@ class ExtensionUpdateTest(BaseTestCase):
             "hubble.SubBatch",
             start_date=(timezone.now() + timezone.timedelta(1)),
         )
-        extension_task = baker.make("hubble.Extension", sub_batch=sub_batch)
+        self.extension_task = baker.make("hubble.Extension", sub_batch=sub_batch)
         self.trainee = baker.make("hubble.InternDetail", sub_batch=sub_batch)
         self.persisted_valid_inputs = {
             "score": 50,
             "comment": self.faker.name(),
             "task": "",
-            "extension": extension_task.id,
+            "extension": self.extension_task.id,
             "status": "true",
         }
 
@@ -211,10 +208,12 @@ class ExtensionWeekTaskDelete(BaseTestCase):
         """
         To check what happens when valid id is given for delete
         """
-        extension = baker.make("hubble.Extension")
-        self.assertDatabaseHas("Extension", {"id": extension.id})
+        trainee = baker.make("hubble.User")
+        sub_batch = baker.make("hubble.SubBatch")
+        extension = baker.make("hubble.Extension", user_id=trainee.id, sub_batch=sub_batch, name=seq("Extension Week "), _quantity=2)
+        self.assertDatabaseHas("Extension", {"id": extension[0].id})
         response = self.make_delete_request(
-            reverse(self.delete_route_name, args=[extension.id])
+            reverse(self.delete_route_name, args=[extension[0].id])
         )
         self.assertJSONEqual(
             response.content,
@@ -224,7 +223,8 @@ class ExtensionWeekTaskDelete(BaseTestCase):
             },
         )
         self.assertEqual(response.status_code, 200)
-        self.assertDatabaseNotHas("Extension", {"id": extension.id})
+        self.assertDatabaseNotHas("Extension", {"id": extension[0].id})
+        self.assertDatabaseHas("Extension", {"id": extension[1].id, "name": extension[0].name})
 
     def test_failure(self):
         """
@@ -236,3 +236,61 @@ class ExtensionWeekTaskDelete(BaseTestCase):
             {"message": "Error while deleting week extension!"},
         )
         self.assertEqual(response.status_code, 500)
+
+
+class ExtensionSummaryTest(BaseTestCase):
+    """
+    This class is responsible for testing the contents of extension cards in user journey page
+    """
+
+    route_name = "user_reports"
+
+    def setUp(self):
+        """
+        This function will run before every test and makes sure required data are ready
+        """
+        super().setUp()
+        self.authenticate()
+        self.sub_batch = baker.make(
+            "hubble.SubBatch",
+            start_date=(timezone.now() + timezone.timedelta(1)),
+        )
+        self.trainee = baker.make("hubble.InternDetail", sub_batch=self.sub_batch)
+        extension_task = baker.make(
+            "hubble.Extension", sub_batch=self.sub_batch, user_id=self.trainee.user_id
+        )
+        baker.make(
+            "hubble.Assessment",
+            extension_id=extension_task.id,
+            user_id=self.trainee.user_id,
+            _quantity=2,
+        )
+
+    def test_assessment_summary(self):
+        """
+        To ensure correct scores and comments are received
+        """
+        latest_extended_task_report = Assessment.objects.filter(
+            extension=OuterRef("id")
+        ).order_by("-id")[:1]
+        desired_output = (
+            Extension.objects.filter(
+                sub_batch=self.sub_batch.id, user=self.trainee.user
+            )
+            .annotate(
+                retries=Count(
+                    "assessments__is_retry", filter=Q(assessments__is_retry=True)
+                ),
+                last_entry=Subquery(latest_extended_task_report.values("score")),
+                comment=Subquery(latest_extended_task_report.values("comment")),
+                is_retry=Subquery(latest_extended_task_report.values("is_retry")),
+            )
+            .order_by("id")
+        )
+        response = self.make_get_request(
+            reverse(self.route_name, args=[self.trainee.user_id])
+        )
+        for row in range(len(desired_output)):
+            self.assertEqual(
+                desired_output[row], response.context["extension_tasks"][row]
+            )
