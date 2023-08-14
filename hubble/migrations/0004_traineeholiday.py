@@ -63,7 +63,6 @@ class Migration(migrations.Migration):
             options={
                 'db_table': 'trainee_holidays',
                 'managed': True,
-                'unique_together': {('batch', 'date_of_holiday')},
             },
         ),
         migrations.RunPython(add_holidays_to_existing_batches),

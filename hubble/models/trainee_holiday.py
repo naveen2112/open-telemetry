@@ -17,7 +17,6 @@ class TraineeHoliday(db.SoftDeleteWithBaseModel):
     class Meta:
         managed = True
         db_table = "trainee_holidays"
-        unique_together = ("batch", "date_of_holiday")
 
     def __str__(self):
         return str(self.date_of_holiday)
