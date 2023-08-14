@@ -126,11 +126,9 @@ Update Sub Batch
     });
 
     $(function() {
-        var startDate = new Date('{{ sub_batch.start_date }}');
         $('input[name="start_date"]').daterangepicker({
             singleDatePicker: true,
             showDropdowns: true,
-            minDate: startDate,
             locale: {
                 format: 'YYYY-MM-DD'
             }
