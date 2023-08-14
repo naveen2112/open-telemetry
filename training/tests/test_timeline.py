@@ -1,4 +1,4 @@
-from django.db.models import F, FloatField, Sum
+from django.db.models import Count, FloatField, OuterRef, Q, Subquery, Sum
 from django.db.models.functions import Coalesce
 from django.forms.models import model_to_dict
 from django.urls import reverse
@@ -6,7 +6,7 @@ from model_bakery import baker
 from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
-from hubble.models import Timeline
+from hubble.models import SubBatch, Timeline
 
 
 class TimelineCreateTest(BaseTestCase):
@@ -526,13 +526,19 @@ class TimelineDatatableTest(BaseTestCase):
         """
         name = self.faker.name()
         baker.make("hubble.Timeline", name=seq(name))
-        timeline = Timeline.objects.filter(
-            task_timeline__deleted_at__isnull=True
-        ).annotate(
-            Days=Coalesce(
-                Sum(F("task_timeline__days")),
-                0,
-                output_field=FloatField(),
+        no_of_sub_batches_subquery = (
+            SubBatch.objects
+            .filter(timeline_id=OuterRef('id'), deleted_at__isnull=True)
+            .values('timeline')
+            .annotate(no_of_sub_batches=Count('id', distinct=True))
+            .values('no_of_sub_batches')
+        )
+        timeline = (
+            Timeline.objects
+            .filter(deleted_at__isnull=True)
+            .annotate(
+                Days=Coalesce(Sum('task_timeline__days', filter=Q(task_timeline__deleted_at__isnull=True)), 0, output_field=FloatField()),
+                no_of_sub_batches=Coalesce(Subquery(no_of_sub_batches_subquery), 0)
             )
         )
 
@@ -566,6 +572,9 @@ class TimelineDatatableTest(BaseTestCase):
             self.assertEqual(
                 expected_value.team.name, received_value["team"]
             )
+            self.assertEqual(
+                expected_value.sub_batches.count(), int(received_value["no_of_sub_batches"])
+            )
 
         # Check whether all headers are present
         for row in response.json()["data"]:
@@ -573,6 +582,7 @@ class TimelineDatatableTest(BaseTestCase):
             self.assertTrue("name" in row)
             self.assertTrue("is_active" in row)
             self.assertTrue("team" in row)
+            self.assertTrue("no_of_sub_batches" in row)
             self.assertTrue("action" in row)
 
         # Check the numbers of rows received is equal to the number of expected rows

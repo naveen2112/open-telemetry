@@ -19,7 +19,7 @@ class SubBatch(db.SoftDeleteWithBaseModel):
         User, related_name="secondary_sub_batches"
     )
     start_date = models.DateField()
-    timeline = models.ForeignKey(Timeline, on_delete=models.CASCADE)
+    timeline = models.ForeignKey(Timeline, on_delete=models.CASCADE, related_name="sub_batches")
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
