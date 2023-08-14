@@ -107,10 +107,10 @@
                     tempVal = tempVal[1].split(",");
                     $.each(tempVal, function (key, item) {
                         if (key + 1 == tempVal.length) {
-                            initialValArray.push(item.split(']')[0]);
+                            initialValArray.push(item.split(']')[0].trim());
                         } else {
                             if (item != "") {
-                                initialValArray.push(item);
+                                initialValArray.push(item.trim());
                             }
                         }
                     })
