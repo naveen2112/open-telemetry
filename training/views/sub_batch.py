@@ -8,8 +8,7 @@ import numpy as np
 import pandas as pd
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import (Avg, Case, Count, F, OuterRef, Q, Subquery,
-                              Value, When)
+from django.db.models import Avg, Case, Count, F, OuterRef, Q, Subquery, Value, When
 from django.db.models.functions import Coalesce
 from django.forms import model_to_dict
 from django.http import JsonResponse
@@ -19,12 +18,25 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView
 
 from core import template_utils
-from core.constants import (ABOVE_AVERAGE, AVERAGE, GOOD, MEET_EXPECTATION,
-                            NOT_YET_STARTED, POOR, TASK_TYPE_ASSESSMENT)
-from core.utils import (CustomDatatable, schedule_timeline_for_sub_batch,
-                        validate_authorization)
-from hubble.models import (Batch, InternDetail, SubBatch, SubBatchTaskTimeline,
-                           Timeline, TimelineTask, User)
+from core.constants import (
+    ABOVE_AVERAGE,
+    AVERAGE,
+    GOOD,
+    MEET_EXPECTATION,
+    NOT_YET_STARTED,
+    POOR,
+    TASK_TYPE_ASSESSMENT,
+)
+from core.utils import CustomDatatable, schedule_timeline_for_sub_batch, validate_authorization
+from hubble.models import (
+    Batch,
+    InternDetail,
+    SubBatch,
+    SubBatchTaskTimeline,
+    Timeline,
+    TimelineTask,
+    User,
+)
 from training.forms import AddInternForm, SubBatchForm
 
 
@@ -403,7 +415,7 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
                         user__assessments__is_retry=True,
                         user__assessments__extension__isnull=True,
                         user__assessments__task_id__deleted_at__isnull=True,
-                        user__assessments__sub_batch_id=request.POST.get("sub_batch")
+                        user__assessments__sub_batch_id=request.POST.get("sub_batch"),
                     ),
                 ),
                 completion=Count(
@@ -411,13 +423,17 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
                     filter=Q(
                         user__assessments__user_id=F("user_id"),
                         user__assessments__task_id__deleted_at__isnull=True,
-                        user__assessments__sub_batch_id=request.POST.get("sub_batch")
+                        user__assessments__sub_batch_id=request.POST.get("sub_batch"),
                     ),
                     distinct=True,
-                ) * 100.0 / task_count,
+                )
+                * 100.0
+                / task_count,
                 performance=Case(
                     When(average_marks__gte=90, then=Value(GOOD)),
-                    When(average_marks__lt=90, average_marks__gte=75, then=Value(MEET_EXPECTATION)),
+                    When(
+                        average_marks__lt=90, average_marks__gte=75, then=Value(MEET_EXPECTATION)
+                    ),
                     When(average_marks__lt=75, average_marks__gte=65, then=Value(ABOVE_AVERAGE)),
                     When(average_marks__lt=65, average_marks__gte=50, then=Value(AVERAGE)),
                     When(average_marks__lt=50, then=Value(POOR)),

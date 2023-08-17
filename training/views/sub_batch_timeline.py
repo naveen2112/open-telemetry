@@ -15,8 +15,7 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView
 
 from core import template_utils
-from core.utils import (CustomDatatable, schedule_timeline_for_sub_batch,
-                        validate_authorization)
+from core.utils import CustomDatatable, schedule_timeline_for_sub_batch, validate_authorization
 from hubble.models import SubBatch, SubBatchTaskTimeline
 from training.forms import SubBatchTimelineForm
 
@@ -73,7 +72,7 @@ class SubBatchTimelineDataTable(LoginRequiredMixin, CustomDatatable):
         The function customize_row customizes the values of certain fields in a row object based on
         the properties of an input object.
         """
-        row["disabled"] = (obj.start_date.date() <= timezone.now().date())
+        row["disabled"] = obj.start_date.date() <= timezone.now().date()
         row["action"] = "<div class='form-inline justify-content-center'>-</div>"
         if self.request.user.is_admin_user:
             row["action"] = "<div class='form-inline justify-content-center'>-</div>"

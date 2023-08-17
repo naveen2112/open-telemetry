@@ -75,19 +75,18 @@ class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
         those with a non-null "deleted_at" field in the related "task_timeline" model.
         """
         no_of_sub_batches_subquery = (
-            SubBatch.objects
-            .filter(timeline_id=OuterRef('id'), deleted_at__isnull=True)
-            .values('timeline')
-            .annotate(no_of_sub_batches=Count('id', distinct=True))
-            .values('no_of_sub_batches')
+            SubBatch.objects.filter(timeline_id=OuterRef("id"), deleted_at__isnull=True)
+            .values("timeline")
+            .annotate(no_of_sub_batches=Count("id", distinct=True))
+            .values("no_of_sub_batches")
         )
-        return (
-            self.model.objects
-            .filter(deleted_at__isnull=True)
-            .annotate(
-                Days=Coalesce(Sum('task_timeline__days', filter=Q(task_timeline__deleted_at__isnull=True)), 0, output_field=FloatField()),
-                no_of_sub_batches=Coalesce(Subquery(no_of_sub_batches_subquery), 0)
-            )
+        return self.model.objects.filter(deleted_at__isnull=True).annotate(
+            Days=Coalesce(
+                Sum("task_timeline__days", filter=Q(task_timeline__deleted_at__isnull=True)),
+                0,
+                output_field=FloatField(),
+            ),
+            no_of_sub_batches=Coalesce(Subquery(no_of_sub_batches_subquery), 0),
         )
 
     def customize_row(self, row, obj):

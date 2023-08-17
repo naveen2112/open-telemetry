@@ -38,7 +38,7 @@ ADMIN_EMAILS = [
     "satheesh@mallow-tech.com",
     "anandraj@mallow-tech.com",
     "sanjay@mallow-tech.com",
-    "palaniyappan@mallow-tech.com"
+    "palaniyappan@mallow-tech.com",
 ]
 
 GOOD = "Good"

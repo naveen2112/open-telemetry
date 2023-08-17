@@ -186,7 +186,7 @@ class BaseTestCase(TestCase):
             message = (
                 f"The current order of the task is invalid. "
                 f"The valid input for order ranges form {validation_parameter[key][0]}-{validation_parameter[key][-1] + 1}."
-            ) # pylint: disable=C0301
+            )  # pylint: disable=C0301
         elif value == "zero_order_error":
             message = "Order value must be greater than zero."
         elif value == "timeline_has_no_tasks":

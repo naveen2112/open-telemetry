@@ -6,8 +6,7 @@ import logging
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import (Avg, BooleanField, Case, Count, F, OuterRef, Q,
-                              Subquery, Value, When)
+from django.db.models import Avg, BooleanField, Case, Count, F, OuterRef, Q, Subquery, Value, When
 from django.db.models.functions import Coalesce
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -16,8 +15,7 @@ from django.views.generic import DetailView
 
 from core.constants import TASK_TYPE_ASSESSMENT
 from core.utils import validate_authorization
-from hubble.models import (Assessment, Extension, InternDetail, SubBatch,
-                           SubBatchTaskTimeline, User)
+from hubble.models import Assessment, Extension, InternDetail, SubBatch, SubBatchTaskTimeline, User
 from training.forms import InternScoreForm
 
 
@@ -47,7 +45,7 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
             .count()
         )
         if task_count == 0:
-            task_count = 1 
+            task_count = 1
 
         last_attempt_score = SubBatchTaskTimeline.objects.filter(
             id=OuterRef("user__assessments__task_id"),
@@ -79,7 +77,9 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
                         user__assessments__sub_batch_id=sub_batch_id,
                     ),
                     distinct=True,
-                ) * 100 / float(task_count)
+                )
+                * 100
+                / float(task_count),
             )
             .values("average_marks", "no_of_retries", "completion")
         )
@@ -91,7 +91,7 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
             .annotate(
                 retries=Count(
                     "assessments__is_retry",
-                    filter=Q(assessments__user=self.object, assessments__is_retry=True)
+                    filter=Q(assessments__user=self.object, assessments__is_retry=True),
                 ),
                 last_entry=Subquery(latest_task_report.values("score")),
                 comment=Subquery(latest_task_report.values("comment")),
@@ -116,14 +116,16 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
             .order_by("order")
         )
 
-        extended_task_summary = Extension.objects.filter(
-            sub_batch=sub_batch_id, user=self.object
-        ).annotate(
-            retries=Count("assessments__is_retry", filter=Q(assessments__is_retry=True)),
-            last_entry=Subquery(latest_extended_task_report.values("score")),
-            comment=Subquery(latest_extended_task_report.values("comment")),
-            is_retry=Subquery(latest_extended_task_report.values("is_retry")),
-        ).order_by("id")
+        extended_task_summary = (
+            Extension.objects.filter(sub_batch=sub_batch_id, user=self.object)
+            .annotate(
+                retries=Count("assessments__is_retry", filter=Q(assessments__is_retry=True)),
+                last_entry=Subquery(latest_extended_task_report.values("score")),
+                comment=Subquery(latest_extended_task_report.values("comment")),
+                is_retry=Subquery(latest_extended_task_report.values("is_retry")),
+            )
+            .order_by("id")
+        )
 
         context = super().get_context_data(**kwargs)
         context["assessment_scores"] = task_summary
@@ -171,11 +173,10 @@ def add_extension(request, pk):
     """
     try:
         extension_name = Extension.objects.filter(
-            sub_batch=SubBatch.objects.filter(intern_details__user=pk).first(),
-            user_id=pk
+            sub_batch=SubBatch.objects.filter(intern_details__user=pk).first(), user_id=pk
         ).count()
         Extension.objects.create(
-            name = f"Extension Week {extension_name+1}",
+            name=f"Extension Week {extension_name+1}",
             sub_batch=SubBatch.objects.filter(intern_details__user=pk).first(),
             user_id=pk,
             created_by=request.user,
@@ -194,9 +195,7 @@ def delete_extension(request, pk):
     try:
         extension = get_object_or_404(Extension, id=pk)
         extension_names_to_be_changed = Extension.objects.filter(
-            sub_batch=extension.sub_batch,
-            id__gt=pk,
-            user_id=extension.user_id
+            sub_batch=extension.sub_batch, id__gt=pk, user_id=extension.user_id
         )
         extension.delete()
         Assessment.bulk_delete({"extension": extension})

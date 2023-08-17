@@ -10,9 +10,13 @@ from model_bakery import baker
 from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
-from core.constants import (PRESENT_TYPE_IN_PERSON, PRESENT_TYPE_REMOTE,
-                            TASK_TYPE_ASSESSMENT, TASK_TYPE_CULTURAL_MEET,
-                            TASK_TYPE_TASK)
+from core.constants import (
+    PRESENT_TYPE_IN_PERSON,
+    PRESENT_TYPE_REMOTE,
+    TASK_TYPE_ASSESSMENT,
+    TASK_TYPE_CULTURAL_MEET,
+    TASK_TYPE_TASK,
+)
 from hubble.models import SubBatchTaskTimeline
 
 
@@ -103,6 +107,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
                 "days": 1.5,
                 "present_type": PRESENT_TYPE_IN_PERSON,
                 "task_type": TASK_TYPE_ASSESSMENT,
+                "order": 2
             }
         )
         response = self.make_post_request(
@@ -240,21 +245,14 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
         }
         validation_parameters = {
             "order": [
-<<<<<<< HEAD
-                (SubBatchTaskTimeline.objects.filter(
-                    sub_batch_id=self.sub_batch.id,
-                    start_date__gt=timezone.now(),
+                (
+                    SubBatchTaskTimeline.objects.filter(
+                        sub_batch_id=self.sub_batch.id,
+                        start_date__gt=timezone.now(),
+                    ).values_list("order", flat=True)
                 )
-                .values_list("order", flat=True))
-            or 0
+                or 0
             ]
-=======
-                SubBatchTaskTimeline.objects.filter(sub_batch_id=self.sub_batch.id)
-                .values_list("order", flat=True)
-                .last()
-            ][0]
-            or 0 + 1
->>>>>>> pylint_integeration_from_sub_batch_improvements
         }
         self.assertEqual(
             self.bytes_cleaner(response.content),

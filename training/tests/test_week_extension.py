@@ -1,10 +1,7 @@
-<<<<<<< HEAD
-from django.db.models import Count, OuterRef, Q, Subquery
-=======
 """
 Django test cases for create, update and delete for the Extension module
 """
->>>>>>> pylint_integeration_from_sub_batch_improvements
+from django.db.models import Count, OuterRef, Q, Subquery
 from django.urls import reverse
 from django.utils import timezone
 from model_bakery import baker
@@ -54,7 +51,12 @@ class ExtensionCreateTest(BaseTestCase):
         """
         Check what happens when valid data is given as input
         """
-        desired_extension_name = Extension.objects.filter(user_id=self.trainee.user_id, sub_batch=self.sub_batch).count() + 1
+        desired_extension_name = (
+            Extension.objects.filter(
+                user_id=self.trainee.user_id, sub_batch=self.sub_batch
+            ).count()
+            + 1
+        )
         response = self.make_post_request(
             reverse(self.create_route_name, args=[self.trainee.user_id]),
             data={},
@@ -214,19 +216,19 @@ class ExtensionWeekTaskDelete(BaseTestCase):
         """
         To check what happens when valid id is given for delete
         """
-<<<<<<< HEAD
         trainee = baker.make("hubble.User")
         sub_batch = baker.make("hubble.SubBatch")
-        extension = baker.make("hubble.Extension", user_id=trainee.id, sub_batch=sub_batch, name=seq("Extension Week "), _quantity=2)
-        self.assertDatabaseHas("Extension", {"id": extension[0].id})
+        extension = baker.make(
+            "hubble.Extension",
+            user_id=trainee.id,
+            sub_batch=sub_batch,
+            name=seq("Extension Week "),
+            _quantity=2,
+        )
+        self.assert_database_has("Extension", {"id": extension[0].id})
         response = self.make_delete_request(
             reverse(self.delete_route_name, args=[extension[0].id])
         )
-=======
-        extension = baker.make("hubble.Extension")
-        self.assert_database_has("Extension", {"id": extension.id})
-        response = self.make_delete_request(reverse(self.delete_route_name, args=[extension.id]))
->>>>>>> pylint_integeration_from_sub_batch_improvements
         self.assertJSONEqual(
             response.content,
             {
@@ -235,12 +237,8 @@ class ExtensionWeekTaskDelete(BaseTestCase):
             },
         )
         self.assertEqual(response.status_code, 200)
-<<<<<<< HEAD
-        self.assertDatabaseNotHas("Extension", {"id": extension[0].id})
-        self.assertDatabaseHas("Extension", {"id": extension[1].id, "name": extension[0].name})
-=======
-        self.assert_database_not_has("Extension", {"id": extension.id})
->>>>>>> pylint_integeration_from_sub_batch_improvements
+        self.assert_database_not_has("Extension", {"id": extension[0].id})
+        self.assert_database_has("Extension", {"id": extension[1].id, "name": extension[0].name})
 
     def test_failure(self):
         """
@@ -286,27 +284,19 @@ class ExtensionSummaryTest(BaseTestCase):
         """
         To ensure correct scores and comments are received
         """
-        latest_extended_task_report = Assessment.objects.filter(
-            extension=OuterRef("id")
-        ).order_by("-id")[:1]
+        latest_extended_task_report = Assessment.objects.filter(extension=OuterRef("id")).order_by(
+            "-id"
+        )[:1]
         desired_output = (
-            Extension.objects.filter(
-                sub_batch=self.sub_batch.id, user=self.trainee.user
-            )
+            Extension.objects.filter(sub_batch=self.sub_batch.id, user=self.trainee.user)
             .annotate(
-                retries=Count(
-                    "assessments__is_retry", filter=Q(assessments__is_retry=True)
-                ),
+                retries=Count("assessments__is_retry", filter=Q(assessments__is_retry=True)),
                 last_entry=Subquery(latest_extended_task_report.values("score")),
                 comment=Subquery(latest_extended_task_report.values("comment")),
                 is_retry=Subquery(latest_extended_task_report.values("is_retry")),
             )
             .order_by("id")
         )
-        response = self.make_get_request(
-            reverse(self.route_name, args=[self.trainee.user_id])
-        )
+        response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
         for row in range(len(desired_output)):
-            self.assertEqual(
-                desired_output[row], response.context["extension_tasks"][row]
-            )
+            self.assertEqual(desired_output[row], response.context["extension_tasks"][row])

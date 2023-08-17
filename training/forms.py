@@ -225,9 +225,7 @@ class SubBatchForm(forms.ModelForm):
         self.fields["name"].validators.append(MinLengthValidator(3))
         self.fields["primary_mentor_id"].label = "Primary Mentor"
         self.fields["secondary_mentor_ids"].label = "Secondary Mentors"
-        self.fields["secondary_mentor_ids"].widget.attrs[
-                "subtitle"
-            ] = "Secondary Mentors"
+        self.fields["secondary_mentor_ids"].widget.attrs["subtitle"] = "Secondary Mentors"
 
         if kwargs.get("instance"):
             instance = kwargs.get("instance")
@@ -253,9 +251,7 @@ class SubBatchForm(forms.ModelForm):
 
     def clean_start_date(self):
         if (
-            models.Holiday.objects.filter(
-                date_of_holiday=self.cleaned_data["start_date"]
-            ).exists()
+            models.Holiday.objects.filter(date_of_holiday=self.cleaned_data["start_date"]).exists()
             or self.cleaned_data["start_date"].weekday() == 6
         ):
             raise ValidationError(

@@ -23,11 +23,11 @@ class SubBatch(db.SoftDeleteWithBaseModel):
         on_delete=models.CASCADE,
         related_name="primary_sub_batches",
     )
-    secondary_mentors = models.ManyToManyField(
-        "hubble.User", related_name="secondary_sub_batches"
-    )
+    secondary_mentors = models.ManyToManyField("hubble.User", related_name="secondary_sub_batches")
     start_date = models.DateField()
-    timeline = models.ForeignKey("hubble.Timeline", on_delete=models.CASCADE, related_name="sub_batches")
+    timeline = models.ForeignKey(
+        "hubble.Timeline", on_delete=models.CASCADE, related_name="sub_batches"
+    )
     created_by = models.ForeignKey("hubble.User", on_delete=models.CASCADE)
 
     class Meta:

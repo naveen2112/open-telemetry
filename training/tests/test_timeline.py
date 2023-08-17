@@ -1,11 +1,7 @@
-<<<<<<< HEAD
-from django.db.models import Count, FloatField, OuterRef, Q, Subquery, Sum
-=======
 """
 Django test cases for create, update, delete and datatable for Timeline
 """
-from django.db.models import F, FloatField, Sum
->>>>>>> pylint_integeration_from_sub_batch_improvements
+from django.db.models import Count, FloatField, OuterRef, Sum, F
 from django.db.models.functions import Coalesce
 from django.forms.models import model_to_dict
 from django.urls import reverse
@@ -471,27 +467,17 @@ class TimelineDatatableTest(BaseTestCase):
         """
         name = self.faker.name()
         baker.make("hubble.Timeline", name=seq(name))
-<<<<<<< HEAD
         no_of_sub_batches_subquery = (
-            SubBatch.objects
-            .filter(timeline_id=OuterRef('id'), deleted_at__isnull=True)
-            .values('timeline')
-            .annotate(no_of_sub_batches=Count('id', distinct=True))
-            .values('no_of_sub_batches')
+            SubBatch.objects.filter(timeline_id=OuterRef("id"), deleted_at__isnull=True)
+            .values("timeline")
+            .annotate(no_of_sub_batches=Count("id", distinct=True))
+            .values("no_of_sub_batches")
         )
-        timeline = (
-            Timeline.objects
-            .filter(deleted_at__isnull=True)
-            .annotate(
-                Days=Coalesce(Sum('task_timeline__days', filter=Q(task_timeline__deleted_at__isnull=True)), 0, output_field=FloatField()),
-                no_of_sub_batches=Coalesce(Subquery(no_of_sub_batches_subquery), 0)
-=======
         timeline = Timeline.objects.filter(task_timeline__deleted_at__isnull=True).annotate(
             Days=Coalesce(
                 Sum(F("task_timeline__days")),
                 0,
                 output_field=FloatField(),
->>>>>>> pylint_integeration_from_sub_batch_improvements
             )
         )
 
@@ -512,17 +498,11 @@ class TimelineDatatableTest(BaseTestCase):
                 self.assertEqual(expected_value.is_active, False)
             else:
                 self.assertEqual(expected_value.is_active, True)
-<<<<<<< HEAD
-            self.assertEqual(
-                expected_value.team.name, received_value["team"]
-            )
+            self.assertEqual(expected_value.team.name, received_value["team"])
             self.assertEqual(
                 expected_value.sub_batches.count(), int(received_value["no_of_sub_batches"])
             )
 
-=======
-            self.assertEqual(expected_value.team.name, received_value["team"])
->>>>>>> pylint_integeration_from_sub_batch_improvements
         # Check whether all headers are present
         for row in response.json()["data"]:
             self.assertTrue("pk" in row)

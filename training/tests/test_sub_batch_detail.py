@@ -2,8 +2,7 @@
 Django test cases for the create, delete and Datatables features in the 
 SubBatchDetail module 
 """
-from django.db.models import (Avg, Case, Count, F, OuterRef, Q, Subquery,
-                              Value, When)
+from django.db.models import Avg, Case, Count, F, OuterRef, Q, Subquery, Value, When
 from django.db.models.functions import Coalesce
 from django.urls import reverse
 from django.utils import timezone
@@ -11,8 +10,15 @@ from model_bakery import baker
 from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
-from core.constants import (ABOVE_AVERAGE, AVERAGE, GOOD, MEET_EXPECTATION,
-                            NOT_YET_STARTED, POOR, TASK_TYPE_ASSESSMENT)
+from core.constants import (
+    ABOVE_AVERAGE,
+    AVERAGE,
+    GOOD,
+    MEET_EXPECTATION,
+    NOT_YET_STARTED,
+    POOR,
+    TASK_TYPE_ASSESSMENT,
+)
 from hubble.models import InternDetail, SubBatchTaskTimeline
 
 
@@ -237,34 +243,12 @@ class TraineeDatatableTest(BaseTestCase):
             order=seq(0),
             sub_batch_id=self.sub_batch.id,
         )
-<<<<<<< HEAD
-=======
         self.persisted_valid_inputs = {
             "draw": 1,
             "start": 0,
             "length": 10,
             "sub_batch": self.sub_batch.id,
         }
-
-    def test_template(self):
-        """
-        To makes sure that the correct template is used
-        """
-        response = self.make_get_request(reverse(self.route_name, args=[self.sub_batch.id]))
-        self.assertTemplateUsed(response, "sub_batch/sub_batch_detail.html")
-        self.assertContains(response, self.sub_batch.name)
-        self.assertContains(response, "Performance")
-        self.assertContains(response, GOOD)
-        self.assertContains(response, MEET_EXPECTATION)
-        self.assertContains(response, ABOVE_AVERAGE)
-        self.assertContains(response, AVERAGE)
-        self.assertContains(response, POOR)
-
-    def test_datatable(self):
-        """
-        To check whether all columns are present in datatable and length of rows without any filter
-        """
->>>>>>> pylint_integeration_from_sub_batch_improvements
         task_count = (
             SubBatchTaskTimeline.objects.filter(
                 sub_batch_id=self.sub_batch.id, task_type=TASK_TYPE_ASSESSMENT
@@ -298,7 +282,10 @@ class TraineeDatatableTest(BaseTestCase):
                 no_of_retries=Coalesce(
                     Count(
                         "user__assessments__is_retry",
-                        filter=Q(Q(user__assessments__is_retry=True) & Q(user__assessments__extension__isnull=True)),
+                        filter=Q(
+                            Q(user__assessments__is_retry=True)
+                            & Q(user__assessments__extension__isnull=True)
+                        ),
                     ),
                     0,
                 ),
@@ -333,25 +320,26 @@ class TraineeDatatableTest(BaseTestCase):
                 ),
             )
         )
-<<<<<<< HEAD
-        self.persisted_valid_inputs = {
-=======
-        payload = {
->>>>>>> pylint_integeration_from_sub_batch_improvements
-            "draw": 1,
-            "start": 0,
-            "length": 10,
-            "sub_batch": self.sub_batch.id,
-        }
-<<<<<<< HEAD
 
     def test_template(self):
         """
         To makes sure that the correct template is used
         """
-        response = self.make_get_request(
-            reverse(self.route_name, args=[self.sub_batch.id])
-        )
+        response = self.make_get_request(reverse(self.route_name, args=[self.sub_batch.id]))
+        self.assertTemplateUsed(response, "sub_batch/sub_batch_detail.html")
+        self.assertContains(response, self.sub_batch.name)
+        self.assertContains(response, "Performance")
+        self.assertContains(response, GOOD)
+        self.assertContains(response, MEET_EXPECTATION)
+        self.assertContains(response, ABOVE_AVERAGE)
+        self.assertContains(response, AVERAGE)
+        self.assertContains(response, POOR)
+
+    def test_template(self):
+        """
+        To makes sure that the correct template is used
+        """
+        response = self.make_get_request(reverse(self.route_name, args=[self.sub_batch.id]))
         self.assertTemplateUsed(response, "sub_batch/sub_batch_detail.html")
         self.assertContains(response, self.sub_batch.name)
         self.assertContains(response, "Performance")
@@ -369,25 +357,17 @@ class TraineeDatatableTest(BaseTestCase):
             reverse(self.datatable_route_name), data=self.get_valid_inputs()
         )
         self.assertEqual(response.status_code, 200)
-        for row in range(len(self.desired_output)):
-            expected_value = self.desired_output[row]
-            received_value = response.json()["data"][row]
-=======
-        response = self.make_post_request(reverse(self.datatable_route_name), data=payload)
-        self.assertEqual(response.status_code, 200)
-        for index, expected_value in enumerate(desired_output):
+        for index, expected_value in enumerate(self.desired_output):
             received_value = response.json()["data"][index]
->>>>>>> pylint_integeration_from_sub_batch_improvements
             self.assertEqual(expected_value.pk, int(received_value["pk"]))
             self.assertEqual(expected_value.user.name, received_value["user"])
             self.assertEqual(expected_value.college, received_value["college"])
             self.assertEqual(
-<<<<<<< HEAD
                 round(expected_value.completion, 2), float(received_value["completion"])
-=======
+            )
+            self.assertEqual(
                 expected_value.expected_completion.strftime("%d %b %Y"),
                 received_value["expected_completion"],
->>>>>>> pylint_integeration_from_sub_batch_improvements
             )
             if expected_value.average_marks is None:
                 self.assertEqual("-", received_value["average_marks"])

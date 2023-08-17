@@ -14,12 +14,8 @@ class Extension(db.SoftDeleteWithBaseModel):
     """
 
     name = models.CharField(max_length=255, blank=True)
-    sub_batch = models.ForeignKey(
-        "SubBatch", on_delete=models.CASCADE, related_name="extensions"
-    )
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="extensions"
-    )
+    sub_batch = models.ForeignKey("SubBatch", on_delete=models.CASCADE, related_name="extensions")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="extensions")
     created_by = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

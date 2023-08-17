@@ -3,13 +3,16 @@
 from django.conf import settings
 from django.db import migrations, models
 
+
 def update_many_to_many(apps, schema_editor):
 
     sub_batch_model = apps.get_model("hubble", "SubBatch")
     user_model = apps.get_model("hubble", "User")
 
     with schema_editor.connection.cursor() as cursor:
-        query = "SELECT id, secondary_mentor_id FROM sub_batches WHERE secondary_mentor_id IS NOT NULL"
+        query = (
+            "SELECT id, secondary_mentor_id FROM sub_batches WHERE secondary_mentor_id IS NOT NULL"
+        )
         cursor.execute(query)
         values = cursor.fetchall()
         for value in values:

@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('hubble', '0002_alter_assessment_user'),
+        ("hubble", "0002_alter_assessment_user"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='extension',
-            name='name',
+            model_name="extension",
+            name="name",
             field=models.CharField(blank=True, max_length=255),
         ),
     ]
