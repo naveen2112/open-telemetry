@@ -246,11 +246,10 @@ Trainee Holiday
         $('input[name="date_of_holiday"]').daterangepicker({
             singleDatePicker: true,
             autoApply: true,
-            {% comment %} minDate: new Date(), {% endcomment %}
+            minDate: new Date(),
             locale: {
                 format: 'DD MMM YYYY',
             }
-
         });
     }
 
