@@ -1,3 +1,4 @@
+import datetime
 import json
 
 from django.apps import apps
@@ -58,6 +59,21 @@ class BaseTestCase(TestCase):
 
     def create_team(self):
         return baker.make("hubble.Team")
+
+    def create_holidays(self):
+        """
+        This function is responsible for creating a fake saturday
+        """
+        current_date = datetime.datetime.now().date()
+        end_date = current_date + datetime.timedelta(weeks=12)
+        while current_date <= end_date:
+            if current_date.weekday() == 5:
+                baker.make(
+                    "hubble.Holiday",
+                    date_of_holiday=current_date,
+                    reason=self.faker.sentence(),
+                )
+            current_date += datetime.timedelta(1)
 
     def authenticate(self, user=None):
         """
