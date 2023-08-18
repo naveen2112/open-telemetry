@@ -56,6 +56,7 @@ class Migration(migrations.Migration):
                     null=True,
                     on_delete=django.db.models.deletion.CASCADE,
                     to="hubble.user",
+                    db_column="updated_by",
                 ),
             )
         )
