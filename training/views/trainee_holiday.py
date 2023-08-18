@@ -66,19 +66,15 @@ class TraineeHolidayDataTable(LoginRequiredMixin, CustomDatatable):
 
     def get_initial_queryset(self, request=None):
         return self.model.objects.filter(batch=request.POST.get("batch"))
-    
+
     def customize_row(self, row, obj):
         if self.request.user.is_admin_user:
             buttons = template_utils.holiday_edit_button(
                 reverse("holiday.show", args=[obj.id])
             ) + template_utils.delete_button(
-                "deleteHoliday('"
-                + reverse("holiday.delete", args=[obj.id])
-                + "')"
+                "deleteHoliday('" + reverse("holiday.delete", args=[obj.id]) + "')"
             )
-            row[
-                "action"
-            ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+            row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         row["date_of_holiday"] = obj.date_of_holiday.strftime("%d %b %Y")
         row["days"] = obj.date_of_holiday.strftime("%A")
         return
@@ -93,7 +89,6 @@ def create_trainee_holiday(request, pk):
     """
     form = TraineeHolidayForm(request.POST)
     if form.is_valid():
-        print(form.cleaned_data)
         holiday = form.save(commit=False)
         holiday.batch_id = pk
         holiday.updated_by_id = request.user.id
@@ -128,13 +123,9 @@ def trainee_holiday_data(request, pk):
         }  # Covert django queryset object to dict,which can be easily serialized and sent as a JSON response
         return JsonResponse(data, safe=False)
     except Exception as e:
-        logging.error(
-            f"An error has occured while fetching the batch data \n{e}"
-        )
-        return JsonResponse(
-            {"message": "Error while getting the data!"}, status=500
-        )
-    
+        logging.error(f"An error has occured while fetching the batch data \n{e}")
+        return JsonResponse({"message": "Error while getting the data!"}, status=500)
+
 
 @login_required
 @validate_authorization()
@@ -179,9 +170,5 @@ def delete_trainee_holiday(request, pk):
             schedule_timeline_for_sub_batch(sub_batch, is_create=False)
         return JsonResponse({"message": "Holiday deleted succcessfully"})
     except Exception as e:
-        logging.error(
-            f"An error has occured while deleting the trainee holiday \n{e}"
-        )
-        return JsonResponse(
-            {"message": "Error while deleting the trainee holiday!"}, status=500
-        )
+        logging.error(f"An error has occured while deleting the trainee holiday \n{e}")
+        return JsonResponse({"message": "Error while deleting the trainee holiday!"}, status=500)
