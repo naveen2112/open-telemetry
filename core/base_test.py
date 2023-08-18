@@ -62,18 +62,37 @@ class BaseTestCase(TestCase):
 
     def create_holidays(self):
         """
-        This function is responsible for creating a fake saturday
+        This function is responsible for create Holidays for the next 12 weeks
         """
         current_date = datetime.datetime.now().date()
         end_date = current_date + datetime.timedelta(weeks=12)
         while current_date <= end_date:
             if current_date.weekday() == 5:
-                baker.make(
+                holiday = baker.make(
                     "hubble.Holiday",
                     date_of_holiday=current_date,
                     reason=self.faker.sentence(),
                 )
             current_date += datetime.timedelta(1)
+
+        return holiday
+
+    def create_trinee_holidays(self, batch_id):
+        """
+        This function is responsible for create Trinee Holidays for the next 12 weeks
+        """
+        current_date = datetime.datetime.now().date()
+        end_date = current_date + datetime.timedelta(weeks=12)
+        while current_date <= end_date:
+            if current_date.weekday() == 5:
+                holiday = baker.make(
+                    "hubble.TraineeHoliday",
+                    date_of_holiday=current_date,
+                    reason=self.faker.sentence(),
+                    batch_id=batch_id,
+                )
+            current_date += datetime.timedelta(1)
+        return holiday
 
     def authenticate(self, user=None):
         """
@@ -93,9 +112,7 @@ class BaseTestCase(TestCase):
         """
         This function is responsible for handling the POST requests
         """
-        return self.client.post(
-            url_pattern, data, SERVER_NAME=self.testcase_server_name
-        )
+        return self.client.post(url_pattern, data, SERVER_NAME=self.testcase_server_name)
 
     def make_delete_request(self, url_pattern):
         """
@@ -201,9 +218,7 @@ class BaseTestCase(TestCase):
         for key, values in field_errors.items():
             temp = []
             for value in values:
-                message = custom_validation_error_message.get(
-                    value
-                ) or self.get_error_message(
+                message = custom_validation_error_message.get(value) or self.get_error_message(
                     key, value, current_value, validation_parameter
                 )
                 error_details = {
