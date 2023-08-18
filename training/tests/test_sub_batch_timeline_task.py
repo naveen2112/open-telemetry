@@ -1,3 +1,4 @@
+import datetime
 import random
 
 from django.forms.models import model_to_dict
@@ -10,7 +11,8 @@ from core.base_test import BaseTestCase
 from core.constants import (PRESENT_TYPE_IN_PERSON, PRESENT_TYPE_REMOTE,
                             TASK_TYPE_ASSESSMENT, TASK_TYPE_CULTURAL_MEET,
                             TASK_TYPE_TASK)
-from hubble.models import SubBatchTaskTimeline
+from core.utils import calculate_duration_for_task, schedule_timeline_for_sub_batch
+from hubble.models import SubBatchTaskTimeline, TraineeHoliday
 
 
 class SubBatchTimelineTaskCreateTest(BaseTestCase):
@@ -105,6 +107,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
                 "days": 1.5,
                 "present_type": PRESENT_TYPE_IN_PERSON,
                 "task_type": TASK_TYPE_ASSESSMENT,
+                "order": 2,
             }
         )
         response = self.make_post_request(
@@ -820,3 +823,55 @@ class SubBatchTimelineDatatableTest(BaseTestCase):
             response.json()["recordsTotal"],
             len(sub_batch_task_timeline),
         )
+
+class SubBatchTimelineTaskStartEndDateTest(BaseTestCase):
+    """
+    This class is responsible for testing the start and end date of the tasks in timeline module
+    """
+
+    def setUp(self):
+        """
+        This function will run before every test and makes sure required data are ready
+        """
+        super().setUp()
+        self.create_holidays()
+        self.user = self.create_user()
+        
+        self.batch = baker.make(
+            "hubble.Batch", start_date=(timezone.now() + timezone.timedelta(1)).date()
+        )
+        self.timeline = baker.make(
+            "hubble.Timeline",
+            is_active=True,
+        )
+        self.days_list = [(random.randint(1, 20))/2 for _ in range(4)]
+        self.timeline_task = baker.make(
+            "hubble.TimelineTask",
+            timeline=self.timeline,
+            days=self.days_list.__iter__(),
+            order=seq(0),
+            _quantity=4,
+        )
+        self.holidays = TraineeHoliday.objects.filter(
+            batch_id = self.batch.id
+        ).values_list("date_of_holiday", flat=True)
+    
+    def test_start_end_date(self):
+        sub_batch = baker.make(
+            "hubble.SubBatch",
+            start_date=(timezone.now().date() + timezone.timedelta(1)),
+            batch=self.batch,
+            timeline=self.timeline,
+        )
+        timeline_task_end_date = schedule_timeline_for_sub_batch(
+            sub_batch=sub_batch, user = self.user
+        )
+        next_start_date = timezone.now() + timezone.timedelta(1)
+        is_half_day = False
+        for task in self.timeline_task:
+            data = calculate_duration_for_task(self.holidays, next_start_date, is_half_day, task.days)
+            next_start_date = data["end_date_time"]
+            is_half_day = data["ends_afternoon"]
+            end_date = data["end_date_time"]
+        self.assertEqual(end_date, timeline_task_end_date)
+        
