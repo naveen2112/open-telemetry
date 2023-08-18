@@ -6,7 +6,10 @@ from model_bakery import baker
 from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
-from hubble.models import Batch
+from hubble.models import Batch, Holiday, TraineeHoliday
+import datetime
+from dateutil.relativedelta import relativedelta
+from core.constants import BATCH_DURATION
 
 
 class BatchCreateTest(BaseTestCase):
@@ -23,13 +26,17 @@ class BatchCreateTest(BaseTestCase):
         """
         super().setUp()
         self.authenticate()
+        self.create_holidays()
         self.update_valid_input()
 
     def update_valid_input(self):
         """
         This function is responsible for updating the valid inputs and creating data in databases as reqiured
         """
-        self.persisted_valid_inputs = {"name": self.faker.name()}
+        self.persisted_valid_inputs = {
+            "name": self.faker.name(),
+            "start_date": datetime.datetime.now().date() + datetime.timedelta(days=1),
+        }
 
     def test_template(self):
         """
@@ -44,14 +51,22 @@ class BatchCreateTest(BaseTestCase):
         Check what happens when valid data is given as input
         """
         data = self.get_valid_inputs()
-        response = self.make_post_request(
-            reverse(self.create_route_name), data=data
-        )
-        self.assertJSONEqual(
-            self.decoded_json(response), {"status": "success"}
-        )
+        response = self.make_post_request(reverse(self.create_route_name), data=data)
+        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertEqual(response.status_code, 200)
-        self.assertDatabaseHas("Batch", {"name": data["name"]})
+        self.assertDatabaseHas(
+            "Batch", {"name": data["name"], "start_date": data["start_date"]}
+        )
+
+        # Check whether the Holidays are created in the database
+        end_date = data["start_date"] + relativedelta(months=BATCH_DURATION)
+        holidays = Holiday.objects.filter(
+            date_of_holiday__range=(data["start_date"], end_date)
+        ).values_list("date_of_holiday", flat=True)
+        trainee_holidays = TraineeHoliday.objects.all().values_list(
+            "date_of_holiday", flat=True
+        )
+        self.assertEqual(set(holidays), set(trainee_holidays))
 
     def test_required_validation(self):
         """
@@ -59,9 +74,9 @@ class BatchCreateTest(BaseTestCase):
         """
         response = self.make_post_request(
             reverse(self.create_route_name),
-            data=self.get_valid_inputs({"name": ""}),
+            data=self.get_valid_inputs({"name": "", "start_date": ""}),
         )
-        field_errors = {"name": {"required"}}
+        field_errors = {"name": {"required"}, "start_date": {"required"}}
         self.assertEqual(
             self.bytes_cleaner(response.content),
             self.get_ajax_response(field_errors=field_errors),
@@ -72,11 +87,13 @@ class BatchCreateTest(BaseTestCase):
         Check what happens when name field fails MinlengthValidation
         """
         data = self.get_valid_inputs(
-            {"name": self.faker.pystr(max_chars=2)}
+            {
+                "name": self.faker.pystr(max_chars=2),
+                "start_date": datetime.datetime.now().date()
+                + datetime.timedelta(days=1),
+            }
         )
-        response = self.make_post_request(
-            reverse(self.create_route_name), data=data
-        )
+        response = self.make_post_request(reverse(self.create_route_name), data=data)
         field_errors = {"name": {"min_length"}}
         validation_paramters = {"name": 3}
         self.assertEqual(
@@ -112,18 +129,18 @@ class BatchShowTest(BaseTestCase):
         response = self.make_get_request(
             reverse(self.update_show_route_name, args=[batch.id])
         )
+        data = {"batch": model_to_dict(Batch.objects.get(id=batch.id))}
+        data["batch"]["start_date"] = data["batch"]["start_date"].strftime("%Y-%m-%d")
         self.assertJSONEqual(
             self.decoded_json(response),
-            {"batch": model_to_dict(Batch.objects.get(id=batch.id))},
+            data,
         )
 
     def test_failure(self):
         """
         To check what happens when invalid id is given as argument for batch update
         """
-        response = self.make_get_request(
-            reverse(self.update_show_route_name, args=[0])
-        )
+        response = self.make_get_request(reverse(self.update_show_route_name, args=[0]))
         self.assertEqual(response.status_code, 500)
 
 
@@ -146,7 +163,10 @@ class BatchUpdateTest(BaseTestCase):
         """
         This function is responsible for updating the valid inputs and creating data in databases as reqiured
         """
-        self.persisted_valid_inputs = {"name": self.faker.name()}
+        self.persisted_valid_inputs = {
+            "name": self.faker.name(),
+            "start_date": datetime.datetime.now().date() + datetime.timedelta(days=1),
+        }
         self.batch_id = baker.make("hubble.Batch").id
 
     def test_success(self):
@@ -158,11 +178,11 @@ class BatchUpdateTest(BaseTestCase):
             reverse(self.update_edit_route_name, args=[self.batch_id]),
             data=data,
         )
-        self.assertJSONEqual(
-            self.decoded_json(response), {"status": "success"}
-        )
+        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertEqual(response.status_code, 200)
-        self.assertDatabaseHas("Batch", {"name": data["name"]})
+        self.assertDatabaseHas(
+            "Batch", {"name": data["name"], "start_date": data["start_date"]}
+        )
 
     def test_required_validation(self):
         """
@@ -170,9 +190,14 @@ class BatchUpdateTest(BaseTestCase):
         """
         response = self.make_post_request(
             reverse(self.update_edit_route_name, args=[self.batch_id]),
-            data=self.get_valid_inputs({"name": ""}),
+            data=self.get_valid_inputs(
+                {
+                    "name": "",
+                    "start_date": "",
+                }
+            ),
         )
-        field_errors = {"name": {"required"}}
+        field_errors = {"name": {"required"}, "start_date": {"required"}}
         self.assertEqual(
             self.bytes_cleaner(response.content),
             self.get_ajax_response(field_errors=field_errors),
@@ -183,7 +208,11 @@ class BatchUpdateTest(BaseTestCase):
         To check what happens when name field fails MinlengthValidation
         """
         data = self.get_valid_inputs(
-            {"name": self.faker.pystr(max_chars=2)}
+            {
+                "name": self.faker.pystr(max_chars=2),
+                "start_date": datetime.datetime.now().date()
+                + datetime.timedelta(days=1),
+            }
         )
         response = self.make_post_request(
             reverse(self.update_edit_route_name, args=[self.batch_id]),
@@ -234,9 +263,7 @@ class BatchDeleteTest(BaseTestCase):
         """
         To check what happens when invalid id is given for delete
         """
-        response = self.make_delete_request(
-            reverse(self.delete_route_name, args=[0])
-        )
+        response = self.make_delete_request(reverse(self.delete_route_name, args=[0]))
         self.assertEqual(response.status_code, 500)
 
 
@@ -262,7 +289,10 @@ class BatchDatatableTest(BaseTestCase):
         """
         self.name = self.faker.name()
         self.batch = baker.make(
-            "hubble.Batch", name=seq(self.name), _quantity=2
+            "hubble.Batch",
+            name=seq(self.name),
+            start_date=datetime.datetime.now().date() + datetime.timedelta(days=1),
+            _quantity=2,
         )
         self.persisted_valid_inputs = {
             "draw": 1,
@@ -286,21 +316,15 @@ class BatchDatatableTest(BaseTestCase):
         batches = Batch.objects.annotate(
             total_trainee=Count(
                 "sub_batches__intern_details",
-                filter=Q(
-                    sub_batches__intern_details__deleted_at__isnull=True
-                ),
+                filter=Q(sub_batches__intern_details__deleted_at__isnull=True),
             ),
             number_of_sub_batches=Coalesce(
                 Subquery(
-                    Batch.objects.filter(
-                        sub_batches__batch_id=OuterRef("id")
-                    )
+                    Batch.objects.filter(sub_batches__batch_id=OuterRef("id"))
                     .annotate(
                         number_of_sub_batches=Count(
                             "sub_batches__id",
-                            filter=Q(
-                                sub_batches__deleted_at__isnull=True
-                            ),
+                            filter=Q(sub_batches__deleted_at__isnull=True),
                         )
                     )
                     .values("number_of_sub_batches")
@@ -318,15 +342,15 @@ class BatchDatatableTest(BaseTestCase):
         for row in range(len(batches)):
             expected_value = batches[row]
             received_value = response.json()["data"][row]
-            self.assertEqual(
-                expected_value.pk, int(received_value["pk"])
-            )
-            self.assertEqual(
-                expected_value.name, received_value["name"]
-            )
+            self.assertEqual(expected_value.pk, int(received_value["pk"]))
+            self.assertEqual(expected_value.name, received_value["name"])
             self.assertEqual(
                 expected_value.number_of_sub_batches,
                 int(received_value["number_of_sub_batches"]),
+            )
+            self.assertEqual(
+                expected_value.start_date.strftime("%d %b %Y"),
+                received_value["start_date"],
             )
 
         # Check whether all headers are present
@@ -335,12 +359,11 @@ class BatchDatatableTest(BaseTestCase):
             self.assertTrue("name" in row)
             self.assertTrue("number_of_sub_batches" in row)
             self.assertTrue("total_trainee" in row)
+            self.assertTrue("start_date" in row)
             self.assertTrue("action" in row)
 
         # Check the numbers of rows received is equal to the number of expected rows
-        self.assertTrue(
-            response.json()["recordsTotal"], len(self.batch)
-        )
+        self.assertTrue(response.json()["recordsTotal"], len(self.batch))
 
     def test_database_search(self):
         """
