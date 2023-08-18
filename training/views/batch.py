@@ -15,8 +15,7 @@ from django.views.generic import DetailView, FormView
 from core import template_utils
 from core.constants import BATCH_DURATION
 from core.utils import CustomDatatable, validate_authorization
-from hubble.models import (Batch, Holiday, InternDetail, SubBatch,
-                           TraineeHoliday)
+from hubble.models import Batch, Holiday, InternDetail, SubBatch, TraineeHoliday
 from training.forms import BatchForm
 
 
@@ -51,6 +50,12 @@ class BatchDataTable(LoginRequiredMixin, CustomDatatable):
             "searchable": False,
         },
         {
+            "name": "start_date",
+            "title": "Start Date",
+            "visible": True,
+            "searchable": False,
+        },
+        {
             "name": "action",
             "title": "Action",
             "visible": True,
@@ -64,21 +69,15 @@ class BatchDataTable(LoginRequiredMixin, CustomDatatable):
         return self.model.objects.annotate(
             total_trainee=Count(
                 "sub_batches__intern_details",
-                filter=Q(
-                    sub_batches__intern_details__deleted_at__isnull=True
-                ),
+                filter=Q(sub_batches__intern_details__deleted_at__isnull=True),
             ),
             number_of_sub_batches=Coalesce(
                 Subquery(
-                    self.model.objects.filter(
-                        sub_batches__batch_id=OuterRef("id")
-                    )
+                    self.model.objects.filter(sub_batches__batch_id=OuterRef("id"))
                     .annotate(
                         number_of_sub_batches=Count(
                             "sub_batches__id",
-                            filter=Q(
-                                sub_batches__deleted_at__isnull=True
-                            ),
+                            filter=Q(sub_batches__deleted_at__isnull=True),
                         )
                     )
                     .values("number_of_sub_batches")
@@ -88,20 +87,15 @@ class BatchDataTable(LoginRequiredMixin, CustomDatatable):
         )
 
     def customize_row(self, row, obj):
-        buttons = template_utils.show_button(
-            reverse("batch.detail", args=[obj.id])
-        )
+        buttons = template_utils.show_button(reverse("batch.detail", args=[obj.id]))
         if self.request.user.is_admin_user:
             buttons += template_utils.edit_button(
                 reverse("batch.show", args=[obj.id])
             ) + template_utils.delete_button(
-                "deleteBatch('"
-                + reverse("batch.delete", args=[obj.id])
-                + "')"
+                "deleteBatch('" + reverse("batch.delete", args=[obj.id]) + "')"
             )
-        row[
-            "action"
-        ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        row["start_date"] = obj.start_date.strftime("%d %b %Y")
         return
 
 
@@ -119,18 +113,16 @@ def create_batch(request):
             batch.save()
             start_date = batch.start_date
             end_date = start_date + relativedelta(months=BATCH_DURATION)
-            holidays = Holiday.objects.filter(
-                date_of_holiday__range=(start_date, end_date)
-            )
+            holidays = Holiday.objects.filter(date_of_holiday__range=(start_date, end_date))
             trainee_holidays = [
                 TraineeHoliday(
-                    batch_id = batch.id,
-                    date_of_holiday = holiday.date_of_holiday,
-                    month_year = holiday.month_year,
-                    updated_by = request.user,
-                    reason = holiday.reason,
-                    allow_check_in = holiday.allow_check_in,
-                    national_holiday = holiday.national_holiday,
+                    batch_id=batch.id,
+                    date_of_holiday=holiday.date_of_holiday,
+                    month_year=holiday.month_year,
+                    updated_by=request.user,
+                    reason=holiday.reason,
+                    allow_check_in=holiday.allow_check_in,
+                    national_holiday=holiday.national_holiday,
                 )
                 for holiday in holidays
             ]
@@ -160,12 +152,8 @@ def batch_data(request, pk):
         }  # Covert django queryset object to dict,which can be easily serialized and sent as a JSON response
         return JsonResponse(data, safe=False)
     except Exception as e:
-        logging.error(
-            f"An error has occured while fetching the batch data \n{e}"
-        )
-        return JsonResponse(
-            {"message": "Error while getting the data!"}, status=500
-        )
+        logging.error(f"An error has occured while fetching the batch data \n{e}")
+        return JsonResponse({"message": "Error while getting the data!"}, status=500)
 
 
 @login_required()
@@ -203,21 +191,15 @@ def delete_batch(request, pk):
     """
     try:
         batch = get_object_or_404(Batch, id=pk)
-        intern_details = list(
-            batch.sub_batches.all().values_list("id", flat=True)
-        )
+        intern_details = list(batch.sub_batches.all().values_list("id", flat=True))
         TraineeHoliday.bulk_delete({"batch_id": pk})
         SubBatch.bulk_delete({"batch_id": pk})
         InternDetail.bulk_delete({"sub_batch_id__in": intern_details})
         batch.delete()
         return JsonResponse({"message": "Batch deleted succcessfully"})
     except Exception as e:
-        logging.error(
-            f"An error has occured while deleting the batch data \n{e}"
-        )
-        return JsonResponse(
-            {"message": "Error while deleting Batch!"}, status=500
-        )
+        logging.error(f"An error has occured while deleting the batch data \n{e}")
+        return JsonResponse({"message": "Error while deleting Batch!"}, status=500)
 
 
 class BatchDetails(LoginRequiredMixin, DetailView):
