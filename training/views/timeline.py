@@ -6,7 +6,7 @@ import logging
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Count, FloatField, Q, Sum, OuterRef, Subquery
+from django.db.models import Count, FloatField, OuterRef, Q, Subquery, Sum
 from django.db.models.functions import Coalesce
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
@@ -17,7 +17,7 @@ from django.views.generic import DetailView, FormView
 
 from core import template_utils
 from core.utils import CustomDatatable, validate_authorization
-from hubble.models import Timeline, TimelineTask, SubBatch
+from hubble.models import SubBatch, Timeline, TimelineTask
 from training.forms import TimelineForm, TimelineTaskForm
 
 

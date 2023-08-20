@@ -10,13 +10,9 @@ from model_bakery import baker
 from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
-from core.constants import (
-    PRESENT_TYPE_IN_PERSON,
-    PRESENT_TYPE_REMOTE,
-    TASK_TYPE_ASSESSMENT,
-    TASK_TYPE_CULTURAL_MEET,
-    TASK_TYPE_TASK,
-)
+from core.constants import (PRESENT_TYPE_IN_PERSON, PRESENT_TYPE_REMOTE,
+                            TASK_TYPE_ASSESSMENT, TASK_TYPE_CULTURAL_MEET,
+                            TASK_TYPE_TASK)
 from hubble.models import SubBatchTaskTimeline
 
 
@@ -107,7 +103,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
                 "days": 1.5,
                 "present_type": PRESENT_TYPE_IN_PERSON,
                 "task_type": TASK_TYPE_ASSESSMENT,
-                "order": 2
+                "order": 2,
             }
         )
         response = self.make_post_request(

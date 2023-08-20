@@ -1,5 +1,5 @@
 """
-Django test classes for testing the create, 
+Django test classes for testing the create,
 show, update, delete, and Datatables features in the Batch module
 """
 from django.db.models import Count, OuterRef, Q, Subquery

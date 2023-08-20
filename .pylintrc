@@ -1,5 +1,5 @@
 [MASTER]
-disable = fixme, too-few-public-methods, broad-exception-caught, import-error, too-many-ancestors, R0801
+disable = fixme, too-few-public-methods, broad-except, import-error, too-many-ancestors, R0801
 
 # Specify the maximum allowed line length
 max-line-length = 99

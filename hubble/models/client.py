@@ -1,5 +1,5 @@
 """
-The Client class represents a model for storing client communication 
+The Client class represents a model for storing client communication
 details in a database.
 """
 from django.db import models

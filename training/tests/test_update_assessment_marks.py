@@ -1,7 +1,8 @@
 """
 Django test cases for updating the assessment details
 """
-from django.db.models import Avg, BooleanField, Case, Count, F, OuterRef, Q, Subquery, Value, When
+from django.db.models import (Avg, BooleanField, Case, Count, F, OuterRef, Q,
+                              Subquery, Value, When)
 from django.db.models.functions import Coalesce
 from django.urls import reverse
 from django.utils import timezone

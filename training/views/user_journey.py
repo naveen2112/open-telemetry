@@ -6,7 +6,8 @@ import logging
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Avg, BooleanField, Case, Count, F, OuterRef, Q, Subquery, Value, When
+from django.db.models import (Avg, BooleanField, Case, Count, F, OuterRef, Q,
+                              Subquery, Value, When)
 from django.db.models.functions import Coalesce
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -15,7 +16,8 @@ from django.views.generic import DetailView
 
 from core.constants import TASK_TYPE_ASSESSMENT
 from core.utils import validate_authorization
-from hubble.models import Assessment, Extension, InternDetail, SubBatch, SubBatchTaskTimeline, User
+from hubble.models import (Assessment, Extension, InternDetail, SubBatch,
+                           SubBatchTaskTimeline, User)
 from training.forms import InternScoreForm
 
 

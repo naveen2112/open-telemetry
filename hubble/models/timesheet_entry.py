@@ -2,7 +2,8 @@
 The TimesheetEntry class is a model that represents a timesheet entry
 """
 from django.db import models
-from django.db.models import Case, CharField, F, FloatField, Func, Q, Sum, Value, When
+from django.db.models import (Case, CharField, F, FloatField, Func, Q, Sum,
+                              Value, When)
 from django.db.models.functions import Coalesce, Round
 from django.utils import timezone
 

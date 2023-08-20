@@ -1,5 +1,5 @@
 """
-Django views that handles user authentication, login, logout, and callback 
+Django views that handles user authentication, login, logout, and callback
 after authentication
 """
 import logging

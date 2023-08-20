@@ -1,5 +1,5 @@
 """
-Module provides functions for managing token caching and authentication using 
+Module provides functions for managing token caching and authentication using
 the MSAL library in Python
 """
 import msal

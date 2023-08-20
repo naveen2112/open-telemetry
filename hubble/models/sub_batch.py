@@ -38,4 +38,4 @@ class SubBatch(db.SoftDeleteWithBaseModel):
         db_table = "sub_batches"
 
     def __str__(self):
-        return self.name
+        return str(self.name)

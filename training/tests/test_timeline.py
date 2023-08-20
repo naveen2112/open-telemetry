@@ -1,7 +1,7 @@
 """
 Django test cases for create, update, delete and datatable for Timeline
 """
-from django.db.models import Count, FloatField, OuterRef, Sum, F
+from django.db.models import Count, F, FloatField, OuterRef, Subquery, Sum
 from django.db.models.functions import Coalesce
 from django.forms.models import model_to_dict
 from django.urls import reverse
@@ -478,7 +478,8 @@ class TimelineDatatableTest(BaseTestCase):
                 Sum(F("task_timeline__days")),
                 0,
                 output_field=FloatField(),
-            )
+            ),
+            no_of_sub_batches=Coalesce(Subquery(no_of_sub_batches_subquery), 0),
         )
 
         payload = {

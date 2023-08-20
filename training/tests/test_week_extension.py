@@ -8,7 +8,6 @@ from model_bakery import baker
 from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
-from core.constants import TASK_TYPE_ASSESSMENT
 from hubble.models import Assessment, Extension
 
 
@@ -122,7 +121,6 @@ class ExtensionUpdateTest(BaseTestCase):
         """
         # Check what happens when is_retry is True
         data = self.get_valid_inputs()
-        print(data)
         response = self.make_post_request(
             reverse(self.update_edit_route_name, args=[self.trainee.user_id]),
             data=data,
@@ -280,6 +278,7 @@ class ExtensionSummaryTest(BaseTestCase):
             _quantity=2,
         )
 
+    # pylint: disable-next=C0200
     def test_assessment_summary(self):
         """
         To ensure correct scores and comments are received
@@ -298,5 +297,5 @@ class ExtensionSummaryTest(BaseTestCase):
             .order_by("id")
         )
         response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
-        for row in range(len(desired_output)):
+        for row in range(len(desired_output)):  # pylint: disable=C0200
             self.assertEqual(desired_output[row], response.context["extension_tasks"][row])

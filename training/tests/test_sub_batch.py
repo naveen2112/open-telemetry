@@ -1,6 +1,7 @@
 """
 Django test cases for create, update, delete and django datatable for the Sub batch
 """
+
 from django.conf import settings
 from django.db.models import Count, Q
 from django.forms.models import model_to_dict
@@ -9,10 +10,9 @@ from django.utils import timezone
 from django.utils.html import strip_tags
 from model_bakery import baker
 from model_bakery.recipe import seq
-import random
 
 from core.base_test import BaseTestCase
-from hubble.models import SubBatch, User, Batch
+from hubble.models import Batch, SubBatch, User
 from training.forms import SubBatchForm
 
 
@@ -65,12 +65,15 @@ class SubBatchCreateTest(BaseTestCase):
         )
         baker.make(
             "hubble.Holiday",
-            date_of_holiday=timezone.now().date() + timezone.timedelta(days=1),
+            date_of_holiday=timezone.now().date() + timezone.timedelta(days=2),
         )
+        start_date = timezone.now().date()
+        if start_date.weekday() == 6:
+            start_date = timezone.now().date() + timezone.timedelta(days=1)
         self.persisted_valid_inputs = {
             "name": self.faker.name(),
             "team": team_id,
-            "start_date": timezone.now().date(),
+            "start_date": start_date,
             "timeline": timeline.id,
             "primary_mentor_id": primary_mentor_id,
             "secondary_mentor_ids": secondary_mentor_ids,
@@ -131,8 +134,7 @@ class SubBatchCreateTest(BaseTestCase):
                     "team_id": data["team"],
                     "timeline_id": data["timeline"],
                     "start_date": data["start_date"],
-                    "secondary_mentors": secondary_mentor1,
-                    "secondary_mentors": secondary_mentor2,
+                    "secondary_mentors__in": [secondary_mentor1, secondary_mentor2],
                 },
             )
 
@@ -215,7 +217,7 @@ class SubBatchCreateTest(BaseTestCase):
             data = self.get_valid_inputs(
                 {
                     "users_list_file": sample_file,
-                    "start_date": timezone.now().date() + timezone.timedelta(days=1),
+                    "start_date": timezone.now().date() + timezone.timedelta(days=2),
                 }
             )
             self.assertFormError(
@@ -338,12 +340,15 @@ class SubBatchUpdateTest(BaseTestCase):
         )
         baker.make(
             "hubble.Holiday",
-            date_of_holiday=timezone.now().date() + timezone.timedelta(days=1),
+            date_of_holiday=timezone.now().date() + timezone.timedelta(days=2),
         )
+        start_date = timezone.now().date()
+        if start_date.weekday() == 6:
+            start_date = timezone.now().date() + timezone.timedelta(days=1)
         self.persisted_valid_inputs = {
             "name": self.faker.name(),
             "team": team_id,
-            "start_date": timezone.now().date(),
+            "start_date": start_date,
             "timeline": timeline.id,
             "primary_mentor_id": primary_mentor_id,
             "secondary_mentor_ids": secondary_mentor_ids,
@@ -389,8 +394,7 @@ class SubBatchUpdateTest(BaseTestCase):
                 "team_id": data["team"],
                 "timeline_id": data["timeline"],
                 "start_date": data["start_date"],
-                "secondary_mentors": secondary_mentor1,
-                "secondary_mentors": secondary_mentor2,
+                "secondary_mentors__in": [secondary_mentor1, secondary_mentor2],
             },
         )
 
@@ -458,7 +462,7 @@ class SubBatchUpdateTest(BaseTestCase):
         To check what happens when start_date is invalid
         """
         data = self.get_valid_inputs(
-            {"start_date": timezone.now().date() + timezone.timedelta(days=1)}
+            {"start_date": timezone.now().date() + timezone.timedelta(days=2)}
         )
         self.assertFormError(
             SubBatchForm(data=data),

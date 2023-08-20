@@ -1,5 +1,5 @@
 """
-Django application basic testcase configuration and test runner for 
+Django application basic testcase configuration and test runner for
 the unmanaged models
 """
 import json
@@ -185,7 +185,8 @@ class BaseTestCase(TestCase):
         elif value == "invalid_order":
             message = (
                 f"The current order of the task is invalid. "
-                f"The valid input for order ranges form {validation_parameter[key][0]}-{validation_parameter[key][-1] + 1}."
+                f"The valid input for order ranges form "
+                f"{validation_parameter[key][0]}-{validation_parameter[key][-1] + 1}."
             )  # pylint: disable=C0301
         elif value == "zero_order_error":
             message = "Order value must be greater than zero."

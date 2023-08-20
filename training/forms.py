@@ -200,7 +200,8 @@ class SubBatchForm(forms.ModelForm):
     secondary_mentor_ids = forms.ModelMultipleChoiceField(
         queryset=models.User.objects.filter(is_employed=True),
         error_messages={
-            "invalid_choice": "Select a valid choice. That choice is not one of the available choices."
+            "invalid_choice": "Select a valid choice. "
+            "That choice is not one of the available choices."
         },
     )
 
@@ -250,6 +251,10 @@ class SubBatchForm(forms.ModelForm):
         return self.cleaned_data["timeline"]
 
     def clean_start_date(self):
+        """
+        The function checks if a selected start date is valid
+        and raises a validation error if it doesn't.
+        """
         if (
             models.Holiday.objects.filter(date_of_holiday=self.cleaned_data["start_date"]).exists()
             or self.cleaned_data["start_date"].weekday() == 6
@@ -442,7 +447,8 @@ class SubBatchTimelineForm(forms.ModelForm):
             raise ValidationError(
                 (
                     f"The current order of the task is invalid. "
-                    f"The valid input for order ranges form {valid_order_value[0]}-{valid_order_value[-1] + 1}."
+                    f"The valid input for order ranges form "
+                    f"{valid_order_value[0]}-{valid_order_value[-1] + 1}."
                 ),
                 code="invalid_order",
             )

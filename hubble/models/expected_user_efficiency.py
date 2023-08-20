@@ -1,5 +1,5 @@
 """
-The ExpectedUserEfficiency class is a Django model that represents the 
+The ExpectedUserEfficiency class is a Django model that represents the
 expected efficiency of a user with the required fields
 """
 from django.db import models

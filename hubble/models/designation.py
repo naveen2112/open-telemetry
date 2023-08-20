@@ -1,5 +1,5 @@
 """
-The Designation class is a Django model that represents a designation 
+The Designation class is a Django model that represents a designation
 and stores its name and type.
 """
 from django.db import models

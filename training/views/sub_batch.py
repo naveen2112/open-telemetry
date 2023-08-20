@@ -8,7 +8,8 @@ import numpy as np
 import pandas as pd
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Avg, Case, Count, F, OuterRef, Q, Subquery, Value, When
+from django.db.models import (Avg, Case, Count, F, OuterRef, Q, Subquery,
+                              Value, When)
 from django.db.models.functions import Coalesce
 from django.forms import model_to_dict
 from django.http import JsonResponse
@@ -18,25 +19,12 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView
 
 from core import template_utils
-from core.constants import (
-    ABOVE_AVERAGE,
-    AVERAGE,
-    GOOD,
-    MEET_EXPECTATION,
-    NOT_YET_STARTED,
-    POOR,
-    TASK_TYPE_ASSESSMENT,
-)
-from core.utils import CustomDatatable, schedule_timeline_for_sub_batch, validate_authorization
-from hubble.models import (
-    Batch,
-    InternDetail,
-    SubBatch,
-    SubBatchTaskTimeline,
-    Timeline,
-    TimelineTask,
-    User,
-)
+from core.constants import (ABOVE_AVERAGE, AVERAGE, GOOD, MEET_EXPECTATION,
+                            NOT_YET_STARTED, POOR, TASK_TYPE_ASSESSMENT)
+from core.utils import (CustomDatatable, schedule_timeline_for_sub_batch,
+                        validate_authorization)
+from hubble.models import (Batch, InternDetail, SubBatch, SubBatchTaskTimeline,
+                           Timeline, TimelineTask, User)
 from training.forms import AddInternForm, SubBatchForm
 
 

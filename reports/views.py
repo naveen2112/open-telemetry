@@ -89,7 +89,7 @@ class EfficiencyDatatable(CustomDatatable):
     ]
 
     def customize_row(self, row, obj):
-        # This is responsible for adding the view action button
+        """This is responsible for adding the view action button"""
         buttons = template_utils.show_btn(  # pylint: disable=no-member
             reverse("detailed_efficiency", args=[obj["pk"]])
         )
@@ -97,7 +97,7 @@ class EfficiencyDatatable(CustomDatatable):
         return row
 
     def get_initial_queryset(self, request=None):
-        # To load a queryset into the datatable
+        """To load a queryset into the datatable"""
         return (
             TimesheetEntry.objects.select_related("user", "team")
             .date_range(
@@ -188,7 +188,7 @@ class MonetizationDatatable(CustomDatatable):
     ]
 
     def get_initial_queryset(self, request=None):
-        # To load a queryset into the datatable
+        """To load a queryset into the datatable"""
         return (
             TimesheetEntry.objects.select_related("user", "project")
             .monetization_fields()
@@ -276,7 +276,7 @@ class KPIDatatable(CustomDatatable):
     ]
 
     def get_initial_queryset(self, request=None):
-        # To load a queryset into the datatable
+        """To load a queryset into the datatable"""
         return (
             TimesheetEntry.objects.select_related("user", "project")
             .date_range(
@@ -327,7 +327,7 @@ class DetaileEfficiencyDatatable(CustomDatatable):
     ]
 
     def get_initial_queryset(self, request=None):
-        # To load a queryset into the datatable
+        """To load a queryset into the datatable"""
         return (
             TimesheetEntry.objects.select_related("user", "team")
             .date_range(

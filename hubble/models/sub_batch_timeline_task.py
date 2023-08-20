@@ -1,6 +1,6 @@
 """
-The SubBatchTaskTimeline class is a Django model that stores data about 
-sub batch timelines and provides a method to check if the timeline 
+The SubBatchTaskTimeline class is a Django model that stores data about
+sub batch timelines and provides a method to check if the timeline
 is editable based on its start date
 """
 from django.db import models

@@ -1,8 +1,9 @@
 """
-Django test cases for the create, delete and Datatables features in the 
-SubBatchDetail module 
+Django test cases for the create, delete and Datatables features in the
+SubBatchDetail module
 """
-from django.db.models import Avg, Case, Count, F, OuterRef, Q, Subquery, Value, When
+from django.db.models import (Avg, Case, Count, F, OuterRef, Q, Subquery,
+                              Value, When)
 from django.db.models.functions import Coalesce
 from django.urls import reverse
 from django.utils import timezone
@@ -10,15 +11,8 @@ from model_bakery import baker
 from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
-from core.constants import (
-    ABOVE_AVERAGE,
-    AVERAGE,
-    GOOD,
-    MEET_EXPECTATION,
-    NOT_YET_STARTED,
-    POOR,
-    TASK_TYPE_ASSESSMENT,
-)
+from core.constants import (ABOVE_AVERAGE, AVERAGE, GOOD, MEET_EXPECTATION,
+                            NOT_YET_STARTED, POOR, TASK_TYPE_ASSESSMENT)
 from hubble.models import InternDetail, SubBatchTaskTimeline
 
 
@@ -335,20 +329,6 @@ class TraineeDatatableTest(BaseTestCase):
         self.assertContains(response, AVERAGE)
         self.assertContains(response, POOR)
 
-    def test_template(self):
-        """
-        To makes sure that the correct template is used
-        """
-        response = self.make_get_request(reverse(self.route_name, args=[self.sub_batch.id]))
-        self.assertTemplateUsed(response, "sub_batch/sub_batch_detail.html")
-        self.assertContains(response, self.sub_batch.name)
-        self.assertContains(response, "Performance")
-        self.assertContains(response, GOOD)
-        self.assertContains(response, MEET_EXPECTATION)
-        self.assertContains(response, ABOVE_AVERAGE)
-        self.assertContains(response, AVERAGE)
-        self.assertContains(response, POOR)
-
     def test_datatable(self):
         """
         To check whether all columns are present in datatable and length of rows without any filter
@@ -423,7 +403,7 @@ class TraineeDatatableTest(BaseTestCase):
             reverse(self.datatable_route_name), data=self.get_valid_inputs()
         )
         for performance in self.desired_output:
-            if performance.average_marks != None:
+            if performance.average_marks is not None:
                 if float(performance.average_marks) >= 90:
                     performance_report[GOOD] += 1
                 elif 90 > float(performance.average_marks) >= 75:

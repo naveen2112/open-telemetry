@@ -1,5 +1,5 @@
 """
-The Currency class is a Django model that represents a currency with 
+The Currency class is a Django model that represents a currency with
 its name and symbol.
 """
 from django.db import models

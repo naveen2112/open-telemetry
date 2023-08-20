@@ -1,5 +1,5 @@
 """
-Module containing custom model fields, managers, and abstract base 
+Module containing custom model fields, managers, and abstract base
 models for the project
 """
 import datetime

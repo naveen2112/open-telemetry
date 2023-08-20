@@ -1,5 +1,5 @@
 """
-The ProjectResource class is a Django model that represents project 
+The ProjectResource class is a Django model that represents project
 resources and their attributes
 """
 from django.db import models

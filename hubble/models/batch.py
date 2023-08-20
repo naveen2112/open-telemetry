@@ -1,5 +1,5 @@
 """
-The Batch class is a Django model that represents a batch with a 
+The Batch class is a Django model that represents a batch with a
 name and a reference to the user
 """
 from django.db import models

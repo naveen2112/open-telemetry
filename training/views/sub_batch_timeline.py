@@ -15,7 +15,8 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView
 
 from core import template_utils
-from core.utils import CustomDatatable, schedule_timeline_for_sub_batch, validate_authorization
+from core.utils import (CustomDatatable, schedule_timeline_for_sub_batch,
+                        validate_authorization)
 from hubble.models import SubBatch, SubBatchTaskTimeline
 from training.forms import SubBatchTimelineForm
 

@@ -3,10 +3,12 @@ Module contains the custom configuration for the Django ajax datatable
 """
 import datetime
 
-from ajax_datatable import AjaxDatatableView
+from ajax_datatable import \
+    AjaxDatatableView  # pylint: disable=no-name-in-module
 from django.http import HttpResponseForbidden
 
-from hubble.models import Holiday, InternDetail, SubBatchTaskTimeline, TimelineTask
+from hubble.models import (Holiday, InternDetail, SubBatchTaskTimeline,
+                           TimelineTask)
 
 
 class CustomDatatable(AjaxDatatableView):

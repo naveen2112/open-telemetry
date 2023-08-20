@@ -1,5 +1,5 @@
 """
-The ProjectResourcePosition class is a Django model that represents a 
+The ProjectResourcePosition class is a Django model that represents a
 project resource position
 """
 from django.db import models
