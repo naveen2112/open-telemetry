@@ -2,8 +2,7 @@
 Django test cases for the create, delete and Datatables features in the
 SubBatchDetail module
 """
-from django.db.models import (Avg, Case, Count, F, OuterRef, Q, Subquery,
-                              Value, When)
+from django.db.models import Avg, Case, Count, F, OuterRef, Q, Subquery, Value, When
 from django.db.models.functions import Coalesce
 from django.urls import reverse
 from django.utils import timezone
@@ -11,8 +10,15 @@ from model_bakery import baker
 from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
-from core.constants import (ABOVE_AVERAGE, AVERAGE, GOOD, MEET_EXPECTATION,
-                            NOT_YET_STARTED, POOR, TASK_TYPE_ASSESSMENT)
+from core.constants import (
+    ABOVE_AVERAGE,
+    AVERAGE,
+    GOOD,
+    MEET_EXPECTATION,
+    NOT_YET_STARTED,
+    POOR,
+    TASK_TYPE_ASSESSMENT,
+)
 from hubble.models import InternDetail, SubBatchTaskTimeline
 
 

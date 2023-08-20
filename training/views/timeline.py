@@ -69,7 +69,7 @@ class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
         },
     ]
 
-    def get_initial_queryset(self, request=None):
+    def get_initial_queryset(self, request=None):  # pylint: disable=unused-argument
         """
         The function returns an initial queryset of objects from a model, filtering out
         those with a non-null "deleted_at" field in the related "task_timeline" model.
@@ -163,7 +163,7 @@ def create_timeline_template(request):
 
 @login_required()
 @validate_authorization()
-def timeline_template_data(request, pk):
+def timeline_template_data(request, pk):  # pylint: disable=unused-argument
     """
     Timeline Template Update Form Data
     """
@@ -211,8 +211,9 @@ def update_timeline_template(request, pk):
 @validate_authorization()
 @require_http_methods(
     ["DELETE"]
-)  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
-def delete_timeline_template(request, pk):
+)  # This decorator ensures that the view function is only accessible
+# through the DELETE HTTP method
+def delete_timeline_template(request, pk):  # pylint: disable=unused-argument
     """
     Delete Timeline Template
     Soft delete the template and record the deletion time in deleted_at field

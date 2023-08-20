@@ -18,6 +18,10 @@ class DateTimeWithoutTZField(models.DateTimeField):
     """
 
     def db_type(self, connection):
+        """
+        The function returns the appropriate database-specific column type based on
+        the database engine specified in the connection settings.
+        """
         # Use the appropriate database-specific column type
         if connection.settings_dict["ENGINE"] == "django.db.backends.postgresql":
             return "timestamp without time zone"

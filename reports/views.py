@@ -89,7 +89,10 @@ class EfficiencyDatatable(CustomDatatable):
     ]
 
     def customize_row(self, row, obj):
-        """This is responsible for adding the view action button"""
+        """
+        The function `customize_row` adds a view action button to a row in a table.
+        """
+        # This is responsible for adding the view action button
         buttons = template_utils.show_btn(  # pylint: disable=no-member
             reverse("detailed_efficiency", args=[obj["pk"]])
         )
@@ -97,7 +100,12 @@ class EfficiencyDatatable(CustomDatatable):
         return row
 
     def get_initial_queryset(self, request=None):
-        """To load a queryset into the datatable"""
+        """
+        The function returns a queryset of TimesheetEntry objects with related user
+        and team objects, filtered by a date range and annotated with capacity
+        and primary key values.
+        """
+        # To load a queryset into the datatable
         return (
             TimesheetEntry.objects.select_related("user", "team")
             .date_range(
@@ -188,7 +196,10 @@ class MonetizationDatatable(CustomDatatable):
     ]
 
     def get_initial_queryset(self, request=None):
-        """To load a queryset into the datatable"""
+        """
+        The function returns a queryset of TimesheetEntry objects filtered by year and month.
+        """
+        # To load a queryset into the datatable
         return (
             TimesheetEntry.objects.select_related("user", "project")
             .monetization_fields()
@@ -276,7 +287,11 @@ class KPIDatatable(CustomDatatable):
     ]
 
     def get_initial_queryset(self, request=None):
-        """To load a queryset into the datatable"""
+        """
+        The function returns a queryset of TimesheetEntry objects with related
+        user and project objects, filtered by a date range and annotated with KPI fields.
+        """
+        # To load a queryset into the datatable
         return (
             TimesheetEntry.objects.select_related("user", "project")
             .date_range(
@@ -327,7 +342,11 @@ class DetaileEfficiencyDatatable(CustomDatatable):
     ]
 
     def get_initial_queryset(self, request=None):
-        """To load a queryset into the datatable"""
+        """
+        The function returns a queryset of TimesheetEntry objects with related user
+        and team objects, filtered by fields.
+        """
+        # To load a queryset into the datatable
         return (
             TimesheetEntry.objects.select_related("user", "team")
             .date_range(

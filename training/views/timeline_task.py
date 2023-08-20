@@ -72,8 +72,8 @@ class TimelineTemplateTaskDataTable(LoginRequiredMixin, CustomDatatable):
 @validate_authorization()
 def update_order(request):
     """
-    The update_order function updates the order of tasks in a timeline based on the data received in
-    the request
+    The update_order function updates the order of tasks in a timeline based on the
+    data received in the request
     """
     response_data = {}  # Initialize an empty dictionary
     data = request.POST.getlist("data[]")
@@ -125,7 +125,7 @@ def create_timeline_task(request):
 
 @login_required()
 @validate_authorization()
-def timeline_task_data(request, pk):
+def timeline_task_data(request, pk):  # pylint: disable=unused-argument
     """
     Timeline Template Task Update Form Data
     """
@@ -171,8 +171,9 @@ def update_timeline_task(request, pk):
 @validate_authorization()
 @require_http_methods(
     ["DELETE"]
-)  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
-def delete_timeline_task(request, pk):
+)  # This decorator ensures that the view function is only accessible through
+# the DELETE HTTP method
+def delete_timeline_task(request, pk):  # pylint: disable=unused-argument
     """
     Delete Timeline Template Task
     Soft delete the template and record the deletion time in deleted_at field

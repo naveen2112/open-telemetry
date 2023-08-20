@@ -18,6 +18,9 @@ class ExceptionReporter(BaseExceptionReporter):
     """
 
     def get_traceback_data(self):
+        """
+        The function `get_traceback_data` removes sensitive data from a traceback report.
+        """
         data = super().get_traceback_data()
 
         # Remove sensitive data from the report
@@ -38,6 +41,9 @@ class TeamsExceptionHandler(AdminEmailHandler):
     """
 
     def emit(self, record):
+        """
+        The `emit` function sends a log record to a Microsoft Teams channel using a webhook URL.
+        """
         url = env("TEAMS_LOGGING_WEBHOOK_URL")
 
         if url:

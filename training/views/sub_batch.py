@@ -8,8 +8,7 @@ import numpy as np
 import pandas as pd
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import (Avg, Case, Count, F, OuterRef, Q, Subquery,
-                              Value, When)
+from django.db.models import Avg, Case, Count, F, OuterRef, Q, Subquery, Value, When
 from django.db.models.functions import Coalesce
 from django.forms import model_to_dict
 from django.http import JsonResponse
@@ -19,12 +18,29 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView
 
 from core import template_utils
-from core.constants import (ABOVE_AVERAGE, AVERAGE, GOOD, MEET_EXPECTATION,
-                            NOT_YET_STARTED, POOR, TASK_TYPE_ASSESSMENT)
-from core.utils import (CustomDatatable, schedule_timeline_for_sub_batch,
-                        validate_authorization)
-from hubble.models import (Batch, InternDetail, SubBatch, SubBatchTaskTimeline,
-                           Timeline, TimelineTask, User)
+from core.constants import (
+    ABOVE_AVERAGE,
+    AVERAGE,
+    GOOD,
+    MEET_EXPECTATION,
+    NOT_YET_STARTED,
+    POOR,
+    TASK_TYPE_ASSESSMENT,
+)
+from core.utils import (
+    CustomDatatable,
+    schedule_timeline_for_sub_batch,
+    validate_authorization,
+)
+from hubble.models import (
+    Batch,
+    InternDetail,
+    SubBatch,
+    SubBatchTaskTimeline,
+    Timeline,
+    TimelineTask,
+    User,
+)
 from training.forms import AddInternForm, SubBatchForm
 
 
@@ -283,7 +299,7 @@ def update_sub_batch(request, pk):
     ["DELETE"]
 )  # This decorator ensures that the view function is only accessible
 # through the DELETE HTTP method
-def delete_sub_batch(request, pk):
+def delete_sub_batch(request, pk):  # pylint: disable=unused-argument
     """
     Delete Batch
     Soft delete the batch and record the deletion time in deleted_at field
@@ -456,7 +472,8 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
         if obj.performance == GOOD:
             row[
                 "performance"
-            ] = f'<span class="bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm">{GOOD}</span>'
+            ] = f'<span class="bg-mild-green-10 text-mild-green py-0.5 px-1.5 \
+                rounded-xl text-sm">{GOOD}</span>'
         if obj.performance == MEET_EXPECTATION:
             row[
                 "performance"
@@ -464,22 +481,30 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
         if obj.performance == ABOVE_AVERAGE:
             row[
                 "performance"
-            ] = f'<span style="background-color:#fefce8; color: #eab308;" class="py-0.5 px-1.5 rounded-xl text-sm">{ABOVE_AVERAGE}</span>'
+            ] = f'<span style="background-color:#fefce8; color: #eab308;" \
+            class="py-0.5 px-1.5 rounded-xl text-sm">{ABOVE_AVERAGE}</span>'
         if obj.performance == AVERAGE:
             row[
                 "performance"
-            ] = f'<span class="bg-orange-100 text-orange-700 py-0.5 px-1.5 rounded-xl text-sm">{AVERAGE}</span>'
+            ] = f'<span class="bg-orange-100 text-orange-700 py-0.5 px-1.5 \
+                rounded-xl text-sm">{AVERAGE}</span>'
         if obj.performance == POOR:
             row[
                 "performance"
-            ] = f'<span class="bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm">{POOR}</span>'
+            ] = f'<span class="bg-dark-red-10 text-dark-red py-0.5 px-1.5 \
+                rounded-xl text-sm">{POOR}</span>'
         if obj.performance == NOT_YET_STARTED:
             row[
                 "performance"
-            ] = f'<span class="bg-dark-black/10 text-dark-black py-0.5 px-1.5 rounded-xl text-sm">{NOT_YET_STARTED}</span>'
-        return
+            ] = f'<span class="bg-dark-black/10 text-dark-black py-0.5 px-1.5 \
+                rounded-xl text-sm">{NOT_YET_STARTED}</span>'
+        return row
 
     def get_response_dict(self, request, paginator, draw_idx, start_pos):
+        """
+        The function calculates a performance report based on average marks and adds it
+        to the response dictionary.
+        """
         response = super().get_response_dict(request, paginator, draw_idx, start_pos)
         performance_report = {
             GOOD: 0,
@@ -551,7 +576,7 @@ def add_trainee(request):
 @login_required
 @validate_authorization()
 @require_http_methods(["DELETE"])
-def remove_trainee(request, pk):
+def remove_trainee(request, pk):  # pylint: disable=unused-argument
     """
     The function remove_trainee deletes an intern from the database and returns a JSON response
     indicating the success or failure of the operation.
