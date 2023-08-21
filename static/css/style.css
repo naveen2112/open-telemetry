@@ -222,3 +222,15 @@
 .dark-orange{
     color: #eab308 !important;
 }
+
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.assessment-card {
+    width: 90%;
+    background-color: white;
+    height: fit-content;
+}
