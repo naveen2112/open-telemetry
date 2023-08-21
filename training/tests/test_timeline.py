@@ -322,7 +322,7 @@ class TimelineUpdateTest(BaseTestCase):
             },
         )
 
-    def teat_required_validation(self):
+    def test_required_validation(self):
         """
         This function checks the required field validations
         """
@@ -466,7 +466,13 @@ class TimelineDatatableTest(BaseTestCase):
         length of rows without any filter
         """
         name = self.faker.name()
-        baker.make("hubble.Timeline", name=seq(name))
+        is_active = [True, False]
+        baker.make(
+            "hubble.Timeline",
+            name=seq(name),
+            is_active=is_active.__iter__(),
+            _quantity=2,
+            )
         no_of_sub_batches_subquery = (
             SubBatch.objects.filter(timeline_id=OuterRef("id"), deleted_at__isnull=True)
             .values("timeline")

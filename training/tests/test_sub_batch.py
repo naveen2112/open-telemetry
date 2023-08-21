@@ -2,6 +2,9 @@
 Django test cases for create, update, delete and django datatable for the Sub batch
 """
 
+import io
+
+import pandas as pd
 from django.conf import settings
 from django.db.models import Count, Q
 from django.urls import reverse
@@ -46,7 +49,7 @@ class SubBatchCreateTest(BaseTestCase):
             employee_id=seq(0),
             _quantity=5,
         )
-        baker.make(
+        self.users = baker.make(
             "hubble.User",
             is_employed=False,
             _fill_optional=["email"],
@@ -81,34 +84,41 @@ class SubBatchCreateTest(BaseTestCase):
             "secondary_mentor_ids": secondary_mentor_ids,
         }
 
-    def get_file_path(self):
+    def create_memory_file(self, data):
         """
-        This function helps us to import the excel sheets from static file
+        This function is responsible for creating valid file input
         """
-        static_path = list(settings.STATICFILES_DIRS)
-        return f"{static_path[0]}/training/pdf/"
+        memory_file = io.BytesIO()
+        df = pd.DataFrame(data)
+        df.to_excel(memory_file, index=False)
+        memory_file.seek(0)
+        return memory_file
 
     def test_success(self):
         """
         Check what happens when valid data is given as input
         """
-        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
-            data = self.get_valid_inputs({"users_list_file": sample_file})
-            response = self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]),
-                data=data,
-            )
-            self.assertRedirects(response, reverse(self.route_name, args=[self.batch_id]))
-            self.assertEqual(response.status_code, 302)
-            self.assert_database_has(
-                "SubBatch",
-                {
-                    "name": data["name"],
-                    "team_id": data["team"],
-                    "timeline_id": data["timeline"],
-                    "start_date": data["start_date"],
-                },
-            )
+        file_values = {
+            "employee_id": [self.users[1].employee_id, self.users[2].employee_id],
+            "college": [self.faker.name(),self.faker.name()],
+        }
+        valid_file = self.create_memory_file(file_values)
+        data = self.get_valid_inputs({"users_list_file": valid_file})
+        response = self.make_post_request(
+            reverse(self.create_route_name, args=[self.batch_id]),
+            data=data,
+        )
+        self.assertRedirects(response, reverse(self.route_name, args=[self.batch_id]))
+        self.assertEqual(response.status_code, 302)
+        self.assert_database_has(
+        "SubBatch",
+        {
+            "name": data["name"],
+            "team_id": data["team"],
+            "timeline_id": data["timeline"],
+            "start_date": data["start_date"],
+        },
+    )
 
     def test_multiple_mentors(self):
         """
@@ -144,89 +154,134 @@ class SubBatchCreateTest(BaseTestCase):
         """
         This function checks the required validation for the team and name fields
         """
-        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
-            data = {"users_list_file": sample_file}
-            self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]),
-                data=data,
-            )
-            field_errors = {
-                "name": {"required"},
-                "team": {"required"},
-                "timeline": {"required"},
-                "primary_mentor_id": {"required"},
-                "secondary_mentor_ids": {"required"},
+        file_values = {
+            "employee_id": [self.users[1].employee_id, self.users[2].employee_id],
+            "college": [self.faker.name(),self.faker.name()],
+        }
+        valid_file = self.create_memory_file(file_values)
+        data = {"users_list_file": valid_file}
+        self.make_post_request(
+            reverse(self.create_route_name, args=[self.batch_id]),
+            data=data,
+        )
+        field_errors = {
+            "name": {"required"},
+            "team": {"required"},
+            "timeline": {"required"},
+            "primary_mentor_id": {"required"},
+            "secondary_mentor_ids": {"required"},
             }
-            self.validate_form_errors(field_errors=field_errors, form=SubBatchForm(data=data))
+        self.validate_form_errors(field_errors=field_errors, form=SubBatchForm(data=data))
 
     def test_invalid_choice_validation(self):
         """
         Check what happens when invalid data for team field is given as input
         """
-        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
-            data = self.get_valid_inputs(
-                {
-                    "users_list_file": sample_file,
-                    "team": self.faker.name(),
-                    "timeline": self.faker.name(),
-                    "primary_mentor_id": self.faker.name(),
-                    "secondary_mentor_ids": [
+        file_values = {
+            "employee_id": [self.users[1].employee_id, self.users[2].employee_id],
+            "college": [self.faker.name(),self.faker.name()],
+        }
+        valid_file = self.create_memory_file(file_values)
+        data = self.get_valid_inputs(
+            {
+                "users_list_file": valid_file,
+                "team": self.faker.name(),
+                "timeline": self.faker.name(),
+                "primary_mentor_id": self.faker.name(),
+                "secondary_mentor_ids": [
                         self.faker.unique.random_int(1, 10),
                         self.faker.unique.random_int(1, 10),
                     ],
-                }
-            )
-            self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]),
-                data=data,
-            )
-            field_errors = {
-                "team": {"invalid_choice"},
-                "timeline": {"invalid_choice"},
-                "primary_mentor_id": {"invalid_choice"},
-                "secondary_mentor_ids": {"invalid_choice"},
             }
-            self.validate_form_errors(field_errors=field_errors, form=SubBatchForm(data=data))
+        )
+        self.make_post_request(
+            reverse(self.create_route_name, args=[self.batch_id]),
+            data=data,
+        )
+        field_errors = {
+            "team": {"invalid_choice"},
+            "timeline": {"invalid_choice"},
+            "primary_mentor_id": {"invalid_choice"},
+            "secondary_mentor_ids": {"invalid_choice"},
+            }
+        self.validate_form_errors(field_errors=field_errors, form=SubBatchForm(data=data))
 
     def test_minimum_length_validation(self):
         """
         To check what happens when name field fails MinlengthValidation
         """
-        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
-            data = self.get_valid_inputs(
-                {
-                    "users_list_file": sample_file,
-                    "name": self.faker.pystr(max_chars=2),
-                }
-            )
-            self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]),
-                data=data,
-            )
-            field_errors = {"name": {"min_length"}}
-            self.validate_form_errors(
-                field_errors=field_errors,
-                current_value=data,
-                validation_parameter={"name": 3},
-                form=SubBatchForm(data=data),
-            )
+        file_values = {
+            "employee_id": [self.users[1].employee_id, self.users[2].employee_id],
+            "college": [self.faker.name(),self.faker.name()],
+        }
+        valid_file = self.create_memory_file(file_values)
+        data = self.get_valid_inputs(
+            {
+                "users_list_file": valid_file,
+                "name": self.faker.pystr(max_chars=2),
+            }
+        )
+        self.make_post_request(
+            reverse(self.create_route_name, args=[self.batch_id]),
+            data=data,
+        )
+        field_errors = {"name": {"min_length"}}
+        self.validate_form_errors(
+            field_errors=field_errors,
+            current_value=data,
+            validation_parameter={"name": 3},
+            form=SubBatchForm(data=data),
+        )
 
     def test_invalid_start_date(self):
         """
         To check what happens when start_date is invalid
         """
-        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
-            data = self.get_valid_inputs(
-                {
-                    "users_list_file": sample_file,
-                    "start_date": timezone.now().date() + timezone.timedelta(days=2),
-                }
-            )
-            self.assertFormError(
-                SubBatchForm(data=data),
-                "start_date",
-                "The Selected date falls on a holiday, please reconsider the start date",
-            )
+        file_values = {
+            "employee_id": [self.users[1].employee_id, self.users[2].employee_id],
+            "college": [self.faker.name(),self.faker.name()],
+        }
+        valid_file = self.create_memory_file(file_values)
+        data = self.get_valid_inputs(
+            {
+                "users_list_file": valid_file,
+                "start_date": timezone.now().date() + timezone.timedelta(days=2),
+            }
+        )
+        self.assertFormError(
+            SubBatchForm(data=data),
+            "start_date",
+            "The Selected date falls on a holiday, please reconsider the start date",
+        )
+
+    def test_validate_no_timeline_task(self):
+        """
+        Check what happpens when a timeline with no task is selected
+        """
+        team_id = self.create_team().id
+        timeline = baker.make("hubble.Timeline", team_id=team_id)
+        file_values = {
+            "employee_id": [self.users[1].employee_id, self.users[2].employee_id],
+            "college": [self.faker.name(), self.faker.name()],
+        }
+        valid_file = self.create_memory_file(file_values)
+        data = self.get_valid_inputs(
+            {
+                "users_list_file": valid_file,
+                "team": team_id,
+                "timeline": timeline.id,
+            }
+        )
+        self.make_post_request(
+            reverse(self.create_route_name, args=[self.batch_id]),
+            data=data,
+        )
+        field_errors = {
+            "timeline": {"timeline_has_no_tasks"},
+        }
+        self.validate_form_errors(
+            field_errors=field_errors, form=SubBatchForm(data=data)
+        )
 
     def test_file_validation(self):
         """
@@ -262,46 +317,58 @@ class SubBatchCreateTest(BaseTestCase):
             )
 
         # Invalid data in file interns belong to another sub-batch
-        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
-            data = self.get_valid_inputs({"users_list_file": sample_file})
-            self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]),
-                data=data,
-            )
-        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
-            data = self.get_valid_inputs({"users_list_file": sample_file})
-            response = self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]),
-                data=data,
-            )
-            self.assertEqual(
-                strip_tags(response.context["errors"]),
-                "Some of the Users are already added in another sub-batch",
-            )
+        file_values = {
+            "employee_id": [self.users[1].employee_id, self.users[2].employee_id],
+            "college": [self.faker.name(),self.faker.name()],
+        }
+        valid_file = self.create_memory_file(file_values)
+        data = self.get_valid_inputs({"users_list_file": valid_file})
+        self.make_post_request(
+            reverse(self.create_route_name, args=[self.batch_id]),
+            data=data,
+        )
+        valid_file =self.create_memory_file(file_values)
+        data = self.get_valid_inputs({"users_list_file": valid_file})
+        response = self.make_post_request(
+            reverse(self.create_route_name, args=[self.batch_id]),
+            data=data,
+        )
+        self.assertEqual(
+            strip_tags(response.context["errors"]),
+            "Some of the Users are already added in another sub-batch",
+        )
 
         # Invalid data in file, employee_id doesn't match with any employee_id in db
-        with open(self.get_file_path() + "invalid_file_upload1.xlsx", "rb") as sample_file:
-            data = self.get_valid_inputs({"users_list_file": sample_file})
-            response = self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]),
-                data=data,
-            )
-            self.assertEqual(
-                strip_tags(response.context["errors"]),
-                "Some of the employee ids are not present in the database, please check again",
-            )
+        file_values = {
+            "employee_id": [self.faker.random_int(10, 20), self.faker.random_int(10, 20)],
+            "college": [self.faker.name(),self.faker.name()],
+        }
+        invalid_file = self.create_memory_file(file_values)
+        data = self.get_valid_inputs({"users_list_file": invalid_file})
+        response = self.make_post_request(
+            reverse(self.create_route_name, args=[self.batch_id]),
+            data=data,
+        )
+        self.assertEqual(
+            strip_tags(response.context["errors"]),
+            "Some of the employee ids are not present in the database, please check again",
+        )
 
         # Invalid column names are present
-        with open(self.get_file_path() + "invalid_file_upload2.xlsx", "rb") as sample_file:
-            data = self.get_valid_inputs({"users_list_file": sample_file})
-            response = self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]),
-                data=data,
-            )
-            self.assertEqual(
-                strip_tags(response.context["errors"]),
-                "Invalid keys are present in the file, please check the sample file",
-            )
+        file_values = {
+            "employee_ids": [self.users[1].employee_id, self.users[2].employee_id],
+            "colleges": [self.faker.name(),self.faker.name()],
+        }
+        invalid_file = self.create_memory_file(file_values)
+        data = self.get_valid_inputs({"users_list_file": invalid_file})
+        response = self.make_post_request(
+            reverse(self.create_route_name, args=[self.batch_id]),
+            data=data,
+        )
+        self.assertEqual(
+            strip_tags(response.context["errors"]),
+            "Invalid keys are present in the file, please check the sample file",
+        )
 
 
 class SubBatchUpdateTest(BaseTestCase):
@@ -415,6 +482,24 @@ class SubBatchUpdateTest(BaseTestCase):
                 "timeline_id": data["timeline"],
                 "start_date": data["start_date"],
                 "secondary_mentors__in": [secondary_mentor1, secondary_mentor2],
+            },
+        )
+
+        # check what happens when a timeline is not updated
+        data = self.get_valid_inputs({"name": self.faker.name()})
+        response = self.make_post_request(
+            reverse(self.update_route_name, args=[self.sub_batch_id]),
+            data=data,
+        )
+        self.assertRedirects(response, reverse(self.route_name, args=[self.batch_id]))
+        self.assertEqual(response.status_code, 302)
+        self.assert_database_has(
+            "SubBatch",
+            {
+                "name": data["name"],
+                "team_id": data["team"],
+                "timeline_id": data["timeline"],
+                "start_date": data["start_date"],
             },
         )
 

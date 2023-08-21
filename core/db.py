@@ -7,7 +7,7 @@ import datetime
 from django.db import models
 
 
-class DateTimeWithoutTZField(models.DateTimeField):
+class DateTimeWithoutTZField(models.DateTimeField): # pragma: no cover
     """
     A custom DateTimeField that selects the appropriate database-specific
     column type based on the database engine.

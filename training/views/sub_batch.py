@@ -1,5 +1,5 @@
 """
-Django view that handles the creation, update, deletion, and retrieval of 
+Django view that handles the creation, update, deletion, and retrieval of
 sub-batches and trainees within a batch management system
 """
 import logging
@@ -200,28 +200,27 @@ def create_sub_batch(request, pk):
             )  # Adding the non-field-error if the file was not uploaded while submission
         if sub_batch_form.is_valid():  # Check if both the forms are valid or not
             sub_batch = sub_batch_form.save(commit=False)
-            if TimelineTask.objects.filter(timeline=sub_batch.timeline.id):
-                sub_batch.batch = Batch.objects.get(id=pk)
-                sub_batch.created_by = request.user
-                sub_batch.primary_mentor_id = request.POST.get("primary_mentor_id")
-                sub_batch.save()
-                sub_batch.secondary_mentors.set(request.POST.getlist("secondary_mentor_ids"))
-                timeline_task_end_date = schedule_timeline_for_sub_batch(
-                    sub_batch=sub_batch, user=request.user
+            sub_batch.batch = Batch.objects.get(id=pk)
+            sub_batch.created_by = request.user
+            sub_batch.primary_mentor_id = request.POST.get("primary_mentor_id")
+            sub_batch.save()
+            sub_batch.secondary_mentors.set(request.POST.getlist("secondary_mentor_ids"))
+            timeline_task_end_date = schedule_timeline_for_sub_batch(
+                sub_batch=sub_batch, user=request.user
+            )
+            user_details = dict(
+                User.objects.filter(employee_id__in=data_frame["employee_id"]).values_list(
+                    "employee_id", "id"
                 )
-                user_details = dict(
-                    User.objects.filter(employee_id__in=data_frame["employee_id"]).values_list(
-                        "employee_id", "id"
-                    )
+            )
+            for row in range(len(data_frame)):  # Iterating over pandas dataframe
+                InternDetail.objects.create(
+                    sub_batch=sub_batch,
+                    user_id=user_details[str(data_frame["employee_id"][row])],
+                    expected_completion=timeline_task_end_date,
+                    college=data_frame["college"][row],
+                    created_by=request.user,
                 )
-                for row in range(len(data_frame)):  # Iterating over pandas dataframe
-                    InternDetail.objects.create(
-                        sub_batch=sub_batch,
-                        user_id=user_details[str(data_frame["employee_id"][row])],
-                        expected_completion=timeline_task_end_date,
-                        college=data_frame["college"][row],
-                        created_by=request.user,
-                    )
 
                 return redirect(reverse("batch.detail", args=[pk]))
             sub_batch_form.add_error(
@@ -258,16 +257,18 @@ def update_sub_batch(request, pk):
     """
     try:
         sub_batch = SubBatch.objects.get(id=pk)
+        old_timeline_id = sub_batch.timeline.id
     except Exception:
         return JsonResponse({"message": "Invalid SubBatch id", "status": "error"})
     if request.method == "POST":
         sub_batch_form = SubBatchForm(request.POST, instance=sub_batch)
         if sub_batch_form.is_valid():
             # validation start date
+            sub_batch_form.save(commit=False)
             sub_batch.primary_mentor_id = request.POST.get("primary_mentor_id")
             sub_batch.secondary_mentors.set(request.POST.getlist("secondary_mentor_ids"))
             sub_batch_form.save()
-            if int(request.POST.get("timeline")) != sub_batch.timeline.id:
+            if int(request.POST.get("timeline")) != old_timeline_id:
                 SubBatchTaskTimeline.bulk_delete({"sub_batch_id": pk})
                 schedule_timeline_for_sub_batch(sub_batch, request.user)
             else:

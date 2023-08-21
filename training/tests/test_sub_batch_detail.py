@@ -232,14 +232,22 @@ class TraineeDatatableTest(BaseTestCase):
         """
         self.name = self.faker.name()
         self.sub_batch = baker.make("hubble.SubBatch", start_date=timezone.now().date())
+        self.another_sub_batch = baker.make("hubble.SubBatch", start_date=timezone.now().date())
         baker.make(
             "hubble.InternDetail",
             user__name=seq(self.name),
             sub_batch_id=self.sub_batch.id,
             _fill_optional=["expected_completion"],
-            _quantity=5,
+            _quantity=7,
         )
         baker.make(
+            "hubble.InternDetail",
+            user__name=seq(self.name),
+            sub_batch_id=self.another_sub_batch.id,
+            _fill_optional=["expected_completion"],
+            _quantity=7,
+        )
+        task = baker.make(
             "hubble.SubBatchTaskTimeline",
             task_type=TASK_TYPE_ASSESSMENT,
             days=seq(0),
@@ -252,6 +260,15 @@ class TraineeDatatableTest(BaseTestCase):
             "length": 10,
             "sub_batch": self.sub_batch.id,
         }
+        intern_details_iterator = InternDetail.objects.values_list("user__id", flat=True).iterator()
+        baker.make(
+            "hubble.assessment",
+            task=task,
+            user_id=intern_details_iterator,
+            score=seq(start=40, increment_by=10, value=0),
+            sub_batch_id=self.sub_batch.id,
+            _quantity=6
+        )
         task_count = (
             SubBatchTaskTimeline.objects.filter(
                 sub_batch_id=self.sub_batch.id, task_type=TASK_TYPE_ASSESSMENT
@@ -259,8 +276,6 @@ class TraineeDatatableTest(BaseTestCase):
             .values("id")
             .count()
         )
-        if task_count == 0:
-            task_count = 1
         last_attempt_score = SubBatchTaskTimeline.objects.filter(
             id=OuterRef("user__assessments__task_id"),
             assessments__user_id=OuterRef("user_id"),
@@ -456,3 +471,12 @@ class TraineeDatatableTest(BaseTestCase):
             performance_report[NOT_YET_STARTED]
             == response.json()["extra_data"]["performance_report"][NOT_YET_STARTED]
         )
+
+    def test_no_assignment(self):
+        """
+        To check what happens when no assignment is given
+        """
+        response = self.make_post_request(
+            reverse(self.datatable_route_name), data=self.get_valid_inputs({"sub_batch": self.another_sub_batch.id})
+        )
+        self.assertEqual(response.status_code, 200)
