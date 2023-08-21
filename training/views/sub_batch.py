@@ -224,10 +224,6 @@ def create_sub_batch(request, pk):
                 )
 
             return redirect(reverse("batch.detail", args=[pk]))
-        sub_batch_form.add_error(
-            None,
-            "The Selected Team's Active Timeline doesn't have any tasks",
-        )
     context = {
         "form": sub_batch_form,
         "sub_batch_id": pk,
