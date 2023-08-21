@@ -10,7 +10,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Avg, Case, Count, F, OuterRef, Q, Subquery, Value, When
 from django.db.models.functions import Coalesce
-from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -157,7 +156,6 @@ def create_sub_batch(request, pk):
     Create Sub-batch View
     """
     sub_batch_form = SubBatchForm()
-
     if request.method == "POST":
         sub_batch_form = SubBatchForm(request.POST)
         # Checking the trainee is already added in the other batch or not
@@ -171,7 +169,14 @@ def create_sub_batch(request, pk):
                 if User.objects.filter(employee_id__in=data_frame["employee_id"]).count() == len(
                     data_frame["employee_id"]
                 ):
-                    if InternDetail.objects.filter(
+                    if User.objects.filter(
+                        employee_id__in=data_frame["employee_id"], status="intern"
+                    ).count() != len(data_frame["employee_id"]):
+                        sub_batch_form.add_error(
+                            None,
+                            "Some of the users are not an intern",
+                        )
+                    elif InternDetail.objects.filter(
                         user__employee_id__in=data_frame["employee_id"]
                     ).exists():
                         sub_batch_form.add_error(
@@ -232,29 +237,17 @@ def create_sub_batch(request, pk):
 
 @login_required()
 @validate_authorization()
-def get_timeline(request):
+def get_timelines(request):
     """
     This function retrieves an active timeline template for a given
     team and returns it as a JSON response, or returns an error message
     if no active template is found.
     """
     team_id = request.POST.get("team_id")
-    try:
-        timeline = Timeline.objects.get(team_id=team_id, is_active=True)
-        return JsonResponse(
-            {"timeline": model_to_dict(timeline)}
-        )  # Return the response with active template for a team
-    except Exception as exception:
-        logging.error(
-            "An error has occurred while fetching an active timeline template for the team\n%s",
-            exception,
-        )
-        return JsonResponse(
-            {
-                "message": "No active timeline template found",
-            },
-            status=404,
-        )
+    timelines = list(Timeline.objects.filter(team_id=team_id).values("id", "name", "is_active"))
+    if len(timelines) == 0:
+        return JsonResponse({"message": "No timeline template found"}, status=404)
+    return JsonResponse(timelines, safe=False)
 
 
 @login_required()
@@ -285,7 +278,6 @@ def update_sub_batch(request, pk):
             return redirect(reverse("batch.detail", args=[sub_batch.batch.id]))
         context = {"form": sub_batch_form, "sub_batch": sub_batch}
         return render(request, "sub_batch/update_sub_batch.html", context)
-    sub_batch = SubBatch.objects.get(id=pk)
     context = {
         "form": SubBatchForm(instance=sub_batch),
         "sub_batch": sub_batch,

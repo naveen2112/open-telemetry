@@ -6,9 +6,9 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator
 from django.utils import timezone
 
-from core.constants import PRESENT_TYPES, TASK_TYPES
+from core.constants import PRESENT_TYPES, TASK_TYPES, USER_STATUS
 from hubble import models
-from hubble.models import Assessment
+from hubble.models import Assessment, Team
 
 
 class TimelineForm(forms.ModelForm):
@@ -207,6 +207,9 @@ class SubBatchForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        instance = kwargs.get("instance")
+        if instance:
+            self.fields["team"].queryset = Team.objects.filter(id=instance.team.id)
 
         self.fields["team"].empty_label = "Select a Team"
         if self.data.get("team", None):
@@ -305,11 +308,12 @@ class SubBatchForm(forms.ModelForm):
                     "placeholder": "Start Date...",
                 }
             ),
-            "timeline": forms.TextInput(
+            "timeline": forms.Select(
                 attrs={
-                    "class": "w-full block border border-primary-dark-30 mt-2.5 \
+                    "class": "w-full block border border-primary-dark-30 \
                         rounded-md focus:outline-none focus:ring-transparent \
-                            focus:ring-offset-0 h-9 p-2 bg-transparent w-250 timeline-input",
+                            focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250\
+                                timeline-input invisible",
                 }
             ),
             "primary_mentor_id": forms.Select(
@@ -371,7 +375,9 @@ class AddInternForm(forms.ModelForm):
         queryset=(
             models.User.objects.exclude(
                 intern_details__isnull=False, intern_details__deleted_at__isnull=True
-            ).filter(is_employed=False)
+            ).filter(
+                is_employed=False, status=USER_STATUS[0]
+            )
         ),
         label="User",
     )

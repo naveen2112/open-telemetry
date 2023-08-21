@@ -17,11 +17,11 @@ def error_404(request, exception):  # pylint: disable=unused-argument
     """
     Handles the 404 error (page not found)
     """
-    return render(request, "induction_kit.html")
+    return render(request, "errors/404.html", status=404)
 
 
-def error_500(request):
+def error_500(request):  # pragma: no cover
     """
     Handles the 500 error (internal server error)
     """
-    return render(request, "induction_kit.html")
+    return render(request, "errors/500.html", status=500)

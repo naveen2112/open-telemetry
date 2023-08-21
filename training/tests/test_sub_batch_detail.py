@@ -18,6 +18,7 @@ from core.constants import (
     NOT_YET_STARTED,
     POOR,
     TASK_TYPE_ASSESSMENT,
+    USER_STATUS,
 )
 from hubble.models import InternDetail, SubBatchTaskTimeline
 
@@ -43,7 +44,9 @@ class AddInternTest(BaseTestCase):
         This function is responsible for updating the valid inputs and
         creating data in databases as reqiured
         """
-        intern = baker.make("hubble.User", is_employed=False, _fill_optional=["email"])
+        intern = baker.make(
+            "hubble.User", is_employed=False, _fill_optional=["email"], status=USER_STATUS[0]
+        )
         self.sub_batch = baker.make("hubble.SubBatch", start_date=timezone.now().date())
         baker.make(
             "hubble.SubBatchTaskTimeline",

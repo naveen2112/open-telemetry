@@ -436,10 +436,6 @@
                     $(parent).find(".selected-toggle").remove();
                 }
 
-                if (childern.length <= 5) {
-                    $(parent).find("#cus-search-wrap").remove();
-                }
-
                 const searchElem = $(parent).find("#select-search"),
                     selectAll = $(parent).find('.select-all-btn'),
                     dropELem = $(parent).find('#drop-btn'),

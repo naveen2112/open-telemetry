@@ -15,6 +15,9 @@ from training.views import (
     user_journey,
 )
 
+handler404 = view.error_404
+handler500 = view.error_500
+
 urlpatterns = [
     path("", include("hubble.urls")),
     path("", view.home, name="training.home"),
@@ -138,8 +141,8 @@ urlpatterns = [
     ),
     path(
         "sub-batch/get-timeline",
-        sub_batch.get_timeline,
-        name="sub-batch.get_timeline",
+        sub_batch.get_timelines,
+        name="sub-batch.get_timelines",
     ),
     path(
         "sub-batch/<int:pk>/edit",

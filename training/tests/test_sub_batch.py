@@ -4,7 +4,6 @@ Django test cases for create, update, delete and django datatable for the Sub ba
 
 from django.conf import settings
 from django.db.models import Count, Q
-from django.forms.models import model_to_dict
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import strip_tags
@@ -12,7 +11,8 @@ from model_bakery import baker
 from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
-from hubble.models import Batch, SubBatch, User
+from core.constants import USER_STATUS
+from hubble.models import Batch, SubBatch, Timeline, User
 from training.forms import SubBatchForm
 
 
@@ -42,6 +42,7 @@ class SubBatchCreateTest(BaseTestCase):
             "hubble.User",
             is_employed=True,
             _fill_optional=["email"],
+            status=USER_STATUS[0],
             employee_id=seq(0),
             _quantity=5,
         )
@@ -49,6 +50,7 @@ class SubBatchCreateTest(BaseTestCase):
             "hubble.User",
             is_employed=False,
             _fill_optional=["email"],
+            status=USER_STATUS[2],
             employee_id=seq(5),
             _quantity=5,
         )
@@ -240,6 +242,24 @@ class SubBatchCreateTest(BaseTestCase):
             strip_tags(response.context["errors"]),
             "Please upload a file",
         )
+
+        # Invalid data in file interns should be a type of intern
+        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
+            data = self.get_valid_inputs({"users_list_file": sample_file})
+            self.make_post_request(
+                reverse(self.create_route_name, args=[self.batch_id]),
+                data=data,
+            )
+        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
+            data = self.get_valid_inputs({"users_list_file": sample_file})
+            response = self.make_post_request(
+                reverse(self.create_route_name, args=[self.batch_id]),
+                data=data,
+            )
+            self.assertEqual(
+                strip_tags(response.context["errors"]),
+                "Some of the users are not an intern",
+            )
 
         # Invalid data in file interns belong to another sub-batch
         with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
@@ -527,7 +547,7 @@ class GetTimelineTest(BaseTestCase):
     This class is responsible for testing whether correct timeline is fetched or not
     """
 
-    get_timeline_route_name = "sub-batch.get_timeline"
+    get_timeline_route_name = "sub-batch.get_timelines"
 
     def setUp(self):
         """
@@ -541,12 +561,15 @@ class GetTimelineTest(BaseTestCase):
         Check what happens when valid data is given as input
         """
         team_id = baker.make("hubble.Team").id
-        timeline = baker.make("hubble.Timeline", team_id=team_id, is_active=True)
+        baker.make("hubble.Timeline", team_id=team_id, is_active=True)
+        timeline_template = list(
+            Timeline.objects.filter(team_id=team_id).values("id", "name", "is_active")
+        )
         response = self.make_post_request(
             reverse(self.get_timeline_route_name),
             data={"team_id": team_id},
         )
-        self.assertJSONEqual((response.content), {"timeline": model_to_dict(timeline)})
+        self.assertJSONEqual((response.content), timeline_template)
         self.assertEqual(response.status_code, 200)
 
     def test_failure(self):
@@ -559,7 +582,7 @@ class GetTimelineTest(BaseTestCase):
         self.assertJSONEqual(
             self.decoded_json(response),
             {
-                "message": "No active timeline template found",
+                "message": "No timeline template found",
             },
         )
         self.assertEqual(response.status_code, 404)
