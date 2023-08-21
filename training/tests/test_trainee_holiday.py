@@ -1,6 +1,7 @@
 import datetime
 
 from dateutil.relativedelta import relativedelta
+from django.forms import model_to_dict
 from django.urls import reverse
 from django.utils import timezone
 from model_bakery import baker
@@ -113,6 +114,47 @@ class TraineeHolidayCreateTest(BaseTestCase):
                 custom_validation_error_message=custom_validation_error_message,
             ),
         )
+
+
+class TraineeHolidayShowTest(BaseTestCase):
+    """
+    This class is responsible for testing the Trainee Holiday SHOW feature in Batch Holiday module
+    """
+
+    update_show_route_name = "holiday.show"
+
+    def setUp(self):
+        """
+        This function will run before every test and makes sure required data are ready
+        """
+        super().setUp()
+        self.create_holidays()
+        self.user = self.create_user()
+        self.authenticate(self.user)
+        self.setup_timline_tasks()
+
+    def test_success(self):
+        """
+        Checks what happens when valid inputs are given for all fields
+        """
+        self.maxDiff = None
+        holiday = TraineeHoliday.objects.filter(batch_id=self.batch_id).first()
+        response = self.make_get_request(
+            reverse(self.update_show_route_name, args=[holiday.id])
+        )
+        data = model_to_dict(TraineeHoliday.objects.get(id=holiday.id))
+        data["date_of_holiday"] = data["date_of_holiday"].strftime("%Y-%m-%d")
+        self.assertJSONEqual(
+            self.decoded_json(response),
+            {"holiday": data},
+        )
+
+    def test_failure(self):
+        """
+        Checks what happens when we try to access invalid arguments in update
+        """
+        response = self.make_get_request(reverse(self.update_show_route_name, args=[0]))
+        self.assertEqual(response.status_code, 500)
 
 
 class TraineeHolidayUpdateTest(BaseTestCase):
