@@ -1,10 +1,13 @@
+import datetime
+
+from dateutil.relativedelta import relativedelta
 from django.urls import reverse
+from django.utils import timezone
 from model_bakery import baker
+from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
 from hubble.models import TraineeHoliday
-import datetime
-from dateutil.relativedelta import relativedelta
 
 
 class TraineeHolidayCreateTest(BaseTestCase):
@@ -20,15 +23,16 @@ class TraineeHolidayCreateTest(BaseTestCase):
         This function will run before every test and makes sure required data are ready
         """
         super().setUp()
-        self.authenticate()
         self.create_holidays()
+        self.user = self.create_user()
+        self.authenticate(self.user)
+        self.setup_timline_tasks()
         self.update_valid_input()
 
     def update_valid_input(self):
         """
         This function is responsible for updating the valid input
         """
-        self.batch_id = baker.make("hubble.Batch").id
         self.persisted_valid_inputs = {
             "date_of_holiday": datetime.date.today() + relativedelta(days=1),
             "reason": self.faker.sentence(),
@@ -49,6 +53,7 @@ class TraineeHolidayCreateTest(BaseTestCase):
         """
         To makes sure that the Trainee Holiday is created successfully
         """
+        self.check_start_end_date()
         data = self.persisted_valid_inputs
         response = self.make_post_request(
             reverse(self.create_route_name, args=[self.batch_id]), data
@@ -65,6 +70,7 @@ class TraineeHolidayCreateTest(BaseTestCase):
                 "batch_id": data["batch_id"],
             },
         )
+        self.check_start_end_date()
 
     def test_required_validation(self):
         """
@@ -88,7 +94,9 @@ class TraineeHolidayCreateTest(BaseTestCase):
         To makes sure that the unique fields are validated
         """
         data = self.get_valid_inputs()
-        self.make_post_request(reverse(self.create_route_name, args=[self.batch_id]), data)
+        self.make_post_request(
+            reverse(self.create_route_name, args=[self.batch_id]), data
+        )
         response = self.make_post_request(
             reverse(self.create_route_name, args=[self.batch_id]), data
         )
@@ -120,16 +128,18 @@ class TraineeHolidayUpdateTest(BaseTestCase):
         This function will run before every test and makes sure required data are ready
         """
         super().setUp()
-        self.authenticate()
         self.create_holidays()
+        self.user = self.create_user()
+        self.authenticate(self.user)
+        self.setup_timline_tasks()
         self.update_valid_input()
 
     def update_valid_input(self):
         """
         This function is responsible for updating the valid input
         """
-        self.batch_id = baker.make("hubble.Batch").id
-        self.holiday = self.create_trinee_holidays(self.batch_id)
+        # self.holiday = self.create_trinee_holidays(self.batch_id)
+        self.holiday = TraineeHoliday.objects.filter(batch_id=self.batch_id).first()
         self.persisted_valid_inputs = {
             "date_of_holiday": datetime.date.today() + relativedelta(days=1),
             "reason": self.faker.sentence(),
@@ -143,6 +153,7 @@ class TraineeHolidayUpdateTest(BaseTestCase):
         """
         To makes sure that the Trainee Holiday is updated successfully
         """
+        self.check_start_end_date()
         data = self.get_valid_inputs(
             {
                 "date_of_holiday": self.holiday.date_of_holiday.strftime("%Y-%m-%d"),
@@ -163,6 +174,7 @@ class TraineeHolidayUpdateTest(BaseTestCase):
                 "batch_id": data["batch_id"],
             },
         )
+        self.check_start_end_date()
 
     def test_required_validation(self):
         """
@@ -187,7 +199,7 @@ class TraineeHolidayUpdateTest(BaseTestCase):
         """
         another_date = (
             TraineeHoliday.objects.filter(batch_id=self.batch_id)
-            .first()
+            .last()
             .date_of_holiday.strftime("%Y-%m-%d")
         )
         data = self.get_valid_inputs(
@@ -226,17 +238,19 @@ class TraineeHolidayDeleteTest(BaseTestCase):
         This function will run before every test and makes sure required data are ready
         """
         super().setUp()
-        self.authenticate()
         self.create_holidays()
-        self.batch_id = baker.make("hubble.Batch").id
-        self.holiday = self.create_trinee_holidays(self.batch_id)
+        self.user = self.create_user()
+        self.authenticate(self.user)
+        self.setup_timline_tasks()
 
     def test_success(self):
         """
         To makes sure that the Trainee Holiday is deleted successfully
         """
+        holiday = TraineeHoliday.objects.filter(batch_id=self.batch_id).first()
+        self.check_start_end_date()
         response = self.make_delete_request(
-            reverse(self.delete_route_name, args=[self.holiday.id])
+            reverse(self.delete_route_name, args=[holiday.id])
         )
         self.assertJSONEqual(
             self.decoded_json(response), {"message": "Holiday deleted succcessfully"}
@@ -245,13 +259,14 @@ class TraineeHolidayDeleteTest(BaseTestCase):
         self.assertDatabaseNotHas(
             "TraineeHoliday",
             {
-                "date_of_holiday": self.holiday.date_of_holiday,
-                "reason": self.holiday.reason,
-                "national_holiday": self.holiday.national_holiday,
-                "allow_check_in": self.holiday.allow_check_in,
-                "batch_id": self.holiday.batch_id,
+                "date_of_holiday": holiday.date_of_holiday,
+                "reason": holiday.reason,
+                "national_holiday": holiday.national_holiday,
+                "allow_check_in": holiday.allow_check_in,
+                "batch_id": holiday.batch_id,
             },
         )
+        self.check_start_end_date()
 
     def test_failure(self):
         """
@@ -298,7 +313,9 @@ class TraineeHolidayDatatableTest(BaseTestCase):
             "length": 100,
             "batch": self.batch_id,
         }
-        response = self.make_post_request(reverse(self.datatable_route_name), data=payload)
+        response = self.make_post_request(
+            reverse(self.datatable_route_name), data=payload
+        )
         self.assertEqual(response.status_code, 200)
 
         # Check whether row details are correct

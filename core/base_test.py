@@ -6,12 +6,15 @@ from django.conf import settings
 from django.db.models import Q
 from django.test import Client, TestCase
 from django.test.runner import DiscoverRunner
+from django.utils import timezone
 from django.utils.translation import ngettext_lazy
 from faker import Faker
 from model_bakery import baker
+from model_bakery.recipe import seq
 
 from core.constants import ADMIN_EMAILS
-from hubble.models import User
+from core.utils import calculate_duration_for_task, schedule_timeline_for_sub_batch
+from hubble.models import TraineeHoliday, User
 from hubble_report.settings import env
 
 
@@ -94,6 +97,48 @@ class BaseTestCase(TestCase):
             current_date += datetime.timedelta(1)
         return holiday
 
+    def setup_timline_tasks(self):
+        self.batch_id = baker.make(
+            "hubble.Batch", start_date=(timezone.now() + timezone.timedelta(1)).date()
+        ).id
+        self.create_trinee_holidays(self.batch_id)
+        self.timeline = baker.make(
+            "hubble.Timeline",
+            is_active=True,
+        )
+        self.days_list = [self.faker.random_number(1, 20) / 2 for _ in range(4)]
+        self.timeline_task = baker.make(
+            "hubble.TimelineTask",
+            timeline=self.timeline,
+            days=self.days_list.__iter__(),
+            order=seq(0),
+            _quantity=4,
+        )
+        self.sub_batch = baker.make(
+            "hubble.SubBatch",
+            start_date=(timezone.now().date() + timezone.timedelta(1)),
+            batch_id=self.batch_id,
+            timeline=self.timeline,
+        )
+        schedule_timeline_for_sub_batch(sub_batch=self.sub_batch, user=self.user)
+
+    def check_start_end_date(self):
+        self.holidays = TraineeHoliday.objects.filter(
+            batch_id=self.batch_id
+        ).values_list("date_of_holiday", flat=True)
+        cur_date = timezone.now() + timezone.timedelta(1)
+        is_half_day = False
+        for task in self.timeline_task:
+            data = calculate_duration_for_task(
+                self.holidays, cur_date, is_half_day, task.days
+            )
+            cur_date = end_date = data["end_date_time"]
+            is_half_day = data["ends_afternoon"]
+        timeline_task_end_date = schedule_timeline_for_sub_batch(
+            sub_batch=self.sub_batch, user=self.user
+        )
+        self.assertEqual(end_date, timeline_task_end_date)
+
     def authenticate(self, user=None):
         """
         This function is responsible for authenticating the created user
@@ -112,7 +157,9 @@ class BaseTestCase(TestCase):
         """
         This function is responsible for handling the POST requests
         """
-        return self.client.post(url_pattern, data, SERVER_NAME=self.testcase_server_name)
+        return self.client.post(
+            url_pattern, data, SERVER_NAME=self.testcase_server_name
+        )
 
     def make_delete_request(self, url_pattern):
         """
@@ -218,7 +265,9 @@ class BaseTestCase(TestCase):
         for key, values in field_errors.items():
             temp = []
             for value in values:
-                message = custom_validation_error_message.get(value) or self.get_error_message(
+                message = custom_validation_error_message.get(
+                    value
+                ) or self.get_error_message(
                     key, value, current_value, validation_parameter
                 )
                 error_details = {
