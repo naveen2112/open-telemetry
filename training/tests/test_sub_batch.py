@@ -15,7 +15,7 @@ from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
 from core.constants import USER_STATUS_INTERN, USER_STATUS_PROBATIONER
-from hubble.models import Batch, SubBatch, Timeline, User
+from hubble.models import Batch, SubBatch, Team, Timeline, User
 from training.forms import SubBatchForm
 
 
@@ -45,7 +45,7 @@ class SubBatchCreateTest(BaseTestCase):
             "hubble.User",
             is_employed=True,
             _fill_optional=["email"],
-            status=USER_STATUS_INTERN,
+            status=USER_STATUS_PROBATIONER,
             employee_id=seq(0),
             _quantity=5,
         )
@@ -53,7 +53,7 @@ class SubBatchCreateTest(BaseTestCase):
             "hubble.User",
             is_employed=False,
             _fill_optional=["email"],
-            status=USER_STATUS_PROBATIONER,
+            status=USER_STATUS_INTERN,
             employee_id=seq(5),
             _quantity=5,
         )
@@ -100,7 +100,7 @@ class SubBatchCreateTest(BaseTestCase):
         """
         file_values = {
             "employee_id": [self.users[1].employee_id, self.users[2].employee_id],
-            "college": [self.faker.name(),self.faker.name()],
+            "college": [self.faker.name(), self.faker.name()],
         }
         valid_file = self.create_memory_file(file_values)
         data = self.get_valid_inputs({"users_list_file": valid_file})
@@ -111,44 +111,48 @@ class SubBatchCreateTest(BaseTestCase):
         self.assertRedirects(response, reverse(self.route_name, args=[self.batch_id]))
         self.assertEqual(response.status_code, 302)
         self.assert_database_has(
-        "SubBatch",
-        {
-            "name": data["name"],
-            "team_id": data["team"],
-            "timeline_id": data["timeline"],
-            "start_date": data["start_date"],
-        },
-    )
+            "SubBatch",
+            {
+                "name": data["name"],
+                "team_id": data["team"],
+                "timeline_id": data["timeline"],
+                "start_date": data["start_date"],
+            },
+        )
 
     def test_multiple_mentors(self):
         """
         Check what happens when valid data is given as input with multiple secondary mentor
         """
-        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
-            secondary_mentor1 = self.create_user().id
-            secondary_mentor2 = self.create_user().id
-            data = self.get_valid_inputs(
-                {
-                    "users_list_file": sample_file,
-                    "secondary_mentor_ids": [secondary_mentor1, secondary_mentor2],
-                }
-            )
-            response = self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]),
-                data=data,
-            )
-            self.assertRedirects(response, reverse(self.route_name, args=[self.batch_id]))
-            self.assertEqual(response.status_code, 302)
-            self.assert_database_has(
-                "SubBatch",
-                {
-                    "name": data["name"],
-                    "team_id": data["team"],
-                    "timeline_id": data["timeline"],
-                    "start_date": data["start_date"],
-                    "secondary_mentors__in": [secondary_mentor1, secondary_mentor2],
-                },
-            )
+        file_values = {
+            "employee_id": [self.users[1].employee_id, self.users[2].employee_id],
+            "college": [self.faker.name(), self.faker.name()],
+        }
+        valid_file = self.create_memory_file(file_values)
+        secondary_mentor1 = self.create_user().id
+        secondary_mentor2 = self.create_user().id
+        data = self.get_valid_inputs(
+            {
+                "users_list_file": valid_file,
+                "secondary_mentor_ids": [secondary_mentor1, secondary_mentor2],
+            }
+        )
+        response = self.make_post_request(
+            reverse(self.create_route_name, args=[self.batch_id]),
+            data=data,
+        )
+        self.assertRedirects(response, reverse(self.route_name, args=[self.batch_id]))
+        self.assertEqual(response.status_code, 302)
+        self.assert_database_has(
+            "SubBatch",
+            {
+                "name": data["name"],
+                "team_id": data["team"],
+                "timeline_id": data["timeline"],
+                "start_date": data["start_date"],
+                "secondary_mentors__in": [secondary_mentor1, secondary_mentor2],
+            },
+        )
 
     def test_required_validation(self):
         """
@@ -156,7 +160,7 @@ class SubBatchCreateTest(BaseTestCase):
         """
         file_values = {
             "employee_id": [self.users[1].employee_id, self.users[2].employee_id],
-            "college": [self.faker.name(),self.faker.name()],
+            "college": [self.faker.name(), self.faker.name()],
         }
         valid_file = self.create_memory_file(file_values)
         data = {"users_list_file": valid_file}
@@ -170,7 +174,7 @@ class SubBatchCreateTest(BaseTestCase):
             "timeline": {"required"},
             "primary_mentor_id": {"required"},
             "secondary_mentor_ids": {"required"},
-            }
+        }
         self.validate_form_errors(field_errors=field_errors, form=SubBatchForm(data=data))
 
     def test_invalid_choice_validation(self):
@@ -179,7 +183,7 @@ class SubBatchCreateTest(BaseTestCase):
         """
         file_values = {
             "employee_id": [self.users[1].employee_id, self.users[2].employee_id],
-            "college": [self.faker.name(),self.faker.name()],
+            "college": [self.faker.name(), self.faker.name()],
         }
         valid_file = self.create_memory_file(file_values)
         data = self.get_valid_inputs(
@@ -189,9 +193,9 @@ class SubBatchCreateTest(BaseTestCase):
                 "timeline": self.faker.name(),
                 "primary_mentor_id": self.faker.name(),
                 "secondary_mentor_ids": [
-                        self.faker.unique.random_int(1, 10),
-                        self.faker.unique.random_int(1, 10),
-                    ],
+                    self.faker.unique.random_int(1, 10),
+                    self.faker.unique.random_int(1, 10),
+                ],
             }
         )
         self.make_post_request(
@@ -203,7 +207,7 @@ class SubBatchCreateTest(BaseTestCase):
             "timeline": {"invalid_choice"},
             "primary_mentor_id": {"invalid_choice"},
             "secondary_mentor_ids": {"invalid_choice"},
-            }
+        }
         self.validate_form_errors(field_errors=field_errors, form=SubBatchForm(data=data))
 
     def test_minimum_length_validation(self):
@@ -212,7 +216,7 @@ class SubBatchCreateTest(BaseTestCase):
         """
         file_values = {
             "employee_id": [self.users[1].employee_id, self.users[2].employee_id],
-            "college": [self.faker.name(),self.faker.name()],
+            "college": [self.faker.name(), self.faker.name()],
         }
         valid_file = self.create_memory_file(file_values)
         data = self.get_valid_inputs(
@@ -239,7 +243,7 @@ class SubBatchCreateTest(BaseTestCase):
         """
         file_values = {
             "employee_id": [self.users[1].employee_id, self.users[2].employee_id],
-            "college": [self.faker.name(),self.faker.name()],
+            "college": [self.faker.name(), self.faker.name()],
         }
         valid_file = self.create_memory_file(file_values)
         data = self.get_valid_inputs(
@@ -279,9 +283,7 @@ class SubBatchCreateTest(BaseTestCase):
         field_errors = {
             "timeline": {"timeline_has_no_tasks"},
         }
-        self.validate_form_errors(
-            field_errors=field_errors, form=SubBatchForm(data=data)
-        )
+        self.validate_form_errors(field_errors=field_errors, form=SubBatchForm(data=data))
 
     def test_file_validation(self):
         """
@@ -299,27 +301,27 @@ class SubBatchCreateTest(BaseTestCase):
         )
 
         # Invalid data in file interns should be a type of intern
-        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
-            data = self.get_valid_inputs({"users_list_file": sample_file})
-            self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]),
-                data=data,
-            )
-        with open(self.get_file_path() + "Sample_Intern_Upload.xlsx", "rb") as sample_file:
-            data = self.get_valid_inputs({"users_list_file": sample_file})
-            response = self.make_post_request(
-                reverse(self.create_route_name, args=[self.batch_id]),
-                data=data,
-            )
-            self.assertEqual(
-                strip_tags(response.context["errors"]),
-                "Some of the users are not an intern",
-            )
+        file_values = {
+            "employee_id": list(
+                User.objects.filter(employee_id__in=[1, 2]).values_list("employee_id", flat=True)
+            ),
+            "college": [self.faker.name(), self.faker.name()],
+        }
+        valid_file = self.create_memory_file(file_values)
+        data = self.get_valid_inputs({"users_list_file": valid_file})
+        response = self.make_post_request(
+            reverse(self.create_route_name, args=[self.batch_id]),
+            data=data,
+        )
+        self.assertEqual(
+            strip_tags(response.context["errors"]),
+            "Some of the users are not an intern",
+        )
 
         # Invalid data in file interns belong to another sub-batch
         file_values = {
             "employee_id": [self.users[1].employee_id, self.users[2].employee_id],
-            "college": [self.faker.name(),self.faker.name()],
+            "college": [self.faker.name(), self.faker.name()],
         }
         valid_file = self.create_memory_file(file_values)
         data = self.get_valid_inputs({"users_list_file": valid_file})
@@ -327,7 +329,7 @@ class SubBatchCreateTest(BaseTestCase):
             reverse(self.create_route_name, args=[self.batch_id]),
             data=data,
         )
-        valid_file =self.create_memory_file(file_values)
+        valid_file = self.create_memory_file(file_values)
         data = self.get_valid_inputs({"users_list_file": valid_file})
         response = self.make_post_request(
             reverse(self.create_route_name, args=[self.batch_id]),
@@ -341,7 +343,7 @@ class SubBatchCreateTest(BaseTestCase):
         # Invalid data in file, employee_id doesn't match with any employee_id in db
         file_values = {
             "employee_id": [self.faker.random_int(10, 20), self.faker.random_int(10, 20)],
-            "college": [self.faker.name(),self.faker.name()],
+            "college": [self.faker.name(), self.faker.name()],
         }
         invalid_file = self.create_memory_file(file_values)
         data = self.get_valid_inputs({"users_list_file": invalid_file})
@@ -357,7 +359,7 @@ class SubBatchCreateTest(BaseTestCase):
         # Invalid column names are present
         file_values = {
             "employee_ids": [self.users[1].employee_id, self.users[2].employee_id],
-            "colleges": [self.faker.name(),self.faker.name()],
+            "colleges": [self.faker.name(), self.faker.name()],
         }
         invalid_file = self.create_memory_file(file_values)
         data = self.get_valid_inputs({"users_list_file": invalid_file})
@@ -398,6 +400,7 @@ class SubBatchUpdateTest(BaseTestCase):
             "hubble.User",
             is_employed=True,
             _fill_optional=["email"],
+            status=USER_STATUS_PROBATIONER,
             employee_id=seq(0),
             _quantity=5,
         )
@@ -450,6 +453,9 @@ class SubBatchUpdateTest(BaseTestCase):
             reverse(self.update_route_name, args=[self.sub_batch_id]),
             data=data,
         )
+        # print(data)
+        # print(Team.objects.all().values_list("id", flat=True))
+        # print(response.context["form"])
         self.assertRedirects(response, reverse(self.route_name, args=[self.batch_id]))
         self.assertEqual(response.status_code, 302)
         self.assert_database_has(

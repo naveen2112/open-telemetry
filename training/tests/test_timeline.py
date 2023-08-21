@@ -472,7 +472,7 @@ class TimelineDatatableTest(BaseTestCase):
             name=seq(name),
             is_active=is_active.__iter__(),
             _quantity=2,
-            )
+        )
         no_of_sub_batches_subquery = (
             SubBatch.objects.filter(timeline_id=OuterRef("id"), deleted_at__isnull=True)
             .values("timeline")

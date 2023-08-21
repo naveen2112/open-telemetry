@@ -207,9 +207,9 @@ class SubBatchForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        instance = kwargs.get("instance")
-        if instance:
-            self.fields["team"].queryset = Team.objects.filter(id=instance.team.id)
+        # instance = kwargs.get("instance")
+        # if instance:
+        #     self.fields["team"].queryset = Team.objects.filter(id=instance.team.id)
 
         self.fields["team"].empty_label = "Select a Team"
         if self.data.get("team", None):
@@ -233,7 +233,7 @@ class SubBatchForm(forms.ModelForm):
 
         if kwargs.get("instance"):
             instance = kwargs.get("instance")
-            self.fields["team"].widget.attrs["initialValue"] = instance.team
+            self.fields["team"].widget.attrs["initialValue"] = instance.team.id
             self.fields["primary_mentor_id"].widget.attrs[
                 "initialValue"
             ] = instance.primary_mentor_id
@@ -375,9 +375,7 @@ class AddInternForm(forms.ModelForm):
         queryset=(
             models.User.objects.exclude(
                 intern_details__isnull=False, intern_details__deleted_at__isnull=True
-            ).filter(
-                is_employed=False, status=USER_STATUS_INTERN
-            )
+            ).filter(is_employed=False, status=USER_STATUS_INTERN)
         ),
         label="User",
     )
@@ -442,9 +440,7 @@ class SubBatchTimelineForm(forms.ModelForm):
         The function clean_order checks if the input order value is valid and returns it if it is.
         """
         last_task = (
-            models.SubBatchTaskTimeline.objects.filter(
-                sub_batch_id=self.data.get("sub_batch_id")
-            )
+            models.SubBatchTaskTimeline.objects.filter(sub_batch_id=self.data.get("sub_batch_id"))
             .order_by("-order")
             .first()
         )
@@ -462,7 +458,7 @@ class SubBatchTimelineForm(forms.ModelForm):
                 ).values_list("order", flat=True)
             ) or [0]
             if (valid_order_value[0] > self.cleaned_data["order"] > 0) or (
-                    self.cleaned_data["order"] > valid_order_value[-1] + 1
+                self.cleaned_data["order"] > valid_order_value[-1] + 1
             ):
                 raise ValidationError(
                     (
@@ -477,6 +473,7 @@ class SubBatchTimelineForm(forms.ModelForm):
                 code="zero_order_error",
             )
         return self.cleaned_data["order"]
+
     days = forms.FloatField(
         widget=forms.NumberInput(
             attrs={

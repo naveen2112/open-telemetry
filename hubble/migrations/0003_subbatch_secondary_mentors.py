@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 def update_many_to_many(apps, schema_editor):
-
     sub_batch_model = apps.get_model("hubble", "SubBatch")
     user_model = apps.get_model("hubble", "User")
 

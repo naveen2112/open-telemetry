@@ -9,7 +9,7 @@ from django.http import HttpResponseForbidden
 from hubble.models import Holiday, InternDetail, SubBatchTaskTimeline, TimelineTask
 
 
-class CustomDatatable(AjaxDatatableView): # pragma: no cover
+class CustomDatatable(AjaxDatatableView):  # pragma: no cover
     """
     This class provides the feature of sending a list of dictionaries
     as input to the datatable
@@ -83,7 +83,7 @@ class CustomDatatable(AjaxDatatableView): # pragma: no cover
         return json_data
 
 
-def validate_authorization(): # pragma: no cover
+def validate_authorization():  # pragma: no cover
     """
     Decorator function that validates user authorization
     """

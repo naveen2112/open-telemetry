@@ -1,5 +1,6 @@
-from core.base_test import BaseTestCase
 from django.utils import timezone
+
+from core.base_test import BaseTestCase
 from hubble.models import User
 
 

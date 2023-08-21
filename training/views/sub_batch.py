@@ -165,8 +165,8 @@ def create_sub_batch(request, pk):
             data_frame = pd.read_excel(excel_file)
             data_frame.replace(chr(160), np.nan, inplace=True)
             data_frame = data_frame.dropna(how="all")
-            data_frame["employee_id"] = data_frame["employee_id"].astype(int)
             if (data_frame.columns[0] == "employee_id") and (data_frame.columns[1] == "college"):
+                data_frame["employee_id"] = data_frame["employee_id"].astype(int)
                 if User.objects.filter(employee_id__in=data_frame["employee_id"]).count() == len(
                     data_frame["employee_id"]
                 ):
@@ -187,8 +187,8 @@ def create_sub_batch(request, pk):
                 else:
                     sub_batch_form.add_error(
                         None,
-                        "Some of the employee ids are not present in the \
-                            database, please check again",
+                        "Some of the employee ids are not present in the "
+                        "database, please check again",
                     )
             else:
                 sub_batch_form.add_error(
@@ -223,11 +223,11 @@ def create_sub_batch(request, pk):
                     created_by=request.user,
                 )
 
-                return redirect(reverse("batch.detail", args=[pk]))
-            sub_batch_form.add_error(
-                None,
-                "The Selected Team's Active Timeline doesn't have any tasks",
-            )
+            return redirect(reverse("batch.detail", args=[pk]))
+        sub_batch_form.add_error(
+            None,
+            "The Selected Team's Active Timeline doesn't have any tasks",
+        )
     context = {
         "form": sub_batch_form,
         "sub_batch_id": pk,

@@ -41,14 +41,24 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
         This function is responsible for updating the valid inputs and creating
         data in databases as reqiured
         """
-        self.sub_batch = baker.make("hubble.SubBatch", start_date=timezone.now().date()+ timezone.timedelta(1)
+        self.sub_batch = baker.make(
+            "hubble.SubBatch", start_date=timezone.now().date() + timezone.timedelta(1)
         )
         date = timezone.now() + timezone.timedelta(1)
-        self.order_count = SubBatchTaskTimeline.objects.filter(sub_batch=self.sub_batch).count() + 1
-        baker.make("hubble.SubBatchTaskTimeline", sub_batch=self.sub_batch, days=self.faker.random_int(1,5), order=self.order_count, end_date=date, start_date=date)
+        self.order_count = (
+            SubBatchTaskTimeline.objects.filter(sub_batch=self.sub_batch).count() + 1
+        )
+        baker.make(
+            "hubble.SubBatchTaskTimeline",
+            sub_batch=self.sub_batch,
+            days=self.faker.random_int(1, 5),
+            order=self.order_count,
+            end_date=date,
+            start_date=date,
+        )
         self.persisted_valid_inputs = {
             "name": self.faker.name(),
-            "days": self.faker.random_int(1,5),
+            "days": self.faker.random_int(1, 5),
             "present_type": PRESENT_TYPE_REMOTE,
             "task_type": TASK_TYPE_TASK,
             "order": self.order_count,
@@ -249,14 +259,13 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
             "order": {"invalid_order"},
         }
         validation_parameters = {
-            "order":
-                list(
-                    SubBatchTaskTimeline.objects.filter(
-                        sub_batch_id=self.sub_batch.id,
-                        start_date__gt=timezone.now(),
-                    ).values_list("order", flat=True)
-                )
-                or [0]
+            "order": list(
+                SubBatchTaskTimeline.objects.filter(
+                    sub_batch_id=self.sub_batch.id,
+                    start_date__gt=timezone.now(),
+                ).values_list("order", flat=True)
+            )
+            or [0]
         }
         self.assertEqual(
             self.bytes_cleaner(response.content),
@@ -334,17 +343,26 @@ class SubBatchTaskTimelineUpdateTest(BaseTestCase):
             "hubble.SubBatch",
             start_date=(timezone.now() + timezone.timedelta(1)).date(),
         )
-        self.order_count = SubBatchTaskTimeline.objects.filter(sub_batch=self.sub_batch).count() + 1
+        self.order_count = (
+            SubBatchTaskTimeline.objects.filter(sub_batch=self.sub_batch).count() + 1
+        )
         date = timezone.now() + timezone.timedelta(1)
         self.persisted_valid_inputs = {
             "name": self.faker.name(),
-            "days": self.faker.random_int(1,5),
+            "days": self.faker.random_int(1, 5),
             "present_type": PRESENT_TYPE_REMOTE,
             "task_type": TASK_TYPE_TASK,
             "order": self.order_count,
-            "sub_batch_id": self.sub_batch.id
+            "sub_batch_id": self.sub_batch.id,
         }
-        sub_batch_task_timeline = baker.make("hubble.SubBatchTaskTimeline", sub_batch=self.sub_batch, days=self.faker.random_int(1,5), order=self.order_count, end_date=date, start_date=date)
+        sub_batch_task_timeline = baker.make(
+            "hubble.SubBatchTaskTimeline",
+            sub_batch=self.sub_batch,
+            days=self.faker.random_int(1, 5),
+            order=self.order_count,
+            end_date=date,
+            start_date=date,
+        )
         started_sub_batch_task_timeline = baker.make(
             "hubble.SubBatchTaskTimeline",
             order=self.order_count,
@@ -572,7 +590,9 @@ class SubBatchTaskTimelineDeleteTest(BaseTestCase):
             "hubble.SubBatch",
             start_date=(timezone.now() + timezone.timedelta(1)).date(),
         )
-        self.order_count = SubBatchTaskTimeline.objects.filter(sub_batch=self.sub_batch).count() + 1
+        self.order_count = (
+            SubBatchTaskTimeline.objects.filter(sub_batch=self.sub_batch).count() + 1
+        )
         self.completed_sub_batch = baker.make(
             "hubble.SubBatch",
             start_date=(timezone.now() - timezone.timedelta(1)).date(),
@@ -586,7 +606,7 @@ class SubBatchTaskTimelineDeleteTest(BaseTestCase):
             "hubble.SubBatchTaskTimeline",
             sub_batch=self.sub_batch,
             order=seq(0),
-            days=self.faker.random_int(1,5),
+            days=self.faker.random_int(1, 5),
             start_date=(timezone.now() + timezone.timedelta()).date(),
             _quantity=2,
         )
@@ -618,7 +638,7 @@ class SubBatchTaskTimelineDeleteTest(BaseTestCase):
             "hubble.SubBatchTaskTimeline",
             sub_batch=self.sub_batch,
             order=self.order_count,
-            days=self.faker.random_int(1,5),
+            days=self.faker.random_int(1, 5),
             start_date=(timezone.now() + timezone.timedelta()).date(),
         )
         self.assert_database_has("SubBatchTaskTimeline", {"id": sub_batch_task_timeline.id})
@@ -653,13 +673,11 @@ class SubBatchTaskTimelineDeleteTest(BaseTestCase):
             "hubble.SubBatchTaskTimeline",
             sub_batch=self.completed_sub_batch,
             order=self.order_count,
-            days=self.faker.random_int(1,5),
+            days=self.faker.random_int(1, 5),
             start_date=(timezone.now() - timezone.timedelta(1)).date(),
             _quantity=2,
         )
-        self.assert_database_has(
-            "SubBatchTaskTimeline", {"id": sub_batch_task_timeline[0].id}
-        )
+        self.assert_database_has("SubBatchTaskTimeline", {"id": sub_batch_task_timeline[0].id})
         response = self.make_delete_request(
             reverse(
                 self.delete_route_name,
@@ -697,11 +715,13 @@ class SubBatchTaskTimelineReOrderTest(BaseTestCase):
         data in databases as reqiured
         """
         self.sub_batch = baker.make("hubble.SubBatch")
-        self.order_count = SubBatchTaskTimeline.objects.filter(sub_batch=self.sub_batch).count() + 1
+        self.order_count = (
+            SubBatchTaskTimeline.objects.filter(sub_batch=self.sub_batch).count() + 1
+        )
         baker.make(
             "hubble.SubBatchTaskTimeline",
             order=seq(0),
-            days=self.faker.random_int(1,5),
+            days=self.faker.random_int(1, 5),
             sub_batch=self.sub_batch,
             _quantity=5,
         )
@@ -786,7 +806,7 @@ class SubBatchTimelineDatatableTest(BaseTestCase):
             "hubble.SubBatchTaskTimeline",
             sub_batch=self.sub_batch,
             order=seq(0),
-            days=self.faker.random_int(1,5),
+            days=self.faker.random_int(1, 5),
             start_date=(timezone.now() + timezone.timedelta(1)).date(),
             end_date=(timezone.now() + timezone.timedelta(2)).date(),
             _quantity=2,

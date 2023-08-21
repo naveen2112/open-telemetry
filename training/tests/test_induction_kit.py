@@ -1,5 +1,7 @@
-from core.base_test import BaseTestCase
 from django.urls import reverse
+
+from core.base_test import BaseTestCase
+
 
 class HomePageTest(BaseTestCase):
     """

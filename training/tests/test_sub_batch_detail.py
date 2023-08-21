@@ -260,14 +260,16 @@ class TraineeDatatableTest(BaseTestCase):
             "length": 10,
             "sub_batch": self.sub_batch.id,
         }
-        intern_details_iterator = InternDetail.objects.values_list("user__id", flat=True).iterator()
+        intern_details_iterator = InternDetail.objects.values_list(
+            "user__id", flat=True
+        ).iterator()
         baker.make(
             "hubble.assessment",
             task=task,
             user_id=intern_details_iterator,
             score=seq(start=40, increment_by=10, value=0),
             sub_batch_id=self.sub_batch.id,
-            _quantity=6
+            _quantity=6,
         )
         task_count = (
             SubBatchTaskTimeline.objects.filter(
@@ -477,6 +479,7 @@ class TraineeDatatableTest(BaseTestCase):
         To check what happens when no assignment is given
         """
         response = self.make_post_request(
-            reverse(self.datatable_route_name), data=self.get_valid_inputs({"sub_batch": self.another_sub_batch.id})
+            reverse(self.datatable_route_name),
+            data=self.get_valid_inputs({"sub_batch": self.another_sub_batch.id}),
         )
         self.assertEqual(response.status_code, 200)
