@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator
 from django.utils import timezone
 
-from core.constants import PRESENT_TYPES, TASK_TYPES, USER_STATUS
+from core.constants import PRESENT_TYPES, TASK_TYPES, USER_STATUS_INTERN
 from hubble import models
 from hubble.models import Assessment, Team
 
@@ -376,7 +376,7 @@ class AddInternForm(forms.ModelForm):
             models.User.objects.exclude(
                 intern_details__isnull=False, intern_details__deleted_at__isnull=True
             ).filter(
-                is_employed=False, status=USER_STATUS[0]
+                is_employed=False, status=USER_STATUS_INTERN
             )
         ),
         label="User",

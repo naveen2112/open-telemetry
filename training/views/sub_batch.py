@@ -25,6 +25,7 @@ from core.constants import (
     NOT_YET_STARTED,
     POOR,
     TASK_TYPE_ASSESSMENT,
+    USER_STATUS_INTERN,
 )
 from core.utils import (
     CustomDatatable,
@@ -170,7 +171,7 @@ def create_sub_batch(request, pk):
                     data_frame["employee_id"]
                 ):
                     if User.objects.filter(
-                        employee_id__in=data_frame["employee_id"], status="intern"
+                        employee_id__in=data_frame["employee_id"], status=USER_STATUS_INTERN
                     ).count() != len(data_frame["employee_id"]):
                         sub_batch_form.add_error(
                             None,

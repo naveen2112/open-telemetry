@@ -14,7 +14,7 @@ from model_bakery import baker
 from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
-from core.constants import USER_STATUS
+from core.constants import USER_STATUS_INTERN, USER_STATUS_PROBATIONER
 from hubble.models import Batch, SubBatch, Timeline, User
 from training.forms import SubBatchForm
 
@@ -45,7 +45,7 @@ class SubBatchCreateTest(BaseTestCase):
             "hubble.User",
             is_employed=True,
             _fill_optional=["email"],
-            status=USER_STATUS[0],
+            status=USER_STATUS_INTERN,
             employee_id=seq(0),
             _quantity=5,
         )
@@ -53,7 +53,7 @@ class SubBatchCreateTest(BaseTestCase):
             "hubble.User",
             is_employed=False,
             _fill_optional=["email"],
-            status=USER_STATUS[2],
+            status=USER_STATUS_PROBATIONER,
             employee_id=seq(5),
             _quantity=5,
         )
