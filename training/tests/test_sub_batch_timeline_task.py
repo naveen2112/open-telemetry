@@ -107,7 +107,6 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
                 "days": 1.5,
                 "present_type": PRESENT_TYPE_IN_PERSON,
                 "task_type": TASK_TYPE_ASSESSMENT,
-                "order": 2,
             }
         )
         response = self.make_post_request(
