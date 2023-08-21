@@ -12,7 +12,11 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView, FormView
 
 from core import template_utils
-from core.utils import CustomDatatable, validate_authorization, schedule_timeline_for_sub_batch
+from core.utils import (
+    CustomDatatable,
+    validate_authorization,
+    schedule_timeline_for_sub_batch,
+)
 from hubble.models import Batch, TraineeHoliday, SubBatch
 from training.forms import TraineeHolidayForm
 
@@ -58,6 +62,7 @@ class TraineeHolidayDataTable(LoginRequiredMixin, CustomDatatable):
         },
         {
             "name": "action",
+            "title": "Action",
             "searchable": False,
             "orderable": False,
             "className": "text-center",
@@ -68,13 +73,16 @@ class TraineeHolidayDataTable(LoginRequiredMixin, CustomDatatable):
         return self.model.objects.filter(batch=request.POST.get("batch"))
 
     def customize_row(self, row, obj):
+        buttons = "-"
         if self.request.user.is_admin_user:
             buttons = template_utils.holiday_edit_button(
                 reverse("holiday.show", args=[obj.id])
             ) + template_utils.delete_button(
                 "deleteHoliday('" + reverse("holiday.delete", args=[obj.id]) + "')"
             )
-            row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        row[
+            "action"
+        ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         row["date_of_holiday"] = obj.date_of_holiday.strftime("%d %b %Y")
         row["days"] = obj.date_of_holiday.strftime("%A")
         return
@@ -171,4 +179,6 @@ def delete_trainee_holiday(request, pk):
         return JsonResponse({"message": "Holiday deleted succcessfully"})
     except Exception as e:
         logging.error(f"An error has occured while deleting the trainee holiday \n{e}")
-        return JsonResponse({"message": "Error while deleting the trainee holiday!"}, status=500)
+        return JsonResponse(
+            {"message": "Error while deleting the trainee holiday!"}, status=500
+        )

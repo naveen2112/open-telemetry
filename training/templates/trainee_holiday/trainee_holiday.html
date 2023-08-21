@@ -50,55 +50,57 @@ Trainee Holiday
             role="grid" aria-describedby="trainee-holiday-table-info">
         </table>
     </div>
-    <div class="rounded-xl fixed top-0 py-5 right-0 mr-5 mt-9 bg-white">
-        <span
-            class="text-dark-red bg-dark-red-10 text-dark-blue bg-dark-blue-10 text-mild-green bg-mild-green-10 text-dark-black bg-dark-black-10 rounded-xl px-1.5 py-0.5"
-            style="display: none;"></span>
-        <form method="post" class="holiday-form" id="holiday-create-form">
-            {% csrf_token %}
-            <div class="px-4 rounded-xl">
-                <div class="flex flex-wrap">
-                    <label id="holiday_title">Add Holiday</label>
-                    <input type="hidden" value="0" id="holiday_id" />
-                </div>
-                <div class="override-width checkbox-size mt-5 w-286">
-                    {{ form.date_of_holiday|show_label }}
-                    <div class="mb-6" id="{{ form.date_of_holiday.name }}_group">
-                        {{ form.date_of_holiday }}
-                        {{ form.date_of_holiday.errors }}
+    {% if request.user.is_admin_user %}
+        <div class="rounded-xl fixed top-0 py-5 right-0 mr-5 mt-9 bg-white">
+            <span
+                class="text-dark-red bg-dark-red-10 text-dark-blue bg-dark-blue-10 text-mild-green bg-mild-green-10 text-dark-black bg-dark-black-10 rounded-xl px-1.5 py-0.5"
+                style="display: none;"></span>
+            <form method="post" class="holiday-form" id="holiday-create-form">
+                {% csrf_token %}
+                <div class="px-4 rounded-xl">
+                    <div class="flex flex-wrap">
+                        <label id="holiday_title">Add Holiday</label>
+                        <input type="hidden" value="0" id="holiday_id" />
                     </div>
-                    <div class="mb-6" id="{{ form.reason.name }}_group">
-                        {{ form.reason }}
-                        {{ form.reason.errors }}
-                    </div>
-                    <div class="mb-6">
-                        <div class="flex items-center">
-                            {{ form.national_holiday }}
-                            {{ form.national_holiday|show_label }}
+                    <div class="override-width checkbox-size mt-5 w-286">
+                        {{ form.date_of_holiday|show_label }}
+                        <div class="mb-6" id="{{ form.date_of_holiday.name }}_group">
+                            {{ form.date_of_holiday }}
+                            {{ form.date_of_holiday.errors }}
                         </div>
-                        <div class="flex items-center">
-                            {{ form.allow_check_in }}
-                            {{ form.allow_check_in|show_label }}
+                        <div class="mb-6" id="{{ form.reason.name }}_group">
+                            {{ form.reason }}
+                            {{ form.reason.errors }}
+                        </div>
+                        <div class="mb-6">
+                            <div class="flex items-center">
+                                {{ form.national_holiday }}
+                                {{ form.national_holiday|show_label }}
+                            </div>
+                            <div class="flex items-center">
+                                {{ form.allow_check_in }}
+                                {{ form.allow_check_in|show_label }}
+                            </div>
                         </div>
                     </div>
+                    <div class="flex flex-wrap justify-center mt-7">
+                        <button id="holiday_save_button" type="button"
+                            class="text-white bg-dark-blue rounded text-center items-center pr-3 pl-2 py-1 text-base font-normal"
+                            onclick="createHoliday();"
+                        >
+                            Save
+                        </button>
+                        <button id="holiday_cancel_button" type="button"
+                            class="text-white bg-dark-blue rounded text-center items-center pr-3 pl-2 py-1 text-base font-normal ml-4 hidden"
+                            onclick="cancelUpdate();"    
+                        >
+                            Cancel
+                        </button>
+                    </div>
                 </div>
-                <div class="flex flex-wrap justify-center mt-7">
-                    <button id="holiday_save_button" type="button"
-                        class="text-white bg-dark-blue rounded text-center items-center pr-3 pl-2 py-1 text-base font-normal"
-                        onclick="createHoliday();"
-                    >
-                        Save
-                    </button>
-                    <button id="holiday_cancel_button" type="button"
-                        class="text-white bg-dark-blue rounded text-center items-center pr-3 pl-2 py-1 text-base font-normal ml-4 hidden"
-                        onclick="cancelUpdate();"    
-                    >
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        </form>
-    </div>
+            </form>
+        </div>
+    {% endif %}
 </div>
 {% endblock %}
 
@@ -113,6 +115,7 @@ Trainee Holiday
                 processing: true,
                 autoWidth: false,
                 scrollX: false,
+                paginate: false,
             }, {
             "batch": "{{ object.id }}"
         }
@@ -142,6 +145,7 @@ Trainee Holiday
             success: function(data) {
                 $('.page-loader').hide();
                 if (data.status === 'success') {
+                    clearData();
                     $('#trainee-holiday-table').DataTable().ajax.reload();
                 } else {
                     renderFormError(data);
@@ -198,7 +202,7 @@ Trainee Holiday
                 $('.page-loader').hide();
                 if (data.status === 'success') {
                     $('#trainee-holiday-table').DataTable().ajax.reload();
-                    cancelUpdate();
+                    clearData();
                 } else {
                     renderFormError(data);
                 }
@@ -210,7 +214,7 @@ Trainee Holiday
         });
     }
 
-    function cancelUpdate() {
+    function clearData() {
         $('#holiday_title').text('Add Holiday');
         $('#id_date_of_holiday').val(moment().format('DD MMM YYYY'));
         $('#id_reason').val('');
