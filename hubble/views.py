@@ -98,11 +98,11 @@ def callback(request):
     return redirect("login")
 
 
-def health_check():
+def health_check(request):
     """
     Performs a health check of the application
     """
-    return JsonResponse(data="", status=200, safe=False)
+    return JsonResponse(data="Good", status=200, safe=False)
 
 
 def error_404(request):

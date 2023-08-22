@@ -18,10 +18,6 @@ from training.views import (
 handler404 = view.error_404
 handler500 = view.error_500
 
-
-handler404 = view.error_404
-handler500 = view.error_500
-
 urlpatterns = [
     path("", include("hubble.urls")),
     path("", view.home, name="training.home"),
