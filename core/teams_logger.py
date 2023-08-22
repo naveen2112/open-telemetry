@@ -1,3 +1,6 @@
+"""
+Microsoft teams log configuration for the exception occured in the application
+"""
 import json
 
 import requests
@@ -9,7 +12,15 @@ from hubble_report.settings import env
 
 
 class ExceptionReporter(BaseExceptionReporter):
+    """
+    Custom exception reporter that retrieves traceback data and
+    removes sensitive information
+    """
+
     def get_traceback_data(self):
+        """
+        The function `get_traceback_data` removes sensitive data from a traceback report.
+        """
         data = super().get_traceback_data()
 
         # Remove sensitive data from the report
@@ -23,27 +34,26 @@ class ExceptionReporter(BaseExceptionReporter):
 
 
 class TeamsExceptionHandler(AdminEmailHandler):
-    def emit(self, record, *args, **kwargs):
+    """
+    Custom exception handler that sends exception details to Microsoft Teams.
+
+    Inherits from the AdminEmailHandler class
+    """
+
+    def emit(self, record):
+        """
+        The `emit` function sends a log record to a Microsoft Teams channel using a webhook URL.
+        """
         url = env("TEAMS_LOGGING_WEBHOOK_URL")
 
         if url:
             try:
                 request = record.request
-                subject = "%s (%s IP): %s" % (
-                    record.levelname,
-                    (
-                        "internal"
-                        if request.META.get("REMOTE_ADDR")
-                        in settings.INTERNAL_IPS
-                        else "EXTERNAL"
-                    ),
-                    record.getMessage(),
-                )
+                subject = f"{record.levelname} ({'internal' if request.META.get('REMOTE_ADDR') in settings.INTERNAL_IPS else 'EXTERNAL'} IP): {record.getMessage()}"  # pylint: disable=C0301
+                # Disabled text too long issue because the f-string
+                # line breakable
             except Exception:
-                subject = "%s: %s" % (
-                    record.levelname,
-                    record.getMessage(),
-                )
+                subject = f"{record.levelname}: {record.getMessage()}"
                 request = None
             subject = self.format_subject(subject)
 
@@ -52,9 +62,7 @@ class TeamsExceptionHandler(AdminEmailHandler):
             else:
                 exc_info = (None, record.getMessage(), None)
 
-            reporter = ExceptionReporter(
-                request, is_email=False, *exc_info
-            )
+            reporter = ExceptionReporter(request, is_email=False, *exc_info)
 
             message = reporter.get_traceback_text()
 
@@ -72,9 +80,7 @@ class TeamsExceptionHandler(AdminEmailHandler):
                 "summary": subject,
                 "@type": "MessageCard",
                 "@context": "https://schema.org/extensions",
-                "themeColor": COLOR_CODES.get(
-                    record.levelname, "#00e07f"
-                ),
+                "themeColor": COLOR_CODES.get(record.levelname, "#00e07f"),
                 "sections": [
                     {
                         "title": subject,
@@ -86,15 +92,11 @@ class TeamsExceptionHandler(AdminEmailHandler):
                             },
                             {
                                 "name": "Method:",
-                                "value": request.method
-                                if request
-                                else "No Request",
+                                "value": request.method if request else "No Request",
                             },
                             {
                                 "name": "Path:",
-                                "value": request.path
-                                if request
-                                else "No Request",
+                                "value": request.path if request else "No Request",
                             },
                             {
                                 "name": "Status Code:",
@@ -112,15 +114,11 @@ class TeamsExceptionHandler(AdminEmailHandler):
                             },
                             {
                                 "name": "GET Params:",
-                                "value": json.dumps(request.GET)
-                                if request
-                                else "No Request",
+                                "value": json.dumps(request.GET) if request else "No Request",
                             },
                             {
                                 "name": "POST Data:",
-                                "value": json.dumps(request.POST)
-                                if request
-                                else "No Request",
+                                "value": json.dumps(request.POST) if request else "No Request",
                             },
                             {
                                 "name": "Exception Details:",
@@ -131,4 +129,4 @@ class TeamsExceptionHandler(AdminEmailHandler):
                 ],
             }
 
-            requests.post(url, headers=headers, data=json.dumps(data))
+            requests.post(url, headers=headers, data=json.dumps(data), timeout=10)

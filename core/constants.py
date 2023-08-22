@@ -1,3 +1,6 @@
+"""
+Module containing constants and configurations for the project.
+"""
 from datetime import datetime
 
 COPY_RIGHTS_TEXT = (
@@ -35,6 +38,7 @@ ADMIN_EMAILS = [
     "satheesh@mallow-tech.com",
     "anandraj@mallow-tech.com",
     "sanjay@mallow-tech.com",
+    "palaniyappan@mallow-tech.com",
     "afsal@mallow-tech.com"
 ]
 
@@ -44,3 +48,10 @@ ABOVE_AVERAGE = "Above Average"
 AVERAGE = "Average"
 POOR = "Poor"
 NOT_YET_STARTED = "Not Yet Started"
+
+USER_STATUS_INTERN = "intern"
+USER_STATUS_PROJECT_INTERN = "project_intern"
+USER_STATUS_PROBATIONER = "probationer"
+USER_STATUS_WORKING = "working"
+USER_STATUS_NOTICE_PERIOD = "in-notice-period"
+USER_STATUS_RELIEVED = "relieved"

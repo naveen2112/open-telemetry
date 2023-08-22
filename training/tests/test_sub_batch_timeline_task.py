@@ -1,3 +1,6 @@
+"""
+Django test cases for create, update and ordering the Sub batch task
+"""
 import random
 
 from django.forms.models import model_to_dict
@@ -7,9 +10,13 @@ from model_bakery import baker
 from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
-from core.constants import (PRESENT_TYPE_IN_PERSON, PRESENT_TYPE_REMOTE,
-                            TASK_TYPE_ASSESSMENT, TASK_TYPE_CULTURAL_MEET,
-                            TASK_TYPE_TASK)
+from core.constants import (
+    PRESENT_TYPE_IN_PERSON,
+    PRESENT_TYPE_REMOTE,
+    TASK_TYPE_ASSESSMENT,
+    TASK_TYPE_CULTURAL_MEET,
+    TASK_TYPE_TASK,
+)
 from hubble.models import SubBatchTaskTimeline
 
 
@@ -31,17 +38,30 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
 
     def update_valid_input(self):
         """
-        This function is responsible for updating the valid inputs and creating data in databases as reqiured
+        This function is responsible for updating the valid inputs and creating
+        data in databases as reqiured
         """
         self.sub_batch = baker.make(
-            "hubble.SubBatch", start_date=timezone.now().date()
+            "hubble.SubBatch", start_date=timezone.now().date() + timezone.timedelta(1)
+        )
+        date = timezone.now() + timezone.timedelta(1)
+        self.order_count = (
+            SubBatchTaskTimeline.objects.filter(sub_batch=self.sub_batch).count() + 1
+        )
+        baker.make(
+            "hubble.SubBatchTaskTimeline",
+            sub_batch=self.sub_batch,
+            days=self.faker.random_int(1, 5),
+            order=self.order_count,
+            end_date=date,
+            start_date=date,
         )
         self.persisted_valid_inputs = {
             "name": self.faker.name(),
-            "days": 2,
+            "days": self.faker.random_int(1, 5),
             "present_type": PRESENT_TYPE_REMOTE,
             "task_type": TASK_TYPE_TASK,
-            "order": 1,
+            "order": self.order_count,
             "sub_batch_id": self.sub_batch.id,
         }
 
@@ -49,11 +69,9 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
         """
         To automate the assertion commands, where same logic is repeated
         """
-        self.assertJSONEqual(
-            self.decoded_json(response), {"status": "success"}
-        )
+        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertEqual(response.status_code, 200)
-        self.assertDatabaseHas(
+        self.assert_database_has(
             "SubBatchTaskTimeline",
             {
                 "name": data["name"],
@@ -68,9 +86,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
         """
         To makes sure that the correct template is used
         """
-        response = self.make_get_request(
-            reverse(self.route_name, args=[self.sub_batch.id])
-        )
+        response = self.make_get_request(reverse(self.route_name, args=[self.sub_batch.id]))
         self.assertTemplateUsed(response, "sub_batch/timeline.html")
         self.assertContains(response, self.sub_batch.name)
 
@@ -91,6 +107,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
                 "days": 0.5,
                 "present_type": PRESENT_TYPE_IN_PERSON,
                 "task_type": TASK_TYPE_CULTURAL_MEET,
+                "order": self.order_count,
             }
         )
         response = self.make_post_request(
@@ -105,6 +122,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
                 "days": 1.5,
                 "present_type": PRESENT_TYPE_IN_PERSON,
                 "task_type": TASK_TYPE_ASSESSMENT,
+                "order": 2,
             }
         )
         response = self.make_post_request(
@@ -117,9 +135,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
         """
         To check what happens when name field fails MinlengthValidation
         """
-        data = self.get_valid_inputs(
-            {"name": self.faker.pystr(max_chars=2)}
-        )
+        data = self.get_valid_inputs({"name": self.faker.pystr(max_chars=2)})
         response = self.make_post_request(
             reverse(self.create_route_name, args=[self.sub_batch.id]),
             data=data,
@@ -151,6 +167,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
             "task_type": {"required"},
             "order": {"required"},
         }
+
         self.assertEqual(
             self.bytes_cleaner(response.content),
             self.get_ajax_response(field_errors=field_errors),
@@ -167,9 +184,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
             data=self.get_valid_inputs({"days": 0.25}),
         )
         field_errors = {"days": {"is_not_divisible_by_0.5"}}
-        error_message = {
-            "is_not_divisible_by_0.5": "Value must be a multiple of 0.5"
-        }
+        error_message = {"is_not_divisible_by_0.5": "Value must be a multiple of 0.5"}
         self.assertEqual(
             self.bytes_cleaner(response.content),
             self.get_ajax_response(
@@ -185,9 +200,7 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
             data=self.get_valid_inputs({"days": 0}),
         )
         field_errors = {"days": {"value_cannot_be_zero"}}
-        error_message = {
-            "value_cannot_be_zero": "Value must be greater than 0"
-        }
+        error_message = {"value_cannot_be_zero": "Value must be greater than 0"}
         self.assertEqual(
             self.bytes_cleaner(response.content),
             self.get_ajax_response(
@@ -199,7 +212,8 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
 
     def test_invalid_choice_validations(self):
         """
-        Check what happens when invalid data for present_type and task_type are given as input
+        Check what happens when invalid data for present_type and
+        task_type are given as input
         """
         response = self.make_post_request(
             reverse(self.create_route_name, args=[self.sub_batch.id]),
@@ -245,14 +259,13 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
             "order": {"invalid_order"},
         }
         validation_parameters = {
-            "order": [
-                (SubBatchTaskTimeline.objects.filter(
+            "order": list(
+                SubBatchTaskTimeline.objects.filter(
                     sub_batch_id=self.sub_batch.id,
                     start_date__gt=timezone.now(),
-                )
-                .values_list("order", flat=True))
-            or 0
-            ]
+                ).values_list("order", flat=True)
+            )
+            or [0]
         }
         self.assertEqual(
             self.bytes_cleaner(response.content),
@@ -282,9 +295,7 @@ class SubBatchTaskTimelineShowTest(BaseTestCase):
         """
         Checks what happens when valid inputs are given for all fields
         """
-        sub_batch_task_timeline = baker.make(
-            "hubble.SubBatchTaskTimeline", order=1
-        )
+        sub_batch_task_timeline = baker.make("hubble.SubBatchTaskTimeline", order=1)
         response = self.make_get_request(
             reverse(
                 self.update_show_route_name,
@@ -295,9 +306,7 @@ class SubBatchTaskTimelineShowTest(BaseTestCase):
             self.decoded_json(response),
             {
                 "timeline": model_to_dict(
-                    SubBatchTaskTimeline.objects.get(
-                        id=sub_batch_task_timeline.id
-                    )
+                    SubBatchTaskTimeline.objects.get(id=sub_batch_task_timeline.id)
                 )
             },
         )
@@ -306,9 +315,7 @@ class SubBatchTaskTimelineShowTest(BaseTestCase):
         """
         Checks what happens when we try to access invalid timeline task id in update
         """
-        response = self.make_get_request(
-            reverse(self.update_show_route_name, args=[0])
-        )
+        response = self.make_get_request(reverse(self.update_show_route_name, args=[0]))
         self.assertEqual(response.status_code, 404)
 
 
@@ -329,35 +336,48 @@ class SubBatchTaskTimelineUpdateTest(BaseTestCase):
 
     def update_valid_input(self):
         """
-        This function is responsible for updating the valid inputs and creating data in databases as reqiured
+        This function is responsible for updating the valid inputs and creating
+        data in databases as reqiured
         """
         self.sub_batch = baker.make(
             "hubble.SubBatch",
             start_date=(timezone.now() + timezone.timedelta(1)).date(),
         )
+        self.order_count = (
+            SubBatchTaskTimeline.objects.filter(sub_batch=self.sub_batch).count() + 1
+        )
+        date = timezone.now() + timezone.timedelta(1)
         self.persisted_valid_inputs = {
             "name": self.faker.name(),
-            "days": 2,
+            "days": self.faker.random_int(1, 5),
             "present_type": PRESENT_TYPE_REMOTE,
             "task_type": TASK_TYPE_TASK,
-            "order": 1,
+            "order": self.order_count,
+            "sub_batch_id": self.sub_batch.id,
         }
         sub_batch_task_timeline = baker.make(
             "hubble.SubBatchTaskTimeline",
-            order=1,
-            start_date=(timezone.now() + timezone.timedelta(1)).date(),
+            sub_batch=self.sub_batch,
+            days=self.faker.random_int(1, 5),
+            order=self.order_count,
+            end_date=date,
+            start_date=date,
+        )
+        started_sub_batch_task_timeline = baker.make(
+            "hubble.SubBatchTaskTimeline",
+            order=self.order_count,
+            start_date=(timezone.now() - timezone.timedelta(10)).date(),
         )
         self.sub_batch_task_timeline_id = sub_batch_task_timeline.id
+        self.started_sub_batch_task_timeline_id = started_sub_batch_task_timeline.id
 
     def validate_response(self, response, data):
         """
         To automate the assertion commands, where same logic is repeated
         """
-        self.assertJSONEqual(
-            self.decoded_json(response), {"status": "success"}
-        )
+        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertEqual(response.status_code, 200)
-        self.assertDatabaseHas(
+        self.assert_database_has(
             "SubBatchTaskTimeline",
             {
                 "name": data["name"],
@@ -383,7 +403,8 @@ class SubBatchTaskTimelineUpdateTest(BaseTestCase):
         )
         self.validate_response(response, data)
 
-        # Valid Scenario 2: Days can have decimal values, which satisfies the is_not_divisible_by_0.5 condition
+        # Valid Scenario 2: Days can have decimal values, which satisfies the
+        # is_not_divisible_by_0.5 condition
         data = self.get_valid_inputs(
             {
                 "days": 0.5,
@@ -421,9 +442,7 @@ class SubBatchTaskTimelineUpdateTest(BaseTestCase):
         """
         To check what happens when name field fails MinlengthValidation
         """
-        data = self.get_valid_inputs(
-            {"name": self.faker.pystr(max_chars=2)}
-        )
+        data = self.get_valid_inputs({"name": self.faker.pystr(max_chars=2)})
         response = self.make_post_request(
             reverse(
                 self.update_edit_route_name,
@@ -479,9 +498,7 @@ class SubBatchTaskTimelineUpdateTest(BaseTestCase):
             data=self.get_valid_inputs({"days": 0.25}),
         )
         field_errors = {"days": {"is_not_divisible_by_0.5"}}
-        error_message = {
-            "is_not_divisible_by_0.5": "Value must be a multiple of 0.5"
-        }
+        error_message = {"is_not_divisible_by_0.5": "Value must be a multiple of 0.5"}
         self.assertEqual(
             self.bytes_cleaner(response.content),
             self.get_ajax_response(
@@ -499,9 +516,7 @@ class SubBatchTaskTimelineUpdateTest(BaseTestCase):
             data=self.get_valid_inputs({"days": 0}),
         )
         field_errors = {"days": {"value_cannot_be_zero"}}
-        error_message = {
-            "value_cannot_be_zero": "Value must be greater than 0"
-        }
+        error_message = {"value_cannot_be_zero": "Value must be greater than 0"}
         self.assertEqual(
             self.bytes_cleaner(response.content),
             self.get_ajax_response(
@@ -537,6 +552,26 @@ class SubBatchTaskTimelineUpdateTest(BaseTestCase):
         )
         self.assertEqual(response.status_code, 200)
 
+    def test_started_task_validation(self):
+        """
+        Check what happens when we try to edit a task which is already started
+        """
+        response = self.make_post_request(
+            reverse(
+                self.update_edit_route_name,
+                args=[self.started_sub_batch_task_timeline_id],
+            ),
+            data=self.get_valid_inputs(),
+        )
+        self.assertJSONEqual(
+            self.decoded_json(response),
+            {
+                "message": "This task has been already started",
+                "status": "error",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+
 
 class SubBatchTaskTimelineDeleteTest(BaseTestCase):
     """
@@ -555,6 +590,13 @@ class SubBatchTaskTimelineDeleteTest(BaseTestCase):
             "hubble.SubBatch",
             start_date=(timezone.now() + timezone.timedelta(1)).date(),
         )
+        self.order_count = (
+            SubBatchTaskTimeline.objects.filter(sub_batch=self.sub_batch).count() + 1
+        )
+        self.completed_sub_batch = baker.make(
+            "hubble.SubBatch",
+            start_date=(timezone.now() - timezone.timedelta(1)).date(),
+        )
 
     def test_success(self):
         """
@@ -564,11 +606,11 @@ class SubBatchTaskTimelineDeleteTest(BaseTestCase):
             "hubble.SubBatchTaskTimeline",
             sub_batch=self.sub_batch,
             order=seq(0),
-            days=1,
+            days=self.faker.random_int(1, 5),
             start_date=(timezone.now() + timezone.timedelta()).date(),
             _quantity=2,
         )
-        self.assertDatabaseHas(
+        self.assert_database_has(
             "SubBatchTaskTimeline",
             {"id": sub_batch_task_timeline[0].id},
         )
@@ -583,7 +625,7 @@ class SubBatchTaskTimelineDeleteTest(BaseTestCase):
             {"message": "Task deleted succcessfully"},
         )
         self.assertEqual(response.status_code, 200)
-        self.assertDatabaseNotHas(
+        self.assert_database_not_has(
             "SubBatchTaskTimeline",
             {"id": sub_batch_task_timeline[0].id},
         )
@@ -595,13 +637,11 @@ class SubBatchTaskTimelineDeleteTest(BaseTestCase):
         sub_batch_task_timeline = baker.make(
             "hubble.SubBatchTaskTimeline",
             sub_batch=self.sub_batch,
-            order=1,
-            days=1,
+            order=self.order_count,
+            days=self.faker.random_int(1, 5),
             start_date=(timezone.now() + timezone.timedelta()).date(),
         )
-        self.assertDatabaseHas(
-            "SubBatchTaskTimeline", {"id": sub_batch_task_timeline.id}
-        )
+        self.assert_database_has("SubBatchTaskTimeline", {"id": sub_batch_task_timeline.id})
         response = self.make_delete_request(
             reverse(
                 self.delete_route_name,
@@ -610,9 +650,7 @@ class SubBatchTaskTimelineDeleteTest(BaseTestCase):
         )
         self.assertJSONEqual(
             self.decoded_json(response),
-            {
-                "message": "This is the last task, Atleast one task should exist in the timeline"
-            },
+            {"message": "This is the last task, Atleast one task should exist in the timeline"},
         )
         self.assertEqual(response.status_code, 500)
 
@@ -620,19 +658,45 @@ class SubBatchTaskTimelineDeleteTest(BaseTestCase):
         """
         To check what happens when invalid id is given for delete
         """
-        response = self.make_delete_request(
-            reverse(self.delete_route_name, args=[0])
-        )
+        response = self.make_delete_request(reverse(self.delete_route_name, args=[0]))
         self.assertJSONEqual(
             response.content,
             {"message": "Error while deleting Task!"},
         )
         self.assertEqual(response.status_code, 500)
 
+    def test_started_task_validation(self):
+        """
+        Check what happens when we try to delete a task which is already started
+        """
+        sub_batch_task_timeline = baker.make(
+            "hubble.SubBatchTaskTimeline",
+            sub_batch=self.completed_sub_batch,
+            order=self.order_count,
+            days=self.faker.random_int(1, 5),
+            start_date=(timezone.now() - timezone.timedelta(1)).date(),
+            _quantity=2,
+        )
+        self.assert_database_has("SubBatchTaskTimeline", {"id": sub_batch_task_timeline[0].id})
+        response = self.make_delete_request(
+            reverse(
+                self.delete_route_name,
+                args=[sub_batch_task_timeline[0].id],
+            )
+        )
+        self.assertJSONEqual(
+            self.decoded_json(response),
+            {
+                "message": "This task has been already started!",
+            },
+        )
+        self.assertEqual(response.status_code, 500)
+
 
 class SubBatchTaskTimelineReOrderTest(BaseTestCase):
     """
-    This class is responsible for testing the order of the tasks after changing the order in timeline task module
+    This class is responsible for testing the order of the tasks after changing the
+    order in timeline task module
     """
 
     reorder_route_name = "sub_batch.timeline.reorder"
@@ -647,20 +711,24 @@ class SubBatchTaskTimelineReOrderTest(BaseTestCase):
 
     def update_valid_input(self):
         """
-        This function is responsible for updating the valid inputs and creating data in databases as reqiured
+        This function is responsible for updating the valid inputs and creating
+        data in databases as reqiured
         """
         self.sub_batch = baker.make("hubble.SubBatch")
+        self.order_count = (
+            SubBatchTaskTimeline.objects.filter(sub_batch=self.sub_batch).count() + 1
+        )
         baker.make(
             "hubble.SubBatchTaskTimeline",
             order=seq(0),
-            days=1,
+            days=self.faker.random_int(1, 5),
             sub_batch=self.sub_batch,
             _quantity=5,
         )
         self.sub_batch_task_timeline_ids = list(
-            SubBatchTaskTimeline.objects.filter(
-                sub_batch_id=self.sub_batch.id
-            ).values_list("id", flat=True)
+            SubBatchTaskTimeline.objects.filter(sub_batch_id=self.sub_batch.id).values_list(
+                "id", flat=True
+            )
         )
         random.shuffle(self.sub_batch_task_timeline_ids)
 
@@ -677,14 +745,10 @@ class SubBatchTaskTimelineReOrderTest(BaseTestCase):
                 }
             ),
         )
-        self.assertJSONEqual(
-            self.decoded_json(response), {"status": "success"}
-        )
+        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertEqual(response.status_code, 200)
-        for order, task_id in enumerate(
-            self.sub_batch_task_timeline_ids
-        ):
-            self.assertDatabaseHas(
+        for order, task_id in enumerate(self.sub_batch_task_timeline_ids):
+            self.assert_database_has(
                 "SubBatchTaskTimeline",
                 {
                     "id": task_id,
@@ -697,12 +761,8 @@ class SubBatchTaskTimelineReOrderTest(BaseTestCase):
         """
         Check what happens when invalid timeline task ids are given as input
         """
-        data = self.get_valid_inputs(
-            {"data[]": [0] * 5, "sub_batch_id": self.sub_batch.id}
-        )
-        response = self.make_post_request(
-            reverse(self.reorder_route_name), data=data
-        )
+        data = self.get_valid_inputs({"data[]": [0] * 5, "sub_batch_id": self.sub_batch.id})
+        response = self.make_post_request(reverse(self.reorder_route_name), data=data)
         self.assertJSONEqual(
             response.content,
             {
@@ -727,29 +787,26 @@ class SubBatchTimelineDatatableTest(BaseTestCase):
         """
         super().setUp()
         self.authenticate()
-        self.sub_batch = baker.make(
-            "hubble.SubBatch", start_date=timezone.now().date()
-        )
+        self.sub_batch = baker.make("hubble.SubBatch", start_date=timezone.now().date())
 
     def test_template(self):
         """
         To makes sure that the correct template is used
         """
-        response = self.make_get_request(
-            reverse(self.route_name, args=[self.sub_batch.id])
-        )
+        response = self.make_get_request(reverse(self.route_name, args=[self.sub_batch.id]))
         self.assertTemplateUsed(response, "sub_batch/timeline.html")
         self.assertContains(response, self.sub_batch.name)
 
     def test_datatable(self):
         """
-        To check whether all columns are present in datatable and length of rows without any filter
+        To check whether all columns are present in datatable and length of
+        rows without any filter
         """
         sub_batch_task_timeline = baker.make(
             "hubble.SubBatchTaskTimeline",
             sub_batch=self.sub_batch,
             order=seq(0),
-            days=1,
+            days=self.faker.random_int(1, 5),
             start_date=(timezone.now() + timezone.timedelta(1)).date(),
             end_date=(timezone.now() + timezone.timedelta(2)).date(),
             _quantity=2,
@@ -760,41 +817,24 @@ class SubBatchTimelineDatatableTest(BaseTestCase):
             "length": 10,
             "sub_batch_id": self.sub_batch.id,
         }
-        response = self.make_post_request(
-            reverse(self.datatable_route_name), data=payload
-        )
+        response = self.make_post_request(reverse(self.datatable_route_name), data=payload)
         self.assertEqual(response.status_code, 200)
 
         # Check whether row details are correct
-        for row in range(len(sub_batch_task_timeline)):
-            expected_value = sub_batch_task_timeline[row]
-            received_value = response.json()["data"][row]
-            self.assertEqual(
-                expected_value.pk, int(received_value["pk"])
-            )
+        for index, expected_value in enumerate(sub_batch_task_timeline):
+            received_value = response.json()["data"][index]
+            self.assertEqual(expected_value.pk, int(received_value["pk"]))
             self.assertEqual(
                 expected_value.order,
-                int(
-                    float(
-                        received_value["order"]
-                        .split(">")[1]
-                        .split("<")[0]
-                    )
-                ),
+                int(float(received_value["order"].split(">")[1].split("<")[0])),
             )
-            self.assertEqual(
-                expected_value.name, received_value["name"]
-            )
-            self.assertEqual(
-                expected_value.days, float(received_value["days"])
-            )
+            self.assertEqual(expected_value.name, received_value["name"])
+            self.assertEqual(expected_value.days, float(received_value["days"]))
             self.assertEqual(
                 expected_value.present_type,
                 received_value["present_type"],
             )
-            self.assertEqual(
-                expected_value.task_type, received_value["task_type"]
-            )
+            self.assertEqual(expected_value.task_type, received_value["task_type"])
             self.assertEqual(
                 expected_value.start_date.strftime("%d %b %Y"),
                 received_value["start_date"],

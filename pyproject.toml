@@ -23,7 +23,25 @@ psycopg2 = "^2.9.6"
 
 [tool.poetry.group.dev.dependencies]
 django-silk = "^5.0.3"
+black = "^23.7.0"
+isort = "^5.12.0"
+pylint = "^2.17.4"
+djlint = "^1.31.1"
+coverage = "^7.2.7"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 99
+
+[tool.isort]
+profile = "black"
+
+[tool.coverage.run]
+source = ["core", "training"]
+omit = [
+    "teams_logger.py",
+    "admin.py"
+]

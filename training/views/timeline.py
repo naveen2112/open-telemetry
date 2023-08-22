@@ -1,8 +1,12 @@
+"""
+Django view and related functions for managing timeline templates, 
+including creating, updating, deleting, and displaying details of timeline templates
+"""
 import logging
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import F, FloatField, Sum
+from django.db.models import Count, FloatField, OuterRef, Q, Subquery, Sum
 from django.db.models.functions import Coalesce
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
@@ -13,7 +17,7 @@ from django.views.generic import DetailView, FormView
 
 from core import template_utils
 from core.utils import CustomDatatable, validate_authorization
-from hubble.models import Timeline, TimelineTask
+from hubble.models import SubBatch, Timeline, TimelineTask
 from training.forms import TimelineForm, TimelineTaskForm
 
 
@@ -36,6 +40,12 @@ class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
     column_defs = [
         {"name": "id", "visible": False, "searchable": False},
         {"name": "name", "visible": True, "searchable": True},
+        {
+            "name": "no_of_sub_batches",
+            "title": "No. of Sub Batches",
+            "visible": True,
+            "searchable": False,
+        },
         {"name": "Days", "visible": True, "searchable": True},
         {
             "name": "is_active",
@@ -59,46 +69,53 @@ class TimelineTemplateDataTable(LoginRequiredMixin, CustomDatatable):
         },
     ]
 
-    def get_initial_queryset(self, request=None):
-        return self.model.objects.filter(
-            task_timeline__deleted_at__isnull=True
-        ).annotate(
+    def get_initial_queryset(self, request=None):  # pylint: disable=unused-argument
+        """
+        The function returns an initial queryset of objects from a model, filtering out
+        those with a non-null "deleted_at" field in the related "task_timeline" model.
+        """
+        no_of_sub_batches_subquery = (
+            SubBatch.objects.filter(timeline_id=OuterRef("id"), deleted_at__isnull=True)
+            .values("timeline")
+            .annotate(no_of_sub_batches=Count("id", distinct=True))
+            .values("no_of_sub_batches")
+        )
+        return self.model.objects.filter(deleted_at__isnull=True).annotate(
             Days=Coalesce(
-                Sum(F("task_timeline__days")),
+                Sum("task_timeline__days", filter=Q(task_timeline__deleted_at__isnull=True)),
                 0,
                 output_field=FloatField(),
-            )
-        )  # TODO :: should we need '-' incase we need to CAST here
+            ),
+            no_of_sub_batches=Coalesce(Subquery(no_of_sub_batches_subquery), 0),
+        )
 
     def customize_row(self, row, obj):
-        buttons = template_utils.show_button(
-            reverse("timeline-template.detail", args=[obj.id])
-        )
+        """
+        The function customize_row customizes a row by adding buttons based on the user's role.
+        """
+        buttons = template_utils.show_button(reverse("timeline-template.detail", args=[obj.id]))
         if self.request.user.is_admin_user:
             buttons += (
-                template_utils.edit_button(
-                    reverse("timeline-template.show", args=[obj.id])
-                )
+                template_utils.edit_button(reverse("timeline-template.show", args=[obj.id]))
                 + template_utils.delete_button(
-                    "deleteTimeline('"
-                    + reverse("timeline-template.delete", args=[obj.id])
-                    + "')"
+                    "deleteTimeline('" + reverse("timeline-template.delete", args=[obj.id]) + "')"
                 )
-                + template_utils.duplicate_button(
-                    reverse("timeline-template.show", args=[obj.id])
-                )
+                + template_utils.duplicate_button(reverse("timeline-template.show", args=[obj.id]))
             )
-        row[
-            "action"
-        ] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
-        return
+        row["action"] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
+        return row
 
     def render_column(self, row, column):
+        """
+        The function render_column takes a row and column as input and returns a HTML span element
+        with a specific class and text based on the value of the column in the row
+        """
         if column == "is_active":
             if row.is_active:
-                return "<span class='bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm'>Active</span>"
-            else:
-                return "<span class='bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm'>In Active</span>"
+                return "<span class='bg-mild-green-10 text-mild-green py-0.5 \
+                    px-1.5 rounded-xl text-sm'>Active</span>"
+            return "<span class='bg-dark-red-10 text-dark-red py-0.5 \
+                px-1.5 rounded-xl text-sm'>In Active</span>"
         return super().render_column(row, column)
 
 
@@ -108,22 +125,18 @@ def create_timeline_template(request):
     """
     Create Timeline Template
     """
+    response_data = {}  # Initialize an empty dictionary
     if request.method == "POST":
         form = TimelineForm(request.POST)
         if form.is_valid():  # Check if form is valid or not
             timeline = form.save(commit=False)
-            timeline.is_active = (
-                True
-                if request.POST.get("is_active") == "true"
-                else False
-            )  # Set is_active to true if the input is checked else it will be false
+            timeline.is_active = request.POST.get("is_active") == "true"  # Set is_active to true
+            # if the input is checked else it will be false
             timeline.created_by = request.user
             timeline.save()
 
             if request.POST.get("id"):
-                timeline_task = TimelineTask.objects.filter(
-                    timeline=request.POST.get("id")
-                )
+                timeline_task = TimelineTask.objects.filter(timeline=request.POST.get("id"))
                 order = 0
                 for task in timeline_task:
                     order += 1
@@ -136,39 +149,36 @@ def create_timeline_template(request):
                         order=order,
                         created_by=task.created_by,
                     )
-            return JsonResponse({"status": "success"})
+            response_data["status"] = "success"
         else:
             field_errors = form.errors.as_json()
             non_field_errors = form.non_field_errors().as_json()
-            return JsonResponse(
-                {
-                    "status": "error",
-                    "field_errors": field_errors,
-                    "non_field_errors": non_field_errors,
-                }
-            )
+            response_data = {
+                "status": "error",
+                "field_errors": field_errors,
+                "non_field_errors": non_field_errors,
+            }
+    return JsonResponse(response_data)
 
 
 @login_required()
 @validate_authorization()
-def timeline_template_data(request, pk):
+def timeline_template_data(request, pk):  # pylint: disable=unused-argument
     """
     Timeline Template Update Form Data
     """
     try:
         data = {
-            "timeline": model_to_dict(
-                get_object_or_404(Timeline, id=pk)
-            )
-        }  # Covert django queryset object to dict,which can be easily serialized and sent as a JSON response
+            "timeline": model_to_dict(get_object_or_404(Timeline, id=pk))
+        }  # Covert django queryset object to dict,which can be easily
+        # serialized and sent as a JSON response
         return JsonResponse(data, safe=False)
-    except Exception as e:
+    except Exception as exception:
         logging.error(
-            f"An error has occured while fetching the Timeline \n{e}"
+            "An error has occured while fetching the Timeline \n%s",
+            exception,
         )
-        return JsonResponse(
-            {"message": "No timeline template found"}, status=500
-        )
+        return JsonResponse({"message": "No timeline template found"}, status=500)
 
 
 @login_required()
@@ -178,32 +188,32 @@ def update_timeline_template(request, pk):
     Update Timeline Template
     """
     form = TimelineForm(
-        request.POST, instance=get_object_or_404(Timeline, id=pk)
+        request.POST,
+        instance=get_object_or_404(Timeline, id=pk),
     )
     if form.is_valid():  # check if form is valid or not
         timeline = form.save(commit=False)
-        timeline.is_active = (
-            True if request.POST.get("is_active") == "true" else False
-        )  # Set is_active to true if the input is checked else it will be false
+        timeline.is_active = request.POST.get("is_active") == "true"  # Set is_active to true
+        # if the input is checked else it will be false
         timeline.save()
         return JsonResponse({"status": "success"})
-    else:
-        field_errors = form.errors.as_json()
-        non_field_errors = form.non_field_errors().as_json()
-        return JsonResponse(
-            {
-                "status": "error",
-                "field_errors": field_errors,
-                "non_field_errors": non_field_errors,
-            }
-        )
+    field_errors = form.errors.as_json()
+    non_field_errors = form.non_field_errors().as_json()
+    return JsonResponse(
+        {
+            "status": "error",
+            "field_errors": field_errors,
+            "non_field_errors": non_field_errors,
+        }
+    )
 
 
 @validate_authorization()
 @require_http_methods(
     ["DELETE"]
-)  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
-def delete_timeline_template(request, pk):
+)  # This decorator ensures that the view function is only accessible
+# through the DELETE HTTP method
+def delete_timeline_template(request, pk):  # pylint: disable=unused-argument
     """
     Delete Timeline Template
     Soft delete the template and record the deletion time in deleted_at field
@@ -212,12 +222,11 @@ def delete_timeline_template(request, pk):
         timeline = get_object_or_404(Timeline, id=pk)
         TimelineTask.bulk_delete({"timeline_id": pk})
         timeline.delete()
-        return JsonResponse(
-            {"message": "Timeline Template deleted successfully"}
-        )
-    except Exception as e:
+        return JsonResponse({"message": "Timeline Template deleted successfully"})
+    except Exception as exception:
         logging.error(
-            f"An error has occured while deleting the Timeline \n{e}"
+            "An error has occured while deleting the Timeline \n%s",
+            exception,
         )
         return JsonResponse(
             {"message": "Error while deleting Timeline Template!"},
