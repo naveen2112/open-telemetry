@@ -353,7 +353,7 @@ class TraineeHolidayDatatableTest(BaseTestCase):
         self.assertEqual(response.status_code, 200)
 
         # Check whether row details are correct
-        for index, holiday in range(holidays):
+        for index, holiday in enumerate(holidays):
             expected_value = holiday
             received_value = response.json()["data"][index]
             self.assertEqual(expected_value.pk, int(received_value["pk"]))
