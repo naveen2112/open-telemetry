@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from core.constants import PRESENT_TYPES, TASK_TYPES, USER_STATUS_INTERN
 from hubble import models
-from hubble.models import Assessment, Team
+from hubble.models import Assessment
 
 
 class TimelineForm(forms.ModelForm):
@@ -207,9 +207,6 @@ class SubBatchForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # instance = kwargs.get("instance")
-        # if instance:
-        #     self.fields["team"].queryset = Team.objects.filter(id=instance.team.id)
 
         self.fields["team"].empty_label = "Select a Team"
         if self.data.get("team", None):
@@ -463,7 +460,7 @@ class SubBatchTimelineForm(forms.ModelForm):
                 raise ValidationError(
                     (
                         f"The current order of the task is invalid."
-                        f"The valid input for order ranges form {valid_order_value[0]}-{valid_order_value[-1] + 1}."
+                        f"The valid input for order ranges form {valid_order_value[0]}-{valid_order_value[-1] + 1}."  # pylint: disable=C0301
                     ),
                     code="invalid_order",
                 )

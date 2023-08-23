@@ -1,3 +1,6 @@
+"""
+Django test classes for testing the files present in Induction Kit
+"""
 from django.urls import reverse
 
 from core.base_test import BaseTestCase

@@ -5,7 +5,6 @@ Django test cases for create, update, delete and django datatable for the Sub ba
 import io
 
 import pandas as pd
-from django.conf import settings
 from django.db.models import Count, Q
 from django.urls import reverse
 from django.utils import timezone
@@ -15,7 +14,7 @@ from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
 from core.constants import USER_STATUS_INTERN, USER_STATUS_PROBATIONER
-from hubble.models import Batch, SubBatch, Team, Timeline, User
+from hubble.models import Batch, SubBatch, Timeline, User
 from training.forms import SubBatchForm
 
 
@@ -89,8 +88,8 @@ class SubBatchCreateTest(BaseTestCase):
         This function is responsible for creating valid file input
         """
         memory_file = io.BytesIO()
-        df = pd.DataFrame(data)
-        df.to_excel(memory_file, index=False)
+        dataframe = pd.DataFrame(data)
+        dataframe.to_excel(memory_file, index=False)
         memory_file.seek(0)
         return memory_file
 

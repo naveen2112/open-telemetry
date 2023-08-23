@@ -470,7 +470,7 @@ class TimelineDatatableTest(BaseTestCase):
         baker.make(
             "hubble.Timeline",
             name=seq(name),
-            is_active=is_active.__iter__(),
+            is_active=is_active.__iter__(),  # pylint: disable=C2801
             _quantity=2,
         )
         no_of_sub_batches_subquery = (

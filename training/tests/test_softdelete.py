@@ -1,3 +1,6 @@
+"""
+Module containing the Base Model for SoftDelete
+"""
 from django.utils import timezone
 
 from core.base_test import BaseTestCase
