@@ -38,7 +38,6 @@ from hubble.models import (
     SubBatch,
     SubBatchTaskTimeline,
     Timeline,
-    TimelineTask,
     User,
 )
 from training.forms import AddInternForm, SubBatchForm
@@ -444,7 +443,7 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
         expected completion date.
         """
         row["completion"] = round(obj.completion, 2)
-        if obj.average_marks != None:
+        if obj.average_marks is not None:
             row["average_marks"] = round(obj.average_marks, 2)
         buttons = template_utils.show_button(reverse("user_reports", args=[obj.user.id]))
         if self.request.user.is_admin_user:
@@ -467,7 +466,7 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
         if obj.performance == MEET_EXPECTATION:
             row[
                 "performance"
-            ] = f'<span class="bg-dark-blue-10 text-dark-blue py-0.5 px-1.5 rounded-xl text-sm">{MEET_EXPECTATION}</span>'
+            ] = f'<span class="bg-dark-blue-10 text-dark-blue py-0.5 px-1.5 rounded-xl text-sm">{MEET_EXPECTATION}</span>'  # pylint: disable=C0301
         if obj.performance == ABOVE_AVERAGE:
             row[
                 "performance"
@@ -505,7 +504,7 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
             NOT_YET_STARTED: 0,
         }
         for performance in request.trainee_performance:
-            if performance.average_marks != None:
+            if performance.average_marks is not None:
                 if float(performance.average_marks) >= 90:
                     performance_report[GOOD] += 1
                 elif 90 > float(performance.average_marks) >= 75:

@@ -98,15 +98,8 @@ def callback(request):
     return redirect("login")
 
 
-def health_check(request):
+def health_check(request):  # pylint: disable=unused-argument
     """
     Performs a health check of the application
     """
     return JsonResponse(data="Good", status=200, safe=False)
-
-
-def error_404(request):
-    """
-    Handles the 404 error (page not found)
-    """
-    return render(request, "errors/404.html")
