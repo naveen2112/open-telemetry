@@ -1,3 +1,7 @@
+"""
+Django application basic testcase configuration and test runner for
+the unmanaged models
+"""
 import datetime
 import json
 
@@ -18,23 +22,37 @@ from hubble.models import TraineeHoliday, User
 from hubble_report.settings import env
 
 
+# It is used to disable the 'potected access error', the protected member
+# is not intended to access it from outside the class or subclass
+# pylint: disable=protected-access
 class UnManagedModelTestRunner(DiscoverRunner):
     """
+    Test runner that automatically makes all unmanaged models in your Django
+    project managed for the duration of the test run, so that one doesn't need
+    to execute the SQL manually to create them.
     Test runner that automatically makes all unmanaged models in your Django
     project managed for the duration of the test run, so that one doesn't need
     to execute the SQL manually to create them.
     """
 
     def setup_test_environment(self, *args, **kwargs):
+        """
+        The function sets up the test environment by setting a flag and calling
+        the parent class's setup_test_environment method.
+        """
         settings.IS_TEST_CASE = True
-        super(UnManagedModelTestRunner, self).setup_test_environment(*args, **kwargs)
+        super().setup_test_environment(*args, **kwargs)
 
     def teardown_test_environment(self, *args, **kwargs):
-        super(UnManagedModelTestRunner, self).teardown_test_environment(*args, **kwargs)
+        """
+        The function `teardown_test_environment` sets the `IS_TEST_CASE` setting
+        to `False` after calling the parent class's `teardown_test_environment` method.
+        """
+        super().teardown_test_environment(*args, **kwargs)
         settings.IS_TEST_CASE = False
 
 
-class BaseTestCase(TestCase):
+class BaseTestCase(TestCase):  # pylint:disable=R0902,R0904
     """
     This class helps us to follow DRY principles in Training module testing
     """
@@ -52,7 +70,8 @@ class BaseTestCase(TestCase):
 
     def create_user(self):
         """
-        This function is responsible for creating an user and giving them admi access
+        This function is responsible for creating an user and giving
+        them admin access
         """
         user = baker.make(User, is_employed=True, _fill_optional=["email"])
         ADMIN_EMAILS.append(
@@ -61,6 +80,9 @@ class BaseTestCase(TestCase):
         return user
 
     def create_team(self):
+        """
+        Creates and returns an instance of the 'hubble.Team' model
+        """
         return baker.make("hubble.Team")
 
     def create_holidays(self):
@@ -98,23 +120,28 @@ class BaseTestCase(TestCase):
         return holiday
 
     def setup_timline_tasks(self):
-        self.batch_id = baker.make(
+        """
+        This function is responsible for creating the timeline tasks
+        """
+        self.batch_id = baker.make(  # pylint:disable=W0201
             "hubble.Batch", start_date=(timezone.now() + timezone.timedelta(1)).date()
         ).id
         self.create_trinee_holidays(self.batch_id)
-        self.timeline = baker.make(
+        self.timeline = baker.make(  # pylint:disable=W0201
             "hubble.Timeline",
             is_active=True,
         )
-        self.days_list = [self.faker.random_number(1, 20) / 2 for _ in range(4)]
-        self.timeline_task = baker.make(
+        self.days_list = [  # pylint:disable=W0201
+            self.faker.random_number(1, 20) / 2 for _ in range(4)
+        ]
+        self.timeline_task = baker.make(  # pylint:disable=W0201
             "hubble.TimelineTask",
             timeline=self.timeline,
-            days=self.days_list.__iter__(),
+            days=self.days_list.__iter__(),  # pylint:disable=C2801
             order=seq(0),
             _quantity=4,
         )
-        self.sub_batch = baker.make(
+        self.sub_batch = baker.make(  # pylint:disable=W0201
             "hubble.SubBatch",
             start_date=(timezone.now().date() + timezone.timedelta(1)),
             batch_id=self.batch_id,
@@ -123,15 +150,16 @@ class BaseTestCase(TestCase):
         schedule_timeline_for_sub_batch(sub_batch=self.sub_batch, user=self.user)
 
     def check_start_end_date(self):
-        self.holidays = TraineeHoliday.objects.filter(
+        """
+        This function is responsible for checking the start and end date
+        """
+        self.holidays = TraineeHoliday.objects.filter(  # pylint:disable=W0201
             batch_id=self.batch_id
         ).values_list("date_of_holiday", flat=True)
         cur_date = timezone.now() + timezone.timedelta(1)
         is_half_day = False
         for task in self.timeline_task:
-            data = calculate_duration_for_task(
-                self.holidays, cur_date, is_half_day, task.days
-            )
+            data = calculate_duration_for_task(self.holidays, cur_date, is_half_day, task.days)
             cur_date = end_date = data["end_date_time"]
             is_half_day = data["ends_afternoon"]
         timeline_task_end_date = schedule_timeline_for_sub_batch(
@@ -157,9 +185,7 @@ class BaseTestCase(TestCase):
         """
         This function is responsible for handling the POST requests
         """
-        return self.client.post(
-            url_pattern, data, SERVER_NAME=self.testcase_server_name
-        )
+        return self.client.post(url_pattern, data, SERVER_NAME=self.testcase_server_name)
 
     def make_delete_request(self, url_pattern):
         """
@@ -167,49 +193,59 @@ class BaseTestCase(TestCase):
         """
         return self.client.delete(url_pattern, SERVER_NAME=self.testcase_server_name)
 
+    # It isn used to disable 'dangerous-default-value'.By default, pylint
+    # warns against using mutable objects as default values for function
+    # parameters because they can lead to unexpected behavior
+    # pylint: disable=dangerous-default-value
     def get_valid_inputs(self, override={}):
         """
-        This function is responsible for getting the valid inputs for testcases and updating it as per need
+        This function is responsible for getting the valid inputs for
+        testcases and updating it as per need
         """
         return {**self.persisted_valid_inputs, **override}
 
     def decoded_json(self, response):
         """
-        This function is responsible getting the response and converting into bytes
+        This function is responsible getting the response and converting
+        into bytes
         """
         return response.content
 
     def get_model_instance(self, model_name):
         """
-        This function is responsible for getting the correct model for DB testcases
+        This function is responsible for getting the correct model
+        for DB testcases
         """
         return apps.get_model(app_label="hubble", model_name=model_name)
 
     def get_queryset_instance(self, model_name, filters):
         """
-        This function is responsible for filtering the model as per the need
+        This function is responsible for filtering the model
+        as per the need
         """
         model = self.get_model_instance(model_name)
         query_filters = Q(**filters)
         return model.objects.filter(query_filters)
 
-    def assertDatabaseHas(self, model_name, filters):
+    def assert_database_has(self, model_name, filters):
         """
-        This function checks whether the DB has the data which we have created or manipulated
+        This function checks whether the DB has the data which
+        we have created or manipulated
         """
         queryset = self.get_queryset_instance(model_name, filters)
         self.assertTrue(queryset.exists())
 
-    def assertDatabaseCount(self, model_name, filters, count):
+    def assert_database_count(self, model_name, filters, count):
         """
         Gives the number of rows present in a table
         """
         queryset = self.get_queryset_instance(model_name, filters)
         self.assertEqual(queryset.count(), count)
 
-    def assertDatabaseNotHas(self, model_name, filters):
+    def assert_database_not_has(self, model_name, filters):
         """
-        This function checks whether the data we desired to delete, has been deleted ot not
+        This function checks whether the data we desired to delete,
+        has been deleted ot not
         """
         queryset = self.get_queryset_instance(model_name, filters)
         self.assertFalse(queryset.exists())
@@ -222,12 +258,15 @@ class BaseTestCase(TestCase):
 
     def get_error_message(self, key, value, current_value, validation_parameter):
         """
-        This function is responsible for building the error json response dynamically
+        This function is responsible for building the error json
+        response dynamically
         """
         if value == "min_length":
             message = ngettext_lazy(
-                "Ensure this value has at least %(validation_parameter)d character (it has %(current_length)d).",
-                "Ensure this value has at least %(validation_parameter)d characters (it has %(current_length)d).",
+                "Ensure this value has at least %(validation_parameter)d "
+                "character (it has %(current_length)d).",
+                "Ensure this value has at least %(validation_parameter)d "
+                "characters (it has %(current_length)d).",
                 validation_parameter[key],
             ) % {
                 "current_length": len(current_value[key]),
@@ -239,9 +278,10 @@ class BaseTestCase(TestCase):
             message = "Select a valid choice. That choice is not one of the available choices."
         elif value == "invalid_order":
             message = (
-                f"The current order of the task is invalid. "
-                f"The valid input for order ranges form {validation_parameter[key][0]}-{validation_parameter[key][-1] + 1}."
-            )
+                f"The current order of the task is invalid."
+                f"The valid input for order ranges form "
+                f"{validation_parameter[key][0]}-{validation_parameter[key][-1] + 1}."
+            )  # pylint: disable=C0301
         elif value == "zero_order_error":
             message = "Order value must be greater than zero."
         elif value == "timeline_has_no_tasks":
@@ -250,6 +290,10 @@ class BaseTestCase(TestCase):
             message = "Score must be between 0 to 100"
         return message
 
+    # It is used to disable the "too-mnay-arguments", according to PEP8
+    # guidlines if the function has more than 5 arguments in the function
+    # it will make code harder to maintain
+    # pylint: disable-next=too-many-arguments
     def get_ajax_response(
         self,
         current_value={},
@@ -265,9 +309,7 @@ class BaseTestCase(TestCase):
         for key, values in field_errors.items():
             temp = []
             for value in values:
-                message = custom_validation_error_message.get(
-                    value
-                ) or self.get_error_message(
+                message = custom_validation_error_message.get(value) or self.get_error_message(
                     key, value, current_value, validation_parameter
                 )
                 error_details = {
@@ -289,6 +331,10 @@ class BaseTestCase(TestCase):
             }
         )
 
+    # It is used to disable the "too-mnay-arguments", according to PEP8
+    # guidlines if the function has more than 5 arguments in the function
+    # it will make code harder to maintain
+    # pylint: disable-next=dangerous-default-value
     def validate_form_errors(
         self,
         form,
@@ -296,6 +342,10 @@ class BaseTestCase(TestCase):
         current_value={},
         validation_parameter={},
     ):
+        """
+        Validates form errors by retrieving error messages and asserting
+        them for each field
+        """
         for key, values in field_errors.items():
             for value in values:
                 error_message = self.get_error_message(

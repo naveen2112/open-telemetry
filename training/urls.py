@@ -1,10 +1,20 @@
+"""
+Training app url configuration
+"""
 from django.urls import include, path
 
 from hubble import views as sso_view
 from training import view
-from training.views import (batch, induction_kit, sub_batch,
-                            sub_batch_timeline, timeline, timeline_task,
-                            trainee_holiday, user_journey)
+from training.views import (
+    batch,
+    induction_kit,
+    sub_batch,
+    sub_batch_timeline,
+    timeline,
+    timeline_task,
+    trainee_holiday,
+    user_journey,
+)
 
 urlpatterns = [
     path("", include("hubble.urls")),
@@ -96,10 +106,20 @@ urlpatterns = [
         name="batch.datatable",
     ),
     path("batch/create", batch.create_batch, name="batch.create"),
-    path("batch/<int:pk>/show", batch.batch_data, name="batch.show"),
-    path("batch/<int:pk>/edit", batch.update_batch, name="batch.edit"),
     path(
-        "batch/<int:pk>/delete", batch.delete_batch, name="batch.delete"
+        "batch/<int:pk>/show",
+        batch.batch_data,
+        name="batch.show",
+    ),
+    path(
+        "batch/<int:pk>/edit",
+        batch.update_batch,
+        name="batch.edit",
+    ),
+    path(
+        "batch/<int:pk>/delete",
+        batch.delete_batch,
+        name="batch.delete",
     ),
     path(
         "batch/<int:pk>",
@@ -107,7 +127,11 @@ urlpatterns = [
         name="batch.detail",
     ),
     # Batch Holiday
-    path("batch/<int:pk>/holiday", trainee_holiday.TraineeHolidayList.as_view(), name="batch.holiday"),
+    path(
+        "batch/<int:pk>/holiday",
+        trainee_holiday.TraineeHolidayList.as_view(),
+        name="batch.holiday",
+    ),
     path(
         "trainee-holiday-datatable",
         trainee_holiday.TraineeHolidayDataTable.as_view(),
@@ -146,8 +170,8 @@ urlpatterns = [
     ),
     path(
         "sub-batch/get-timeline",
-        sub_batch.get_timeline,
-        name="sub-batch.get_timeline",
+        sub_batch.get_timelines,
+        name="sub-batch.get_timelines",
     ),
     path(
         "sub-batch/<int:pk>/edit",

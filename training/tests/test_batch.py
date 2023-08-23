@@ -1,3 +1,10 @@
+"""
+Django test classes for testing the create,
+show, update, delete, and Datatables features in the Batch module
+"""
+import datetime
+
+from dateutil.relativedelta import relativedelta
 from django.db.models import Count, OuterRef, Q, Subquery
 from django.db.models.functions import Coalesce
 from django.forms.models import model_to_dict
@@ -6,10 +13,8 @@ from model_bakery import baker
 from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
-from hubble.models import Batch, Holiday, TraineeHoliday
-import datetime
-from dateutil.relativedelta import relativedelta
 from core.constants import BATCH_DURATION
+from hubble.models import Batch, Holiday, TraineeHoliday
 
 
 class BatchCreateTest(BaseTestCase):
@@ -22,7 +27,8 @@ class BatchCreateTest(BaseTestCase):
 
     def setUp(self):
         """
-        This function will run before every test and makes sure required data are ready
+        This function will run before every test and makes sure required
+        data are ready
         """
         super().setUp()
         self.authenticate()
@@ -31,7 +37,8 @@ class BatchCreateTest(BaseTestCase):
 
     def update_valid_input(self):
         """
-        This function is responsible for updating the valid inputs and creating data in databases as reqiured
+        This function is responsible for updating the valid inputs and
+        creating data in databases as reqiured
         """
         self.persisted_valid_inputs = {
             "name": self.faker.name(),
@@ -54,18 +61,14 @@ class BatchCreateTest(BaseTestCase):
         response = self.make_post_request(reverse(self.create_route_name), data=data)
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertEqual(response.status_code, 200)
-        self.assertDatabaseHas(
-            "Batch", {"name": data["name"], "start_date": data["start_date"]}
-        )
+        self.assert_database_has("Batch", {"name": data["name"], "start_date": data["start_date"]})
 
         # Check whether the Holidays are created in the database
         end_date = data["start_date"] + relativedelta(months=BATCH_DURATION)
         holidays = Holiday.objects.filter(
             date_of_holiday__range=(data["start_date"], end_date)
         ).values_list("date_of_holiday", flat=True)
-        trainee_holidays = TraineeHoliday.objects.all().values_list(
-            "date_of_holiday", flat=True
-        )
+        trainee_holidays = TraineeHoliday.objects.all().values_list("date_of_holiday", flat=True)
         self.assertEqual(set(holidays), set(trainee_holidays))
 
     def test_required_validation(self):
@@ -89,8 +92,7 @@ class BatchCreateTest(BaseTestCase):
         data = self.get_valid_inputs(
             {
                 "name": self.faker.pystr(max_chars=2),
-                "start_date": datetime.datetime.now().date()
-                + datetime.timedelta(days=1),
+                "start_date": datetime.datetime.now().date() + datetime.timedelta(days=1),
             }
         )
         response = self.make_post_request(reverse(self.create_route_name), data=data)
@@ -116,7 +118,8 @@ class BatchShowTest(BaseTestCase):
 
     def setUp(self):
         """
-        This function will run before every test and makes sure required data are ready
+        This function will run before every test and makes sure required
+        data are ready
         """
         super().setUp()
         self.authenticate()
@@ -126,9 +129,7 @@ class BatchShowTest(BaseTestCase):
         Check what happens when valid data is given as input
         """
         batch = baker.make("hubble.Batch")
-        response = self.make_get_request(
-            reverse(self.update_show_route_name, args=[batch.id])
-        )
+        response = self.make_get_request(reverse(self.update_show_route_name, args=[batch.id]))
         data = {"batch": model_to_dict(Batch.objects.get(id=batch.id))}
         data["batch"]["start_date"] = data["batch"]["start_date"].strftime("%Y-%m-%d")
         self.assertJSONEqual(
@@ -138,7 +139,8 @@ class BatchShowTest(BaseTestCase):
 
     def test_failure(self):
         """
-        To check what happens when invalid id is given as argument for batch update
+        To check what happens when invalid id is given as argument
+        for batch update
         """
         response = self.make_get_request(reverse(self.update_show_route_name, args=[0]))
         self.assertEqual(response.status_code, 500)
@@ -161,7 +163,8 @@ class BatchUpdateTest(BaseTestCase):
 
     def update_valid_input(self):
         """
-        This function is responsible for updating the valid inputs and creating data in databases as reqiured
+        This function is responsible for updating the valid inputs and creating
+        data in databases as reqiured
         """
         self.persisted_valid_inputs = {
             "name": self.faker.name(),
@@ -180,9 +183,7 @@ class BatchUpdateTest(BaseTestCase):
         )
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertEqual(response.status_code, 200)
-        self.assertDatabaseHas(
-            "Batch", {"name": data["name"], "start_date": data["start_date"]}
-        )
+        self.assert_database_has("Batch", {"name": data["name"], "start_date": data["start_date"]})
 
     def test_required_validation(self):
         """
@@ -210,8 +211,7 @@ class BatchUpdateTest(BaseTestCase):
         data = self.get_valid_inputs(
             {
                 "name": self.faker.pystr(max_chars=2),
-                "start_date": datetime.datetime.now().date()
-                + datetime.timedelta(days=1),
+                "start_date": datetime.datetime.now().date() + datetime.timedelta(days=1),
             }
         )
         response = self.make_post_request(
@@ -250,14 +250,10 @@ class BatchDeleteTest(BaseTestCase):
         Check what happens when valid data is given as input
         """
         batch = baker.make("hubble.Batch")
-        response = self.make_delete_request(
-            reverse(self.delete_route_name, args=[batch.id])
-        )
-        self.assertJSONEqual(
-            response.content, {"message": "Batch deleted succcessfully"}
-        )
+        response = self.make_delete_request(reverse(self.delete_route_name, args=[batch.id]))
+        self.assertJSONEqual(response.content, {"message": "Batch deleted succcessfully"})
         self.assertEqual(response.status_code, 200)
-        self.assertDatabaseNotHas("Batch", {"id": batch.id})
+        self.assert_database_not_has("Batch", {"id": batch.id})
 
     def test_failure(self):
         """
@@ -269,7 +265,8 @@ class BatchDeleteTest(BaseTestCase):
 
 class BatchDatatableTest(BaseTestCase):
     """
-    This class is responsible for testing the Datatables present in the Batch module
+    This class is responsible for testing the Datatables present
+    in the Batch module
     """
 
     datatable_route_name = "batch.datatable"
@@ -277,7 +274,8 @@ class BatchDatatableTest(BaseTestCase):
 
     def setUp(self):
         """
-        This function will run before every test and makes sure required data are ready
+        This function will run before every test and makes sure required
+        data are ready
         """
         super().setUp()
         self.authenticate()
@@ -285,7 +283,8 @@ class BatchDatatableTest(BaseTestCase):
 
     def update_valid_input(self):
         """
-        This function is responsible for updating the valid inputs and creating data in databases as reqiured
+        This function is responsible for updating the valid inputs and
+        creating data in databases as reqiured
         """
         self.name = self.faker.name()
         self.batch = baker.make(
@@ -311,7 +310,8 @@ class BatchDatatableTest(BaseTestCase):
 
     def test_datatable(self):
         """
-        To check whether all columns are present in datatable and length of rows without any filter
+        To check whether all columns are present in datatable
+        and length of rows without any filter
         """
         batches = Batch.objects.annotate(
             total_trainee=Count(
@@ -339,9 +339,9 @@ class BatchDatatableTest(BaseTestCase):
         self.assertEqual(response.status_code, 200)
 
         # Check whether row details are correct
-        for row in range(len(batches)):
-            expected_value = batches[row]
-            received_value = response.json()["data"][row]
+        for index, batch in enumerate(batches):
+            expected_value = batch
+            received_value = response.json()["data"][index]
             self.assertEqual(expected_value.pk, int(received_value["pk"]))
             self.assertEqual(expected_value.name, received_value["name"])
             self.assertEqual(

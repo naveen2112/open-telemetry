@@ -1,11 +1,12 @@
+"""
+Django test cases for create, update the TraineeHoliday module
+"""
 import datetime
 
 from dateutil.relativedelta import relativedelta
 from django.forms import model_to_dict
 from django.urls import reverse
-from django.utils import timezone
 from model_bakery import baker
-from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
 from hubble.models import TraineeHoliday
@@ -13,7 +14,7 @@ from hubble.models import TraineeHoliday
 
 class TraineeHolidayCreateTest(BaseTestCase):
     """
-    This class is responsible for testing the Trainee Holiday CREATE feature in Batch Holiday module
+    This class is responsible for testing the Trainee Holiday CREATE feature
     """
 
     create_route_name = "holiday.create"
@@ -61,7 +62,7 @@ class TraineeHolidayCreateTest(BaseTestCase):
         )
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertEqual(response.status_code, 200)
-        self.assertDatabaseHas(
+        self.assert_database_has(
             "TraineeHoliday",
             {
                 "date_of_holiday": data["date_of_holiday"],
@@ -95,9 +96,7 @@ class TraineeHolidayCreateTest(BaseTestCase):
         To makes sure that the unique fields are validated
         """
         data = self.get_valid_inputs()
-        self.make_post_request(
-            reverse(self.create_route_name, args=[self.batch_id]), data
-        )
+        self.make_post_request(reverse(self.create_route_name, args=[self.batch_id]), data)
         response = self.make_post_request(
             reverse(self.create_route_name, args=[self.batch_id]), data
         )
@@ -137,11 +136,8 @@ class TraineeHolidayShowTest(BaseTestCase):
         """
         Checks what happens when valid inputs are given for all fields
         """
-        self.maxDiff = None
         holiday = TraineeHoliday.objects.filter(batch_id=self.batch_id).first()
-        response = self.make_get_request(
-            reverse(self.update_show_route_name, args=[holiday.id])
-        )
+        response = self.make_get_request(reverse(self.update_show_route_name, args=[holiday.id]))
         data = model_to_dict(TraineeHoliday.objects.get(id=holiday.id))
         data["date_of_holiday"] = data["date_of_holiday"].strftime("%Y-%m-%d")
         self.assertJSONEqual(
@@ -159,7 +155,7 @@ class TraineeHolidayShowTest(BaseTestCase):
 
 class TraineeHolidayUpdateTest(BaseTestCase):
     """
-    This class is responsible for testing the Trainee Holiday UPDATE feature in Batch Holiday module
+    This class is responsible for testing the Trainee Holiday UPDATE feature
     """
 
     update_route_name = "holiday.edit"
@@ -206,7 +202,7 @@ class TraineeHolidayUpdateTest(BaseTestCase):
         )
         self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
         self.assertEqual(response.status_code, 200)
-        self.assertDatabaseHas(
+        self.assert_database_has(
             "TraineeHoliday",
             {
                 "date_of_holiday": data["date_of_holiday"],
@@ -269,7 +265,7 @@ class TraineeHolidayUpdateTest(BaseTestCase):
 
 class TraineeHolidayDeleteTest(BaseTestCase):
     """
-    This class is responsible for testing the Trainee Holiday DELETE feature in Batch Holiday module
+    This class is responsible for testing the Trainee Holiday DELETE feature
     """
 
     delete_route_name = "holiday.delete"
@@ -291,14 +287,12 @@ class TraineeHolidayDeleteTest(BaseTestCase):
         """
         holiday = TraineeHoliday.objects.filter(batch_id=self.batch_id).first()
         self.check_start_end_date()
-        response = self.make_delete_request(
-            reverse(self.delete_route_name, args=[holiday.id])
-        )
+        response = self.make_delete_request(reverse(self.delete_route_name, args=[holiday.id]))
         self.assertJSONEqual(
             self.decoded_json(response), {"message": "Holiday deleted succcessfully"}
         )
         self.assertEqual(response.status_code, 200)
-        self.assertDatabaseNotHas(
+        self.assert_database_not_has(
             "TraineeHoliday",
             {
                 "date_of_holiday": holiday.date_of_holiday,
@@ -320,7 +314,7 @@ class TraineeHolidayDeleteTest(BaseTestCase):
 
 class TraineeHolidayDatatableTest(BaseTestCase):
     """
-    This class is responsible for testing the Trainee Holiday DATATABLE feature in Batch Holiday module
+    This class is responsible for testing the Trainee Holiday DATATABLE feature
     """
 
     datatable_route_name = "holiday-datatable"
@@ -355,15 +349,13 @@ class TraineeHolidayDatatableTest(BaseTestCase):
             "length": 100,
             "batch": self.batch_id,
         }
-        response = self.make_post_request(
-            reverse(self.datatable_route_name), data=payload
-        )
+        response = self.make_post_request(reverse(self.datatable_route_name), data=payload)
         self.assertEqual(response.status_code, 200)
 
         # Check whether row details are correct
-        for row in range(len(holidays)):
-            expected_value = holidays[row]
-            received_value = response.json()["data"][row]
+        for index, holiday in range(holidays):
+            expected_value = holiday
+            received_value = response.json()["data"][index]
             self.assertEqual(expected_value.pk, int(received_value["pk"]))
             self.assertEqual(
                 expected_value.date_of_holiday.strftime("%d %b %Y"),

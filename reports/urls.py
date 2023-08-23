@@ -1,7 +1,10 @@
-from django.urls import path, include, register_converter
-from reports import views
-from hubble import views as sso_view
+"""
+Report app url configuration
+"""
+from django.urls import include, path
 
+from hubble import views as sso_view
+from reports import views
 
 urlpatterns = [
     path("auth", include("hubble.urls")),

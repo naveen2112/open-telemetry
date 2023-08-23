@@ -26,7 +26,7 @@ Batch
 
 {% block body %}
 <div class="jquery-modal current hidden batch-model" id="modal">
-    <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
+    <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white  jquery-modal-body">
         <p class="font-semibold text-lg mb-10" id="open_modal">Create Batch</p>
         <form method="post" class="timeline-form" id="timeline-create-form">
             <div class="modal-body">
@@ -59,7 +59,7 @@ Batch
         <span class="absolute top-2 left-2"><span class="hbl hbl-search-icon text-dark-black-50 text-2xl"></span></span>
     </div>
 </div>
-<table id="batch-table" class="display border-0 table-with-no-border dataTable no-footer" style="width: 100%;"
+<table id="batch-table" class="display border-0 table-with-no-border dataTable no-footer""
     role="grid" aria-describedby="batch-table_info">
 </table>
 {% endblock %}

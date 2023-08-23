@@ -34,7 +34,7 @@ RUN poetry install --no-interaction --no-ansi --no-root --no-dev
 ADD . .
 RUN mkdir -p /var/app/session_files
 RUN mkdir -p /var/app/staticfiles
-RUN python manage.py collectstatic
+RUN python manage.py collectstatic --noinput
 
 ADD docker/app/entrypoint.sh /usr/bin/
 RUN chmod +x /usr/bin/entrypoint.sh

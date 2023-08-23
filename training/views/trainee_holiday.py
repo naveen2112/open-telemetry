@@ -1,4 +1,7 @@
-import json
+"""
+Django view and related functions for managing trainee holiday, 
+including creating, updating, deleting, and displaying details of trainee holiday
+"""
 import logging
 
 from django.contrib.auth.decorators import login_required
@@ -14,10 +17,10 @@ from django.views.generic import DetailView, FormView
 from core import template_utils
 from core.utils import (
     CustomDatatable,
-    validate_authorization,
     schedule_timeline_for_sub_batch,
+    validate_authorization,
 )
-from hubble.models import Batch, TraineeHoliday, SubBatch
+from hubble.models import Batch, SubBatch, TraineeHoliday
 from training.forms import TraineeHolidayForm
 
 
@@ -70,9 +73,15 @@ class TraineeHolidayDataTable(LoginRequiredMixin, CustomDatatable):
     ]
 
     def get_initial_queryset(self, request=None):
+        """
+        The function returns an initial queryset of objects from a model, filtering out
+        """
         return self.model.objects.filter(batch=request.POST.get("batch"))
 
     def customize_row(self, row, obj):
+        """
+        The function customize_row customizes a row by adding buttons based on the user's role.
+        """
         buttons = "-"
         if self.request.user.is_admin_user:
             buttons = template_utils.holiday_edit_button(
@@ -80,12 +89,10 @@ class TraineeHolidayDataTable(LoginRequiredMixin, CustomDatatable):
             ) + template_utils.delete_button(
                 "deleteHoliday('" + reverse("holiday.delete", args=[obj.id]) + "')"
             )
-        row[
-            "action"
-        ] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
         row["date_of_holiday"] = obj.date_of_holiday.strftime("%d %b %Y")
         row["days"] = obj.date_of_holiday.strftime("%A")
-        return
+        return row
 
 
 @login_required
@@ -121,17 +128,17 @@ def create_trainee_holiday(request, pk):
 
 @login_required
 @validate_authorization()
-def trainee_holiday_data(request, pk):
+def trainee_holiday_data(request, pk):  # pylint: disable=unused-argument
     """
     Trainee Holiday Data
     """
     try:
         data = {
             "holiday": model_to_dict(get_object_or_404(TraineeHoliday, id=pk))
-        }  # Covert django queryset object to dict,which can be easily serialized and sent as a JSON response
+        }  # Covert django queryset object to dict
         return JsonResponse(data, safe=False)
-    except Exception as e:
-        logging.error(f"An error has occured while fetching the batch data \n{e}")
+    except Exception as exception:
+        logging.error("An error has occured while fetching the batch data \n%e", exception)
         return JsonResponse({"message": "Error while getting the data!"}, status=500)
 
 
@@ -166,7 +173,7 @@ def update_trainee_holiday(request, pk):
 @login_required
 @validate_authorization()
 @require_http_methods(["DELETE"])
-def delete_trainee_holiday(request, pk):
+def delete_trainee_holiday(request, pk):  # pylint: disable=unused-argument
     """
     Delete Trainee Holiday
     """
@@ -177,8 +184,6 @@ def delete_trainee_holiday(request, pk):
         for sub_batch in sub_batches:
             schedule_timeline_for_sub_batch(sub_batch, is_create=False)
         return JsonResponse({"message": "Holiday deleted succcessfully"})
-    except Exception as e:
-        logging.error(f"An error has occured while deleting the trainee holiday \n{e}")
-        return JsonResponse(
-            {"message": "Error while deleting the trainee holiday!"}, status=500
-        )
+    except Exception as exception:
+        logging.error("An error has occured while deleting the trainee holiday \n%e", exception)
+        return JsonResponse({"message": "Error while deleting the trainee holiday!"}, status=500)

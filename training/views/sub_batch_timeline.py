@@ -1,3 +1,7 @@
+"""
+Django view that handles the creation, update, and deletion of sub-batch 
+timelines and tasks, and provides data for displaying the timelines in a datatable
+"""
 import logging
 
 from django.contrib.auth.decorators import login_required
@@ -11,15 +15,18 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView
 
 from core import template_utils
-from core.utils import (CustomDatatable, schedule_timeline_for_sub_batch,
-                        validate_authorization)
+from core.utils import (
+    CustomDatatable,
+    schedule_timeline_for_sub_batch,
+    validate_authorization,
+)
 from hubble.models import SubBatch, SubBatchTaskTimeline
 from training.forms import SubBatchTimelineForm
 
 
 class SubBatchTimeline(LoginRequiredMixin, DetailView):
     """
-    Sub batch Timeline
+    Sub batch Timeline is used to display the timeline for a sub batch
     """
 
     extra_context = {"form": SubBatchTimelineForm()}
@@ -27,6 +34,8 @@ class SubBatchTimeline(LoginRequiredMixin, DetailView):
     template_name = "sub_batch/timeline.html"
 
 
+# The `SubBatchTimelineDataTable` class is a custom datatable for displaying and managing timeline
+# tasks associated with a sub-batch.
 class SubBatchTimelineDataTable(LoginRequiredMixin, CustomDatatable):
     """
     Timeline Template Task Datatable
@@ -56,36 +65,32 @@ class SubBatchTimelineDataTable(LoginRequiredMixin, CustomDatatable):
     ]
 
     def get_initial_queryset(self, request=None):
-        return self.model.objects.filter(
-            sub_batch=request.POST.get("sub_batch_id")
-        )
+        """
+        The function returns a queryset of objects filtered by the "sub_batch_id" value from the
+        request's POST data.
+        """
+        return self.model.objects.filter(sub_batch=request.POST.get("sub_batch_id"))
 
     def customize_row(self, row, obj):
-        row["disabled"] = (obj.start_date.date() <= timezone.now().date())
-        row[
-            "action"
-        ] = f"<div class='form-inline justify-content-center'>-</div>"
+        """
+        The function customize_row customizes the values of certain fields in a row object based on
+        the properties of an input object.
+        """
+        row["disabled"] = obj.start_date.date() <= timezone.now().date()
+        row["action"] = "<div class='form-inline justify-content-center'>-</div>"
         if self.request.user.is_admin_user:
-            row[
-                "action"
-            ] = f"<div class='form-inline justify-content-center'>-</div>"
+            row["action"] = "<div class='form-inline justify-content-center'>-</div>"
             if obj.can_editable():
                 buttons = template_utils.edit_button(
                     reverse("sub_batch.timeline.show", args=[obj.id])
                 ) + template_utils.delete_button(
-                    "deleteTimeline('"
-                    + reverse(
-                        "sub_batch.timeline.delete", args=[obj.id]
-                    )
-                    + "')"
+                    "deleteTimeline('" + reverse("sub_batch.timeline.delete", args=[obj.id]) + "')"
                 )
-                row[
-                    "action"
-                ] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
+                row["action"] = f"<div class='form-inline justify-content-center'>{buttons}</div>"
         row["start_date"] = obj.start_date.strftime("%d %b %Y")
         row["end_date"] = obj.end_date.strftime("%d %b %Y")
         row["order"] = f"<span data-id='{obj.id}'>{obj.order}</span>"
-        return
+        return row
 
 
 @login_required()
@@ -94,6 +99,7 @@ def create_sub_batch_timeline(request, pk):
     """
     Create Task Timeline
     """
+    response_data = {}  # Initialize an empty dictionary
     if request.method == "POST":
         form = SubBatchTimelineForm(request.POST)
         sub_batch = SubBatch.objects.get(id=pk)
@@ -114,37 +120,39 @@ def create_sub_batch_timeline(request, pk):
                     task.order = order
                     task.save()
             schedule_timeline_for_sub_batch(sub_batch, is_create=False)
-
-            return JsonResponse({"status": "success"})
+            response_data["status"] = "success"
         else:
             field_errors = form.errors.as_json()
             non_field_errors = form.non_field_errors().as_json()
-            return JsonResponse(
-                {
-                    "status": "error",
-                    "field_errors": field_errors,
-                    "non_field_errors": non_field_errors,
-                }
-            )
+            response_data = {
+                "status": "error",
+                "field_errors": field_errors,
+                "non_field_errors": non_field_errors,
+            }
+    return JsonResponse(response_data)
 
 
 @login_required()
 @validate_authorization()
-def sub_batch_timeline_data(request, pk):
+def sub_batch_timeline_data(request, pk):  # pylint: disable=unused-argument
     """
     Sub batch timeline data
     """
     data = {
-        "timeline": model_to_dict(
-            get_object_or_404(SubBatchTaskTimeline, id=pk)
-        )
-    }  # Covert django queryset object to dict,which can be easily serialized and sent as a JSON response
+        "timeline": model_to_dict(get_object_or_404(SubBatchTaskTimeline, id=pk))
+    }  # Covert django queryset object to dict,which can be easily serialized
+    # and sent as a JSON response
     return JsonResponse(data, safe=False)
 
 
 @login_required()
 @validate_authorization()
 def update_sub_batch_timeline(request, pk):
+    """
+    The function update_sub_batch_timeline updates the timeline of a sub-batch
+    task based on user input, and returns a JSON response indicating the
+    success or failure of the update.
+    """
     current_task = get_object_or_404(SubBatchTaskTimeline, id=pk)
     previous_duration = current_task.days
     sub_batch = SubBatch.objects.get(id=current_task.sub_batch_id)
@@ -156,9 +164,7 @@ def update_sub_batch_timeline(request, pk):
                 timeline_task.sub_batch = sub_batch
                 timeline_task.created_by = request.user
             form.save()
-            schedule_timeline_for_sub_batch(
-                sub_batch=sub_batch, is_create=False
-            )
+            schedule_timeline_for_sub_batch(sub_batch=sub_batch, is_create=False)
             return JsonResponse({"status": "success"})
         field_errors = form.errors.as_json()
         non_field_errors = form.non_field_errors().as_json()
@@ -180,23 +186,24 @@ def update_sub_batch_timeline(request, pk):
 @login_required()
 @validate_authorization()
 def update_task_sequence(request):
+    """
+    The update_task_sequence function updates the order of tasks in a
+    timeline and schedules the timeline for a sub-batch if all the tasks
+    belong to the current timeline.
+    """
     task_order = request.POST.getlist("data[]")
     check_valid_tasks = SubBatchTaskTimeline.objects.filter(
         sub_batch_id=request.POST.get("sub_batch_id"), id__in=task_order
     ).count()
     if check_valid_tasks == len(task_order):
-        sub_batch_task = SubBatchTaskTimeline.objects.get(
-            id=task_order[0]
-        )
+        sub_batch_task = SubBatchTaskTimeline.objects.get(id=task_order[0])
         order = 0
         for task_id in task_order:
             task = SubBatchTaskTimeline.objects.get(id=task_id)
             order += 1
             task.order = order
             task.save()
-        schedule_timeline_for_sub_batch(
-            sub_batch_task.sub_batch, is_create=False
-        )
+        schedule_timeline_for_sub_batch(sub_batch_task.sub_batch, is_create=False)
         return JsonResponse({"status": "success"})
     return JsonResponse(
         {
@@ -210,8 +217,9 @@ def update_task_sequence(request):
 @validate_authorization()
 @require_http_methods(
     ["DELETE"]
-)  # This decorator ensures that the view function is only accessible through the DELETE HTTP method
-def delete_sub_batch_timeline(request, pk):
+)  # This decorator ensures that the view function is only accessible
+# through the DELETE HTTP method
+def delete_sub_batch_timeline(request, pk):  # pylint: disable=unused-argument
     """
     Delete Sub Batch Task
     Soft delete the Sub Batch Task and record the deletion time in deleted_at field
@@ -224,11 +232,7 @@ def delete_sub_batch_timeline(request, pk):
                 sub_batch=sub_batch.id,
                 order__gt=timeline.order,
             )  # Remaining task after the deletion of the task
-            if (
-                SubBatchTaskTimeline.objects.filter(
-                    sub_batch=sub_batch.id
-                ).count()
-            ) > 1:
+            if (SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch.id).count()) > 1:
                 # Check whether multiple tasks are available before deleting
                 order = timeline.order - 1
                 timeline.delete()
@@ -236,27 +240,23 @@ def delete_sub_batch_timeline(request, pk):
                     order += 1
                     task.order = order
                     task.save()
-                schedule_timeline_for_sub_batch(
-                    sub_batch=sub_batch, is_create=False
-                )
-                return JsonResponse(
-                    {"message": "Task deleted succcessfully"}
-                )
+                schedule_timeline_for_sub_batch(sub_batch=sub_batch, is_create=False)
+                return JsonResponse({"message": "Task deleted succcessfully"})
             return JsonResponse(
                 {
-                    "message": "This is the last task, Atleast one task should exist in the timeline"
+                    "message": "This is the last task, Atleast one"
+                    " task should exist in the timeline"
                 },
                 status=500,
             )
-        else:
-            return JsonResponse(
-                {"message": "This task has been already started!"},
-                status=500,
-            )
-    except Exception as e:
-        logging.error(
-            f"An error has occured while deleting the data \n{e}"
-        )
         return JsonResponse(
-            {"message": "Error while deleting Task!"}, status=500
+            {"message": "This task has been already started!"},
+            status=500,
         )
+    except Exception as exception:
+        logging.error(
+            "An error has occurred while deleting the data \n%s",
+            exception,
+        )
+
+        return JsonResponse({"message": "Error while deleting Task!"}, status=500)

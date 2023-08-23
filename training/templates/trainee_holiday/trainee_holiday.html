@@ -22,7 +22,7 @@ Trainee Holiday
                 >
                 Holidays
             </p>
-            <h4 class="text-lg text-black ">{{ timeline.name|title }}</h3>
+            <h4 class="text-lg text-black">{{ timeline.name|title }}</h4>
         </div>
         <div class="text-dark-black-50 text-sm">
             List of All Holidays
@@ -44,17 +44,15 @@ Trainee Holiday
 <div class="flex mt-5">
     <div class="px-5 py-0 h-full w-1020">
         <span
-            class="text-dark-red bg-dark-red-10 text-dark-blue bg-dark-blue-10 text-mild-green bg-mild-green-10 text-dark-black bg-dark-black-10 rounded-xl px-1.5 py-0.5"
-            style="display: none;"></span>
-        <table id="trainee-holiday-table" class="display border-0 table-with-no-border dataTable no-footer" style="width: 100%;"
+            class="text-dark-red bg-dark-red-10 text-dark-blue bg-dark-blue-10 text-mild-green bg-mild-green-10 text-dark-black bg-dark-black-10 rounded-xl px-1.5 py-0.5 hidden"></span>
+        <table id="trainee-holiday-table" class="display border-0 table-with-no-border dataTable no-footer w-100"
             role="grid" aria-describedby="trainee-holiday-table-info">
         </table>
     </div>
     {% if request.user.is_admin_user %}
         <div class="rounded-xl fixed top-0 py-5 right-0 mr-5 mt-9 bg-white">
             <span
-                class="text-dark-red bg-dark-red-10 text-dark-blue bg-dark-blue-10 text-mild-green bg-mild-green-10 text-dark-black bg-dark-black-10 rounded-xl px-1.5 py-0.5"
-                style="display: none;"></span>
+                class="text-dark-red bg-dark-red-10 text-dark-blue bg-dark-blue-10 text-mild-green bg-mild-green-10 text-dark-black bg-dark-black-10 rounded-xl px-1.5 py-0.5 hidden"></span>
             <form method="post" class="holiday-form" id="holiday-create-form">
                 {% csrf_token %}
                 <div class="px-4 rounded-xl">

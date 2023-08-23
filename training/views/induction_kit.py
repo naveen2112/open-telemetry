@@ -1,3 +1,7 @@
+"""
+Django view and a function for serving PDF files from a static folder, with 
+authentication required for accessing the view
+"""
 import os
 
 from django.conf import settings
@@ -25,12 +29,10 @@ class InductionKit(LoginRequiredMixin, TemplateView):
 
 
 @login_required()
-def induction_kit_detail(request, text):
+def induction_kit_detail(request, text):  # pylint: disable=unused-argument
     """
     Induction Kit Detail
     """
     static_path = list(settings.STATICFILES_DIRS)
     file_path = f"{static_path[0]}/training/pdf/{text}"
-    return FileResponse(
-        open(file_path, "rb"), content_type="application/pdf"
-    )
+    return FileResponse(open(file_path, "rb"), content_type="application/pdf")
