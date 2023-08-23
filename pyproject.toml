@@ -19,7 +19,6 @@ openpyxl = "^3.1.2"
 model-bakery = "^1.12.0"
 faker = "^18.10.1"
 psycopg2 = "^2.9.6"
-pre-commit = "^3.3.3"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -29,6 +28,7 @@ isort = "^5.12.0"
 pylint = "^2.17.4"
 djlint = "^1.31.1"
 coverage = "^7.2.7"
+pre-commit = "^3.3.3"
 
 [build-system]
 requires = ["poetry-core"]
