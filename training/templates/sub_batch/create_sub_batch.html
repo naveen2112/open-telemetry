@@ -79,12 +79,12 @@
                     <label class="w-64 flex justify-center border-dashed border-2 border-dark-black-35 rounded-md items-center cursor-pointer "
                            for="file_upload"
                            id="profileImageUpload">
-                        <span class="text-dark-black-35 text-clip overflow-hidden text-sm file_input_text text-center">
+                        <span class="text-dark-black-35 mt-2 mb-3 text-clip overflow-hidden text-sm file_input_text text-center">
                             Click Here To Upload File
                             <br>
                             Excel File Only
                         </span>
-                        <span class="hidden text-dark-black-35 text-clip overflow-hidden text-sm file_input_name text-center"></span>
+                        <span class="hidden text-dark-black-35 mt-2 mb-3 text-clip overflow-hidden text-sm file_input_name text-center"></span>
                     </label>
                     <div class="text-dark-red ml-10 mt-7 text-sm font-normal mb-7 inline-flex items-center cursor-pointer remove-file">
                         Remove File
@@ -176,10 +176,12 @@
         };
 
         $(document).ready(function() {
+            $(".remove-file").hide();
             function readURL(input) {
                 if (input.files && input.files[0]) {
                     let fileName = input.files[0].name;
                     $('.file_input_name').show().html(fileName);
+                    $(".remove-file").show();
                     $('.file_input_text').hide();
                 }
             }
@@ -192,6 +194,7 @@
                 $("#file_upload").val(null);
                 $('.file_input_name').hide();
                 $('.file_input_text').show();
+                $(".remove-file").hide();
             });
         });
 
