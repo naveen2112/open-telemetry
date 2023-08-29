@@ -37,6 +37,10 @@ ADMIN_EMAILS = [
     "sanjay@mallow-tech.com",
 ]
 
+PROBATIONER_EMAILS = [
+    "ajit.thenraj@mallow-tech.com",
+]
+
 GOOD = "Good"
 MEET_EXPECTATION = "Meet Expectation"
 ABOVE_AVERAGE = "Above Average"
