@@ -285,9 +285,7 @@ class SubBatchCreateTest(BaseTestCase):
         self.validate_form_errors(field_errors=field_errors, form=SubBatchForm(data=data))
 
     def test_inactive_timeline_has_no_tasks(self):
-        """
-        Check what happpens when a timeline with no task is selected
-        """
+
         team_id = self.create_team().id
         timeline = baker.make("hubble.Timeline", team_id=team_id)
         file_values = {
