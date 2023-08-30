@@ -248,7 +248,7 @@ class BaseTestCase(TestCase):
     # It is used to disable the "too-mnay-arguments", according to PEP8
     # guidlines if the function has more than 5 arguments in the function
     # it will make code harder to maintain
-    # pylint: disable-next=dangerous-default-value
+    # pylint: disable-next=dangerous-default-value, too-many-arguments
     def validate_form_errors(
         self,
         form,
