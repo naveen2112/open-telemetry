@@ -194,11 +194,11 @@ class SubBatchForm(forms.ModelForm):
     """
 
     primary_mentor_id = forms.ModelChoiceField(
-        queryset=models.User.objects.filter(is_employed=True)
+        queryset=models.User.objects.exclude(status=USER_STATUS_INTERN).filter(is_employed=True)
     )
 
     secondary_mentor_ids = forms.ModelMultipleChoiceField(
-        queryset=models.User.objects.filter(is_employed=True),
+        queryset=models.User.objects.exclude(status=USER_STATUS_INTERN).filter(is_employed=True),
         error_messages={
             "invalid_choice": "Select a valid choice. "
             "That choice is not one of the available choices."
@@ -243,11 +243,18 @@ class SubBatchForm(forms.ModelForm):
         The function checks if a selected team's active timeline
         has any tasks and raises a validation error if it doesn't.
         """
-        if not models.TimelineTask.objects.filter(timeline=self.cleaned_data["timeline"].id):
-            raise ValidationError(
-                "The Selected Team's Active Timeline doesn't have any tasks.",
-                code="timeline_has_no_tasks",
-            )
+        if models.Timeline.objects.filter(id=self.cleaned_data["timeline"].id, is_active=True):
+            if not models.TimelineTask.objects.filter(timeline=self.cleaned_data["timeline"].id):
+                raise ValidationError(
+                    "The Selected Team's Active Timeline doesn't have any tasks.",
+                    code="timeline_has_no_tasks",
+                )
+        else:
+            if not models.TimelineTask.objects.filter(timeline=self.cleaned_data["timeline"].id):
+                raise ValidationError(
+                    "The Selected Team's In Active Timeline doesn't have any tasks.",
+                    code="timeline_has_no_tasks",
+                )
         return self.cleaned_data["timeline"]
 
     def clean_start_date(self):

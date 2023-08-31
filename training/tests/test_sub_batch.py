@@ -262,7 +262,7 @@ class SubBatchCreateTest(BaseTestCase):
         Check what happpens when a timeline with no task is selected
         """
         team_id = self.create_team().id
-        timeline = baker.make("hubble.Timeline", team_id=team_id)
+        timeline = baker.make("hubble.Timeline", team_id=team_id, is_active=True)
         file_values = {
             "employee_id": [self.users[1].employee_id, self.users[2].employee_id],
             "college": [self.faker.name(), self.faker.name()],
@@ -283,6 +283,42 @@ class SubBatchCreateTest(BaseTestCase):
             "timeline": {"timeline_has_no_tasks"},
         }
         self.validate_form_errors(field_errors=field_errors, form=SubBatchForm(data=data))
+
+    def test_inactive_timeline_has_no_tasks(self):
+        """
+        Check what happpens when a timeline with no task is selected
+        """
+        team_id = self.create_team().id
+        timeline = baker.make("hubble.Timeline", team_id=team_id)
+        file_values = {
+            "employee_id": [self.users[1].employee_id, self.users[2].employee_id],
+            "college": [self.faker.name(), self.faker.name()],
+        }
+        valid_file = self.create_memory_file(file_values)
+        data = self.get_valid_inputs(
+            {
+                "users_list_file": valid_file,
+                "team": team_id,
+                "timeline": timeline.id,
+            }
+        )
+        self.make_post_request(
+            reverse(self.create_route_name, args=[self.batch_id]),
+            data=data,
+        )
+        field_errors = {
+            "timeline": {"timeline_has_no_tasks"},
+        }
+        error_message = {
+            "timeline_has_no_tasks": "The Selected Team's In Active Timeline"
+            " doesn't have any tasks."
+        }
+        custom_validation_error_message = error_message
+        self.validate_form_errors(
+            field_errors=field_errors,
+            custom_validation_error_message=custom_validation_error_message,
+            form=SubBatchForm(data=data),
+        )
 
     def test_file_validation(self):
         """
@@ -580,7 +616,23 @@ class SubBatchUpdateTest(BaseTestCase):
             "The Selected date falls on a holiday, please reconsider the start date",
         )
 
-    def test_timeline_has_no_tasks(self):
+    def test_active_timeline_has_no_tasks(self):
+        """
+        Check what happpens when a timeline with no task is selected
+        """
+        team_id = self.create_team().id
+        timeline = baker.make("hubble.Timeline", team_id=team_id, is_active=True)
+        data = self.get_valid_inputs({"team": team_id, "timeline": timeline.id})
+        self.make_post_request(
+            reverse(self.update_route_name, args=[self.sub_batch_id]),
+            data=data,
+        )
+        field_errors = {
+            "timeline": {"timeline_has_no_tasks"},
+        }
+        self.validate_form_errors(field_errors=field_errors, form=SubBatchForm(data=data))
+
+    def test_inactive_timeline_has_no_tasks(self):
         """
         Check what happpens when a timeline with no task is selected
         """
@@ -594,7 +646,16 @@ class SubBatchUpdateTest(BaseTestCase):
         field_errors = {
             "timeline": {"timeline_has_no_tasks"},
         }
-        self.validate_form_errors(field_errors=field_errors, form=SubBatchForm(data=data))
+        error_message = {
+            "timeline_has_no_tasks": "The Selected Team's In Active Timeline"
+            " doesn't have any tasks."
+        }
+        custom_validation_error_message = error_message
+        self.validate_form_errors(
+            field_errors=field_errors,
+            custom_validation_error_message=custom_validation_error_message,
+            form=SubBatchForm(data=data),
+        )
 
 
 class SubBatchShowTest(BaseTestCase):

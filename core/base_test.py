@@ -248,13 +248,14 @@ class BaseTestCase(TestCase):
     # It is used to disable the "too-mnay-arguments", according to PEP8
     # guidlines if the function has more than 5 arguments in the function
     # it will make code harder to maintain
-    # pylint: disable-next=dangerous-default-value
+    # pylint: disable-next=dangerous-default-value, too-many-arguments
     def validate_form_errors(
         self,
         form,
         field_errors,
         current_value={},
         validation_parameter={},
+        custom_validation_error_message={},
     ):
         """
         Validates form errors by retrieving error messages and asserting
@@ -262,7 +263,7 @@ class BaseTestCase(TestCase):
         """
         for key, values in field_errors.items():
             for value in values:
-                error_message = self.get_error_message(
-                    key, value, current_value, validation_parameter
-                )
+                error_message = custom_validation_error_message.get(
+                    value
+                ) or self.get_error_message(key, value, current_value, validation_parameter)
                 self.assertFormError(form, key, error_message)
