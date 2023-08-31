@@ -150,7 +150,7 @@ urlpatterns = [
         name="sub-batch.edit",
     ),
     path(
-        "batch/sub-batch/<int:pk>",
+        "sub-batch/<int:pk>",
         sub_batch.SubBatchDetail.as_view(),
         name="sub-batch.detail",
     ),
@@ -176,7 +176,7 @@ urlpatterns = [
     ),
     # sub_batch_timeline
     path(
-        "batch/sub-batch/<int:pk>/timeline",
+        "sub-batch/<int:pk>/timeline",
         sub_batch_timeline.SubBatchTimeline.as_view(),
         name="sub-batch.timeline",
     ),
@@ -212,7 +212,7 @@ urlpatterns = [
     ),
     # user_reports_crud
     path(
-        "batch/sub-batch/user/<int:pk>",
+        "user/<int:pk>",
         user_journey.TraineeJourneyView.as_view(),
         name="user_reports",
     ),
