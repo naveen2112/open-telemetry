@@ -328,7 +328,7 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
         {"name": "pk", "visible": False, "searchable": False},
         {
             "name": "user",
-            "title": "Trainee's",
+            "title": "Trainee's Name",
             "foreign_field": "user__name",
             "visible": True,
             "searchable": True,
@@ -342,7 +342,7 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
         },
         {
             "name": "no_of_retries",
-            "title": "Total Retries (%)",
+            "title": "Total Retries",
             "visible": True,
             "searchable": False,
         },

@@ -153,7 +153,7 @@ class TimelineTaskForm(forms.ModelForm):
                     "class": "w-full block border border-primary-dark-30 \
                         rounded-md focus:outline-none focus:ring-transparent \
                             focus:ring-offset-0 h-9 p-2",
-                    "placeholder": "Timeline name...",
+                    "placeholder": "Task name...",
                 }
             ),
         }
@@ -218,10 +218,11 @@ class SubBatchForm(forms.ModelForm):
                 "primary_mentor_id", None
             )
 
-        if self.data.get("secondary_mentor_ids", None):
-            self.fields["secondary_mentor_ids"].widget.attrs["initialValue"] = self.data.get(
-                "secondary_mentor_ids", None
-            )
+        if self.data.getlist("secondary_mentor_ids", None):
+            self.fields["secondary_mentor_ids"].widget.attrs["initialValue"] = [
+                int(secondary_mentor)
+                for secondary_mentor in self.data.getlist("secondary_mentor_ids")
+            ]
 
         self.fields["name"].validators.append(MinLengthValidator(3))
         self.fields["primary_mentor_id"].label = "Primary Mentor"
@@ -448,8 +449,11 @@ class SubBatchTimelineForm(forms.ModelForm):
             .order_by("-order")
             .first()
         )
-        if last_task.end_date < timezone.now():
-            if last_task.order >= self.cleaned_data["order"]:
+        if last_task.start_date < timezone.now() < last_task.end_date:
+            if (
+                last_task.order >= self.cleaned_data["order"]
+                or last_task.order + 1 < self.cleaned_data["order"]
+            ):
                 raise ValidationError(
                     f"The order value must be {last_task.order + 1}",
                     code="invalid_order",
@@ -467,7 +471,7 @@ class SubBatchTimelineForm(forms.ModelForm):
                 raise ValidationError(
                     (
                         f"The current order of the task is invalid."
-                        f"The valid input for order ranges form {valid_order_value[0]}-{valid_order_value[-1] + 1}."  # pylint: disable=C0301
+                        f"The valid input for order ranges from {valid_order_value[0]}-{valid_order_value[-1] + 1}."  # pylint: disable=C0301
                     ),
                     code="invalid_order",
                 )

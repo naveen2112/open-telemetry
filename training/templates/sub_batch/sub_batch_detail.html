@@ -247,7 +247,7 @@
                         $('.form_errors').remove();
                         $('.page-loader').hide();
                         if (data.status === 'success') {
-                            $('#sub-batch-trainees-table').DataTable().ajax.reload();
+                            location.reload();
                             closeModal('modal');
                         } else {
                             renderFormError(data);
@@ -266,7 +266,7 @@
                         success: function(data) {
                             removeErrors();
                             $('.page-loader').hide();
-                            $('#sub-batch-trainees-table').DataTable().ajax.reload();
+                            location.reload();
                         },
                         error: function() {
                             $('.page-loader').hide();
