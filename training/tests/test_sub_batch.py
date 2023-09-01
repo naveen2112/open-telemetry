@@ -6,6 +6,7 @@ import io
 
 import pandas as pd
 from django.db.models import Count, Q
+from django.http.request import QueryDict
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import strip_tags
@@ -82,6 +83,7 @@ class SubBatchCreateTest(BaseTestCase):
             "primary_mentor_id": primary_mentor_id,
             "secondary_mentor_ids": secondary_mentor_ids,
         }
+        self.query_dict = QueryDict("", mutable=True)
 
     def create_memory_file(self, data):
         """
@@ -162,7 +164,8 @@ class SubBatchCreateTest(BaseTestCase):
             "college": [self.faker.name(), self.faker.name()],
         }
         valid_file = self.create_memory_file(file_values)
-        data = {"users_list_file": valid_file}
+        self.query_dict.update({"users_list_file": valid_file})
+        data = self.query_dict
         self.make_post_request(
             reverse(self.create_route_name, args=[self.batch_id]),
             data=data,
@@ -185,18 +188,17 @@ class SubBatchCreateTest(BaseTestCase):
             "college": [self.faker.name(), self.faker.name()],
         }
         valid_file = self.create_memory_file(file_values)
+        secondary_mentors = [0, 0]
         data = self.get_valid_inputs(
             {
                 "users_list_file": valid_file,
                 "team": self.faker.name(),
                 "timeline": self.faker.name(),
                 "primary_mentor_id": self.faker.name(),
-                "secondary_mentor_ids": [
-                    self.faker.unique.random_int(1, 10),
-                    self.faker.unique.random_int(1, 10),
-                ],
+                "secondary_mentor_ids": secondary_mentors,
             }
         )
+        data.setlist("secondary_mentor_ids", secondary_mentors)
         self.make_post_request(
             reverse(self.create_route_name, args=[self.batch_id]),
             data=data,
@@ -478,6 +480,7 @@ class SubBatchUpdateTest(BaseTestCase):
             "primary_mentor_id": primary_mentor_id,
             "secondary_mentor_ids": secondary_mentor_ids,
         }
+        self.query_dict = QueryDict("", mutable=True)
 
     def test_success(self):
         """
@@ -488,9 +491,6 @@ class SubBatchUpdateTest(BaseTestCase):
             reverse(self.update_route_name, args=[self.sub_batch_id]),
             data=data,
         )
-        # print(data)
-        # print(Team.objects.all().values_list("id", flat=True))
-        # print(response.context["form"])
         self.assertRedirects(response, reverse(self.route_name, args=[self.batch_id]))
         self.assertEqual(response.status_code, 302)
         self.assert_database_has(
@@ -548,7 +548,8 @@ class SubBatchUpdateTest(BaseTestCase):
         """
         This function checks the required validation for the team and name fields
         """
-        data = {}
+        self.query_dict.update({})
+        data = self.query_dict
         self.make_post_request(
             reverse(self.update_route_name, args=[self.sub_batch_id]),
             data=data,
@@ -571,7 +572,7 @@ class SubBatchUpdateTest(BaseTestCase):
                 "team": self.faker.name(),
                 "timeline": self.faker.name(),
                 "primary_mentor_id": self.faker.name(),
-                "secondary_mentor_ids": [self.faker.unique.random_int(1, 10)],
+                "secondary_mentor_ids": self.faker.unique.random_int(1, 10),
             }
         )
         self.make_post_request(

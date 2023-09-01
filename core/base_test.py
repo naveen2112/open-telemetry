@@ -7,6 +7,7 @@ import json
 from django.apps import apps
 from django.conf import settings
 from django.db.models import Q
+from django.http import QueryDict
 from django.test import Client, TestCase
 from django.test.runner import DiscoverRunner
 from django.utils.translation import ngettext_lazy
@@ -116,7 +117,9 @@ class BaseTestCase(TestCase):
         This function is responsible for getting the valid inputs for
         testcases and updating it as per need
         """
-        return {**self.persisted_valid_inputs, **override}
+        query_dict = QueryDict("", mutable=True)
+        query_dict.update({**self.persisted_valid_inputs, **override})
+        return query_dict
 
     def decoded_json(self, response):
         """
