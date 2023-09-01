@@ -218,10 +218,11 @@ class SubBatchForm(forms.ModelForm):
                 "primary_mentor_id", None
             )
 
-        if self.data.get("secondary_mentor_ids", None):
-            self.fields["secondary_mentor_ids"].widget.attrs["initialValue"] = self.data.get(
-                "secondary_mentor_ids", None
-            )
+        if self.data.getlist("secondary_mentor_ids", None):
+            self.fields["secondary_mentor_ids"].widget.attrs["initialValue"] = [
+                int(secondary_mentor)
+                for secondary_mentor in self.data.getlist("secondary_mentor_ids")
+            ]
 
         self.fields["name"].validators.append(MinLengthValidator(3))
         self.fields["primary_mentor_id"].label = "Primary Mentor"
