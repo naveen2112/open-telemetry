@@ -607,7 +607,7 @@ class SubBatchTaskTimelineDeleteTest(BaseTestCase):
             sub_batch=self.sub_batch,
             order=seq(0),
             days=self.faker.random_int(1, 5),
-            start_date=(timezone.now() + timezone.timedelta()).date(),
+            start_date=(timezone.now() + timezone.timedelta(1)).date(),
             _quantity=2,
         )
         self.assert_database_has(
@@ -639,7 +639,7 @@ class SubBatchTaskTimelineDeleteTest(BaseTestCase):
             sub_batch=self.sub_batch,
             order=self.order_count,
             days=self.faker.random_int(1, 5),
-            start_date=(timezone.now() + timezone.timedelta()).date(),
+            start_date=(timezone.now() + timezone.timedelta(1)).date(),
         )
         self.assert_database_has("SubBatchTaskTimeline", {"id": sub_batch_task_timeline.id})
         response = self.make_delete_request(

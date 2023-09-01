@@ -42,7 +42,7 @@ class BatchDataTable(LoginRequiredMixin, CustomDatatable):
         {"name": "name", "visible": True, "searchable": True},
         {
             "name": "number_of_sub_batches",
-            "title": "Number of Sub-Batches",
+            "title": "Number of Sub Batches",
             "searchable": False,
         },
         {

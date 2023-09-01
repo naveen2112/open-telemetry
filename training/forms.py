@@ -153,7 +153,7 @@ class TimelineTaskForm(forms.ModelForm):
                     "class": "w-full block border border-primary-dark-30 \
                         rounded-md focus:outline-none focus:ring-transparent \
                             focus:ring-offset-0 h-9 p-2",
-                    "placeholder": "Timeline name...",
+                    "placeholder": "Task name...",
                 }
             ),
         }
@@ -448,8 +448,11 @@ class SubBatchTimelineForm(forms.ModelForm):
             .order_by("-order")
             .first()
         )
-        if last_task.end_date < timezone.now():
-            if last_task.order >= self.cleaned_data["order"]:
+        if last_task.start_date < timezone.now() < last_task.end_date:
+            if (
+                last_task.order >= self.cleaned_data["order"]
+                or last_task.order + 1 < self.cleaned_data["order"]
+            ):
                 raise ValidationError(
                     f"The order value must be {last_task.order + 1}",
                     code="invalid_order",

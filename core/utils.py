@@ -135,7 +135,7 @@ def calculate_duration_for_task(holidays, start_date, is_half_day, number_of_day
         start_date += datetime.timedelta(1)
         start_date = start_date.replace(hour=9, minute=0)
 
-    if is_leave_day(holidays, start_date):
+    while is_leave_day(holidays, start_date):
         start_date += datetime.timedelta(1)
 
     if is_half_day:
