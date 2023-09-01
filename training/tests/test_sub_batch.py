@@ -822,7 +822,7 @@ class SubBatchDatatableTest(BaseTestCase):
         """
         response = self.make_get_request(reverse(self.route_name, args=[self.batch.id]))
         self.assertTemplateUsed(response, "sub_batch/sub_batch.html")
-        self.assertContains(response, "SubBatch List")
+        self.assertContains(response, "Sub Batch List")
 
     def test_datatable(self):
         """

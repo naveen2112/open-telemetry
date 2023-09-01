@@ -47,7 +47,7 @@ class BatchDataTable(LoginRequiredMixin, CustomDatatable):
         },
         {
             "name": "total_trainee",
-            "title": "No. of Trainee",
+            "title": "No. of Trainees",
             "visible": True,
             "searchable": False,
         },

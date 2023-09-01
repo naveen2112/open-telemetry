@@ -467,7 +467,7 @@ class SubBatchTimelineForm(forms.ModelForm):
                 raise ValidationError(
                     (
                         f"The current order of the task is invalid."
-                        f"The valid input for order ranges form {valid_order_value[0]}-{valid_order_value[-1] + 1}."  # pylint: disable=C0301
+                        f"The valid input for order ranges from {valid_order_value[0]}-{valid_order_value[-1] + 1}."  # pylint: disable=C0301
                     ),
                     code="invalid_order",
                 )

@@ -342,7 +342,7 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
         },
         {
             "name": "no_of_retries",
-            "title": "Total Retries (%)",
+            "title": "Total Retries",
             "visible": True,
             "searchable": False,
         },

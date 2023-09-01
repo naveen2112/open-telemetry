@@ -193,7 +193,7 @@ class BaseTestCase(TestCase):
         elif value == "invalid_order":
             message = (
                 f"The current order of the task is invalid."
-                f"The valid input for order ranges form "
+                f"The valid input for order ranges from "
                 f"{validation_parameter[key][0]}-{validation_parameter[key][-1] + 1}."
             )  # pylint: disable=C0301
         elif value == "zero_order_error":
