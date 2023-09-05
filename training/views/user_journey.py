@@ -78,7 +78,6 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
             .annotate(
                 average_marks=Avg(
                     Subquery(last_attempt_score.values("assessments__score")),
-                    distinct=True,
                 ),
                 no_of_retries=Count(
                     "user__assessments__is_retry",
