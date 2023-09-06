@@ -4,7 +4,7 @@ import core.db
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
-from core.constants import BATCH_DURATION
+from core.constants import BATCH_DURATION_IN_MONTHS
 from dateutil.relativedelta import relativedelta
 
 
@@ -14,7 +14,7 @@ def add_holidays_to_existing_batches(apps, schema_editor):
     Holiday = apps.get_model("hubble", "Holiday")
     for batch in Batch.objects.all():
         start_date = batch.start_date
-        end_date = start_date + relativedelta(months=BATCH_DURATION)
+        end_date = start_date + relativedelta(months=BATCH_DURATION_IN_MONTHS)
         holidays = Holiday.objects.filter(date_of_holiday__range=(start_date, end_date))
         trainee_holidays = [
             TraineeHoliday(

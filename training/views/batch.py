@@ -17,7 +17,7 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView, FormView
 
 from core import template_utils
-from core.constants import BATCH_DURATION
+from core.constants import BATCH_DURATION_IN_MONTHS
 from core.utils import CustomDatatable, validate_authorization
 from hubble.models import Batch, Holiday, InternDetail, SubBatch, TraineeHoliday
 from training.forms import BatchForm
@@ -125,7 +125,7 @@ def create_batch(request):
             batch.created_by = request.user
             batch.save()
             start_date = batch.start_date
-            end_date = start_date + relativedelta(months=BATCH_DURATION)
+            end_date = start_date + relativedelta(months=BATCH_DURATION_IN_MONTHS)
             holidays = Holiday.objects.filter(date_of_holiday__range=(start_date, end_date))
             trainee_holidays = [
                 TraineeHoliday(

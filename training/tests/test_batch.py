@@ -13,7 +13,7 @@ from model_bakery import baker
 from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
-from core.constants import BATCH_DURATION
+from core.constants import BATCH_DURATION_IN_MONTHS
 from hubble.models import Batch, Holiday, TraineeHoliday
 
 
@@ -64,7 +64,7 @@ class BatchCreateTest(BaseTestCase):
         self.assert_database_has("Batch", {"name": data["name"], "start_date": data["start_date"]})
 
         # Check whether the Holidays are created in the database
-        end_date = data["start_date"] + relativedelta(months=BATCH_DURATION)
+        end_date = data["start_date"] + relativedelta(months=BATCH_DURATION_IN_MONTHS)
         holidays = Holiday.objects.filter(
             date_of_holiday__range=(data["start_date"], end_date)
         ).values_list("date_of_holiday", flat=True)
