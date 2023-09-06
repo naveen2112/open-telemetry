@@ -126,11 +126,7 @@
                     'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val()
                 },
                 data: {
-                    batch_id: {
-                        {
-                            object.id
-                        }
-                    },
+                    batch_id: {{ object.id }},
                     date_of_holiday: $('#id_date_of_holiday').val(),
                     reason: $('#id_reason').val(),
                     national_holiday: $('#id_national_holiday').is(':checked'),
@@ -189,11 +185,7 @@
                 },
                 data: {
                     id: $('#holiday_id').val(),
-                    batch_id: {
-                        {
-                            object.id
-                        }
-                    },
+                    batch_id: {{ object.id }},
                     date_of_holiday: $('#id_date_of_holiday').val(),
                     reason: $('#id_reason').val(),
                     national_holiday: $('#id_national_holiday').is(':checked'),
@@ -216,6 +208,7 @@
         }
 
         function clearData() {
+            removeErrors();
             $('#holiday_title').text('Add Holiday');
             $('#id_date_of_holiday').val(moment().format('DD MMM YYYY'));
             $('#id_reason').val('');

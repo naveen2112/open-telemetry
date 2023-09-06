@@ -108,6 +108,27 @@ class BatchCreateTest(BaseTestCase):
         )
         self.assertEqual(response.status_code, 200)
 
+    def test_invalid_date_validation(self):
+        """
+        Check what happens when start_date field fails DateValidation
+        """
+        data = self.get_valid_inputs(
+            {
+                "name": self.faker.name(),
+                "start_date": "Invalid Date",
+            }
+        )
+        response = self.make_post_request(reverse(self.create_route_name), data=data)
+        field_errors = {"start_date": {"invalid"}}
+        custom_validation_error_message = {"invalid": "Enter a valid date."}
+        self.assertJSONEqual(
+            self.bytes_cleaner(response.content),
+            self.get_ajax_response(
+                field_errors=field_errors,
+                custom_validation_error_message=custom_validation_error_message,
+            ),
+        )
+
 
 class BatchShowTest(BaseTestCase):
     """
@@ -229,6 +250,30 @@ class BatchUpdateTest(BaseTestCase):
             ),
         )
         self.assertEqual(response.status_code, 200)
+
+    def test_invalid_date_validation(self):
+        """
+        To check what happens when start_date field fails DateValidation
+        """
+        data = self.get_valid_inputs(
+            {
+                "name": self.faker.name(),
+                "start_date": "Invalid Date",
+            }
+        )
+        response = self.make_post_request(
+            reverse(self.update_edit_route_name, args=[self.batch_id]),
+            data=data,
+        )
+        field_errors = {"start_date": {"invalid"}}
+        custom_validation_error_message = {"invalid": "Enter a valid date."}
+        self.assertJSONEqual(
+            self.bytes_cleaner(response.content),
+            self.get_ajax_response(
+                field_errors=field_errors,
+                custom_validation_error_message=custom_validation_error_message,
+            ),
+        )
 
 
 class BatchDeleteTest(BaseTestCase):

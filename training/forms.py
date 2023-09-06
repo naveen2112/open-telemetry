@@ -219,6 +219,22 @@ class TraineeHolidayForm(forms.ModelForm):
                 "The date of holiday has already been taken.",
                 code="invalid_date",
             )
+        if id:
+            holiday = TraineeHoliday.objects.get(id=id)
+            if (
+                holiday.date_of_holiday != self.cleaned_data["date_of_holiday"]
+                and self.cleaned_data["date_of_holiday"] < timezone.now().date()
+            ):
+                raise ValidationError(
+                    "The date of holiday cannot be in the past.",
+                    code="invalid_date",
+                )
+        else:
+            if self.cleaned_data["date_of_holiday"] < timezone.now().date():
+                raise ValidationError(
+                    "The date of holiday cannot be in the past.",
+                    code="invalid_date",
+                )
         return self.cleaned_data["date_of_holiday"]
 
     date_of_holiday = forms.DateField(

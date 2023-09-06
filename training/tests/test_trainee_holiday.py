@@ -114,6 +114,51 @@ class TraineeHolidayCreateTest(BaseTestCase):
             ),
         )
 
+    def test_invalid_date_validation(self):
+        """
+        To makes sure that the date is validated
+        """
+        data = self.get_valid_inputs(
+            {
+                "date_of_holiday": datetime.date.today() - relativedelta(days=1),
+            }
+        )
+        response = self.make_post_request(
+            reverse(self.create_route_name, args=[self.batch_id]), data
+        )
+        field_errors = {
+            "date_of_holiday": {"invalid_date"},
+        }
+        custom_validation_error_message = {
+            "invalid_date": "The date of holiday cannot be in the past."
+        }
+        self.assertJSONEqual(
+            self.bytes_cleaner(response.content),
+            self.get_ajax_response(
+                field_errors=field_errors,
+                custom_validation_error_message=custom_validation_error_message,
+            ),
+        )
+        data = self.get_valid_inputs(
+            {
+                "date_of_holiday": "Invaid Date",
+            }
+        )
+        response = self.make_post_request(
+            reverse(self.create_route_name, args=[self.batch_id]), data
+        )
+        field_errors = {
+            "date_of_holiday": {"invalid"},
+        }
+        custom_validation_error_message = {"invalid": "Enter a valid date."}
+        self.assertJSONEqual(
+            self.bytes_cleaner(response.content),
+            self.get_ajax_response(
+                field_errors=field_errors,
+                custom_validation_error_message=custom_validation_error_message,
+            ),
+        )
+
 
 class TraineeHolidayShowTest(BaseTestCase):
     """
@@ -254,6 +299,52 @@ class TraineeHolidayUpdateTest(BaseTestCase):
         custom_validation_error_message = {
             "invalid_date": "The date of holiday has already been taken."
         }
+        self.assertJSONEqual(
+            self.bytes_cleaner(response.content),
+            self.get_ajax_response(
+                field_errors=field_errors,
+                custom_validation_error_message=custom_validation_error_message,
+            ),
+        )
+
+    def test_invalid_date_validation(self):
+        """
+        To makes sure that the date is validated
+        """
+        another_date = datetime.date.today() - relativedelta(days=1)
+        data = self.get_valid_inputs(
+            {
+                "date_of_holiday": another_date,
+            }
+        )
+        response = self.make_post_request(
+            reverse(self.update_route_name, args=[self.holiday.id]), data
+        )
+        field_errors = {
+            "date_of_holiday": {"invalid_date"},
+        }
+        custom_validation_error_message = {
+            "invalid_date": "The date of holiday cannot be in the past."
+        }
+        self.assertJSONEqual(
+            self.bytes_cleaner(response.content),
+            self.get_ajax_response(
+                field_errors=field_errors,
+                custom_validation_error_message=custom_validation_error_message,
+            ),
+        )
+        data = self.get_valid_inputs(
+            {
+                "date_of_holiday": "Invaid Date",
+            }
+        )
+        response = self.make_post_request(
+            reverse(self.update_route_name, args=[self.holiday.id]), data
+        )
+        field_errors = {
+            "date_of_holiday": {"invalid"},
+        }
+        custom_validation_error_message = {"invalid": "Enter a valid date."}
         self.assertJSONEqual(
             self.bytes_cleaner(response.content),
             self.get_ajax_response(
