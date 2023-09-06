@@ -90,7 +90,7 @@ Trainee Holiday
                         </button>
                         <button id="holiday_cancel_button" type="button"
                             class="text-white bg-dark-blue rounded text-center items-center pr-3 pl-2 py-1 text-base font-normal ml-4 hidden"
-                            onclick="cancelUpdate();"    
+                            onclick="clearData();"    
                         >
                             Cancel
                         </button>
@@ -157,12 +157,13 @@ Trainee Holiday
     }
 
     function editHoliday(url){
+        $('.page-loader').show();
         removeErrors();
         $.ajax({
             type: "GET",
             url: url,
             success: function(data) {
-                {% comment %} $('.page-loader').hide(); {% endcomment %}
+                $('.page-loader').hide();
                 $('#holiday_title').text('Update Holiday');
                 $('#id_date_of_holiday').val(moment(data.holiday.date_of_holiday).format('DD MMM YYYY'));
                 $('#id_reason').val(data.holiday.reason);
