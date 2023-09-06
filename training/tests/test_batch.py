@@ -128,7 +128,7 @@ class BatchShowTest(BaseTestCase):
         """
         Check what happens when valid data is given as input
         """
-        batch = baker.make("hubble.Batch")
+        batch = baker.make("hubble.Batch", start_date=datetime.datetime.now().date())
         response = self.make_get_request(reverse(self.update_show_route_name, args=[batch.id]))
         data = {"batch": model_to_dict(Batch.objects.get(id=batch.id))}
         data["batch"]["start_date"] = data["batch"]["start_date"].strftime("%Y-%m-%d")
