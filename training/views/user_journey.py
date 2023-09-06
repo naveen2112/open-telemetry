@@ -68,7 +68,7 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
             task_count = 1
 
         last_attempt_score = SubBatchTaskTimeline.objects.filter(
-            id=OuterRef("user__assessments__task_id"),
+            id=OuterRef("sub_batch__task_timelines__id"),
             assessments__user_id=OuterRef("user_id"),
             sub_batch_id=OuterRef("sub_batch_id"),
         ).order_by("-assessments__id")[:1]
