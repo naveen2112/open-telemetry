@@ -5,7 +5,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("hubble", "0003_batch_start_date"),
+        ("hubble", "0002_alter_assessment_user"),
     ]
 
     operations = [

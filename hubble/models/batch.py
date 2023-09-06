@@ -13,7 +13,7 @@ class Batch(db.SoftDeleteWithBaseModel):
     """
 
     name = models.CharField(max_length=250)
-    start_date = models.DateField()
+    start_date = models.DateField(null=True)
     created_by = models.ForeignKey("hubble.User", on_delete=models.CASCADE)
 
     class Meta:

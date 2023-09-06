@@ -12,7 +12,8 @@ def add_holidays_to_existing_batches(apps, schema_editor):
     Batch = apps.get_model("hubble", "Batch")
     TraineeHoliday = apps.get_model("hubble", "TraineeHoliday")
     Holiday = apps.get_model("hubble", "Holiday")
-    for batch in Batch.objects.all():
+    batches = Batch.objects.filter(deleted_at__isnull=True)
+    for batch in batches:
         start_date = batch.start_date
         end_date = start_date + relativedelta(months=BATCH_DURATION_IN_MONTHS)
         holidays = Holiday.objects.filter(date_of_holiday__range=(start_date, end_date))
@@ -33,7 +34,7 @@ def add_holidays_to_existing_batches(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("hubble", "0005_alter_subbatch_secondary_mentors_and_more"),
+        ("hubble", "0006_batch_start_date"),
     ]
 
     operations = [
@@ -72,7 +73,6 @@ class Migration(migrations.Migration):
             ],
             options={
                 "db_table": "trainee_holidays",
-                "managed": True,
             },
         ),
         migrations.RunPython(add_holidays_to_existing_batches),

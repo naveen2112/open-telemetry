@@ -27,7 +27,6 @@ class TraineeHoliday(db.SoftDeleteWithBaseModel):
         Meta class for defining class behavior and properties.
         """
 
-        managed = True
         db_table = "trainee_holidays"
 
     def __str__(self):
