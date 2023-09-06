@@ -155,34 +155,34 @@
             $('#submit-btn').attr("onclick", "createTimelineTask()");
         }
 
-    function createTimelineTask() {
-        $('.page-loader').show();
-        $.ajax({
-            type: "POST",
-            url: "{% url 'timeline-task.create' %}",
-            data: {
-                name: $('#id_name').val(),
-                days: $('#id_days').val(),
-                present_type: $('input[name="present_type"]:checked').val(),
-                task_type: $('input[name="task_type"]:checked').val(),
-                timeline_id: $('#timeline_id').val(),
-            },
-            success: function(data) {
-                removeErrors();
-                $('.page-loader').hide();
-                if (data.status === 'success') {
-                    $('#timeline-table').DataTable().ajax.reload();
-                    closeModal('modal');
-                } else {
-                    renderFormError(data);
-                }
-            },
-            error: function() {
-                $('.page-loader').hide();
-                alert("Something went wrong");
-            },
-        });
-    }
+        function createTimelineTask() {
+            $('.page-loader').show();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'timeline-task.create' %}",
+                data: {
+                    name: $('#id_name').val(),
+                    days: $('#id_days').val(),
+                    present_type: $('input[name="present_type"]:checked').val(),
+                    task_type: $('input[name="task_type"]:checked').val(),
+                    timeline_id: $('#timeline_id').val(),
+                },
+                success: function(data) {
+                    removeErrors();
+                    $('.page-loader').hide();
+                    if (data.status === 'success') {
+                        $('#timeline-table').DataTable().ajax.reload();
+                        closeModal('modal');
+                    } else {
+                        renderFormError(data);
+                    }
+                },
+                error: function() {
+                    $('.page-loader').hide();
+                    alert("Something went wrong");
+                },
+            });
+        }
 
         function openUpdateModel(url) {
             removeErrors();
@@ -240,23 +240,23 @@
             });
         }
 
-    function deleteTimeline(url) {
-        let text = 'Are you sure do you want to delete';
-        if (confirm(text) == true) {
-            $('.page-loader').show();
-            $.ajax({
-                type: "DELETE",
-                url: url,
-                success: function(data) {
-                    $('#timeline-table').DataTable().ajax.reload();
-                    $('.page-loader').hide();
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    alert(jqXHR.responseJSON.message);
-                    $('.page-loader').hide();
-                },
-            });
+        function deleteTimeline(url) {
+            let text = 'Are you sure do you want to delete';
+            if (confirm(text) == true) {
+                $('.page-loader').show();
+                $.ajax({
+                    type: "DELETE",
+                    url: url,
+                    success: function(data) {
+                        $('#timeline-table').DataTable().ajax.reload();
+                        $('.page-loader').hide();
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        alert(jqXHR.responseJSON.message);
+                        $('.page-loader').hide();
+                    },
+                });
+            }
         }
-    }
-</script>
+    </script>
 {% endblock %}

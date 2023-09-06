@@ -83,53 +83,52 @@
 {% endblock %}
 
 {% block script %}
-<script>
-    let copy_seleted = [];
-    $(document).ready(function() {
-        $("#sub-batch-timeline-table").on("rowCallback", function (event, table, row, data) {
-            if (data.disabled) {
-                $(row).addClass("static");
-            }
-        })
-        AjaxDatatableViewUtils.initialize_table(
-            $('#sub-batch-timeline-table'),
-            "{% url 'sub-batch.datatable' %}",
-            {
-                serverSide: true,
-                processing: true,
-                autoWidth: false,
-                scrollX: false,
-                order: [],
-                bPaginate: false
-            }, {
-            "sub_batch_id": "{{ object.id }}"
-        });
-    });
-    $("#sortable > tr").each(function() {
-        copy_selected.push($(this).children(':first').text());
-    });
-
-    $(function() {
-        if ("{{ request.user.is_admin_user }}" == "True") {
-            var el = document.getElementById("sortable");
-            Sortable.create(el, {
-                filter: ".static",
-                onEnd: function () {
-                    var selectedData = [];
-                    $("#sortable > tr").each(function() {
-                        selectedData.push($(this).children(':first').children(':first').attr('data-id'));
-                    })
-                    if (copy_seleted.toString() !== selectedData.toString()) {
-                        copy_seleted = selectedData;
-                        updateTimelineTaskByOrder(copy_seleted);
-                    }
-                },
-                onMove: function (e) {
-                    return e.related.className.indexOf('static') === -1; 
+    <script>
+        let copy_seleted = [];
+        $(document).ready(function() {
+            $("#sub-batch-timeline-table").on("rowCallback", function(event, table, row, data) {
+                if (data.disabled) {
+                    $(row).addClass("static");
                 }
-            });
-        }
-    });
+            })
+            AjaxDatatableViewUtils.initialize_table(
+                $('#sub-batch-timeline-table'),
+                "{% url 'sub-batch.datatable' %}", {
+                    serverSide: true,
+                    processing: true,
+                    autoWidth: false,
+                    scrollX: false,
+                    order: [],
+                    bPaginate: false
+                }, {
+                    "sub_batch_id": "{{ object.id }}"
+                });
+        });
+        $("#sortable > tr").each(function() {
+            copy_selected.push($(this).children(':first').text());
+        });
+
+        $(function() {
+            if ("{{ request.user.is_admin_user }}" == "True") {
+                var el = document.getElementById("sortable");
+                Sortable.create(el, {
+                    filter: ".static",
+                    onEnd: function() {
+                        var selectedData = [];
+                        $("#sortable > tr").each(function() {
+                            selectedData.push($(this).children(':first').children(':first').attr('data-id'));
+                        })
+                        if (copy_seleted.toString() !== selectedData.toString()) {
+                            copy_seleted = selectedData;
+                            updateTimelineTaskByOrder(copy_seleted);
+                        }
+                    },
+                    onMove: function(e) {
+                        return e.related.className.indexOf('static') === -1;
+                    }
+                });
+            }
+        });
 
         function openTaskCreateModal() {
             openBaseModal();

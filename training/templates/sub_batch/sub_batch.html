@@ -5,40 +5,36 @@
 {% endblock title %}
 
 {% block header %}
-<div class="flex justify-between items-center">
-    <div>
-        <div class="text-dark-black text-lg mb-1 leading-none">
-            SubBatch List
+    <div class="flex justify-between items-center">
+        <div>
+            <div class="text-dark-black text-lg mb-1 leading-none">SubBatch List</div>
+            <div class="text-dark-black text-lg mb-1 leading-none">
+                <p class="text-sm">
+                    <a href="{% url 'batch' %}" class="text-sm text-dark-blue">Batch List</a>
+                    >
+                    {{ batch.name }}
+                </p>
+                <h4 class="text-lg text-black ">{{ timeline.name|title }}</h4>
+            </div>
+            <div class="text-dark-black-50 text-sm">
+                <p class="text-sm">Current you are viewing {{ batch.name }} batch</p>
+            </div>
         </div>
-        <div class="text-dark-black text-lg mb-1 leading-none">
-            <p class="text-sm">
-                <a href="{% url 'batch' %}" class="text-sm text-dark-blue">
-                    Batch List
-                </a>
-                >
-                {{ batch.name }}
-            </p>
-            <h4 class="text-lg text-black ">{{ timeline.name|title }}</h4>
-        </div>
-        <div class="text-dark-black-50 text-sm">
-            <p class="text-sm">Current you are viewing {{ batch.name }} batch</p>
-        </div>
-    </div>
-    <div>
-        <a href="{% url 'batch.holiday' batch.id %}"
-                class="text-white h-9 bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal">
+        <div>
+            <a href="{% url 'batch.holiday' batch.id %}"
+               class="text-white h-9 bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal">
                 <span class="hbl hbl-calander text-xl mr-2"></span>
                 Holidays
-        </a>
-        {% if request.user.is_admin_user %}
-            <a href="{% url 'sub-batch.create' batch.id %}"
-                class="text-white h-9 bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal">
-                <span class="text-xl mr-2 hbl hbl-plus"></span>
-                Create Sub Batch
             </a>
-        {% endif %}
+            {% if request.user.is_admin_user %}
+                <a href="{% url 'sub-batch.create' batch.id %}"
+                   class="text-white h-9 bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal">
+                    <span class="text-xl mr-2 hbl hbl-plus"></span>
+                    Create Sub Batch
+                </a>
+            {% endif %}
+        </div>
     </div>
-</div>
 {% endblock %}
 
 {% block body %}
