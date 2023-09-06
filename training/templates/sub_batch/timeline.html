@@ -109,7 +109,7 @@
         copy_selected.push($(this).children(':first').text());
     });
 
-    $(function(){
+    $(function() {
         if ("{{ request.user.is_admin_user }}" == "True") {
             var el = document.getElementById("sortable");
             Sortable.create(el, {

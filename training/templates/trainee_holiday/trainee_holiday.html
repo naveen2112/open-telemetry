@@ -156,7 +156,7 @@ Trainee Holiday
         });
     }
 
-    function editHoliday(url){
+    function editHoliday(url) {
         $('.page-loader').show();
         removeErrors();
         $.ajax({
@@ -182,7 +182,7 @@ Trainee Holiday
         });
     }
 
-    function updateHoliday(url){
+    function updateHoliday(url) {
         removeErrors();
         $('.page-loader').show();
         $.ajax({
@@ -225,7 +225,7 @@ Trainee Holiday
         $('#holiday_save_button').attr('onclick', 'createHoliday()');
     }
 
-    function deleteHoliday(url){
+    function deleteHoliday(url) {
         removeErrors();
         if (confirm('Are you sure you want to delete this holiday?')) {
             $('.page-loader').show();
@@ -245,7 +245,7 @@ Trainee Holiday
         }
     }
 
-    function date_picker(){
+    function date_picker() {
         $('input[name="date_of_holiday"]').daterangepicker({
             singleDatePicker: true,
             autoApply: true,
