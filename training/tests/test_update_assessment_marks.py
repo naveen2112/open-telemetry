@@ -13,7 +13,6 @@ from django.db.models import (
     Value,
     When,
 )
-from django.db.models.functions import Coalesce
 from django.urls import reverse
 from django.utils import timezone
 from model_bakery import baker
@@ -320,7 +319,7 @@ class HeaderStatsTest(BaseTestCase):
         if task_count == 0:
             task_count = 1
         last_attempt_score = SubBatchTaskTimeline.objects.filter(
-            id=OuterRef("user__assessments__task_id"),
+            id=OuterRef("sub_batch__task_timelines__id"),
             assessments__user_id=OuterRef("user_id"),
         ).order_by("-assessments__id")[:1]
 
@@ -330,28 +329,27 @@ class HeaderStatsTest(BaseTestCase):
                 average_marks=Avg(
                     Subquery(last_attempt_score.values("assessments__score")),
                 ),
-                no_of_retries=Coalesce(
-                    Count(
-                        "user__assessments__is_retry",
-                        filter=Q(
-                            Q(user__assessments__is_retry=True)
-                            & Q(user__assessments__extension__isnull=True)
-                        ),
+                no_of_retries=Count(
+                    "user__assessments__id",
+                    filter=Q(
+                        user__assessments__is_retry=True,
+                        user__assessments__extension__isnull=True,
+                        user__assessments__task_id__deleted_at__isnull=True,
+                        user__assessments__sub_batch_id=self.sub_batch.id,
                     ),
-                    0,
+                    distinct=True,
                 ),
-                completion=Coalesce(
-                    (
-                        Count(
-                            "user__assessments__task_id",
-                            filter=Q(user__assessments__user_id=F("user_id")),
-                            distinct=True,
-                        )
-                        / float(task_count)
-                    )
-                    * 100,
-                    0.0,
-                ),
+                completion=Count(
+                    "user__assessments__task_id",
+                    filter=Q(
+                        user__assessments__user_id=F("user_id"),
+                        user__assessments__task_id__deleted_at__isnull=True,
+                        user__assessments__sub_batch_id=self.sub_batch.id,
+                    ),
+                    distinct=True,
+                )
+                * 100
+                / float(task_count),
             )
             .values("average_marks", "no_of_retries", "completion")
         )
