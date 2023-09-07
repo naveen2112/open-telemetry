@@ -4,7 +4,6 @@ including creating, updating, deleting, and displaying details of trainee holida
 """
 import logging
 
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import IntegrityError
 from django.forms import model_to_dict
@@ -19,8 +18,8 @@ from django.views.generic import DetailView, FormView
 from core import template_utils
 from core.utils import (
     CustomDatatable,
+    ValidateAuthorizationMixin,
     schedule_timeline_for_sub_batch,
-    validate_authorization,
 )
 from hubble.models import Batch, SubBatch, TraineeHoliday
 from training.forms import TraineeHolidayForm
@@ -97,9 +96,7 @@ class TraineeHolidayDataTable(LoginRequiredMixin, CustomDatatable):
         return row
 
 
-@method_decorator(login_required, name="dispatch")
-@method_decorator(validate_authorization(), name="dispatch")
-class TraineeHolidayCreateView(View):
+class TraineeHolidayCreateView(LoginRequiredMixin, ValidateAuthorizationMixin, View):
     """
     Create Trainee Holiday View
     """
@@ -142,9 +139,7 @@ class TraineeHolidayCreateView(View):
         )
 
 
-@method_decorator(login_required, name="dispatch")
-@method_decorator(validate_authorization(), name="dispatch")
-class TraineeHolidayDataView(View):
+class TraineeHolidayDataView(LoginRequiredMixin, ValidateAuthorizationMixin, View):
     """
     Trainee Holiday Data View
     """
@@ -163,9 +158,7 @@ class TraineeHolidayDataView(View):
             return JsonResponse({"message": "Error while getting the data!"}, status=500)
 
 
-@method_decorator(login_required, name="dispatch")
-@method_decorator(validate_authorization(), name="dispatch")
-class TraineeHolidayUpdateView(View):
+class TraineeHolidayUpdateView(LoginRequiredMixin, ValidateAuthorizationMixin, View):
     """
     Update Trainee Holiday View
     """
@@ -205,9 +198,7 @@ class TraineeHolidayUpdateView(View):
         )
 
 
-@method_decorator(login_required, name="dispatch")
-@method_decorator(validate_authorization(), name="dispatch")
-class TraineeHolidayDeleteView(View):
+class TraineeHolidayDeleteView(LoginRequiredMixin, ValidateAuthorizationMixin, View):
     """
     Delete Trainee Holiday View
     """
