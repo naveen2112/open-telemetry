@@ -142,22 +142,22 @@ urlpatterns = [
     ),
     path(
         "batch/<int:pk>/holiday/create",
-        trainee_holiday.create_trainee_holiday,
+        trainee_holiday.TraineeHolidayCreateView.as_view(),
         name="holiday.create",
     ),
     path(
         "holiday/<int:pk>/show",
-        trainee_holiday.trainee_holiday_data,
+        trainee_holiday.TraineeHolidayDataView.as_view(),
         name="holiday.show",
     ),
     path(
         "holiday/<int:pk>/edit",
-        trainee_holiday.update_trainee_holiday,
+        trainee_holiday.TraineeHolidayUpdateView.as_view(),
         name="holiday.edit",
     ),
     path(
         "holiday/<int:pk>/delete",
-        trainee_holiday.delete_trainee_holiday,
+        trainee_holiday.TraineeHolidayDeleteView.as_view(),
         name="holiday.delete",
     ),
     # Sub Batch
