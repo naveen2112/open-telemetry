@@ -402,13 +402,14 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
                     Subquery(last_attempt_score.values("assessments__score")),
                 ),
                 no_of_retries=Count(
-                    "user__assessments__is_retry",
+                    "user__assessments__id",
                     filter=Q(
                         user__assessments__is_retry=True,
                         user__assessments__extension__isnull=True,
                         user__assessments__task_id__deleted_at__isnull=True,
                         user__assessments__sub_batch_id=request.POST.get("sub_batch"),
                     ),
+                    distinct=True,
                 ),
                 completion=Count(
                     "user__assessments__task_id",

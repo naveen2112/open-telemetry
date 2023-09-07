@@ -3,7 +3,6 @@ Django test cases for the create, delete and Datatables features in the
 SubBatchDetail module
 """
 from django.db.models import Avg, Case, Count, F, OuterRef, Q, Subquery, Value, When
-from django.db.models.functions import Coalesce
 from django.urls import reverse
 from django.utils import timezone
 from model_bakery import baker
@@ -286,31 +285,28 @@ class TraineeDatatableTest(BaseTestCase):
             InternDetail.objects.filter(sub_batch__id=self.sub_batch.id)
             .select_related("user")
             .annotate(
-                average_marks=Avg(
-                    Subquery(last_attempt_score.values("assessments__score")),
-                ),
-                no_of_retries=Coalesce(
-                    Count(
-                        "user__assessments__is_retry",
-                        filter=Q(
-                            Q(user__assessments__is_retry=True)
-                            & Q(user__assessments__extension__isnull=True)
-                        ),
+                average_marks=Avg(Subquery(last_attempt_score.values("assessments__score"))),
+                no_of_retries=Count(
+                    "user__assessments__id",
+                    filter=Q(
+                        user__assessments__is_retry=True,
+                        user__assessments__extension__isnull=True,
+                        user__assessments__task_id__deleted_at__isnull=True,
+                        user__assessments__sub_batch_id=self.sub_batch.id,
                     ),
-                    0,
+                    distinct=True,
                 ),
-                completion=Coalesce(
-                    (
-                        Count(
-                            "user__assessments__task_id",
-                            filter=Q(user__assessments__user_id=F("user_id")),
-                            distinct=True,
-                        )
-                        / float(task_count)
-                    )
-                    * 100,
-                    0.0,
-                ),
+                completion=Count(
+                    "user__assessments__task_id",
+                    filter=Q(
+                        user__assessments__user_id=F("user_id"),
+                        user__assessments__task_id__deleted_at__isnull=True,
+                        user__assessments__sub_batch_id=self.sub_batch.id,
+                    ),
+                    distinct=True,
+                )
+                * 100.0
+                / task_count,
                 performance=Case(
                     When(average_marks__gte=90, then=Value(GOOD)),
                     When(
