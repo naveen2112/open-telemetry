@@ -4,6 +4,7 @@ Module contains the custom configuration for the Django ajax datatable
 import datetime
 
 from ajax_datatable import AjaxDatatableView  # pylint: disable=no-name-in-module
+from django.contrib.auth.mixins import AccessMixin
 from django.http import HttpResponseForbidden
 
 from hubble.models import (
@@ -86,6 +87,18 @@ class CustomDatatable(AjaxDatatableView):  # pragma: no cover
 
             json_data.append(retdict)
         return json_data
+
+
+class ValidateAuthorizationMixin(AccessMixin):
+    """Mixin that validates user authorization"""
+
+    def dispatch(self, request, *args, **kwargs):
+        """
+        Dispatches the request to the view function
+        """
+        if not request.user.is_admin_user:
+            return HttpResponseForbidden()
+        return super().dispatch(request, *args, **kwargs)
 
 
 def validate_authorization():  # pragma: no cover
