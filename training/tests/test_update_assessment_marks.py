@@ -327,18 +327,8 @@ class HeaderStatsTest(BaseTestCase):
         desired_output = (
             InternDetail.objects.filter(sub_batch=self.sub_batch, user_id=self.trainee.user_id)
             .annotate(
-                average_marks=Case(
-                    When(
-                        user_id=F("user__assessments__user_id"),
-                        then=Coalesce(
-                            Avg(
-                                Subquery(last_attempt_score.values("assessments__score")),
-                                distinct=True,
-                            ),
-                            0.0,
-                        ),
-                    ),
-                    default=None,
+                average_marks=Avg(
+                    Subquery(last_attempt_score.values("assessments__score")),
                 ),
                 no_of_retries=Coalesce(
                     Count(

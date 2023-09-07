@@ -279,25 +279,15 @@ class TraineeDatatableTest(BaseTestCase):
             .count()
         )
         last_attempt_score = SubBatchTaskTimeline.objects.filter(
-            id=OuterRef("user__assessments__task_id"),
+            id=OuterRef("sub_batch__task_timelines__id"),
             assessments__user_id=OuterRef("user_id"),
         ).order_by("-assessments__id")[:1]
         self.desired_output = (
             InternDetail.objects.filter(sub_batch__id=self.sub_batch.id)
             .select_related("user")
             .annotate(
-                average_marks=Case(
-                    When(
-                        user_id=F("user__assessments__user_id"),
-                        then=Coalesce(
-                            Avg(
-                                Subquery(last_attempt_score.values("assessments__score")),
-                                distinct=True,
-                            ),
-                            0.0,
-                        ),
-                    ),
-                    default=None,
+                average_marks=Avg(
+                    Subquery(last_attempt_score.values("assessments__score")),
                 ),
                 no_of_retries=Coalesce(
                     Count(
