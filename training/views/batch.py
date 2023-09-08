@@ -1,7 +1,4 @@
-"""
-Django view for managing batches, including creating, updating, and 
-deleting batches, as well as displaying batch details
-"""
+
 import logging
 
 from django.contrib.auth.decorators import login_required
