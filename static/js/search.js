@@ -107,10 +107,10 @@
                     tempVal = tempVal[1].split(",");
                     $.each(tempVal, function (key, item) {
                         if (key + 1 == tempVal.length) {
-                            initialValArray.push(item.split(']')[0]);
+                            initialValArray.push(item.split(']')[0].trim());
                         } else {
                             if (item != "") {
-                                initialValArray.push(item);
+                                initialValArray.push(item.trim());
                             }
                         }
                     })
@@ -434,10 +434,6 @@
 
                 if (!multipleCheck || childern.length < 1) {
                     $(parent).find(".selected-toggle").remove();
-                }
-
-                if (childern.length <= 5) {
-                    $(parent).find("#cus-search-wrap").remove();
                 }
 
                 const searchElem = $(parent).find("#select-search"),

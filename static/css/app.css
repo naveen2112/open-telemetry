@@ -2771,8 +2771,27 @@ video {
 .selected-toggle {
     display: flex;
     justify-content: space-between;
+    font-size: 14px;
+    font-weight: 400;
     align-items: center;
-    margin-top: 10px;
+    padding: 12px;
+}
+
+.selected-toggle .combine-selector-text {
+  opacity: 0.5;
+  font-weight: 600;
+}
+
+.multi-select .selected-toggle .btn-wrap {
+  color: #C32255;
+}
+
+.multi-select .selected-toggle .select-all-btn {
+  margin-right: 12px;
+}
+
+.multi-select .selected-toggle .btn-wrap span {
+  cursor: pointer;
 }
 
 #project_filter_dropdown_element #project_filterdropdown>div {

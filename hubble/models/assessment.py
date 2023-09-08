@@ -1,3 +1,6 @@
+"""
+The Assessment class is used to store the assessment report of a trainee
+"""
 from django.db import models
 
 from core import db
@@ -9,6 +12,10 @@ from .user import User
 
 
 class Assessment(db.SoftDeleteWithBaseModel):
+    """
+    Store the assessment report of the trainee
+    """
+
     sub_batch = models.ForeignKey(SubBatch, on_delete=models.CASCADE)
     task = models.ForeignKey(
         SubBatchTaskTimeline,
@@ -22,9 +29,7 @@ class Assessment(db.SoftDeleteWithBaseModel):
         null=True,
         related_name="assessments",
     )
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="assessments"
-    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="assessments")
     score = models.IntegerField()
     is_retry = models.BooleanField(default=False)
     comment = models.TextField()
@@ -35,4 +40,8 @@ class Assessment(db.SoftDeleteWithBaseModel):
     )
 
     class Meta:
+        """
+        Meta class for defining class behavior and properties.
+        """
+
         db_table = "assessments"
