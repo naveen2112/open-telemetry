@@ -2,281 +2,306 @@
 
 {% load static %}
 
-{% block title %} {{ object.name }} {% endblock %}
+{% block title %}{{ object.name }}{% endblock %}
 
 {% block container %}
-<div class="px-5 pt-9 bg-white pb-7">
-    <div class="flex items-center my-5">
-        <div class="flex items-center mr-10">
-            <div class="pr-4">
-                <img src="{% static 'images/user-profile.svg' %}" class="w-24 h-24 rounded-full" alt="Profile Icon">
-            </div>
-            <div>
-                <p class="text-base text-dark-black mb-1">{{ object.name }} | {{ object.employee_id }}</p>
-                <div class="text-sm text-dark-black/50 ">
-                    <p>{{ object.designation.name }}</p>
-                    <p>{{ object.email }}</p>
-                    <p>{{ object.mobile_no }}</p>
+    <div class="px-5 pt-9 bg-white pb-7">
+        <div class="flex items-center my-5">
+            <div class="flex items-center mr-10">
+                <div class="pr-4">
+                    <img src="{% static 'images/user-profile.svg' %}"
+                         width="6rem"
+                         height="6rem"
+                         class="rounded-full w-24 h-24"
+                         alt="Profile Icon">
+                </div>
+                <div>
+                    <p class="text-base text-dark-black mb-1">{{ object.name }} | {{ object.employee_id }}</p>
+                    <div class="text-sm text-dark-black/50 ">
+                        <p>{{ object.designation.name }}</p>
+                        <p>{{ object.email }}</p>
+                        <p>{{ object.mobile_no }}</p>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="rounded-xl bg-mild-green-10 flex justify-center items-center flex-col mr-6"
-            style="width: 180px;height: 90px;">
-            <h3 class="font-bold mb-2">{{ performance_stats.average_marks|floatformat:2|default_if_none:"-" }}</h3>
-            <p class="text-mild-green text-base">Average Score %</p>
-        </div>
-        <div class="rounded-xl bg-dark-blue-10 flex justify-center items-center flex-col mr-6"
-            style="width: 180px;height: 90px;">
-            <h3 class="font-bold mb-2">{{ performance_stats.no_of_retries }}</h3>
-            <p class="text-dark-blue text-base">Total Retries</p>
-        </div>
-        <div class=" flex justify-between items-start flex-col" style="width: 180px;height: 90px;">
-            <h3 class="font-bold mb-2">Overall Completion</h3>
-            <div style="width: 250px;height: 10px;" class="rounded-xl bg-dark-blue-10">
-                <div class="rounded-xl bg-dark-blue" style="width: {{ performance_stats.completion }}%;height: 100%;"></div>
+            <div class="rounded-xl bg-mild-green-10 flex justify-center items-center flex-col mr-6 width-180 height-120">
+                <h3 class="font-bold mb-2">{{ performance_stats.average_marks|floatformat:2|default_if_none:"-" }}</h3>
+                <p class="text-mild-green text-base">Average Score %</p>
             </div>
-            <p class="text-sm text-gray-400">{{ performance_stats.completion|floatformat:2 }}% Completed</p>
+            <div class="rounded-xl bg-dark-blue-10 flex justify-center items-center flex-col mr-6 width-180 height-120">
+                <h3 class="font-bold mb-2">{{ performance_stats.no_of_retries }}</h3>
+                <p class="text-dark-blue text-base">Total Retries</p>
+            </div>
+            <div class=" flex justify-between items-start flex-col width-180 height-120">
+                <h3 class="font-bold mb-2">Overall Completion</h3>
+                <div class="rounded-xl bg-dark-blue-10 w-250-h10">
+                    {# djlint:off H021 #}
+                    <div class="rounded-xl bg-dark-blue"
+                         style="width: {{ performance_stats.completion }}%;
+                                height: 100%">{# djlint:on #}</div>
+                </div>
+                <p class="text-sm text-gray-400">{{ performance_stats.completion|floatformat:2 }}% Completed</p>
+            </div>
         </div>
     </div>
-</div>
-<div class="px-3 pt-5 bg-light-violet">
-    <div class="text-dark-black text-lg mb-1 leading-none">
-        <p class="text-sm">
-            <a href="{% url 'batch' %}" class="text-sm text-dark-blue">
-                Batch List
-            </a>
-            >
-            <a href="{% url 'batch.detail' sub_batch.batch.id %}" class="text-sm text-dark-blue">
-                {{ sub_batch.batch.name }}
-            </a>
-            >
-            <a href="{% url 'sub-batch.detail' sub_batch.id %}" class="text-sm text-dark-blue">
-                {{ sub_batch.name|title }}
-            </a>
-            >
-            {{ object.name }}
-        </p>
+    <div class="px-3 pt-5">
+        <div class="text-dark-black text-lg mb-1 leading-none">
+            <p class="text-sm">
+                <a href="{% url 'batch' %}" class="text-sm text-dark-blue">Batch List</a>
+                >
+                <a href="{% url 'batch.detail' sub_batch.batch.id %}"
+                   class="text-sm text-dark-blue">{{ sub_batch.batch.name }}</a>
+                >
+                <a href="{% url 'sub-batch.detail' sub_batch.id %}"
+                   class="text-sm text-dark-blue">{{ sub_batch.name|title }}</a>
+                >
+                {{ object.name }}
+            </p>
+        </div>
     </div>
-</div>
 {% endblock %}
-
-
 
 {% block body %}
-<div>
-    <div class="flex justify-between items-center">
-        <h3 class="font-semibold">Assignment Journey</h3>
+    <div>
+        <div class="flex justify-between items-center">
+            <h3 class="font-semibold">Assignment Journey</h3>
             <button onclick="addWeekExtensionCard('{{ object.id }}')"
-                class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal">
-                <div class="flex mr-1"><span class="hbl hbl-plus text-2xl text-white"></span></div>
+                    class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal">
+                <div class="flex mr-1">
+                    <span class="hbl hbl-plus text-2xl text-white"></span>
+                </div>
                 Add Week Extension
             </button>
-    </div>
-
-    <div class="jquery-modal current hidden" id="modal">
-        <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
-            <p class="font-semibold text-md mt-8 mb-2" id="assessment_name"></p>
-            <form method="post" class="timeline-form" id="timeline-create-form">
-                <div class="modal-body">
-                    {% csrf_token %}
-                    <div class="form-group mb-7" id="{{ form.score.label|lower }}_group">
-                        {{ form.score|show_label }}
-                        {{ form.score }}
-                    </div>
-                    <div class="form-group mb-7" id="{{ form.comment.label|lower }}_group">
-                        {{ form.comment|show_label }}
-                        {{ form.comment }}
-                    </div>
-                    <div class="form-group mb-7" id="{{form.status.label|lower}}_group">
-                        <label for="is_retry" class="ml-3 mb-3.6 text-sm text-dark-black-50">Is retry score?</label>
-                        {{ form.is_retry }}
-                        <p class="text-dark-red text-xs">Note: Please make sure to check the checkbox when entering the retry score, but do not 
-                            select it for the first time.</p>
-                    </div>
-                </div>
-                <div id="non_field_error"></div>
-                <div class="text-center mt-10">
-                    <a class="cursor-pointer inline-block align-middle border border-grey px-8 py-2 rounded mr-6"
-                        onclick="closeModal('modal')">Close</a>
-                    <a class="cursor-pointer inline-block align-middle text-white bg-dark-blue rounded inline-flex items-center rounded px-8 py-2 text-base font-normal"
-                        id="submit-btn">Submit</a>
-                </div>
-            </form>
         </div>
-    </div>
-
-    <div class="card-container grid grid-cols-3" id="card_container">
-        {% for task in assessment_scores %}
-        <div id="assessment-reports"
-            class="{% if task.inactive_tasks %}disabled-container{% else %}enabled-container{% endif %} rounded-xl flex justify-between items-center flex-col p-4 mt-5"
-            style="width: 90%">
-            <div class="w-full flex justify-between items-center mb-5">
-                <h4>{{ task.name }}</h4>
-                <div class="flex">
-                    {% if not task.inactive_tasks %}
-                        <a href="javascript:void(0)" onclick="openCreateModal('{{ task.id }}', '{{task.name}}', null, null)">
-                            <div class="inline mr-1"><span class="hbl hbl-edit text-2xl text-dark-black/50"></span></div>
-                        </a>
-                    <p>
-                        {% if task.retries != 0 %}
-                            {% if task.is_retry %}
-                                <span class="bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm">Retry</span>
-                            {% else %}
-                                <span class="bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm">Completed</span>
+        <div class="jquery-modal current hidden" id="modal">
+            <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white jquery-modal-body">
+                <p class="font-semibold text-md mt-8 mb-2" id="assessment_name"></p>
+                <form method="post" class="timeline-form" id="timeline-create-form">
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <div class="form-group mb-7" id="{{ form.score.label|lower }}_group">
+                            {{ form.score|show_label }}
+                            {{ form.score }}
+                        </div>
+                        <div class="form-group mb-7" id="{{ form.comment.label|lower }}_group">
+                            {{ form.comment|show_label }}
+                            {{ form.comment }}
+                        </div>
+                        <div class="form-group mb-7" id="{{ form.status.label|lower }}_group">
+                            <label for="is_retry" class="ml-3 mb-3.6 text-sm text-dark-black-50">Is retry score?</label>
+                            {{ form.is_retry }}
+                            <p class="text-dark-red text-xs">
+                                Note: Please make sure to check the checkbox when entering the
+                                retry score, but do not
+                                select it for the first time.
+                            </p>
+                        </div>
+                    </div>
+                    <div id="non_field_error"></div>
+                    <div class="text-center mt-10">
+                        <a class="cursor-pointer inline-block align-middle border border-grey px-8 py-2 rounded mr-6"
+                           onclick="closeModal('modal')">Close</a>
+                        <a class="cursor-pointer inline-block align-middle text-white bg-dark-blue rounded inline-flex items-center rounded px-8 py-2 text-base font-normal"
+                           id="submit-btn">Submit</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="card-container grid grid-cols-3" id="card_container">
+            {% for task in assessment_scores %}
+                <div id="assessment-reports"
+                     class="{% if task.inactive_tasks %}disabled-container{% else %}enabled-container{% endif %} rounded-xl flex justify-between items-center flex-col p-4 mt-5 assessment-card">
+                    <div class="w-full flex justify-between items-center mb-5">
+                        <h4>{{ task.name }}</h4>
+                        <div class="flex">
+                            {% if not task.inactive_tasks %}
+                                <a onclick="openCreateModal('{{ task.id }}', '{{ task.name }}', null, null)">
+                                    <div class="inline mr-1">
+                                        <span class="hbl hbl-edit text-2xl text-dark-black/50"></span>
+                                    </div>
+                                </a>
+                                <p>
+                                    {% if task.retries != 0 %}
+                                        {% if task.is_retry %}
+                                            <span class="bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm">Retry</span>
+                                        {% else %}
+                                            <span class="bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm">Completed</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </p>
                             {% endif %}
-                        {% endif %}
-                    </p>
-                    {% endif %}
+                        </div>
+                    </div>
+                    <div class="w-full flex justify-between items-center mb-5">
+                        <div class="div flex flex-col justify-center items-center">
+                            <h3 class="font-bold mb-1">
+                                {% if task.inactive_tasks %}
+                                    -
+                                {% else %}
+                                    {{ task.last_entry|default_if_none:"-" }}
+                                {% endif %}
+                            </h3>
+                            <p>Score</p>
+                        </div>
+                        <div class="div flex flex-col justify-center items-center">
+                            <h3 class="font-bold mb-1">
+                                {% if task.inactive_tasks %}
+                                    -
+                                {% else %}
+                                    {{ task.retries|default:"-" }}
+                                {% endif %}
+                            </h3>
+                            <p>Retries</p>
+                        </div>
+                        <div class="div flex flex-col justify-center items-center">
+                            <h3 class="font-bold mb-1">
+                                {% if task.inactive_tasks %}
+                                    -
+                                {% else %}
+                                    {% if task.last_entry %}
+                                        Yes
+                                    {% else %}
+                                        No
+                                    {% endif %}
+                                {% endif %}
+                            </h3>
+                            <p>Present Status</p>
+                        </div>
+                    </div>
+                    <div class="w-full flex flex-col justify-start bg-dark-blue-10 rounded-md p-2">
+                        <h3 class="font-semibold">Comments</h3>
+                        <p class="truncate">{% if task.inactive_tasks %} - {% else %} {{ task.comment }} {% endif %}</p>
+                        <a class="text-sm text-dark-blue cursor-pointer show-more-btn">Show more</a>
+                    </div>
                 </div>
-            </div>
-            <div class="w-full flex justify-between items-center mb-5">
-                <div class="div flex flex-col justify-center items-center">
-                    <h3 class="font-bold mb-1">{% if task.inactive_tasks %} - {% else %} {{ task.last_entry|default_if_none:"-"}} {% endif %}</h3>
-                    <p>Score</p>
-                </div>
-                <div class="div flex flex-col justify-center items-center">
-                    <h3 class="font-bold mb-1">{% if task.inactive_tasks %} - {% else %} {{ task.retries|default:"-" }} {% endif %}</h3>
-                    <p>Retries</p>
-                </div>
-                <div class="div flex flex-col justify-center items-center">
-                    <h3 class="font-bold mb-1">{% if task.inactive_tasks %} - {% else %} {% if task.last_entry %} Yes
-                        {% else%} No {% endif %} {% endif %}</h3>
-                    <p>Present Status</p>
-                </div>
-            </div>
-            <div class="w-full flex flex-col justify-start bg-dark-blue-10 rounded-md p-2">
-                <h3 class="font-semibold">Comments</h3>
-                <p class="truncate">{% if task.inactive_tasks %} - {% else %} {{ task.comment|truncatechars:10 }} {% endif %}</p>
-                <a href="javascript:void(0)" class="text-sm text-dark-blue cursor-pointer show-more-btn">Show more</a>
-            </div>
-        </div>
-        {% endfor %}
-        {% for assessment in extension_tasks %}
-        <div id="assessment-reports-2" style="width: 90%;background-color: white;height: auto;"
-            class="assessment-reports rounded-xl flex justify-between items-center flex-col p-4 mt-4">
-            <div class="w-full flex justify-between items-center mb-5" >
-                <h4>Extension Week {{ forloop.counter }}</h4>
-                <div class="flex">
-                        <a href="javascript:void(0)" onclick="openCreateModal(null, null, '{{ assessment.id }}', 'Extension Week {{ forloop.counter }}')">
+            {% endfor %}
+            {% for assessment in extension_tasks %}
+            <div id="assessment-reports-2"
+                class="assessment-reports rounded-xl flex justify-between items-center flex-col p-4 mt-4 assessment-card">
+                <div class="w-full flex justify-between items-center mb-5">
+                    <h4>{{ assessment.name }}</h4>
+                    <div class="flex">
+                        <a
+                            onclick="openCreateModal(null, null, '{{ assessment.id }}', '{{ assessment.name }}')">
                             <div class="inline mr-1"><span class="hbl hbl-edit text-2xl text-dark-black/50"></span></div>
                         </a>
-                        <a href="javascript:void(0)" onclick="deleteExtension('{{ assessment.id }}')">
+                        <a onclick="deleteExtension('{{ assessment.id }}')">
                             <div class="inline mr-1"><span class="hbl hbl-delete text-2xl text-dark-black/50"></span></div>
                         </a>
-                    <p>
-                        {% if assessment.retries != 0 %} 
+                        <p>
+                            {% if assessment.retries != 0 %}
                             {% if assessment.is_retry %}
-                                <span class="bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm">Retry</span>
+                            <span class="bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm">Retry</span>
                             {% else %}
-                                <span class="bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm">Completed</span>
+                            <span class="bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm">Completed</span>
                             {% endif %}
-                        {% endif %}
-                    </p>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                <div class="w-full flex justify-between items-center mb-5">
+                    <div class="div flex flex-col justify-center items-center">
+                        <h3 class="font-bold mb-1">{{ assessment.last_entry|default_if_none:" - " }}</h3>
+                        <p>Score</p>
+                    </div>
+                    <div class="div flex flex-col justify-center items-center">
+                        <h3 class="font-bold mb-1">{% if assessment.retries == 0 %} - {% else%} {{ assessment.retries|default:"-" }}
+                            {% endif %}</h3>
+                        <p>Retries</p>
+                    </div>
+                    <div class="div flex flex-col justify-center items-center">
+                        <h3 class="font-bold mb-1">{% if assessment.last_entry %} Yes {% else%} No {% endif %}</h3>
+                        <p>Present Status</p>
+                    </div>
+                </div>
+                <div class="w-full flex flex-col justify-start bg-dark-blue-10 rounded-md p-2">
+                    <h3 class="font-semibold">Comments</h3>
+                    <p class="truncate">{% if assessment.last_entry %} {{ assessment.comment }} {% else %} - {% endif %}</p>
+                    <a class="text-sm text-dark-blue cursor-pointer show-more-btn">Show more</a>
                 </div>
             </div>
-            <div class="w-full flex justify-between items-center mb-5">
-                <div class="div flex flex-col justify-center items-center">
-                    <h3 class="font-bold mb-1">{{ assessment.last_entry|default_if_none:" - " }}</h3>
-                    <p>Score</p>
-                </div>
-                <div class="div flex flex-col justify-center items-center">
-                    <h3 class="font-bold mb-1">{% if assessment.retries == 0 %} - {% else%} {{ assessment.retries|default:"-" }} {% endif %}</h3>
-                    <p>Retries</p>
-                </div>
-                <div class="div flex flex-col justify-center items-center">
-                    <h3 class="font-bold mb-1">{% if assessment.last_entry %} Yes {% else%} No {% endif %}</h3>
-                    <p>Present Status</p>
-                </div>
-            </div>
-            <div class="w-full flex flex-col justify-start bg-dark-blue-10 rounded-md p-2">
-                <h3 class="font-semibold">Comments</h3>
-                <p class="truncate">{% if assessment.last_entry %} {{ assessment.comment|truncatechars:10 }} {% else %} - {% endif %}</p>
-                <a href="javascript:void(0)" class="text-sm text-dark-blue cursor-pointer show-more-btn">Show more</a>
-            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
-</div>
 {% endblock %}
 
-
 {% block script %}
-<script>
-    function openCreateModal(task, task_name, extension, extension_name) {
-        $('.page-loader').show();
-        openBaseModal();
-        if (task){
-            $("#assessment_name").text(task_name);
-        } else {
-            $("#assessment_name").text(extension_name);
-        }
-        $('#id_score').val("");
-        $('#id_comment').val("");
-        $(".form-group").find("span").remove();
-        $("#submit-btn").attr("onclick", "UpdateScore(" + task + ", " + extension + ")");
-        $('.page-loader').hide();
-    }
-
-    function UpdateScore(task, extension) {
-        $('.page-loader').show();
-        $.ajax({
-            type: "POST",
-            url: "{% url 'user.update-score' object.id %}",
-            data: {
-                score: $('#id_score').val(),
-                status: $('.checkbox_active').is(":checked"),
-                comment: $('#id_comment').val(),
-                task: task,
-                extension: extension,
-            },
-            success: function (data) {
-                removeErrors();
-                $('.page-loader').hide();
-                if (data.status === 'success') {
-                    closeModal('modal');
-                    location.reload();
-                } else {
-                    renderFormError(data);
-                }
+    <script>
+        function openCreateModal(task, task_name, extension, extension_name) {
+            $('.page-loader').show();
+            openBaseModal();
+            if (task) {
+                $("#assessment_name").text(task_name);
+            } else {
+                $("#assessment_name").text(extension_name);
             }
-        });
-    }
+            $('#id_score').val("");
+            $('#id_comment').val("");
+            $(".form-group").find("span").remove();
+            $("#submit-btn").attr("onclick", "UpdateScore(" + task + ", " + extension + ")");
+            $('.page-loader').hide();
+        }
 
-    $(".show-more-btn").on("click", function() {
-        $(this).text($(this).text() == "Show more" ? "Show less" : "Show more")
-        $(this).siblings().next().toggleClass('truncate')
-    });
-
-    function addWeekExtensionCard(user) {
-        $('.page-loader').show();
-        $.ajax({
-            type: "POST",
-            url: "{% url 'extension.create' object.id %}",
-            success: function(data) {
-                if (data.status === 'success') {
-                    location.reload();
-                } else {
+        function UpdateScore(task, extension) {
+            $('.page-loader').show();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'user.update-score' object.id %}",
+                data: {
+                    score: $('#id_score').val(),
+                    status: $('.checkbox_active').is(":checked"),
+                    comment: $('#id_comment').val(),
+                    task: task,
+                    extension: extension,
+                },
+                success: function(data) {
+                    removeErrors();
                     $('.page-loader').hide();
-                    alert("Something went wrong");
+                    if (data.status === 'success') {
+                        closeModal('modal');
+                        location.reload();
+                    } else {
+                        renderFormError(data);
+                    }
                 }
-            },
-        });
-    }
+            });
+        }
 
-    function deleteExtension(id) {
-        $('.page-loader').show();
-        $.ajax({
-            type: "POST",
-            url: "/extension/" + id + "/delete",
-            success: function(data) {
-                if (data.status === 'success') {
-                    location.reload();
-                } else {
-                    $('.page-loader').hide();
-                    alert("Something went wrong");
-                }
-            },
+        $(".show-more-btn").on("click", function() {
+            $(this).text($(this).text() == "Show more" ? "Show less" : "Show more")
+            $(this).siblings().next().toggleClass('truncate')
         });
-    }
-</script>
+
+        function addWeekExtensionCard(user) {
+            $('.page-loader').show();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'extension.create' object.id %}",
+                success: function(data) {
+                    if (data.status === 'success') {
+                        location.reload();
+                    } else {
+                        $('.page-loader').hide();
+                        alert("Something went wrong");
+                    }
+                },
+            });
+        }
+
+        function deleteExtension(id) {
+            $('.page-loader').show();
+            $.ajax({
+                type: "POST",
+                url: "/extension/" + id + "/delete",
+                success: function(data) {
+                    if (data.status === 'success') {
+                        location.reload();
+                    } else {
+                        $('.page-loader').hide();
+                        alert("Something went wrong");
+                    }
+                },
+            });
+        }
+    </script>
 {% endblock %}

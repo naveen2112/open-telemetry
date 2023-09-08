@@ -1,122 +1,126 @@
 {% extends 'layouts/base.html' %}
+
 {% load static %}
 
-{% block title %} Monetization Gap {% endblock %}
+{% block title %}Monetization Gap{% endblock %}
 
 {% block header %}
-<div class="header bg-white">
-    <div class="px-2 pt-9 bg-mild-violet pb-7">
-        <div class="flex">
-            <div>
-                <div class="text-dark-black text-lg mb-1 leading-none">Monetization Gap Report</div>
+    <div class="header bg-white">
+        <div class="px-2 pt-9 bg-mild-violet pb-7">
+            <div class="flex">
+                <div>
+                    <div class="text-dark-black text-lg mb-1 leading-none">Monetization Gap Report</div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 {% endblock %}
 
 {% block sub_header %}
-<div class="flex">
-    <div class="relative mr-5">
-        <input type="text" value="" name="search_project" placeholder="Search by Team, Date"
-            class="w-397 h-10 pl-11 pr-2.5 py-3 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0"
-            id="search_project" />
-        <span class="absolute top-2 left-2">
-            <?xml version="1.0" encoding="UTF-8"?>
-            <svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg"
-                xmlns:xlink="http://www.w3.org/1999/xlink">
-                <title>Search</title>
-                <defs>
+    <div class="flex">
+        <div class="relative mr-5">
+            <input type="text"
+                   value=""
+                   name="search_project"
+                   placeholder="Search by Team, Date"
+                   class="w-397 h-10 pl-11 pr-2.5 py-3 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0"
+                   id="search_project" />
+            <span class="absolute top-2 left-2">
+                <?xml version="1.0" encoding="UTF-8"?>
+                <svg width="24px"
+                     height="24px"
+                     viewBox="0 0 24 24"
+                     version="1.1"
+                     xmlns="http://www.w3.org/2000/svg"
+                     xmlns:xlink="http://www.w3.org/1999/xlink">
+                    <title>Search</title>
+                    <defs>
                     <rect id="path-1" x="0" y="0" width="397" height="40" rx="10"></rect>
-                    <filter x="-2.3%" y="-22.5%" width="104.5%" height="145.0%" filterUnits="objectBoundingBox"
-                        id="filter-2">
-                        <feOffset dx="0" dy="0" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
-                        <feGaussianBlur stdDeviation="3" in="shadowOffsetOuter1" result="shadowBlurOuter1">
-                        </feGaussianBlur>
-                        <feColorMatrix
-                            values="0 0 0 0 0.0509803922   0 0 0 0 0.0470588235   0 0 0 0 0.11372549  0 0 0 0.05 0"
-                            type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+                    <filter x="-2.3%" y="-22.5%" width="104.5%" height="145.0%" filterUnits="objectBoundingBox" id="filter-2">
+                    <feOffset dx="0" dy="0" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+                    <feGaussianBlur stdDeviation="3" in="shadowOffsetOuter1" result="shadowBlurOuter1">
+                    </feGaussianBlur>
+                    <feColorMatrix values="0 0 0 0 0.0509803922   0 0 0 0 0.0470588235   0 0 0 0 0.11372549  0 0 0 0.05 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
                     </filter>
-                </defs>
-                <g id="Final---User-Profile" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                    </defs>
+                    <g id="Final---User-Profile" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                     <g id="UserProfile---list" transform="translate(-130.000000, -111.000000)">
-                        <rect fill="#5D3E91" opacity="0.06" x="0" y="0" width="1440" height="900"></rect>
-                        <g id="Group" transform="translate(120.000000, 103.000000)">
-                            <g id="Rectangle">
-                                <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
-                                <use fill="#FBFCFF" fill-rule="evenodd" xlink:href="#path-1"></use>
-                            </g>
-                            <g id="search-icon" transform="translate(10.000000, 8.000000)">
-                                <rect id="Rectangle" fill="#F3F6FF" opacity="0" x="0" y="0" width="24" height="24">
-                                </rect>
-                                <path
-                                    d="M6.05025253,6.05025253 C8.78392257,3.31658249 13.2160774,3.31658249 15.9497475,6.05025253 C18.4484927,8.5489978 18.6632287,12.4668446 16.5939552,15.2094979 C16.6570068,15.2527187 16.7176613,15.3034478 16.7747054,15.3604918 L20.074537,18.6603235 C20.5301487,19.1159351 20.5829124,19.8018639 20.1923882,20.1923882 C19.8018639,20.5829124 19.1159351,20.5301487 18.6603235,20.074537 L15.3604918,16.7747054 C15.3034478,16.7176613 15.2527187,16.6570068 15.208384,16.5937738 C12.4668446,18.6632287 8.5489978,18.4484927 6.05025253,15.9497475 C3.31658249,13.2160774 3.31658249,8.78392257 6.05025253,6.05025253 Z M7.46446609,7.46446609 C5.51184464,9.41708755 5.51184464,12.5829124 7.46446609,14.5355339 C9.41708755,16.4881554 12.5829124,16.4881554 14.5355339,14.5355339 C16.4881554,12.5829124 16.4881554,9.41708755 14.5355339,7.46446609 C12.5829124,5.51184464 9.41708755,5.51184464 7.46446609,7.46446609 Z"
-                                    id="Shape" fill-opacity="0.5" fill="#020C2D"></path>
-                            </g>
-                        </g>
+                    <rect fill="#5D3E91" opacity="0.06" x="0" y="0" width="1440" height="900"></rect>
+                    <g id="Group" transform="translate(120.000000, 103.000000)">
+                    <g id="Rectangle">
+                    <use fill="black" fill-opacity="1" filter="url(#filter-2)" xlink:href="#path-1"></use>
+                    <use fill="#FBFCFF" fill-rule="evenodd" xlink:href="#path-1"></use>
                     </g>
-                </g>
-            </svg>
-        </span>
+                    <g id="search-icon" transform="translate(10.000000, 8.000000)">
+                    <rect id="Rectangle" fill="#F3F6FF" opacity="0" x="0" y="0" width="24" height="24">
+                    </rect>
+                    <path d="M6.05025253,6.05025253 C8.78392257,3.31658249 13.2160774,3.31658249 15.9497475,6.05025253 C18.4484927,8.5489978 18.6632287,12.4668446 16.5939552,15.2094979 C16.6570068,15.2527187 16.7176613,15.3034478 16.7747054,15.3604918 L20.074537,18.6603235 C20.5301487,19.1159351 20.5829124,19.8018639 20.1923882,20.1923882 C19.8018639,20.5829124 19.1159351,20.5301487 18.6603235,20.074537 L15.3604918,16.7747054 C15.3034478,16.7176613 15.2527187,16.6570068 15.208384,16.5937738 C12.4668446,18.6632287 8.5489978,18.4484927 6.05025253,15.9497475 C3.31658249,13.2160774 3.31658249,8.78392257 6.05025253,6.05025253 Z M7.46446609,7.46446609 C5.51184464,9.41708755 5.51184464,12.5829124 7.46446609,14.5355339 C9.41708755,16.4881554 12.5829124,16.4881554 14.5355339,14.5355339 C16.4881554,12.5829124 16.4881554,9.41708755 14.5355339,7.46446609 C12.5829124,5.51184464 9.41708755,5.51184464 7.46446609,7.46446609 Z" id="Shape" fill-opacity="0.5" fill="#020C2D">
+                    </path>
+                    </g>
+                    </g>
+                    </g>
+                    </g>
+                </svg>
+            </span>
+        </div>
+        <div>
+            <label for="cars">Choose a Year:</label>
+            <select name="year"
+                    id="years"
+                    class="date-change mt-2 border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-8 px-5">
+            </select>
+        </div>
     </div>
-    <div class=''><label for="cars">Choose a Year:</label>
-        <select name="year" id="years"
-            class='date-change mt-2 border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-8 px-5'>
-        </select>
+    <div class="grid grid-cols-12 text-xs py-4 items-center mt-3 px-2">
+        <div class="col-span-12">
+            <label for="">Choose a Month:</label>
+        </div>
+        <br>
+        <div class="col-span-12 grid grid-cols-12" id="months"></div>
     </div>
-</div>
-<div class='grid grid-cols-12 text-xs py-4 items-center mt-3 px-2'>
-    <div class="col-span-12">
-        <label for="">Choose a Month:</label>
-    </div>
-    <br>
-    <div class='col-span-12 grid grid-cols-12' id='months'>
-    </div>
-</div>
 {% endblock %}
 
 {% block body %}
-<table id="reports-table" style="width: 100%;" class="display border-0 table-with-no-border dataTable no-footer">
-</table>
+    <table id="reports-table w-100"
+           class="display border-0 table-with-no-border dataTable no-footer">
+    </table>
 {% endblock %}
 
 {% block script %}
-<script>
-    $(document).ready(function() {
-        AjaxDatatableViewUtils.initialize_table(
-            $('#reports-table'),
-            "{% url 'monetization_datatable' %}",
-            {
-                processing: true,
-                searching: true,
-                serverSide: true,
-                autoWidth: false,
-                full_row_select: false,
-                scrollX: false,
-                bFilter: true,
-                bSort: true,
-                dom: 'ltip',
-            },
-            {
-                'year_filter': function() {
-                    return $("#years").val();
-                },
-                'month_filter': function() {
-                    return $("[name='month']:checked").val();
-                },
-            }
-        );
-    });
-    $("#search_project").on('input', function() {
-        var searchvalue = $(this).val();
-        var table = $("#reports-table").DataTable();
-        table.search(searchvalue).draw();
-    });
-    $("#months, #years").change(function() {
-        var table = $("#reports-table").DataTable();
-        table.ajax.reload();
-    });
-    var months = [
+    <script>
+        $(document).ready(function() {
+            AjaxDatatableViewUtils.initialize_table(
+                $('#reports-table'),
+                "{% url 'monetization_datatable' %}", {
+                    processing: true,
+                    searching: true,
+                    serverSide: true,
+                    autoWidth: false,
+                    full_row_select: false,
+                    scrollX: false,
+                    bFilter: true,
+                    bSort: true,
+                    dom: 'ltip',
+                }, {
+                    'year_filter': function() {
+                        return $("#years").val();
+                    },
+                    'month_filter': function() {
+                        return $("[name='month']:checked").val();
+                    },
+                }
+            );
+        });
+        $("#search_project").on('input', function() {
+            var searchvalue = $(this).val();
+            var table = $("#reports-table").DataTable();
+            table.search(searchvalue).draw();
+        });
+        $("#months, #years").change(function() {
+            var table = $("#reports-table").DataTable();
+            table.ajax.reload();
+        });
+        var months = [
             "January",
             "February",
             "March",
@@ -130,31 +134,32 @@
             "November",
             "December"
         ];
-    dateRender();
-    function dateRender() {
-        var start_year = 2010,
-            end_year = new Date().getFullYear();
+        dateRender();
 
-        for (i = start_year; i <= end_year; i++) {
-            var selected = "";
-            if (end_year == (i)) {
-                selected = 'selected';
-            }
-            $("#years").append(`<option value="${i}" ${selected}>${i}</option>`);
-        }
-        months.forEach((number, index) => {
-            var checked = "";
-            if (new Date().getMonth() == index) {
-                checked = "checked";
-            }
+        function dateRender() {
+            var start_year = 2010,
+                end_year = new Date().getFullYear();
 
-            $("#months").append(`<div class="col-span-1 ">
+            for (i = start_year; i <= end_year; i++) {
+                var selected = "";
+                if (end_year == (i)) {
+                    selected = 'selected';
+                }
+                $("#years").append(`<option value="${i}" ${selected}>${i}</option>`);
+            }
+            months.forEach((number, index) => {
+                var checked = "";
+                if (new Date().getMonth() == index) {
+                    checked = "checked";
+                }
+
+                $("#months").append(`<div class="col-span-1 ">
                                     <label for="${number}" class='custom-radio'>
                                         <input type="radio" id="${number}" value='${index + 1}'
                                             name='month' ${checked} class='date-change'><span>${number}</span>
                                     </label>
                                 </div>`);
-        });
-    }
-</script>
+            });
+        }
+    </script>
 {% endblock %}

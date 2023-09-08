@@ -63,3 +63,5 @@ hubble_report/reports/__pycache__
 hubble_report/reports/migrations/__pycache__
 hubble_report/training/__pycache__
 hubble_report/training/migrations/__pycache__
+
+.coverage

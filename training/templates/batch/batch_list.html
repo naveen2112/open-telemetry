@@ -1,117 +1,116 @@
 {% extends 'layouts/base.html' %}
 
 {% block title %}
-Batch
+    Batch
 {% endblock title %}
 
 {% block header %}
-<div class="flex justify-between items-center">
-    <div>
-        <div class="text-dark-black text-lg mb-1 leading-none">
-            Batch List
+    <div class="flex justify-between items-center">
+        <div>
+            <div class="text-dark-black text-lg mb-1 leading-none">Batch List</div>
+            <div class="text-dark-black-50 text-sm">List of Batches</div>
         </div>
-        <div class="text-dark-black-50 text-sm">
-            List of Batches
-        </div>
+        {% if request.user.is_admin_user %}
+            <button class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal"
+                    onclick="openModal()">
+                <span class="text-xl mr-2">+</span>
+                Create Batch
+            </button>
+        {% endif %}
     </div>
-    {% if request.user.is_admin_user %}
-        <button class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal"
-            onclick="openModal()">
-            <span class="text-xl mr-2">+</span>
-            Create Batch
-        </button>
-    {% endif %}
-</div>
 {% endblock %}
 
 {% block body %}
-<div class="jquery-modal current hidden batch-model" id="modal">
-    <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white" style="width: 1000px; display: inline-block;">
-        <p class="font-semibold text-lg mb-10" id="open_modal">Create Batch</p>
-        <form method="post" class="timeline-form" id="timeline-create-form">
-            <div class="modal-body">
-                {% csrf_token %}
-                <div class="form-group mb-7" id="{{ form.name.label|lower }}_group">
-                    {{ form.name|show_label }}
-                    {{ form.name }}
+    <div class="jquery-modal current hidden batch-model" id="modal">
+        <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white jquery-modal-body">
+            <p class="font-semibold text-lg mb-10" id="open_modal">Create Batch</p>
+            <form method="post" class="timeline-form" id="timeline-create-form">
+                <div class="modal-body">
+                    {% csrf_token %}
+                    <div class="form-group mb-7" id="{{ form.name.label|lower }}_group">
+                        {{ form.name|show_label }}
+                        {{ form.name }}
+                    </div>
                 </div>
-            </div>
-            <div id="non_field_error"></div>
-            <div class="text-center mt-10">
-                <a class="cursor-pointer inline-block align-middle border border-grey px-8 py-2 rounded mr-6"
-                    onclick="closeModal('modal')">Close</a>
-                <a class="cursor-pointer inline-block align-middle text-white bg-dark-blue rounded inline-flex items-center rounded px-8 py-2 text-base font-normal"
-                    id="submit-btn">Submit</a>
-            </div>
-        </form>
+                <div id="non_field_error"></div>
+                <div class="text-center mt-10">
+                    <a class="cursor-pointer inline-block align-middle border border-grey px-8 py-2 rounded mr-6"
+                       onclick="closeModal('modal')">Close</a>
+                    <a class="cursor-pointer inline-block align-middle text-white bg-dark-blue rounded inline-flex items-center rounded px-8 py-2 text-base font-normal"
+                       id="submit-btn">Submit</a>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
-
-<div class="flex mb-7 items-center">
-    <div class="relative mr-5" id="batch-table_filter">
-        <input type="text" value="" name="search_project" placeholder="Search by Name"
-            class="w-397 h-10 pl-11 pr-2.5 py-3 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0"
-            id="search_project">
-        <span class="absolute top-2 left-2"><span class="hbl hbl-search-icon text-dark-black-50 text-2xl"></span></span>
+    <div class="flex mb-7 items-center">
+        <div class="relative mr-5 width-100" id="batch-table_filter">
+            <input type="text"
+                   value=""
+                   name="search_project"
+                   placeholder="Search by Name"
+                   class="w-397 h-10 pl-11 pr-2.5 py-3 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0"
+                   id="search_project">
+            <span class="absolute top-2 left-2"><span class="hbl hbl-search-icon text-dark-black-50 text-2xl"></span></span>
+        </div>
     </div>
-</div>
-<table id="batch-table" class="display border-0 table-with-no-border dataTable no-footer" style="width: 100%;"
-    role="grid" aria-describedby="batch-table_info">
-</table>
+    <table id="batch-table"
+           class="display border-0 table-with-no-border dataTable no-footer"
+           role="grid"
+           aria-describedby="batch-table_info">
+    </table>
 {% endblock %}
 
 {% block script %}
-<script>
-    $(document).ready(function() {
-        AjaxDatatableViewUtils.initialize_table(
-            $('#batch-table'),
-            "{% url 'batch.datatable' %}",
-            {
-                serverSide: true,
-                processing: true,
-                autoWidth: false,
-                scrollX: false,
-            },
-        );
-    });
-
-    $("#search_project").on('input', function () {
-        var searchvalue = $(this).val();
-        var table = $("#batch-table").DataTable();
-        table.search(searchvalue).draw();
-    });
-
-    function openModal() {
-        openBaseModal();
-        $("#open_modal").text("Create Batch");
-        $('#id_name').val('');
-        $('#submit-btn').attr("onclick", "createBatch()");
-    }
-
-    function createBatch() {
-        $('.page-loader').show();
-        $.ajax({
-            type: "POST",
-            url: "{% url 'batch.create' %}",
-            data: {
-                name: $('#id_name').val(),
-            },
-            success: function(data) {
-                $('.page-loader').hide();
-                if (data.status === 'success') {
-                    $('#batch-table').DataTable().ajax.reload();
-                    closeModal('modal');
-                } else {
-                    removeErrors();
-                    renderFormError(data);
-                }
-            },
-            error: function() {
-                $('.page-loader').hide();
-                alert("Something went wrong");
-            },
+    <script>
+        $(document).ready(function() {
+            AjaxDatatableViewUtils.initialize_table(
+                $('#batch-table'),
+                "{% url 'batch.datatable' %}", {
+                    serverSide: true,
+                    processing: true,
+                    autoWidth: false,
+                    scrollX: false,
+                },
+            );
         });
-    }
+
+        $("#search_project").on('input', function() {
+            var searchvalue = $(this).val();
+            var table = $("#batch-table").DataTable();
+            table.search(searchvalue).draw();
+        });
+
+        function openModal() {
+            openBaseModal();
+            $("#open_modal").text("Create Batch");
+            $('#id_name').val('');
+            $('#submit-btn').attr("onclick", "createBatch()");
+        }
+
+        function createBatch() {
+            $('.page-loader').show();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'batch.create' %}",
+                data: {
+                    name: $('#id_name').val(),
+                },
+                success: function(data) {
+                    $('.page-loader').hide();
+                    if (data.status === 'success') {
+                        $('#batch-table').DataTable().ajax.reload();
+                        closeModal('modal');
+                    } else {
+                        removeErrors();
+                        renderFormError(data);
+                    }
+                },
+                error: function() {
+                    $('.page-loader').hide();
+                    alert("Something went wrong");
+                },
+            });
+        }
 
         function openUpdateModel(url) {
             $('.page-loader').show();
@@ -139,7 +138,7 @@ Batch
             $('.page-loader').show();
             $.ajax({
                 type: "POST",
-                url: "batch/"+ id +"/edit", //TODO
+                url: "batch/" + id + "/edit", //TODO
                 data: {
                     name: $('#id_name').val(),
                 },
@@ -148,7 +147,7 @@ Batch
                     if (data.status === 'success') {
                         $('#batch-table').DataTable().ajax.reload();
                         closeModal('modal');
-                    }else {
+                    } else {
                         removeErrors();
                         renderFormError(data);
                     }

@@ -1,112 +1,112 @@
 {% extends 'layouts/base.html' %}
 
-
 {% block title %}
-Sub Batch
+    Sub Batch
 {% endblock title %}
 
-
 {% block header %}
-<div class="flex justify-between items-center">
-    <div>
-        <div class="text-dark-black text-lg mb-1 leading-none">
-            SubBatch List
+    <div class="flex justify-between items-center">
+        <div>
+            <div class="text-dark-black text-lg mb-1 leading-none">Sub Batch List</div>
+            <div class="text-dark-black text-lg mb-1 leading-none">
+                <p class="text-sm">
+                    <a href="{% url 'batch' %}" class="text-sm text-dark-blue">Batch List</a>
+                    >
+                    {{ batch.name }}
+                </p>
+                <h4 class="text-lg text-black ">{{ timeline.name|title }}</h4>
+            </div>
+            <div class="text-dark-black-50 text-sm">
+                <p class="text-sm">Current you are viewing {{ batch.name }} batch</p>
+            </div>
         </div>
-        <div class="text-dark-black text-lg mb-1 leading-none">
-            <p class="text-sm">
-                <a href="{% url 'batch' %}" class="text-sm text-dark-blue">
-                    Batch List
-                </a>
-                >
-                {{ batch.name }}
-            </p>
-            <h4 class="text-lg text-black ">{{ timeline.name|title }}</h3>
-        </div>
-        <div class="text-dark-black-50 text-sm">
-            <p class="text-sm">Current you are viewing {{ batch.name }} batch</p>
-        </div>
+        {% if request.user.is_admin_user %}
+            <a href="{% url 'sub-batch.create' batch.id %}"
+               class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal">
+                <span class="text-xl mr-2">+</span>
+                Create Sub Batch
+            </a>
+        {% endif %}
     </div>
-    {% if request.user.is_admin_user %}
-        <a href="{% url 'sub-batch.create' batch.id %}"
-            class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal">
-            <span class="text-xl mr-2">+</span>
-            Create Sub Batch
-        </a>
-    {% endif %}
-</div>
 {% endblock %}
-
 
 {% block body %}
-<div class="flex mb-7 items-center">
-    <div class="relative mr-5" id="sub_batch-table_filter">
-        <input type="text" value="" name="search_project" placeholder="Search by Name, Team and Timeline template"
-            class="w-397 h-10 pl-11 pr-2.5 py-3 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0"
-            id="search_project">
-        <span class="absolute top-2 left-2"><span class="hbl hbl-search-icon text-dark-black-50 text-2xl"></span></span>
-    </div>
-    <div class="rounded-md bg-dark-blue-10 mr-4" style="width:7rem; height:3rem;">
-        <p class="text-center"><span class="font-bold text-dark-black" id="teams_count"></span></p>
-        <p class="text-dark-blue text-center">Teams</p>
-    </div>
-        <div class="rounded-md bg-dark-blue-10 mr-4" style="width:7rem; height:3rem;">
-            <p class="text-center"><span class="font-bold text-dark-black" id="trainees_count"></span></p>
+    <div class="flex mb-7 items-center">
+        <div class="relative mr-5" id="sub_batch-table_filter">
+            <input type="text"
+                   value=""
+                   name="search_project"
+                   placeholder="Search by Name, Team and Timeline template"
+                   class="w-397 h-10 pl-11 pr-2.5 py-3 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0"
+                   id="search_project">
+            <span class="absolute top-2 left-2"><span class="hbl hbl-search-icon text-dark-black-50 text-2xl"></span></span>
+        </div>
+        <div class="rounded-md bg-dark-blue-10 mr-4 header-data">
+            <p class="text-center">
+                <span class="font-bold text-dark-black" id="teams_count"></span>
+            </p>
+            <p class="text-dark-blue text-center">Teams</p>
+        </div>
+        <div class="rounded-md bg-dark-blue-10 mr-4 header-data">
+            <p class="text-center">
+                <span class="font-bold text-dark-black" id="trainees_count"></span>
+            </p>
             <p class="text-dark-blue text-center">Trainees</p>
+        </div>
     </div>
-</div>
-<table id="sub-batch-table" class="display border-0 table-with-no-border dataTable no-footer" style="width: 100%;"
-    role="grid" aria-describedby="sub-batch-table_info">
-    {% csrf_token %}
-</table>
+    <table id="sub-batch-table"
+           class="display border-0 table-with-no-border dataTable no-footer w-100"
+           role="grid"
+           aria-describedby="sub-batch-table_info">
+        {% csrf_token %}
+    </table>
 {% endblock %}
 
-
 {% block script %}
-<script>
-    $(document).ready(function() {
-        AjaxDatatableViewUtils.initialize_table(
-            $('#sub-batch-table'),
-            "{% url 'sub-batch-datatable' %}",
-            {
-                serverSide: true,
-                processing: true,
-                searching: true,
-                autoWidth: false,
-                scrollX: false,
-            }, {
-            "batch_id": "{{ object.id }}"
-        }
-        );
-    }); 
-    $("#search_project").on('input', function () {
-        var searchvalue = $(this).val();
-        var table = $("#sub-batch-table").DataTable();
-        table.search(searchvalue).draw();
-    });
-    $(document).ready(function () {
-        $('#sub-batch-table').on('xhr.dt', function (e, settings, json, xhr) {
-            $("#teams_count").text(json['extra_data'][0]["no_of_teams"]);
-            $("#trainees_count").text(json['extra_data'][0]["no_of_trainees"]);
-        });
-    });
-
-    function deleteSubBatch(url) {
-        let text = 'Are you sure do you want to delete';
-        if (confirm(text) == true) {
-            $('.page-loader').show();
-            $.ajax({
-                type: "DELETE",
-                url: url,
-                success: function(data) {
-                    $('.page-loader').hide();
-                    $('#sub-batch-table').DataTable().ajax.reload();
-                },
-                error: function() {
-                    $('.page-loader').hide();
-                    alert("Something went wrong, please reload the page");
+    <script>
+        $(document).ready(function() {
+            AjaxDatatableViewUtils.initialize_table(
+                $('#sub-batch-table'),
+                "{% url 'sub-batch-datatable' %}", {
+                    serverSide: true,
+                    processing: true,
+                    searching: true,
+                    autoWidth: false,
+                    scrollX: false,
+                }, {
+                    "batch_id": "{{ object.id }}"
                 }
+            );
+        });
+        $("#search_project").on('input', function() {
+            var searchvalue = $(this).val();
+            var table = $("#sub-batch-table").DataTable();
+            table.search(searchvalue).draw();
+        });
+        $(document).ready(function() {
+            $('#sub-batch-table').on('xhr.dt', function(e, settings, json, xhr) {
+                $("#teams_count").text(json['extra_data'][0]["no_of_teams"]);
+                $("#trainees_count").text(json['extra_data'][0]["no_of_trainees"]);
             });
+        });
+
+        function deleteSubBatch(url) {
+            let text = 'Are you sure do you want to delete';
+            if (confirm(text) == true) {
+                $('.page-loader').show();
+                $.ajax({
+                    type: "DELETE",
+                    url: url,
+                    success: function(data) {
+                        $('.page-loader').hide();
+                        $('#sub-batch-table').DataTable().ajax.reload();
+                    },
+                    error: function() {
+                        $('.page-loader').hide();
+                        alert("Something went wrong, please reload the page");
+                    }
+                });
+            }
         }
-    }
     </script>
 {% endblock %}

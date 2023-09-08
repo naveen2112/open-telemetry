@@ -1,0 +1,5 @@
+{
+  "option": "value",
+  "blank_line_after_tag": "load,extends,include, endblock",
+  "blank_line_before_tag": "load,extends,include, block"
+}
