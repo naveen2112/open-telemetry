@@ -599,10 +599,6 @@ video {
   pointer-events: auto;
 }
 
-.\!visible {
-  visibility: visible !important;
-}
-
 .visible {
   visibility: visible;
 }
@@ -923,10 +919,6 @@ video {
   display: block;
   -webkit-box-orient: horizontal;
   -webkit-line-clamp: none;
-}
-
-.\!block {
-  display: block !important;
 }
 
 .block {
@@ -3049,10 +3041,6 @@ video {
 .content-\[\'this-is-also-valid\]-weirdly-enough\'\] {
   --tw-content: 'this-is-also-valid]-weirdly-enough';
   content: var(--tw-content);
-}
-
-.\[agentkeepalive\:deprecated\] {
-  agentkeepalive: deprecated;
 }
 
 @media (min-width: 640px) {
