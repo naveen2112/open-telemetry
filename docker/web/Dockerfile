@@ -25,7 +25,7 @@ RUN mkdir -p /var/app/staticfiles
 
 RUN mkdir -p /var/app/twcss/css/tw/
 
-ADD static/css/tw/* /var/app/twcss/css/tw/*
+ADD static/css/tw/* /var/app/twcss/css/tw/
 
 #Log Config
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
