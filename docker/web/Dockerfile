@@ -21,7 +21,9 @@ ADD docker/web/webserver.conf /etc/nginx/conf.d/default.conf
 
 ADD docker/web/nginx.conf /etc/nginx/nginx.conf
 
-RUN mkdir -p /var/app/staticfiles
+RUN mkdir -p /var/app/staticfiles/css/tw/
+
+ADD static/css/tw/* /var/app/staticfiles/css/tw/
 
 RUN mkdir -p /var/app/twcss/css/tw/
 
