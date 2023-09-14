@@ -25,6 +25,16 @@ def edit_button(url):
             </a>"""
 
 
+def holiday_edit_button(url):
+    """
+    Returns HTML code for an holiday edit button with a JavaScript function to
+    handle the click event
+    """
+    return f"""<a href="javascript:void(0)" onclick="editHoliday(\'{url}\')">
+                <div class="inline mr-1"> <span class="hbl hbl-edit text-2xl text-dark-black/50"></span></div>
+            </a>"""
+
+
 def delete_button(function):
     """
     Returns HTML code for a delete button with a JavaScript function to

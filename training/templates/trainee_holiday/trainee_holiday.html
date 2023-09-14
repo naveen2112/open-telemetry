@@ -1,0 +1,260 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %}
+    Trainee Holiday
+{% endblock title %}
+
+{% block header %}
+    <div class="mb-7">
+        <div>
+            <div class="text-dark-black text-lg mb-1 leading-none">{{ batch.name }} Holidays</div>
+            <div class="text-dark-black text-lg mb-1 leading-none">
+                <p class="text-sm">
+                    <a href="{% url 'batch' %}" class="text-sm text-dark-blue">Batch List</a>
+                    >
+                    <a href="{% url 'batch.detail' batch.id %}"
+                       class="text-sm text-dark-blue">{{ batch.name }}</a>
+                    >
+                    Holidays
+                </p>
+                <h4 class="text-lg text-black">{{ timeline.name|title }}</h4>
+            </div>
+            <div class="text-dark-black-50 text-sm">List of All Holidays</div>
+        </div>
+    </div>
+    <div class="flex">
+        <div class="relative mr-5" id="batch-table_filter">
+            <input type="text"
+                   value=""
+                   name="search_holiday"
+                   placeholder="Search Holiday"
+                   class="w-397 h-10 pl-11 pr-2.5 py-3 text-sm rounded-xl text-dark-black-50 font-normal bg-mild-white focus:outline-none focus:ring-transparent focus:ring-offset-0"
+                   id="search_holiday">
+            <span class="absolute top-2 left-2"><span class="hbl hbl-search-icon text-dark-black-50 text-2xl"></span></span>
+        </div>
+    </div>
+{% endblock %}
+
+{% block body %}
+    <div class="flex mt-5">
+        <div class="px-5 py-0 h-full w-1020">
+            <span class="text-dark-red bg-dark-red-10 text-dark-blue bg-dark-blue-10 text-mild-green bg-mild-green-10 text-dark-black bg-dark-black-10 rounded-xl px-1.5 py-0.5 hidden"></span>
+            <table id="trainee-holiday-table"
+                   class="display border-0 table-with-no-border dataTable no-footer w-100"
+                   role="grid"
+                   aria-describedby="trainee-holiday-table-info">
+            </table>
+        </div>
+        {% if request.user.is_admin_user %}
+            <div class="rounded-xl fixed top-0 py-5 right-0 mr-5 mt-9 bg-white">
+                <span class="text-dark-red bg-dark-red-10 text-dark-blue bg-dark-blue-10 text-mild-green bg-mild-green-10 text-dark-black bg-dark-black-10 rounded-xl px-1.5 py-0.5 hidden"></span>
+                <form method="post" class="holiday-form" id="holiday-create-form">
+                    {% csrf_token %}
+                    <div class="px-4 rounded-xl">
+                        <div class="flex flex-wrap">
+                            <label id="holiday_title">Add Holiday</label>
+                            <input type="hidden" value="0" id="holiday_id" />
+                        </div>
+                        <div class="override-width checkbox-size mt-5 w-286">
+                            {{ form.date_of_holiday|show_label }}
+                            <div class="mb-6" id="{{ form.date_of_holiday.name }}_group">
+                                {{ form.date_of_holiday }}
+                                {{ form.date_of_holiday.errors }}
+                            </div>
+                            <div class="mb-6" id="{{ form.reason.name }}_group">
+                                {{ form.reason }}
+                                {{ form.reason.errors }}
+                            </div>
+                            <div class="mb-6">
+                                <div class="flex items-center">
+                                    {{ form.national_holiday }}
+                                    {{ form.national_holiday|show_label }}
+                                </div>
+                                <div class="flex items-center">
+                                    {{ form.allow_check_in }}
+                                    {{ form.allow_check_in|show_label }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap justify-center mt-7">
+                            <button id="holiday_save_button"
+                                    type="button"
+                                    class="text-white bg-dark-blue rounded text-center items-center pr-3 pl-2 py-1 text-base font-normal"
+                                    onclick="createHoliday();">Save</button>
+                            <button id="holiday_cancel_button"
+                                    type="button"
+                                    class="text-white bg-dark-blue rounded text-center items-center pr-3 pl-2 py-1 text-base font-normal ml-4 hidden"
+                                    onclick="clearData();">Cancel</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        $(document).ready(function() {
+            AjaxDatatableViewUtils.initialize_table(
+                $('#trainee-holiday-table'),
+                "{% url 'holiday-datatable' %}", {
+                    serverSide: true,
+                    processing: true,
+                    autoWidth: false,
+                    scrollX: false,
+                    paginate: false,
+                }, {
+                    "batch": "{{ object.id }}"
+                }
+            );
+        });
+
+        $("#search_holiday").on('input', function() {
+            var searchvalue = $(this).val();
+            var table = $("#trainee-holiday-table").DataTable();
+            table.search(searchvalue).draw();
+        });
+
+        function createHoliday() {
+            removeErrors();
+            $('.page-loader').show();
+            $.ajax({
+                type: "POST",
+                url: "{% url 'holiday.create' object.id %}",
+                headers: {
+                    'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val()
+                },
+                data: {
+                    batch_id: {{ object.id }},
+                    date_of_holiday: $('#id_date_of_holiday').val(),
+                    reason: $('#id_reason').val(),
+                    national_holiday: $('#id_national_holiday').is(':checked'),
+                    allow_check_in: $('#id_allow_checkin').is(':checked'),
+                },
+                success: function(data) {
+                    $('.page-loader').hide();
+                    if (data.status === 'success') {
+                        clearData();
+                        $('#trainee-holiday-table').DataTable().ajax.reload();
+                    } else {
+                        renderFormError(data);
+                    }
+                },
+                error: function() {
+                    $('.page-loader').hide();
+                    alert("Something went wrong");
+                },
+            });
+        }
+
+        function editHoliday(url) {
+            $('.page-loader').show();
+            removeErrors();
+            $.ajax({
+                type: "GET",
+                url: url,
+                success: function(data) {
+                    $('.page-loader').hide();
+                    $('#holiday_title').text('Update Holiday');
+                    $('#id_date_of_holiday').val(moment(data.holiday.date_of_holiday).format('DD MMM YYYY'));
+                    $('#id_reason').val(data.holiday.reason);
+                    $('#id_national_holiday').prop('checked', data.holiday.national_holiday);
+                    $('#id_allow_checkin').prop('checked', data.holiday.allow_check_in);
+                    $('#holiday_id').val(data.holiday.id);
+                    $('#holiday_save_button').text('Update');
+                    $('#holiday_cancel_button').removeClass('hidden');
+                    var update_url = "{% url 'holiday.edit' 0 %}".replace('0', data.holiday.id);
+                    $('#holiday_save_button').attr('onclick', 'updateHoliday("' + update_url + '")');
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    alert(jqXHR.responseJSON.message);
+                    $('.page-loader').hide();
+                },
+            });
+        }
+
+        function updateHoliday(url) {
+            removeErrors();
+            $('.page-loader').show();
+            $.ajax({
+                type: "POST",
+                url: url,
+                headers: {
+                    'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val()
+                },
+                data: {
+                    id: $('#holiday_id').val(),
+                    batch_id: {{ object.id }},
+                    date_of_holiday: $('#id_date_of_holiday').val(),
+                    reason: $('#id_reason').val(),
+                    national_holiday: $('#id_national_holiday').is(':checked'),
+                    allow_check_in: $('#id_allow_checkin').is(':checked'),
+                },
+                success: function(data) {
+                    $('.page-loader').hide();
+                    if (data.status === 'success') {
+                        $('#trainee-holiday-table').DataTable().ajax.reload();
+                        clearData();
+                    } else {
+                        renderFormError(data);
+                    }
+                },
+                error: function() {
+                    $('.page-loader').hide();
+                    alert("Something went wrong");
+                },
+            });
+        }
+
+        function clearData() {
+            removeErrors();
+            $('#holiday_title').text('Add Holiday');
+            $('#id_date_of_holiday').val(moment().format('DD MMM YYYY'));
+            $('#id_reason').val('');
+            $('#id_national_holiday').prop('checked', false);
+            $('#id_allow_checkin').prop('checked', false);
+            $('#holiday_id').val(0);
+            $('#holiday_save_button').text('Save');
+            $('#holiday_cancel_button').addClass('hidden');
+            $('#holiday_save_button').attr('onclick', 'createHoliday()');
+        }
+
+        function deleteHoliday(url) {
+            removeErrors();
+            if (confirm('Are you sure you want to delete this holiday?')) {
+                $('.page-loader').show();
+                $.ajax({
+                    type: "DELETE",
+                    url: url,
+                    headers: {
+                        'X-CSRFToken': $("[name=csrfmiddlewaretoken]").val()
+                    },
+                    success: function(data) {
+                        $('.page-loader').hide();
+                        $('#trainee-holiday-table').DataTable().ajax.reload();
+                    },
+                    error: function() {
+                        $('.page-loader').hide();
+                        alert("Something went wrong");
+                    },
+                });
+            }
+        }
+
+        function date_picker() {
+            $('input[name="date_of_holiday"]').daterangepicker({
+                singleDatePicker: true,
+                autoApply: true,
+                minDate: new Date(),
+                locale: {
+                    format: 'DD MMM YYYY',
+                }
+            });
+        }
+
+        $(function() {
+            date_picker();
+        });
+    </script>
+{% endblock %}

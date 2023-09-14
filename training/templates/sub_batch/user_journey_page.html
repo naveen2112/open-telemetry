@@ -170,56 +170,82 @@
                     </div>
                     <div class="w-full flex flex-col justify-start bg-dark-blue-10 rounded-md p-2">
                         <h3 class="font-semibold">Comments</h3>
-                        <p class="truncate">{% if task.inactive_tasks %} - {% else %} {{ task.comment }} {% endif %}</p>
+                        <p class="truncate">
+                            {% if task.inactive_tasks %}
+                                -
+                            {% else %}
+                                {{ task.comment }}
+                            {% endif %}
+                        </p>
                         <a class="text-sm text-dark-blue cursor-pointer show-more-btn">Show more</a>
                     </div>
                 </div>
             {% endfor %}
             {% for assessment in extension_tasks %}
-            <div id="assessment-reports-2"
-                class="assessment-reports rounded-xl flex justify-between items-center flex-col p-4 mt-4 assessment-card">
-                <div class="w-full flex justify-between items-center mb-5">
-                    <h4>{{ assessment.name }}</h4>
-                    <div class="flex">
-                        <a
-                            onclick="openCreateModal(null, null, '{{ assessment.id }}', '{{ assessment.name }}')">
-                            <div class="inline mr-1"><span class="hbl hbl-edit text-2xl text-dark-black/50"></span></div>
-                        </a>
-                        <a onclick="deleteExtension('{{ assessment.id }}')">
-                            <div class="inline mr-1"><span class="hbl hbl-delete text-2xl text-dark-black/50"></span></div>
-                        </a>
-                        <p>
-                            {% if assessment.retries != 0 %}
-                            {% if assessment.is_retry %}
-                            <span class="bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm">Retry</span>
+                <div id="assessment-reports-2"
+                     class="assessment-reports rounded-xl flex justify-between items-center flex-col p-4 mt-4 assessment-card">
+                    <div class="w-full flex justify-between items-center mb-5">
+                        <h4>{{ assessment.name }}</h4>
+                        <div class="flex">
+                            <a onclick="openCreateModal(null, null, '{{ assessment.id }}', '{{ assessment.name }}')">
+                                <div class="inline mr-1">
+                                    <span class="hbl hbl-edit text-2xl text-dark-black/50"></span>
+                                </div>
+                            </a>
+                            <a onclick="deleteExtension('{{ assessment.id }}')">
+                                <div class="inline mr-1">
+                                    <span class="hbl hbl-delete text-2xl text-dark-black/50"></span>
+                                </div>
+                            </a>
+                            <p>
+                                {% if assessment.retries != 0 %}
+                                    {% if assessment.is_retry %}
+                                        <span class="bg-dark-red-10 text-dark-red py-0.5 px-1.5 rounded-xl text-sm">Retry</span>
+                                    {% else %}
+                                        <span class="bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm">Completed</span>
+                                    {% endif %}
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="w-full flex justify-between items-center mb-5">
+                        <div class="div flex flex-col justify-center items-center">
+                            <h3 class="font-bold mb-1">{{ assessment.last_entry|default_if_none:" - " }}</h3>
+                            <p>Score</p>
+                        </div>
+                        <div class="div flex flex-col justify-center items-center">
+                            <h3 class="font-bold mb-1">
+                                {% if assessment.retries == 0 %}
+                                    -
+                                {% else %}
+                                    {{ assessment.retries|default:"-" }}
+                                {% endif %}
+                            </h3>
+                            <p>Retries</p>
+                        </div>
+                        <div class="div flex flex-col justify-center items-center">
+                            <h3 class="font-bold mb-1">
+                                {% if assessment.last_entry %}
+                                    Yes
+                                {% else %}
+                                    No
+                                {% endif %}
+                            </h3>
+                            <p>Present Status</p>
+                        </div>
+                    </div>
+                    <div class="w-full flex flex-col justify-start bg-dark-blue-10 rounded-md p-2">
+                        <h3 class="font-semibold">Comments</h3>
+                        <p class="truncate">
+                            {% if assessment.last_entry %}
+                                {{ assessment.comment }}
                             {% else %}
-                            <span class="bg-mild-green-10 text-mild-green py-0.5 px-1.5 rounded-xl text-sm">Completed</span>
-                            {% endif %}
+                                -
                             {% endif %}
                         </p>
+                        <a class="text-sm text-dark-blue cursor-pointer show-more-btn">Show more</a>
                     </div>
                 </div>
-                <div class="w-full flex justify-between items-center mb-5">
-                    <div class="div flex flex-col justify-center items-center">
-                        <h3 class="font-bold mb-1">{{ assessment.last_entry|default_if_none:" - " }}</h3>
-                        <p>Score</p>
-                    </div>
-                    <div class="div flex flex-col justify-center items-center">
-                        <h3 class="font-bold mb-1">{% if assessment.retries == 0 %} - {% else%} {{ assessment.retries|default:"-" }}
-                            {% endif %}</h3>
-                        <p>Retries</p>
-                    </div>
-                    <div class="div flex flex-col justify-center items-center">
-                        <h3 class="font-bold mb-1">{% if assessment.last_entry %} Yes {% else%} No {% endif %}</h3>
-                        <p>Present Status</p>
-                    </div>
-                </div>
-                <div class="w-full flex flex-col justify-start bg-dark-blue-10 rounded-md p-2">
-                    <h3 class="font-semibold">Comments</h3>
-                    <p class="truncate">{% if assessment.last_entry %} {{ assessment.comment }} {% else %} - {% endif %}</p>
-                    <a class="text-sm text-dark-blue cursor-pointer show-more-btn">Show more</a>
-                </div>
-            </div>
             {% endfor %}
         </div>
     </div>

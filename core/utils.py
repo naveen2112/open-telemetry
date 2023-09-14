@@ -4,9 +4,15 @@ Module contains the custom configuration for the Django ajax datatable
 import datetime
 
 from ajax_datatable import AjaxDatatableView  # pylint: disable=no-name-in-module
+from django.contrib.auth.mixins import AccessMixin
 from django.http import HttpResponseForbidden
 
-from hubble.models import Holiday, InternDetail, SubBatchTaskTimeline, TimelineTask
+from hubble.models import (
+    InternDetail,
+    SubBatchTaskTimeline,
+    TimelineTask,
+    TraineeHoliday,
+)
 
 
 class CustomDatatable(AjaxDatatableView):  # pragma: no cover
@@ -81,6 +87,18 @@ class CustomDatatable(AjaxDatatableView):  # pragma: no cover
 
             json_data.append(retdict)
         return json_data
+
+
+class ValidateAuthorizationMixin(AccessMixin):
+    """Mixin that validates user authorization"""
+
+    def dispatch(self, request, *args, **kwargs):
+        """
+        Dispatches the request to the view function
+        """
+        if not request.user.is_admin_user:
+            return HttpResponseForbidden()
+        return super().dispatch(request, *args, **kwargs)
 
 
 def validate_authorization():  # pragma: no cover
@@ -180,10 +198,13 @@ def calculate_duration_for_task(holidays, start_date, is_half_day, number_of_day
 
 def schedule_timeline_for_sub_batch(sub_batch, user=None, is_create=True):
     """
-    Schedules the timeline for a sub-batch
+    Schedules the timeline for a sub-batch based on the holiday of the batch
     """
-    value_end_date = None
-    holidays = list(Holiday.objects.values_list("date_of_holiday", flat=True))
+    holidays = list(
+        TraineeHoliday.objects.filter(batch_id=sub_batch.batch.id).values_list(
+            "date_of_holiday", flat=True
+        )
+    )
     start_date = datetime.datetime.strptime(str(sub_batch.start_date), "%Y-%m-%d")
     is_half_day = False
     order = 0
@@ -215,5 +236,6 @@ def schedule_timeline_for_sub_batch(sub_batch, user=None, is_create=True):
             task.start_date = values["start_date_time"]
             task.end_date = values["end_date_time"]
             task.save()
+        value_end_date = values["end_date_time"]
     update_expected_end_date_of_intern_details(sub_batch.id)
     return value_end_date

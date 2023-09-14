@@ -234,3 +234,7 @@
     background-color: white;
     height: fit-content;
 }
+.checkbox-size input[type=checkbox] {
+    width: auto;
+    cursor: pointer;
+}
