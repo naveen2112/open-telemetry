@@ -1,0 +1,9 @@
+.enabled-container {
+    width: 420px;
+    background-color: white;
+    height: auto;
+}
+
+.dataTables_filter {
+    display: none;
+}
