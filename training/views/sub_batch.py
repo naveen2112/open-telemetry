@@ -397,6 +397,7 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
         query = (
             self.model.objects.filter(sub_batch__id=request.POST.get("sub_batch"))
             .select_related("user")
+            .prefetch_related("user__assessments")
             .annotate(
                 average_marks=Avg(
                     Subquery(last_attempt_score.values("assessments__score")),
@@ -405,7 +406,6 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
                     "user__assessments__id",
                     filter=Q(
                         user__assessments__is_retry=True,
-                        user__assessments__extension__isnull=True,
                         user__assessments__task_id__deleted_at__isnull=True,
                         user__assessments__sub_batch_id=request.POST.get("sub_batch"),
                     ),
