@@ -25,7 +25,7 @@ RUN mkdir -p /var/app/staticfiles/css/tw/
 
 RUN mkdir -p /var/app/newstaticfiles/
 
-ADD static/* /var/app/newstaticfiles/
+COPY static/ /var/app/newstaticfiles/
 
 ADD static/css/tw/* /var/app/staticfiles/css/tw/
 
