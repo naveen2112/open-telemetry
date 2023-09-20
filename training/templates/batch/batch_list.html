@@ -84,6 +84,7 @@
         });
 
         function openModal() {
+            start_date_picker();
             openBaseModal();
             $("#open_modal").text("Create Batch");
             $('#id_name').val('');
@@ -186,14 +187,14 @@
 
         function start_date_picker(date = null) {
             if (date == null) {
-                date = moment().format('YYYY-MM-DD');
+                date = moment();
             }
             $('input[name="start_date"]').daterangepicker({
                 singleDatePicker: true,
                 autoApply: true,
-                startDate: date,
+                startDate: new Date(date),
                 locale: {
-                    format: 'YYYY-MM-DD',
+                    format: 'DD MMM YYYY',
                 }
             });
         }
