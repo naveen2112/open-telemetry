@@ -1,6 +1,7 @@
 """
 Django test classes for testing the files present in Induction Kit
 """
+from django.test import override_settings
 from django.urls import reverse
 
 from core.base_test import BaseTestCase
@@ -70,6 +71,7 @@ class InductionKitFileTest(BaseTestCase):
         self.assertEqual(response["Content-Type"], "application/pdf")
 
 
+@override_settings(DEBUG=False)
 class Error404Test(BaseTestCase):
     """
     This class is responsible for testing the 404 page
