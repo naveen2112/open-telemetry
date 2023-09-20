@@ -187,9 +187,9 @@ class BatchForm(forms.ModelForm):
             ),
             "start_date": forms.DateInput(
                 attrs={
-                    "class": "block border border-primary-dark-30 rounded-md mt-2.5 \
-                        w-64 focus:outline-none focus:ring-transparent focus:ring-offset-0 \
-                            h-9 p-2 bg-transparent w-250 start_date_input",
+                    "class": " w-full block border border-primary-dark-30 rounded-md \
+                        focus:outline-none focus:ring-transparent focus:ring-offset-0 \
+                            h-9 p-2 start_date_input",
                     "placeholder": "Start Date",
                 }
             ),
@@ -335,6 +335,9 @@ class SubBatchForm(forms.ModelForm):
         self.fields["secondary_mentor_ids"].label = "Secondary Mentors"
         self.fields["secondary_mentor_ids"].widget.attrs["subtitle"] = "Secondary Mentors"
 
+        self.update_instance = False
+        self.batch_id = None
+
         if kwargs.get("instance"):
             instance = kwargs.get("instance")
             self.fields["team"].widget.attrs["initialValue"] = instance.team.id
@@ -344,6 +347,12 @@ class SubBatchForm(forms.ModelForm):
             self.fields["secondary_mentor_ids"].widget.attrs[
                 "initialValue"
             ] = instance.secondary_mentors.all().values_list("id", flat=True)
+            self.update_instance = True
+            self.batch_id = instance.batch_id
+
+        if kwargs.get("initial"):
+            initial = kwargs.get("initial")
+            self.batch_id = initial.get("batch")
 
     def clean_timeline(self):
         """
@@ -369,12 +378,20 @@ class SubBatchForm(forms.ModelForm):
         The function checks if a selected start date is valid
         and raises a validation error if it doesn't.
         """
+        batch_start_date = models.Batch.objects.get(id=self.batch_id).start_date
         if (
-            models.Holiday.objects.filter(date_of_holiday=self.cleaned_data["start_date"]).exists()
+            models.TraineeHoliday.objects.filter(
+                batch_id=self.batch_id, date_of_holiday=self.cleaned_data["start_date"]
+            ).exists()
             or self.cleaned_data["start_date"].weekday() == 6
         ):
             raise ValidationError(
                 "The Selected date falls on a holiday, please reconsider the start date",
+                code="invalid_date",
+            )
+        if self.cleaned_data["start_date"] < batch_start_date:
+            raise ValidationError(
+                "The Selected date is before the batch start date",
                 code="invalid_date",
             )
         return self.cleaned_data["start_date"]
