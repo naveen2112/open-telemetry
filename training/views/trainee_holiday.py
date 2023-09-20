@@ -5,7 +5,6 @@ including creating, updating, deleting, and displaying details of trainee holida
 import logging
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db import IntegrityError
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -120,14 +119,11 @@ class TraineeHolidayCreateView(LoginRequiredMixin, ValidateAuthorizationMixin, V
             holiday = form.save(commit=False)
             holiday.batch_id = pk
             holiday.updated_by_id = request.user.id
-            try:
-                holiday.save()
-                sub_batches = SubBatch.objects.filter(batch_id=pk)
-                for sub_batch in sub_batches:
-                    schedule_timeline_for_sub_batch(sub_batch, is_create=False)
-                return JsonResponse({"status": "success"})
-            except IntegrityError:
-                form.add_error("date_of_holiday", "Holiday already exists")
+            holiday.save()
+            sub_batches = SubBatch.objects.filter(batch_id=pk)
+            for sub_batch in sub_batches:
+                schedule_timeline_for_sub_batch(sub_batch, is_create=False)
+            return JsonResponse({"status": "success"})
         field_errors = form.errors.as_json()
         non_field_errors = form.non_field_errors().as_json()
         return JsonResponse(
