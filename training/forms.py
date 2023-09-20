@@ -335,7 +335,6 @@ class SubBatchForm(forms.ModelForm):
         self.fields["secondary_mentor_ids"].label = "Secondary Mentors"
         self.fields["secondary_mentor_ids"].widget.attrs["subtitle"] = "Secondary Mentors"
 
-        self.update_instance = False
         self.batch_id = None
 
         if kwargs.get("instance"):
@@ -347,7 +346,6 @@ class SubBatchForm(forms.ModelForm):
             self.fields["secondary_mentor_ids"].widget.attrs[
                 "initialValue"
             ] = instance.secondary_mentors.all().values_list("id", flat=True)
-            self.update_instance = True
             self.batch_id = instance.batch_id
 
         if kwargs.get("initial"):
