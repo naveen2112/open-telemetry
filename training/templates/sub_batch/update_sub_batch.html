@@ -124,6 +124,7 @@
                 $('#sub_batch_form').submit();
             })
             $("#team_dropdown").find(".multi-select-inner").css("pointer-events", "none");
+            $("#id_start_date").val(moment($("#id_start_date").val()).format('DD MMM YYYY'));
         });
 
         $(function() {
@@ -131,8 +132,10 @@
             $('input[name="start_date"]').daterangepicker({
                 singleDatePicker: true,
                 showDropdowns: true,
+                autoApply: true,
+                minDate: new Date("{{ sub_batch.batch.start_date }}"),
                 locale: {
-                    format: 'YYYY-MM-DD'
+                    format: 'DD MMM YYYY',
                 }
             });
         });
