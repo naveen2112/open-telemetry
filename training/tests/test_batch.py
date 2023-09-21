@@ -9,6 +9,7 @@ from django.db.models import Count, OuterRef, Q, Subquery
 from django.db.models.functions import Coalesce
 from django.forms.models import model_to_dict
 from django.urls import reverse
+from django.utils import timezone
 from model_bakery import baker
 from model_bakery.recipe import seq
 
@@ -121,6 +122,27 @@ class BatchCreateTest(BaseTestCase):
         response = self.make_post_request(reverse(self.create_route_name), data=data)
         field_errors = {"start_date": {"invalid"}}
         custom_validation_error_message = {"invalid": "Enter a valid date."}
+        self.assertJSONEqual(
+            self.bytes_cleaner(response.content),
+            self.get_ajax_response(
+                field_errors=field_errors,
+                custom_validation_error_message=custom_validation_error_message,
+            ),
+        )
+        # Check what happens if the start date is an holiday
+        holday = baker.make("hubble.Holiday", date_of_holiday=timezone.now().date())
+        data = self.get_valid_inputs(
+            {
+                "name": self.faker.name(),
+                "start_date": holday.date_of_holiday,
+            }
+        )
+        response = self.make_post_request(reverse(self.create_route_name), data=data)
+        field_errors = {"start_date": {"invalid_date"}}
+        custom_validation_error_message = {
+            "invalid_date": "The Selected date falls on a holiday, \
+                please reconsider the start date"
+        }
         self.assertJSONEqual(
             self.bytes_cleaner(response.content),
             self.get_ajax_response(
@@ -267,6 +289,29 @@ class BatchUpdateTest(BaseTestCase):
         )
         field_errors = {"start_date": {"invalid"}}
         custom_validation_error_message = {"invalid": "Enter a valid date."}
+        self.assertJSONEqual(
+            self.bytes_cleaner(response.content),
+            self.get_ajax_response(
+                field_errors=field_errors,
+                custom_validation_error_message=custom_validation_error_message,
+            ),
+        )
+        # Check what happens if the start date is an holiday
+        holday = baker.make("hubble.Holiday", date_of_holiday=timezone.now().date())
+        data = self.get_valid_inputs(
+            {
+                "name": self.faker.name(),
+                "start_date": holday.date_of_holiday,
+            }
+        )
+        response = self.make_post_request(
+            reverse(self.update_edit_route_name, args=[self.batch_id]), data=data
+        )
+        field_errors = {"start_date": {"invalid_date"}}
+        custom_validation_error_message = {
+            "invalid_date": "The Selected date falls on a holiday, \
+                please reconsider the start date"
+        }
         self.assertJSONEqual(
             self.bytes_cleaner(response.content),
             self.get_ajax_response(
