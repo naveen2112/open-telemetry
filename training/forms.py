@@ -168,6 +168,21 @@ class BatchForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["name"].validators.append(MinLengthValidator(3))
 
+    def clean_start_date(self):
+        """
+        The function checks if a selected start date is valid
+        and raises a validation error if it doesn't.
+        """
+        if (
+            models.Holiday.objects.filter(date_of_holiday=self.cleaned_data["start_date"]).exists()
+            or self.cleaned_data["start_date"].weekday() == 6
+        ):
+            raise ValidationError(
+                "The Selected date falls on a holiday, please reconsider the start date",
+                code="invalid_date",
+            )
+        return self.cleaned_data["start_date"]
+
     class Meta:
         """
         Meta class for defining class behavior and properties.
