@@ -137,12 +137,10 @@ class BatchCreateTest(BaseTestCase):
                 "start_date": holday.date_of_holiday,
             }
         )
+        error_message = "The Selected date falls on a holiday, please reconsider the start date"
         response = self.make_post_request(reverse(self.create_route_name), data=data)
         field_errors = {"start_date": {"invalid_date"}}
-        custom_validation_error_message = {
-            "invalid_date": "The Selected date falls on a holiday, \
-                please reconsider the start date"
-        }
+        custom_validation_error_message = {"invalid_date": error_message}
         self.assertJSONEqual(
             self.bytes_cleaner(response.content),
             self.get_ajax_response(
@@ -307,10 +305,10 @@ class BatchUpdateTest(BaseTestCase):
         response = self.make_post_request(
             reverse(self.update_edit_route_name, args=[self.batch_id]), data=data
         )
+        error_message = "The Selected date falls on a holiday, please reconsider the start date"
         field_errors = {"start_date": {"invalid_date"}}
         custom_validation_error_message = {
-            "invalid_date": "The Selected date falls on a holiday, \
-                please reconsider the start date"
+            "invalid_date": error_message,
         }
         self.assertJSONEqual(
             self.bytes_cleaner(response.content),
