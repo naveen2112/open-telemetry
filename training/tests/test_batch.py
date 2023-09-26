@@ -315,8 +315,7 @@ class BatchDatatableTest(BaseTestCase):
             self.assertTrue("total_trainee" in row)
             self.assertTrue("action" in row)
 
-        # Check the numbers of rows received is equal to the
-        # number of expected rows
+        # Check the numbers of rows received is equal to the number of expected rows
         self.assertTrue(response.json()["recordsTotal"], len(self.batch))
 
     def test_database_search(self):

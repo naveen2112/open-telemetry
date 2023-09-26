@@ -461,7 +461,7 @@ class SubBatchTimelineForm(forms.ModelForm):
         else:
             valid_order_value = list(
                 models.SubBatchTaskTimeline.objects.filter(
-                    start_date__gt=timezone.now(),
+                    start_date__gte=timezone.now().date(),
                     sub_batch_id=self.data.get("sub_batch_id"),
                 ).values_list("order", flat=True)
             ) or [0]
@@ -546,14 +546,77 @@ class InternScoreForm(forms.ModelForm):
     Intenr score form is used to add the assessment mark details for the particular trainee
     """
 
+    assessment_details = None
+
+    present_status = forms.TypedChoiceField(
+        coerce=lambda x: x == "True",
+        choices=((True, "Yes"), (False, "No")),
+        widget=forms.RadioSelect({"class": "flex mr-1 ml-4"}),
+    )
+
+    def clean(self):
+        """
+        The function adds the assessment task details to the form
+        """
+        cleaned_data = super().clean()
+        if self.data.get("task"):
+            self.assessment_details = models.SubBatchTaskTimeline.objects.filter(
+                id=self.data.get("task")
+            )
+        if self.data.get("extension"):
+            self.assessment_details = models.Extension.objects.filter(
+                id=self.data.get("extension")
+            )
+        return cleaned_data
+
     def clean_score(self):
         """
         The function `clean_score` validates that the score is between 0 and 100 and raises a
         `ValidationError` if it is not.
         """
-        if not 0 <= self.cleaned_data["score"] <= 100:
-            raise ValidationError("Score must be between 0 to 100", code="invalid_score")
+        if self.data.get("present_status", "False") == "True":
+            if self.cleaned_data["score"] is not None:
+                if not 0 <= self.cleaned_data["score"] <= 100:
+                    raise ValidationError("Score must be between 0 to 100", code="invalid_score")
+                return self.cleaned_data["score"]
+            raise ValidationError("This field is required.", code="required")
         return self.cleaned_data["score"]
+
+    def clean_comment(self):
+        """
+        The function `clean_comment` validates that the comment is present if the present status
+        is true and raises a `ValidationError` if it is not.
+        """
+        if self.data.get("present_status", "False") == "True":
+            if self.cleaned_data["comment"] == "":
+                raise ValidationError("This field is required.", code="required")
+        return self.cleaned_data["comment"]
+
+    def clean_is_retry_needed(self):
+        """
+        The function `clean_is_retry_needed` validates that the is_retry_needed
+        field is not present during retest weeks
+        """
+        self.clean()
+        if self.cleaned_data["is_retry_needed"]:
+            if self.assessment_details and (self.data.get("test_week") == "false"):
+                raise ValidationError(
+                    "You can not suggest retry needed during the retry week", code="invalid_week"
+                )
+        return self.cleaned_data["is_retry_needed"]
+
+    def clean_is_retry(self):
+        """
+        The function `clean_is_retry` validates that the is_retry field is not present
+        during test weeks
+        """
+        self.clean()
+        if self.cleaned_data["is_retry"]:
+            if self.assessment_details and (self.data.get("test_week") == "true"):
+                raise ValidationError(
+                    "You can not update retry score during the test week", code="invalid_week"
+                )
+        return self.cleaned_data["is_retry"]
 
     class Meta:
         """
@@ -561,7 +624,7 @@ class InternScoreForm(forms.ModelForm):
         """
 
         model = Assessment
-        fields = ("score", "is_retry", "comment")
+        fields = ("score", "is_retry", "comment", "present_status", "is_retry_needed")
 
         widgets = {
             "score": forms.NumberInput(
@@ -578,6 +641,12 @@ class InternScoreForm(forms.ModelForm):
                         border-primary-dark-30 rounded-md w-4 mr-3 focus:outline-none \
                             focus:ring-transparent focus:ring-offset-0 h-9 p-2",
                 }
+            ),
+            "is_retry_needed": forms.CheckboxInput(
+                attrs={
+                    "class": "cursor-pointer rounded-md mr-3 w-4 focus:outline-none"
+                    " focus:ring-transparent focus:ring-offset-0",
+                },
             ),
             "comment": forms.Textarea(
                 attrs={

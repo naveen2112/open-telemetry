@@ -246,11 +246,13 @@ class SubBatchCreateTest(BaseTestCase):
             "employee_id": [self.users[1].employee_id, self.users[2].employee_id],
             "college": [self.faker.name(), self.faker.name()],
         }
+
         valid_file = self.create_memory_file(file_values)
+
         data = self.get_valid_inputs(
             {
                 "users_list_file": valid_file,
-                "start_date": timezone.now().date() + timezone.timedelta(days=2),
+                "start_date": timezone.now().date() + timezone.timedelta(2),
             }
         )
         self.assertFormError(

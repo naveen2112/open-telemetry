@@ -7,19 +7,19 @@ import logging
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import (
-    Avg,
     BooleanField,
     Case,
     Count,
-    F,
     OuterRef,
     Q,
     Subquery,
     Value,
     When,
 )
+from django.forms.models import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.template.loader import render_to_string
 from django.utils import timezone
 from django.views.generic import DetailView
 
@@ -44,18 +44,19 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
     model = User
     template_name = "sub_batch/user_journey_page.html"
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs):  # TODO :: Need to add custom Managers and querysets
         """
         The `get_context_data` function retrieves data related to assessments, task timelines
         and performance statistics for a given user.
         """
+        sub_batch_id = SubBatch.objects.filter(intern_details__user=self.object.id).last()
+
         latest_task_report = Assessment.objects.filter(
-            task=OuterRef("id"), user_id=self.object.id
-        ).order_by("-id")[:1]
+            task=OuterRef("id"), user_id=self.object.id, sub_batch=sub_batch_id
+        ).order_by("-created_at")[:1]
         latest_extended_task_report = Assessment.objects.filter(extension=OuterRef("id")).order_by(
             "-id"
         )[:1]
-        sub_batch_id = SubBatch.objects.filter(intern_details__user=self.object.id).last()
 
         task_count = (
             SubBatchTaskTimeline.objects.filter(
@@ -64,58 +65,39 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
             .values("id")
             .count()
         )
-        if task_count == 0:
-            task_count = 1
-
-        last_attempt_score = SubBatchTaskTimeline.objects.filter(
-            id=OuterRef("sub_batch__task_timelines__id"),
-            assessments__user_id=OuterRef("user_id"),
-            sub_batch_id=OuterRef("sub_batch_id"),
-        ).order_by("-assessments__id")[:1]
+        task_count = max(task_count, 1)
 
         performance = (
-            InternDetail.objects.filter(sub_batch=sub_batch_id, user_id=self.kwargs["pk"])
-            .annotate(
-                average_marks=Avg(
-                    Subquery(last_attempt_score.values("assessments__score")),
-                ),
-                no_of_retries=Count(
-                    "user__assessments__id",
-                    filter=Q(
-                        user__assessments__is_retry=True,
-                        user__assessments__extension__isnull=True,
-                        user__assessments__task_id__deleted_at__isnull=True,
-                        user__assessments__sub_batch_id=sub_batch_id,
-                    ),
-                    distinct=True,
-                ),
-                completion=Count(
-                    "user__assessments__task_id",
-                    filter=Q(
-                        user__assessments__user_id=F("user_id"),
-                        user__assessments__task_id__deleted_at__isnull=True,
-                        user__assessments__sub_batch_id=sub_batch_id,
-                    ),
-                    distinct=True,
-                )
-                * 100
-                / float(task_count),
+            InternDetail.objects.get_performance_summary(sub_batch_id, task_count)
+            .filter(user_id=self.kwargs["pk"])
+            .values(
+                "average_marks",
+                "no_of_retries",
+                "completion",
             )
-            .values("average_marks", "no_of_retries", "completion")
         )
 
         task_summary = (
-            SubBatchTaskTimeline.objects.filter(
-                sub_batch=sub_batch_id, task_type=TASK_TYPE_ASSESSMENT
+            SubBatchTaskTimeline.objects.prefetch_related("assessments")
+            .filter(
+                sub_batch=sub_batch_id,
+                task_type=TASK_TYPE_ASSESSMENT,
             )
             .annotate(
                 retries=Count(
                     "assessments__is_retry",
-                    filter=Q(assessments__user=self.object, assessments__is_retry=True),
+                    filter=Q(
+                        assessments__is_retry=True,
+                        assessments__present_status=True,
+                        assessments__user=self.object,
+                    ),
                 ),
+                assessment_id=Subquery(latest_task_report.values("id")),
                 last_entry=Subquery(latest_task_report.values("score")),
                 comment=Subquery(latest_task_report.values("comment")),
                 is_retry=Subquery(latest_task_report.values("is_retry")),
+                is_retry_needed=Subquery(latest_task_report.values("is_retry_needed")),
+                present_status=Subquery(latest_task_report.values("present_status")),
                 inactive_tasks=Case(
                     When(
                         start_date__gt=timezone.now(), then=Value(False)
@@ -124,25 +106,32 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
                     output_field=BooleanField(),
                 ),
             )
-            .values(
-                "id",
-                "last_entry",
-                "retries",
-                "comment",
-                "name",
-                "is_retry",
-                "inactive_tasks",
-            )
             .order_by("order")
         )
 
+        tasks = SubBatchTaskTimeline.objects.prefetch_related("assessments").filter(
+            sub_batch_id=sub_batch_id, task_type=TASK_TYPE_ASSESSMENT
+        )
+
+        task_details = list(tasks.values())
+
+        for task in range(tasks.count()):
+            task_details[task]["assessments"] = list(tasks[task].assessments.all().values())
+
+        for task in task_summary:
+            task.assessment_status = task.update_assessment(
+                task.order, self.object.id, task_details
+            )
+
         extended_task_summary = (
-            Extension.objects.filter(sub_batch=sub_batch_id, user=self.object)
+            Extension.objects.prefetch_related("assessments")
+            .filter(sub_batch=sub_batch_id, user=self.object)
             .annotate(
                 retries=Count("assessments__is_retry", filter=Q(assessments__is_retry=True)),
                 last_entry=Subquery(latest_extended_task_report.values("score")),
                 comment=Subquery(latest_extended_task_report.values("comment")),
-                is_retry=Subquery(latest_extended_task_report.values("is_retry")),
+                present_status=Subquery(latest_extended_task_report.values("present_status")),
+                assessment_id=Subquery(latest_extended_task_report.values("id")),
             )
             .order_by("id")
         )
@@ -152,11 +141,63 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
         context["sub_batch"] = sub_batch_id
         context["form"] = InternScoreForm()
         context["extension_tasks"] = extended_task_summary
-        context["performance_stats"] = performance[0]
+        try:
+            context["performance_stats"] = performance[0]
+        except IndexError:
+            context["performance_stats"] = performance
         return context
 
 
+@login_required
+def show_task_score(request):
+    """
+    This function helps us to render the scores for a specific task
+    """
+    extension_id = (
+        None if request.GET.get("extension_id") == "" else request.GET.get("extension_id")
+    )
+    task_id = None if request.GET.get("task_id") == "" else request.GET.get("task_id")
+    try:
+        task_last_attempt_details = model_to_dict(
+            Assessment.objects.filter(
+                task_id=task_id,
+                extension_id=extension_id,
+                sub_batch_id=request.GET.get("sub_batch_id"),
+                user_id=request.GET.get("trainee_id"),
+            )
+            .order_by("-created_at")
+            .first()
+        )
+        return JsonResponse({"task_details": task_last_attempt_details, "status": "success"})
+    except Exception:
+        return JsonResponse(
+            {"message": "This task/ extension doesn't have any history"}, status=404
+        )
+
+
+def create_assessment(request, report, pk):
+    """
+    This function helps us to create assessments
+    """
+    report.created_by = request.user
+    report.updated_by = request.user
+    report.present_status = request.POST.get("present_status") == "True"
+    report.task_id = request.POST.get("task")
+    report.extension_id = request.POST.get("extension")
+    if report.task_id != "":
+        if request.POST.get("test_week") == "true":
+            report.is_retry_needed = request.POST.get("is_retry_needed") == "true"
+            report.is_retry = False
+        else:
+            report.is_retry_needed = False
+            report.is_retry = True
+    report.user_id = pk
+    report.sub_batch = SubBatch.objects.filter(intern_details__user=pk).last()
+    report.save()
+
+
 @login_required()
+# pylint: disable=too-many-nested-blocks
 def update_task_score(request, pk):
     """
     Update task score
@@ -164,24 +205,38 @@ def update_task_score(request, pk):
     response_data = {}  # Initialize an empty dictionary
     if request.method == "POST":
         form = InternScoreForm(request.POST)
-        if form.is_valid():  # Check if form is valid or not
+        if form.is_valid():
             report = form.save(commit=False)
-            report.user_id = pk
-            report.task_id = request.POST.get("task")
-            report.extension_id = request.POST.get("extension")
-            report.sub_batch = SubBatch.objects.filter(intern_details__user=pk).last()
-            report.is_retry = request.POST.get("status") == "true"
-            report.created_by = request.user
-            report.save()
-            response_data["status"] = "success"
-        else:
-            field_errors = form.errors.as_json()
-            non_field_errors = form.non_field_errors().as_json()
-            response_data = {
-                "status": "error",
-                "field_errors": field_errors,
-                "non_field_errors": non_field_errors,
-            }
+            if request.POST.get("assessment_id"):
+                assessment = Assessment.objects.get(id=request.POST.get("assessment_id"))
+                assessment.present_status = request.POST.get("present_status") == "True"
+                assessment.score = report.score
+                assessment.comment = report.comment
+                assessment.updated_by = request.user
+                if assessment.task_id is not None:
+                    if request.POST.get("test_week") == "true":
+                        assessment.is_retry_needed = request.POST.get("is_retry_needed") == "true"
+                        assessment.is_retry = False
+                        assessment.save()
+                    else:
+                        if assessment.is_retry:
+                            assessment.is_retry_needed = False
+                            assessment.is_retry = True
+                            assessment.save()
+                        else:
+                            create_assessment(request, report, pk)
+                else:
+                    assessment.save()
+            else:
+                create_assessment(request, report, pk)
+            return JsonResponse({"status": "success"})
+        field_errors = form.errors.as_json()
+        non_field_errors = form.non_field_errors().as_json()
+        response_data = {
+            "status": "error",
+            "field_errors": field_errors,
+            "non_field_errors": non_field_errors,
+        }
     return JsonResponse(response_data)
 
 
@@ -237,3 +292,24 @@ def delete_extension(request, pk):  # pylint: disable=unused-argument
             {"message": "Error while deleting week extension!"},
             status=500,
         )
+
+
+@login_required()
+def get_mark_history(request):
+    """
+    Returns a JsonResponse, which renders the score history of an assessment
+    """
+    extension_id = (
+        None if request.POST.get("extension_id") == "" else request.POST.get("extension_id")
+    )
+    task_id = None if request.POST.get("task_id") == "" else request.POST.get("task_id")
+    user_id = request.POST.get("user_id")
+    data = Assessment.objects.filter(
+        task_id=task_id,
+        extension_id=extension_id,
+        user_id=user_id,
+        sub_batch_id=InternDetail.objects.filter(user_id=user_id)
+        .values("sub_batch_id")
+        .last()["sub_batch_id"],
+    ).order_by("-created_at")
+    return JsonResponse(render_to_string("sub_batch/score_table.html", {"data": data}), safe=False)

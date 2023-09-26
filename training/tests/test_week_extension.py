@@ -8,7 +8,7 @@ from model_bakery import baker
 from model_bakery.recipe import seq
 
 from core.base_test import BaseTestCase
-from hubble.models import Assessment, Extension
+from hubble.models import Assessment, Extension, InternDetail
 
 
 class ExtensionCreateTest(BaseTestCase):
@@ -105,14 +105,18 @@ class ExtensionUpdateTest(BaseTestCase):
             "hubble.SubBatch",
             start_date=(timezone.now() + timezone.timedelta(1)),
         )
-        self.extension_task = baker.make("hubble.Extension", sub_batch=sub_batch)
         self.trainee = baker.make("hubble.InternDetail", sub_batch=sub_batch)
+        self.extension_task = baker.make(
+            "hubble.Extension", sub_batch=sub_batch, user_id=self.trainee.user_id
+        )
         self.persisted_valid_inputs = {
             "score": 50,
             "comment": self.faker.name(),
             "task": "",
             "extension": self.extension_task.id,
-            "status": "true",
+            "present_status": "True",
+            "is_retry_needed": "false",
+            "is_retry": "false",
         }
 
     def test_success(self):
@@ -133,12 +137,12 @@ class ExtensionUpdateTest(BaseTestCase):
                 "score": data["score"],
                 "comment": data["comment"],
                 "extension_id": data["extension"],
-                "is_retry": data["status"].capitalize(),
+                "present_status": data["present_status"].capitalize(),
             },
         )
 
-        # Check what happens when is_retry is False
-        data = self.get_valid_inputs({"status": "false"})
+        # Check what happens when we try to enter score for second time
+        data = self.get_valid_inputs({"score": 90})
         response = self.make_post_request(
             reverse(self.update_edit_route_name, args=[self.trainee.user_id]),
             data=data,
@@ -151,7 +155,7 @@ class ExtensionUpdateTest(BaseTestCase):
                 "score": data["score"],
                 "comment": data["comment"],
                 "extension_id": data["extension"],
-                "is_retry": data["status"].capitalize(),
+                "present_status": data["present_status"],
             },
         )
 
@@ -159,15 +163,31 @@ class ExtensionUpdateTest(BaseTestCase):
         """
         This function checks the required validation for the score and comment fields
         """
+        # Check the required Validation for present status
         response = self.make_post_request(
             reverse(self.update_edit_route_name, args=[self.trainee.user_id]),
             data={},
+        )
+        field_errors = {
+            "present_status": {"required"},
+        }
+        self.assertEqual(
+            self.bytes_cleaner(response.content),
+            self.get_ajax_response(field_errors=field_errors),
+        )
+        self.assertEqual(response.status_code, 200)
+
+        # Check the required validation for score and comment
+        response = self.make_post_request(
+            reverse(self.update_edit_route_name, args=[self.trainee.user_id]),
+            data={"present_status": True},
         )
         field_errors = {"score": {"required"}, "comment": {"required"}}
         self.assertEqual(
             self.bytes_cleaner(response.content),
             self.get_ajax_response(field_errors=field_errors),
         )
+        self.assertEqual(response.status_code, 200)
 
     def test_invalid_score_validation(self):
         """
@@ -287,15 +307,90 @@ class ExtensionSummaryTest(BaseTestCase):
             "-id"
         )[:1]
         desired_output = (
-            Extension.objects.filter(sub_batch=self.sub_batch.id, user=self.trainee.user)
+            Extension.objects.filter(sub_batch=self.sub_batch, user=self.trainee.user_id)
             .annotate(
                 retries=Count("assessments__is_retry", filter=Q(assessments__is_retry=True)),
                 last_entry=Subquery(latest_extended_task_report.values("score")),
                 comment=Subquery(latest_extended_task_report.values("comment")),
-                is_retry=Subquery(latest_extended_task_report.values("is_retry")),
+                present_status=Subquery(latest_extended_task_report.values("present_status")),
+                assessment_id=Subquery(latest_extended_task_report.values("id")),
             )
             .order_by("id")
         )
         response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
-        for row in range(len(desired_output)):  # pylint: disable=C0200
-            self.assertEqual(desired_output[row], response.context["extension_tasks"][row])
+        for row, value in enumerate(desired_output):
+            self.assertEqual(
+                value.last_entry,
+                response.context["extension_tasks"][row].last_entry,
+            )
+            self.assertEqual(
+                value.comment,
+                response.context["extension_tasks"][row].comment,
+            )
+            self.assertEqual(
+                value.present_status,
+                response.context["extension_tasks"][row].present_status,
+            )
+            self.assertEqual(
+                value.assessment_id,
+                response.context["extension_tasks"][row].assessment_id,
+            )
+
+
+class ExtensionScoreHistory(BaseTestCase):
+    """
+    This class is responsible for testing whether the rendered
+    Score History table is correct or not
+    """
+
+    route_name = "score_history"
+
+    def setUp(self):
+        """
+        This function will run before every test and makes sure required data are ready
+        """
+        super().setUp()
+        self.authenticate()
+        sub_batch = baker.make(
+            "hubble.SubBatch",
+            start_date=(timezone.now() + timezone.timedelta(1)),
+        )
+        self.trainee = baker.make("hubble.InternDetail", sub_batch=sub_batch)
+        self.extension = baker.make(
+            "hubble.Extension",
+            user_id=self.trainee.user_id,
+            sub_batch=sub_batch,
+            name=seq("Extension Week "),
+        )
+        baker.make(
+            "hubble.Assessment",
+            extension_id=self.extension.id,
+            user_id=self.trainee.user_id,
+            sub_batch=sub_batch,
+            score=50,
+            is_retry_needed=False,
+            is_retry=False,
+        )
+
+    def test_score_history(self):
+        """
+        This function will test whether the rendered score history table is correct or not
+        """
+        data = {
+            "extension_id": self.extension.id,
+            "task_id": "",
+            "user_id": self.trainee.user_id,
+        }
+        response = self.make_post_request(
+            reverse(self.route_name),
+            data=data,
+        )
+        data = Assessment.objects.filter(
+            task_id=None,
+            extension_id=self.extension.id,
+            user_id=self.trainee.user_id,
+            sub_batch_id=InternDetail.objects.filter(user_id=self.trainee.user_id)
+            .values("sub_batch_id")
+            .last()["sub_batch_id"],
+        ).order_by("-id")
+        self.assertEqual(set(response.context["data"]), set(data))

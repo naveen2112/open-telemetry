@@ -49,7 +49,7 @@ class UnManagedModelTestRunner(DiscoverRunner):
         settings.IS_TEST_CASE = False
 
 
-class BaseTestCase(TestCase):
+class BaseTestCase(TestCase):  # pylint:disable=R0902,R0904
     """
     This class helps us to follow DRY principles in Training module testing
     """
@@ -90,11 +90,11 @@ class BaseTestCase(TestCase):
             user = self.create_user()
         self.client.force_login(user)
 
-    def make_get_request(self, url_pattern):
+    def make_get_request(self, url_pattern, data=None):
         """
         This function is responsible for handling the GET requests
         """
-        return self.client.get(url_pattern, SERVER_NAME=self.testcase_server_name)
+        return self.client.get(url_pattern, data=data, SERVER_NAME=self.testcase_server_name)
 
     def make_post_request(self, url_pattern, data):
         """

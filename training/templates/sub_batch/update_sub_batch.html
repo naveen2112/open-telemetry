@@ -13,7 +13,7 @@
         <div class=" w-full flex justify-end items-center batch-btn">
             <a href="{% url 'batch.detail' sub_batch.batch.id %}"
                class="text-white bg-gray-500 rounded inline-flex items-center px-3 py-1 mr-6 text-base font-normal">
-                <span class="text-xl mr-2">x</span>
+               <span class="text-xl mr-2">x</span>
                 Cancel
             </a>
             <button type="submit"
@@ -49,8 +49,9 @@
                 {{ form.timeline|show_label }}
                 <div class="relative" id="timeline-template-select">
                     <select name="timeline"
-                        class="w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250 timeline-input invisible"
-                        required="" id="id_timeline"></select>
+                            class="w-full block border border-primary-dark-30 rounded-md focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 dropdown_select bg-transparent w-250 timeline-input invisible"
+                            required=""
+                            id="id_timeline"></select>
                 </div>
                 {{ form.timeline|show_field_errors }}
             </div>
@@ -90,7 +91,7 @@
 
                         if (data.length !== 0) {
                             selectElement.append(`<option value="${0}">Select a Timeline</option>`);
-                            data.forEach(function (item) {
+                            data.forEach(function(item) {
                                 const option = `<option value="${item.id}" ${item.is_active ? "selected" : ""}>${item.name}</option>`;
                                 selectElement.append(option);
                             });
@@ -123,6 +124,7 @@
                 $('#sub_batch_form').submit();
             })
             $("#team_dropdown").find(".multi-select-inner").css("pointer-events", "none");
+            $("#id_start_date").val(moment($("#id_start_date").val()).format('DD MMM YYYY'));
         });
 
         $(function() {
@@ -131,7 +133,7 @@
                 singleDatePicker: true,
                 showDropdowns: true,
                 locale: {
-                    format: 'YYYY-MM-DD'
+                    format: 'DD MMM YYYY',
                 }
             });
         });

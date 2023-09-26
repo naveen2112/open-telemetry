@@ -12,14 +12,14 @@
 }
 
 .disabled-container {
-    width: 420px;
+    width: 90%;
     background-color: #D3D3D3;
     height: auto;
     opacity: 0.5;
 }
 
 .enabled-container {
-    width: 420px;
+    width: 90%;
     background-color: white;
     height: auto;
 }
@@ -166,7 +166,7 @@
 }
 
 .assessment-report-week {
-    width: 420px;
+    width: 90%;
     background-color: white;
     height: auto;
 }
@@ -233,4 +233,13 @@
     width: 90%;
     background-color: white;
     height: fit-content;
+}
+
+.user_journey_page_score_modal {
+    max-width: 950px !important;
+    display: inline-block !important;
+}
+
+.user_journey_page_score_update_modal {
+    display: inline-block !important;
 }

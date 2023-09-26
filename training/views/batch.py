@@ -141,11 +141,7 @@ def batch_data(request, pk):  # pylint: disable=unused-argument
         # serialized and sent as a JSON response
         return JsonResponse(data, safe=False)
     except Exception as exception:
-        logging.error(
-            "An error has occurred while fetching the batch data \n%s",
-            exception,
-        )
-
+        logging.error("An error has occured while fetching the batch data \n%e", exception)
         return JsonResponse({"message": "Error while getting the data!"}, status=500)
 
 
@@ -192,10 +188,7 @@ def delete_batch(request, pk):  # pylint: disable=unused-argument
         batch.delete()
         return JsonResponse({"message": "Batch deleted succcessfully"})
     except Exception as exception:
-        logging.error(
-            "An error has occurred while deleting the batch data \n%s",
-            exception,
-        )
+        logging.error("An error has occured while deleting the batch data \n%e", exception)
         return JsonResponse({"message": "Error while deleting Batch!"}, status=500)
 
 

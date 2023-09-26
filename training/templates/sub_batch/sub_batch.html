@@ -20,13 +20,15 @@
                 <p class="text-sm">Current you are viewing {{ batch.name }} batch</p>
             </div>
         </div>
-        {% if request.user.is_admin_user %}
-            <a href="{% url 'sub-batch.create' batch.id %}"
-               class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal">
-                <span class="text-xl mr-2">+</span>
-                Create Sub Batch
-            </a>
-        {% endif %}
+        <div>
+            {% if request.user.is_admin_user %}
+                <a href="{% url 'sub-batch.create' batch.id %}"
+                   class="text-white h-9 bg-dark-blue rounded inline-flex items-center px-3 py-1 text-base font-normal">
+                    <span class="text-xl mr-2 hbl hbl-plus"></span>
+                    Create Sub Batch
+                </a>
+            {% endif %}
+        </div>
     </div>
 {% endblock %}
 

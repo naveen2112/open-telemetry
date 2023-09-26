@@ -215,5 +215,6 @@ def schedule_timeline_for_sub_batch(sub_batch, user=None, is_create=True):
             task.start_date = values["start_date_time"]
             task.end_date = values["end_date_time"]
             task.save()
+        value_end_date = values["end_date_time"]
     update_expected_end_date_of_intern_details(sub_batch.id)
     return value_end_date

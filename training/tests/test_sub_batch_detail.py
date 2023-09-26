@@ -283,6 +283,12 @@ class TraineeDatatableTest(BaseTestCase):
         ).order_by("-assessments__id")[:1]
         self.desired_output = (
             InternDetail.objects.filter(sub_batch__id=self.sub_batch.id)
+            .filter(
+                sub_batch=self.sub_batch.id,
+                user__assessments__extension__isnull=True,
+                user__assessments__task__deleted_at__isnull=True,
+                user__assessments__sub_batch_id=self.sub_batch.id,
+            )
             .select_related("user")
             .annotate(
                 average_marks=Avg(Subquery(last_attempt_score.values("assessments__score"))),
@@ -290,9 +296,6 @@ class TraineeDatatableTest(BaseTestCase):
                     "user__assessments__id",
                     filter=Q(
                         user__assessments__is_retry=True,
-                        user__assessments__extension__isnull=True,
-                        user__assessments__task_id__deleted_at__isnull=True,
-                        user__assessments__sub_batch_id=self.sub_batch.id,
                     ),
                     distinct=True,
                 ),
@@ -300,8 +303,6 @@ class TraineeDatatableTest(BaseTestCase):
                     "user__assessments__task_id",
                     filter=Q(
                         user__assessments__user_id=F("user_id"),
-                        user__assessments__task_id__deleted_at__isnull=True,
-                        user__assessments__sub_batch_id=self.sub_batch.id,
                     ),
                     distinct=True,
                 )
