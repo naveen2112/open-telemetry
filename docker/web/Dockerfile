@@ -21,17 +21,17 @@ ADD docker/web/webserver.conf /etc/nginx/conf.d/default.conf
 
 ADD docker/web/nginx.conf /etc/nginx/nginx.conf
 
-RUN mkdir -p /var/app/staticfiles/css/tw/
+# RUN mkdir -p /var/app/staticfiles/css/tw/
 
-RUN mkdir -p /var/app/newstaticfiles/
+# RUN mkdir -p /var/app/newstaticfiles/
 
-ADD static/* /var/app/newstaticfiles/
+# COPY static/ /var/app/newstaticfiles/
 
-ADD static/css/tw/* /var/app/staticfiles/css/tw/
+# ADD static/css/tw/* /var/app/staticfiles/css/tw/
 
-RUN mkdir -p /var/app/twcss/css/tw/
+# RUN mkdir -p /var/app/twcss/css/tw/
 
-ADD static/css/tw/* /var/app/twcss/css/tw/
+# ADD static/css/tw/* /var/app/twcss/css/tw/
 
 #Log Config
 RUN ln -sf /dev/stdout /var/log/nginx/access.log \
