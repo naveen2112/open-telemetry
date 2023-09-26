@@ -44,6 +44,14 @@ def get_constant(name):
 
 
 @register.filter()
+def replace_spaces(value):
+    """
+    Replaces spaces in a string with underscores
+    """
+    return value.replace(" ", "_")
+
+
+@register.filter()
 def show_field_errors(field):
     """
     Returns an HTML representation of the error message for a
@@ -82,8 +90,15 @@ def show_label(field):
     required = ""
     if field.field.required:  # Check the field is required or not
         required = '<span class="text-red-600">*</span>'
+    else:
+        required = ""
+    if field.field.widget.__class__.__name__ == "CheckboxInput":
+        return mark_safe(
+            f'<label for="id_{field.label.lower().replace(" ", "_")}" \
+                class="mb-3.6 text-sm text-dark-black cursor-pointer"> \
+                    {field.label}</label>'  # pylint:disable=C0301
+        )
     return mark_safe(
-        f'<label for="{field.label}" class="mb-3.6 text-sm \
-            text-dark-black-50">{field.label} {required}\
-        </label>'
+        f'<label for="{field.label.lower().replace(" ", "_")}" \
+            class="mb-3.6 text-sm text-dark-black-50">{field.label} {required}</label>'
     )

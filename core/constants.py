@@ -40,6 +40,7 @@ ADMIN_EMAILS = [
     "sanjay@mallow-tech.com",
     "palaniyappan@mallow-tech.com",
     "afsal@mallow-tech.com",
+    "poonkawin@mallow-tech.com",
 ]
 
 PROBATIONER_EMAILS = [
@@ -59,3 +60,5 @@ USER_STATUS_PROBATIONER = "probationer"
 USER_STATUS_WORKING = "working"
 USER_STATUS_NOTICE_PERIOD = "in-notice-period"
 USER_STATUS_RELIEVED = "relieved"
+
+BATCH_DURATION_IN_MONTHS = 5
