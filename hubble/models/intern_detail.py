@@ -28,6 +28,7 @@ class PerformanceManager(db.SoftDeleteManager):
                 assessments__user_id=OuterRef("user_id"),
                 sub_batch_id=sub_batch_id,
                 assessments__present_status=True,
+                assessments__deleted_at__isnull=True,
             )
             .order_by("-assessments__created_at")[:1]
         )
@@ -54,13 +55,16 @@ class PerformanceManager(db.SoftDeleteManager):
                     filter=Q(
                         user__assessments__sub_batch=sub_batch_id,
                         user__assessments__is_retry=True,
+                        user__assessments__deleted_at__isnull=True,
                     ),
                     distinct=True,
                 ),
                 completion=Count(
-                    "sub_batch__task_timelines__id",
+                    "user__assessments__task__id",
                     filter=Q(
-                        sub_batch__task_timelines__deleted_at__isnull=True,
+                        user__assessments__task__deleted_at__isnull=True,
+                        user__assessments__sub_batch_id=sub_batch_id,
+                        user__assessments__deleted_at__isnull=True,
                     ),
                     distinct=True,
                 )

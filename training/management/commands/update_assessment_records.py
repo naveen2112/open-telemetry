@@ -42,8 +42,10 @@ class Command(BaseCommand):
             created_by=sub_batch.primary_mentor,
             updated_by=sub_batch.primary_mentor,
         )
-        assessment.created_at = task.start_date + timezone.timedelta(1)
-        assessment.save()
+        Assessment.objects.filter(id=assessment.id).update(
+            created_at=task.start_date + timezone.timedelta(1),
+            updated_at=task.start_date + timezone.timedelta(1),
+        )
         return assessment
 
     # pylint: disable=too-many-nested-blocks, unused-argument, too-many-locals
@@ -51,10 +53,6 @@ class Command(BaseCommand):
         """
         Create records based on the given scenario
         """
-        # assessmnet_details = Assessment.objects.all()
-        Assessment.objects.filter(sub_batch_id__in=kwargs["sub_batch_id"]).update(
-            present_status=True
-        )
         for sub_batch_id in kwargs["sub_batch_id"]:
             try:
                 sub_batch = SubBatch.objects.prefetch_related(

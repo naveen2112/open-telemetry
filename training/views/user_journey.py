@@ -90,6 +90,7 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
                         assessments__is_retry=True,
                         assessments__present_status=True,
                         assessments__user=self.object,
+                        assessments__deleted_at__isnull=True,
                     ),
                 ),
                 assessment_id=Subquery(latest_task_report.values("id")),
