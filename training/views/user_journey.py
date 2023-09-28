@@ -249,11 +249,11 @@ def add_extension(request, pk):
     """
     try:
         extension_name = Extension.objects.filter(
-            sub_batch=SubBatch.objects.filter(intern_details__user=pk).first(), user_id=pk
+            sub_batch=SubBatch.objects.filter(intern_details__user=pk).last(), user_id=pk
         ).count()
         Extension.objects.create(
             name=f"Extension Week {extension_name+1}",
-            sub_batch=SubBatch.objects.filter(intern_details__user=pk).first(),
+            sub_batch=SubBatch.objects.filter(intern_details__user=pk).last(),
             user_id=pk,
             created_by=request.user,
         )
