@@ -74,7 +74,10 @@ def first_assessment_entry(
         last_assessment_with_absent_record["present_status"]
         and not last_assessment_with_absent_record["is_retry_needed"]
     ):
-        response = constants.INFINITE_TEST_EDIT
+        if last_assessment_with_absent_record["updated_at"] < current_week_start_date:
+            response = constants.TEST_COMPLETED
+        else:
+            response = constants.INFINITE_TEST_EDIT
     elif last_assessment_record["present_status"] and last_assessment_record["is_retry_needed"]:
         if last_assessment_with_absent_record["is_retry"]:
             response = constants.INFINITE_RETEST_EDIT
@@ -109,7 +112,10 @@ def second_assessment_entry(
         else:
             response = constants.TEST_COMPLETED
     elif last_assessment_record["present_status"]:
-        if last_assessment_record["is_retry"]:
+        if (
+            last_assessment_record["is_retry"]
+            and last_assessment_record["updated_at"] > current_week_start_date
+        ):
             response = constants.INFINITE_RETEST_EDIT
         else:
             response = constants.TEST_COMPLETED

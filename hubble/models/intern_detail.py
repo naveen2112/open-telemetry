@@ -46,8 +46,6 @@ class PerformanceManager(db.SoftDeleteManager):
             .filter(
                 sub_batch=sub_batch_id,
                 sub_batch__task_timelines__task_type=constants.TASK_TYPE_ASSESSMENT,
-                user__assessments__extension__isnull=True,
-                user__assessments__task__deleted_at__isnull=True,
             )
             .annotate(
                 no_of_retries=Count(
@@ -56,6 +54,9 @@ class PerformanceManager(db.SoftDeleteManager):
                         user__assessments__sub_batch=sub_batch_id,
                         user__assessments__is_retry=True,
                         user__assessments__deleted_at__isnull=True,
+                        user__assessments__present_status=True,
+                        user__assessments__extension__isnull=True,
+                        user__assessments__task__deleted_at__isnull=True,
                     ),
                     distinct=True,
                 ),

@@ -61,7 +61,7 @@
 {% block body %}
 
     <div class="flex justify-between items-center">
-        <h3 class="font-semibold">Assignment Journey</h3>
+        <h3 class="font-semibold">Assessment Journey</h3>
         <button onclick="addWeekExtensionCard('{{ object.id }}')"
             class="text-white bg-dark-blue rounded inline-flex items-center px-3 py-1 mr-10 text-base font-normal">
             <div class="flex mr-1"><span class="hbl hbl-plus text-2xl text-white"></span></div>
@@ -438,10 +438,12 @@
             $("#id_comment").val("");
             $("#id_score").prop('disabled', true);
             $("#id_comment").prop('disabled', true);
+            $("#id_is_retry_needed").prop('disabled', true);
         }
         else {
             $("#id_score").removeAttr('disabled');
             $("#id_comment").removeAttr('disabled');
+            $("#id_is_retry_needed").removeAttr('disabled');
         }
     }
 

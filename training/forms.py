@@ -449,7 +449,7 @@ class SubBatchTimelineForm(forms.ModelForm):
             .order_by("-order")
             .first()
         )
-        if last_task.start_date < timezone.now() < last_task.end_date:
+        if last_task.start_date < timezone.now():
             if (
                 last_task.order >= self.cleaned_data["order"]
                 or last_task.order + 1 < self.cleaned_data["order"]

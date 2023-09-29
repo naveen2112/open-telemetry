@@ -85,13 +85,14 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
             )
             .annotate(
                 retries=Count(
-                    "assessments__is_retry",
+                    "assessments__id",
                     filter=Q(
                         assessments__is_retry=True,
                         assessments__present_status=True,
                         assessments__user=self.object,
                         assessments__deleted_at__isnull=True,
                     ),
+                    distinct=True,
                 ),
                 assessment_id=Subquery(latest_task_report.values("id")),
                 last_entry=Subquery(latest_task_report.values("score")),
