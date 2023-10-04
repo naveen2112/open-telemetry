@@ -159,6 +159,24 @@ class ExtensionUpdateTest(BaseTestCase):
             },
         )
 
+        assessment = Assessment.objects.get(score=data["score"], user_id=self.trainee.user_id)
+        data = self.get_valid_inputs({"score": 90, "assessment_id": assessment.id})
+        response = self.make_post_request(
+            reverse(self.update_edit_route_name, args=[self.trainee.user_id]),
+            data=data,
+        )
+        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
+        self.assertEqual(response.status_code, 200)
+        self.assert_database_has(
+            "Assessment",
+            {
+                "score": data["score"],
+                "comment": data["comment"],
+                "extension_id": data["extension"],
+                "present_status": data["present_status"],
+            },
+        )
+
     def test_required_validation(self):
         """
         This function checks the required validation for the score and comment fields

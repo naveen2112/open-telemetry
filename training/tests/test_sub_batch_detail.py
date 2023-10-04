@@ -2,7 +2,7 @@
 Django test cases for the create, delete and Datatables features in the
 SubBatchDetail module
 """
-from django.db.models import Avg, Case, Count, F, OuterRef, Q, Subquery, Value, When
+from django.db.models import Case, Value, When
 from django.urls import reverse
 from django.utils import timezone
 from model_bakery import baker
@@ -270,62 +270,27 @@ class TraineeDatatableTest(BaseTestCase):
             sub_batch_id=self.sub_batch.id,
             _quantity=6,
         )
+
         task_count = (
             SubBatchTaskTimeline.objects.filter(
-                sub_batch_id=self.sub_batch.id, task_type=TASK_TYPE_ASSESSMENT
+                sub_batch_id=self.sub_batch,
+                task_type=TASK_TYPE_ASSESSMENT,
             )
             .values("id")
             .count()
         )
-        last_attempt_score = SubBatchTaskTimeline.objects.filter(
-            id=OuterRef("sub_batch__task_timelines__id"),
-            assessments__user_id=OuterRef("user_id"),
-        ).order_by("-assessments__id")[:1]
-        self.desired_output = (
-            InternDetail.objects.filter(sub_batch__id=self.sub_batch.id)
-            .filter(
-                sub_batch=self.sub_batch.id,
-                user__assessments__extension__isnull=True,
-                user__assessments__task__deleted_at__isnull=True,
-                user__assessments__sub_batch_id=self.sub_batch.id,
-            )
-            .select_related("user")
-            .annotate(
-                average_marks=Avg(Subquery(last_attempt_score.values("assessments__score"))),
-                no_of_retries=Count(
-                    "user__assessments__id",
-                    filter=Q(
-                        user__assessments__is_retry=True,
-                    ),
-                    distinct=True,
-                ),
-                completion=Count(
-                    "user__assessments__task_id",
-                    filter=Q(
-                        user__assessments__user_id=F("user_id"),
-                    ),
-                    distinct=True,
-                )
-                * 100.0
-                / task_count,
-                performance=Case(
-                    When(average_marks__gte=90, then=Value(GOOD)),
-                    When(
-                        Q(average_marks__lt=90) & Q(average_marks__gte=75),
-                        then=Value(MEET_EXPECTATION),
-                    ),
-                    When(
-                        Q(average_marks__lt=75) & Q(average_marks__gte=65),
-                        then=Value(ABOVE_AVERAGE),
-                    ),
-                    When(
-                        Q(average_marks__lt=65) & Q(average_marks__gte=50),
-                        then=Value(AVERAGE),
-                    ),
-                    When(average_marks__lt=65, then=Value(POOR)),
-                    default=Value(NOT_YET_STARTED),
-                ),
-            )
+        task_count = max(task_count, 1)
+        self.desired_output = InternDetail.objects.get_performance_summary(
+            self.sub_batch.id, task_count
+        ).annotate(
+            performance=Case(
+                When(average_marks__gte=90, then=Value(GOOD)),
+                When(average_marks__lt=90, average_marks__gte=75, then=Value(MEET_EXPECTATION)),
+                When(average_marks__lt=75, average_marks__gte=65, then=Value(ABOVE_AVERAGE)),
+                When(average_marks__lt=65, average_marks__gte=50, then=Value(AVERAGE)),
+                When(average_marks__lt=50, then=Value(POOR)),
+                default=Value(NOT_YET_STARTED),
+            ),
         )
 
     def test_template(self):

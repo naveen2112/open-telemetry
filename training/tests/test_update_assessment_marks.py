@@ -1,6 +1,8 @@
+# pylint: disable=too-many-lines
 """
 Django test cases for updating the assessment details
 """
+import time_machine
 from django.db.models import (
     Avg,
     BooleanField,
@@ -19,8 +21,9 @@ from django.utils import timezone
 from model_bakery import baker
 from model_bakery.recipe import seq
 
+from core import constants
 from core.base_test import BaseTestCase
-from core.constants import TASK_TYPE_ASSESSMENT
+from core.utils import schedule_timeline_for_sub_batch
 from hubble.models import Assessment, InternDetail, SubBatchTaskTimeline
 
 
@@ -44,7 +47,7 @@ class TaskSummaryTest(BaseTestCase):
         baker.make(
             "hubble.SubBatchTaskTimeline",
             days=seq(1),
-            task_type=TASK_TYPE_ASSESSMENT,
+            task_type=constants.TASK_TYPE_ASSESSMENT,
             sub_batch=self.sub_batch,
             start_date=self.sub_batch.start_date,
             end_date=(timezone.now() + timezone.timedelta(10)).date(),
@@ -63,7 +66,7 @@ class TaskSummaryTest(BaseTestCase):
         ).order_by("-id")[:1]
         desired_output = (
             SubBatchTaskTimeline.objects.filter(
-                sub_batch=self.sub_batch, task_type=TASK_TYPE_ASSESSMENT
+                sub_batch=self.sub_batch, task_type=constants.TASK_TYPE_ASSESSMENT
             )
             .annotate(
                 retries=Count(
@@ -133,7 +136,7 @@ class TaskSummaryTest(BaseTestCase):
         ).order_by("-id")[:1]
         desired_output = list(
             SubBatchTaskTimeline.objects.filter(
-                sub_batch=self.sub_batch, task_type=TASK_TYPE_ASSESSMENT
+                sub_batch=self.sub_batch, task_type=constants.TASK_TYPE_ASSESSMENT
             )
             .annotate(
                 retries=Count(
@@ -180,7 +183,7 @@ class HeaderStatsTest(BaseTestCase):
         task = baker.make(
             "hubble.SubBatchTaskTimeline",
             days=10,
-            task_type=TASK_TYPE_ASSESSMENT,
+            task_type=constants.TASK_TYPE_ASSESSMENT,
             sub_batch=self.sub_batch,
             start_date=self.sub_batch.start_date,
             end_date=(timezone.now() + timezone.timedelta(10)).date(),
@@ -207,7 +210,7 @@ class HeaderStatsTest(BaseTestCase):
         """
         task_count = (
             SubBatchTaskTimeline.objects.filter(
-                sub_batch=self.sub_batch, task_type=TASK_TYPE_ASSESSMENT
+                sub_batch=self.sub_batch, task_type=constants.TASK_TYPE_ASSESSMENT
             )
             .values("id")
             .count()
@@ -296,7 +299,7 @@ class UpdateAssessmentTest(BaseTestCase):
         self.sub_batch_task_timeline = baker.make(
             "hubble.SubBatchTaskTimeline",
             days=days,
-            task_type=TASK_TYPE_ASSESSMENT,
+            task_type=constants.TASK_TYPE_ASSESSMENT,
             start_date=sub_batch.start_date,
             sub_batch=sub_batch,
             end_date=(timezone.now() + timezone.timedelta(days)).date(),
@@ -328,6 +331,77 @@ class UpdateAssessmentTest(BaseTestCase):
         """
         # Check what happens when is_retry is True
         data = self.get_valid_inputs()
+        response = self.make_post_request(
+            reverse(self.update_edit_route_name, args=[self.trainee.user_id]),
+            data=data,
+        )
+        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
+        self.assertEqual(response.status_code, 200)
+        self.assert_database_has(
+            "Assessment",
+            {
+                "score": data["score"],
+                "comment": data["comment"],
+                "task_id": data["task"],
+                "is_retry_needed": data["is_retry_needed"].capitalize(),
+                "is_retry": data["is_retry"].capitalize(),
+            },
+        )
+
+        assessment = Assessment.objects.get(score=data["score"], user_id=self.trainee.user_id)
+        data = self.get_valid_inputs({"assessment_id": assessment.id})
+        response = self.make_post_request(
+            reverse(self.update_edit_route_name, args=[self.trainee.user_id]),
+            data=data,
+        )
+        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
+        self.assertEqual(response.status_code, 200)
+        self.assert_database_has(
+            "Assessment",
+            {
+                "score": data["score"],
+                "comment": data["comment"],
+                "task_id": data["task"],
+                "is_retry_needed": data["is_retry_needed"].capitalize(),
+                "is_retry": data["is_retry"].capitalize(),
+            },
+        )
+
+        data = self.get_valid_inputs(
+            {
+                "assessment_id": assessment.id,
+                "is_retry": "true",
+                "test_week": "false",
+                "is_retry_needed": "false",
+            }
+        )
+        response = self.make_post_request(
+            reverse(self.update_edit_route_name, args=[self.trainee.user_id]),
+            data=data,
+        )
+        self.assertJSONEqual(self.decoded_json(response), {"status": "success"})
+        self.assertEqual(response.status_code, 200)
+        self.assert_database_has(
+            "Assessment",
+            {
+                "score": data["score"],
+                "comment": data["comment"],
+                "task_id": data["task"],
+                "is_retry_needed": data["is_retry_needed"].capitalize(),
+                "is_retry": data["is_retry"].capitalize(),
+            },
+        )
+
+        assessment.is_retry = True
+        assessment.save()
+        data = self.get_valid_inputs(
+            {
+                "assessment_id": assessment.id,
+                "is_retry": "true",
+                "test_week": "false",
+                "is_retry_needed": "false",
+            }
+        )
         response = self.make_post_request(
             reverse(self.update_edit_route_name, args=[self.trainee.user_id]),
             data=data,
@@ -561,7 +635,7 @@ class TaskScoreHistory(BaseTestCase):
         self.sub_batch_task_timeline = baker.make(
             "hubble.SubBatchTaskTimeline",
             days=10,
-            task_type=TASK_TYPE_ASSESSMENT,
+            task_type=constants.TASK_TYPE_ASSESSMENT,
             sub_batch=self.sub_batch,
             start_date=timezone.now().date(),
             end_date=(timezone.now() + timezone.timedelta(10)).date(),
@@ -628,7 +702,7 @@ class AssessmentUpdateShowTest(BaseTestCase):
         self.sub_batch_task_timeline = baker.make(
             "hubble.SubBatchTaskTimeline",
             days=10,
-            task_type=TASK_TYPE_ASSESSMENT,
+            task_type=constants.TASK_TYPE_ASSESSMENT,
             sub_batch=self.sub_batch,
             start_date=timezone.now().date(),
             end_date=(timezone.now() + timezone.timedelta(10)).date(),
@@ -713,22 +787,24 @@ class AssessmentRenderedTest(BaseTestCase):
         self.authenticate()
         self.sub_batch = baker.make(
             "hubble.SubBatch",
-            start_date=(timezone.now() + timezone.timedelta(-1)),
+            start_date=(timezone.now() + timezone.timedelta(-1)).date(),
         )
-        self.task = baker.make(
+        baker.make(
             "hubble.SubBatchTaskTimeline",
             days=seq(1),
-            task_type=TASK_TYPE_ASSESSMENT,
+            task_type=constants.TASK_TYPE_ASSESSMENT,
             sub_batch=self.sub_batch,
             start_date=self.sub_batch.start_date,
-            end_date=(timezone.now() + timezone.timedelta(10)).date(),
+            end_date=(timezone.now() + timezone.timedelta(2)).date(),
             order=seq(0),
-            _quantity=5,
+            _quantity=2,
         )
+        schedule_timeline_for_sub_batch(self.sub_batch, is_create=False)
+        self.task = SubBatchTaskTimeline.objects.filter(sub_batch=self.sub_batch)
         self.trainee = baker.make("hubble.InternDetail", sub_batch=self.sub_batch)
         self.assessment = baker.make(
             "hubble.Assessment",
-            score=70,
+            score=self.faker.random_int(1, 100),
             user_id=self.trainee.user_id,
             is_retry_needed=True,
             present_status=True,
@@ -737,56 +813,248 @@ class AssessmentRenderedTest(BaseTestCase):
             _fill_optional=["comment"],
         )
 
-    def test_fresh_create_icon(self):
+    def test_test_week_scenarios(self):
         """
         This function is responsible for testing whether the
         Test Create model is rendered correctly
         """
-        Assessment.objects.all().delete()
+        Assessment.objects.all().update(deleted_at=timezone.now())
         response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
-        expected_content = (
-            f"onclick=\"openCreateModal(null, '{ self.task[0].id }',"
-            f" '{ self.task[0].name }', 'True', 'False', null, null)\">"
-        )
         self.assertTemplateUsed(response, "sub_batch/user_journey_page.html")
-        self.assertTrue(expected_content in str(response.content, encoding="utf-8"))
-
-    def test_test_edit_icon(self):
-        """
-        This function is responsible for testing whether the
-        Test Edit model is rendered correctly
-        """
-        response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
-        expected_content = (
-            f"onclick=\"openUpdateModal('{self.assessment.id}', '{self.task[0].id}', "
-            f"'{self.task[0].name}', 'True', 'False', null, null)\">"
+        self.assertEqual(
+            response.context["assessment_scores"][0].assessment_status, constants.TEST_CREATE
         )
-        self.assertTemplateUsed(response, "sub_batch/user_journey_page.html")
-        self.assertTrue(expected_content in str(response.content, encoding="utf-8"))
 
-    def test_retest_create_icon(self):
-        """
-        This function is responsible for testing whether the
-        Retest Create model is rendered correctly
-        """
-        Assessment.objects.all().update(updated_at=F("updated_at") + timezone.timedelta(days=-7))
-        response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
-        expected_content = (
-            f"onclick=\"openCreateModal(null, '{ self.task[0].id }',"
-            f" '{ self.task[0].name }', 'False', 'True', null, null)\">"
-        )
-        self.assertTemplateUsed(response, "sub_batch/user_journey_page.html")
-        self.assertTrue(expected_content in str(response.content, encoding="utf-8"))
-
-    def test_retest_edit_icon(self):
-        """
-        This function is responsible for testing whether the
-        Retest Edit model is rendered correctly
-        """
-        Assessment.objects.all().update(updated_at=F("updated_at") + timezone.timedelta(days=-7))
-        assessment = baker.make(
+        baker.make(
             "hubble.Assessment",
-            score=70,
+            score=self.faker.random_int(1, 100),
+            user_id=self.trainee.user_id,
+            is_retry_needed=True,
+            present_status=False,
+            task_id=self.task[0].id,
+            sub_batch_id=self.sub_batch.id,
+            _fill_optional=["comment"],
+        )
+        response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
+        self.assertEqual(
+            response.context["assessment_scores"][0].assessment_status, constants.TEST_EDIT
+        )
+
+        baker.make(
+            "hubble.Assessment",
+            score=self.faker.random_int(1, 100),
+            user_id=self.trainee.user_id,
+            is_retry_needed=True,
+            present_status=True,
+            task_id=self.task[0].id,
+            sub_batch_id=self.sub_batch.id,
+            _fill_optional=["comment"],
+        )
+        response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
+        self.assertEqual(
+            response.context["assessment_scores"][0].assessment_status, constants.TEST_EDIT
+        )
+
+        Assessment.objects.all().update(deleted_at=timezone.now())
+        baker.make(
+            "hubble.Assessment",
+            score=self.faker.random_int(1, 100),
+            user_id=self.trainee.user_id,
+            present_status=True,
+            task_id=self.task[0].id,
+            sub_batch_id=self.sub_batch.id,
+            updated_at=timezone.now() + timezone.timedelta(-1),
+            _fill_optional=["comment"],
+        )
+
+        traveller = time_machine.travel(self.task[1].start_date)
+        traveller.start()
+        baker.make(
+            "hubble.SubBatchTaskTimeline",
+            days=seq(1),
+            task_type=constants.TASK_TYPE_ASSESSMENT,
+            sub_batch=self.sub_batch,
+            start_date=self.sub_batch.start_date,
+            end_date=(timezone.now() + timezone.timedelta(2)).date(),
+            order=3,
+        )
+        schedule_timeline_for_sub_batch(self.sub_batch, is_create=False)
+        response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
+        self.assertEqual(
+            response.context["assessment_scores"][0].assessment_status, constants.TEST_COMPLETED
+        )
+        SubBatchTaskTimeline.objects.filter(sub_batch=self.sub_batch, order=3).delete()
+        traveller.stop()
+
+        traveller = time_machine.travel(self.task[1].start_date)
+        traveller.start()
+        response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
+        self.assertEqual(
+            response.context["assessment_scores"][0].assessment_status, constants.TEST_COMPLETED
+        )
+        Assessment.objects.all().update(deleted_at=timezone.now())
+        baker.make(
+            "hubble.Assessment",
+            score=self.faker.random_int(1, 100),
+            user_id=self.trainee.user_id,
+            present_status=True,
+            task_id=self.task[0].id,
+            sub_batch_id=self.sub_batch.id,
+            _fill_optional=["comment"],
+        )
+        response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
+        self.assertEqual(
+            response.context["assessment_scores"][0].assessment_status, constants.TEST_EDIT
+        )
+
+        Assessment.objects.all().update(deleted_at=timezone.now())
+
+        response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
+        self.assertEqual(
+            response.context["assessment_scores"][0].assessment_status,
+            constants.INFINITE_TEST_CREATE,
+        )
+
+        baker.make(
+            "hubble.Assessment",
+            score=self.faker.random_int(1, 100),
+            user_id=self.trainee.user_id,
+            is_retry_needed=True,
+            present_status=False,
+            task_id=self.task[0].id,
+            sub_batch_id=self.sub_batch.id,
+            updated_at=timezone.now(),
+            _fill_optional=["comment"],
+        )
+        response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
+        self.assertEqual(
+            response.context["assessment_scores"][0].assessment_status,
+            constants.INFINITE_TEST_EDIT,
+        )
+
+        traveller.stop()
+
+    def test_retest_week_scenarios(self):
+        """
+        This function is responsible for testing whether the
+        retest scenarios are handled correctly or not
+        """
+        traveller = time_machine.travel(self.task[1].start_date)
+        traveller.start()
+        response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
+        self.assertEqual(
+            response.context["assessment_scores"][0].assessment_status,
+            constants.INFINITE_RETEST_CREATE,
+        )
+
+        baker.make(
+            "hubble.Assessment",
+            score=self.faker.random_int(1, 100),
+            user_id=self.trainee.user_id,
+            is_retry=True,
+            present_status=False,
+            task_id=self.task[0].id,
+            sub_batch_id=self.sub_batch.id,
+            updated_at=timezone.now(),
+            _fill_optional=["comment"],
+        )
+        response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
+        self.assertEqual(
+            response.context["assessment_scores"][0].assessment_status,
+            constants.INFINITE_RETEST_EDIT,
+        )
+
+        baker.make(
+            "hubble.SubBatchTaskTimeline",
+            days=seq(1),
+            task_type=constants.TASK_TYPE_ASSESSMENT,
+            sub_batch=self.sub_batch,
+            start_date=self.sub_batch.start_date,
+            end_date=(timezone.now() + timezone.timedelta(2)).date(),
+            order=3,
+        )
+        schedule_timeline_for_sub_batch(self.sub_batch, is_create=False)
+        baker.make(
+            "hubble.Assessment",
+            score=self.faker.random_int(1, 100),
+            user_id=self.trainee.user_id,
+            is_retry=True,
+            present_status=False,
+            task_id=self.task[0].id,
+            sub_batch_id=self.sub_batch.id,
+            updated_at=timezone.now(),
+            _fill_optional=["comment"],
+        )
+        response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
+        self.assertEqual(
+            response.context["assessment_scores"][0].assessment_status, constants.RETEST_EDIT
+        )
+
+        baker.make(
+            "hubble.Assessment",
+            score=self.faker.random_int(1, 100),
+            user_id=self.trainee.user_id,
+            is_retry=True,
+            present_status=True,
+            task_id=self.task[0].id,
+            sub_batch_id=self.sub_batch.id,
+            updated_at=timezone.now(),
+            _fill_optional=["comment"],
+        )
+        response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
+        self.assertEqual(
+            response.context["assessment_scores"][0].assessment_status, constants.RETEST_EDIT
+        )
+
+        Assessment.objects.filter(is_retry=True).update(deleted_at=timezone.now())
+        response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
+        self.assertEqual(
+            response.context["assessment_scores"][0].assessment_status, constants.RETEST_CREATE
+        )
+
+        baker.make(
+            "hubble.Assessment",
+            score=self.faker.random_int(1, 100),
+            user_id=self.trainee.user_id,
+            is_retry=True,
+            present_status=True,
+            task_id=self.task[0].id,
+            sub_batch_id=self.sub_batch.id,
+            updated_at=timezone.now(),
+            _fill_optional=["comment"],
+        )
+        response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
+        self.assertEqual(
+            response.context["assessment_scores"][0].assessment_status, constants.RETEST_EDIT
+        )
+        traveller.stop()
+
+        Assessment.objects.filter(is_retry=True).update(deleted_at=timezone.now())
+
+        baker.make(
+            "hubble.Assessment",
+            score=self.faker.random_int(1, 100),
+            user_id=self.trainee.user_id,
+            is_retry=True,
+            present_status=True,
+            task_id=self.task[0].id,
+            sub_batch_id=self.sub_batch.id,
+            _fill_optional=["comment"],
+        )
+        traveller = time_machine.travel(self.task[1].start_date)
+        traveller.start()
+        response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
+        self.assertEqual(
+            response.context["assessment_scores"][0].assessment_status, constants.TEST_COMPLETED
+        )
+        SubBatchTaskTimeline.objects.filter(sub_batch=self.sub_batch, order=3).delete()
+
+        Assessment.objects.filter(is_retry=True).update(deleted_at=timezone.now())
+        traveller = time_machine.travel(self.task[1].start_date)
+        traveller.start()
+        baker.make(
+            "hubble.Assessment",
+            score=self.faker.random_int(1, 100),
             user_id=self.trainee.user_id,
             is_retry=True,
             present_status=True,
@@ -795,9 +1063,24 @@ class AssessmentRenderedTest(BaseTestCase):
             _fill_optional=["comment"],
         )
         response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
-        expected_content = (
-            f"onclick=\"openUpdateModal('{assessment.id}', '{self.task[0].id}', "
-            f"'{self.task[0].name}', 'False', 'True', null, null)\">"
+        self.assertEqual(
+            response.context["assessment_scores"][0].assessment_status,
+            constants.INFINITE_RETEST_EDIT,
         )
-        self.assertTemplateUsed(response, "sub_batch/user_journey_page.html")
-        self.assertTrue(expected_content in str(response.content, encoding="utf-8"))
+
+        baker.make(
+            "hubble.Assessment",
+            user_id=self.trainee.user_id,
+            is_retry=True,
+            present_status=False,
+            task_id=self.task[0].id,
+            sub_batch_id=self.sub_batch.id,
+            _fill_optional=["comment"],
+        )
+        response = self.make_get_request(reverse(self.route_name, args=[self.trainee.user_id]))
+        self.assertEqual(
+            response.context["assessment_scores"][0].assessment_status,
+            constants.INFINITE_RETEST_EDIT,
+        )
+
+        traveller.stop()

@@ -35,7 +35,7 @@ class SubBatchCreateTest(BaseTestCase):
         self.authenticate()
         self.update_valid_input()
 
-    def update_valid_input(self):
+    def update_valid_input(self):  # pragma: no cover
         """
         This function is responsible for updating the valid inputs and creating
         data in databases as reqiured
@@ -428,7 +428,7 @@ class SubBatchUpdateTest(BaseTestCase):
         self.authenticate()
         self.update_valid_input()
 
-    def update_valid_input(self):
+    def update_valid_input(self):  # pragma: no cover
         """
         This function is responsible for updating the valid inputs and creating
         data in databases as reqiured

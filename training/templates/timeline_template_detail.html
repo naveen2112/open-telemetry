@@ -53,11 +53,11 @@
                         {{ form.days|show_label }}
                         {{ form.days }}
                     </div>
-                    <div class="mb-7" id="{{ form.present_type.label|lower }}_group">
+                    <div class="mb-7" id="{{ form.present_type.label|convert_to_id|lower }}_group">
                         {{ form.present_type|show_label }}
                         {{ form.present_type }}
                     </div>
-                    <div class="mb-7" id="{{ form.task_type.label|lower }}_group">
+                    <div class="mb-7" id="{{ form.task_type.label|convert_to_id|lower }}_group">
                         {{ form.task_type|show_label }}
                         {{ form.task_type }}
                     </div>
