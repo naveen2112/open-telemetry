@@ -243,3 +243,9 @@
 .user_journey_page_score_update_modal {
     display: inline-block !important;
 }
+
+.footer p {
+    text-align: left !important;
+    align-items: start !important;
+    margin: 0 !important;
+}

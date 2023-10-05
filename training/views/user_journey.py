@@ -96,6 +96,7 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
                 ),
                 assessment_id=Subquery(latest_task_report.values("id")),
                 last_entry=Subquery(latest_task_report.values("score")),
+                last_updated=Subquery(latest_task_report.values("updated_at")),
                 comment=Subquery(latest_task_report.values("comment")),
                 is_retry=Subquery(latest_task_report.values("is_retry")),
                 is_retry_needed=Subquery(latest_task_report.values("is_retry_needed")),

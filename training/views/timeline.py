@@ -220,6 +220,11 @@ def delete_timeline_template(request, pk):  # pylint: disable=unused-argument
     """
     try:
         timeline = get_object_or_404(Timeline, id=pk)
+        if timeline.sub_batches.all().count() > 0:
+            return JsonResponse(
+                {"message": "This Timeline Template has active Sub Batches!"},
+                status=500,
+            )
         TimelineTask.bulk_delete({"timeline_id": pk})
         timeline.delete()
         return JsonResponse({"message": "Timeline Template deleted successfully"})

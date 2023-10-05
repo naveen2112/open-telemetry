@@ -4,7 +4,7 @@ The InternDetail class is a Django model that stores information about trainees
 from django.db import models
 from django.db.models import Avg, Case, Count, OuterRef, Q, Subquery, When
 
-from core import constants, db
+from core import db
 from hubble import models as hubble_models
 
 from .user import User
@@ -45,7 +45,6 @@ class PerformanceManager(db.SoftDeleteManager):
             )
             .filter(
                 sub_batch=sub_batch_id,
-                sub_batch__task_timelines__task_type=constants.TASK_TYPE_ASSESSMENT,
             )
             .annotate(
                 no_of_retries=Count(

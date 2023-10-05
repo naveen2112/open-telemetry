@@ -224,6 +224,10 @@
                     <p class="truncate">{% if task.inactive_tasks %} - {% else %} {{ task.comment|default_if_none:"-"|truncatechars:10 }} {% endif %}</p>
                     <a class="text-sm text-dark-blue cursor-pointer show-more-btn">Show more</a>
                 </div>
+                <div class="w-full flex flex-col justify-start">
+                    <p class="text-xs">Completion Date: {{ task.end_date|date:"M d, Y" }}</p>
+                    <p class="text-xs">Last Updated: {{ task.last_updated|date:"M d, Y"|default:"-" }}</p>
+                </div>
             </div>
         {% endfor %}
         {% for assessment in extension_tasks %}
