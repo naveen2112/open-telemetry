@@ -83,6 +83,9 @@ class SubBatchTaskTimeline(db.SoftDeleteWithBaseModel):
             for assessment in current_task["assessments"]
             if assessment["user_id"] == user
         ]
+        assessments_completed = sorted(
+            assessments_completed, key=lambda assessment: assessment["updated_at"]
+        )
         assessment_attended = [
             assessment_attended
             for assessment_attended in current_task["assessments"]
@@ -91,6 +94,9 @@ class SubBatchTaskTimeline(db.SoftDeleteWithBaseModel):
                 and (assessment_attended["present_status"] is not False)
             )
         ]
+        assessment_attended = sorted(
+            assessment_attended, key=lambda assessment: assessment["updated_at"]
+        )
         current_task_assessments = len(assessment_attended)
         try:
             last_assessment_with_absent_record = assessments_completed[-1]
