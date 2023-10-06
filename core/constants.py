@@ -76,3 +76,5 @@ TEST_COMPLETED = "Test Completed"
 
 NO_START_DATE = datetime(1, 1, 1, 1, 0, 0)
 NO_END_DATE = datetime(1, 1, 1, 1, 0, 0)
+
+REQUIRED = ["Score", "Comment"]

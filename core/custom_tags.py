@@ -80,7 +80,9 @@ def show_label(field):
     Returns an HTML representation of the label with custom styling
     """
     required = ""
-    if field.field.required:  # Check the field is required or not
+    if (field.label in constants.REQUIRED) or (
+        field.field.required
+    ):  # Check the field is required or not
         required = '<span class="text-red-600">*</span>'
     else:
         required = ""
