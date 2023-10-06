@@ -96,11 +96,11 @@
                         </div>
                     </div>
                     <div class="form-group mb-7" id="{{ form.score.label|lower }}_group">
-                        {{ form.score|show_label }}
+                        <label for="score" class="mb-3.6 text-sm text-dark-black-50">Score <span class="text-red-600">*</span></label>
                         {{ form.score }}
                     </div>
                     <div class="form-group mb-7" id="{{ form.comment.label|lower }}_group">
-                        {{ form.comment|show_label }}
+                        <label for="comment" class="mb-3.6 text-sm text-dark-black-50">Comment <span class="text-red-600">*</span></label>
                         {{ form.comment }}
                     </div>
                     <div class="form-group mb-7" id="{{ form.is_retry_needed.label|convert_to_id }}_group">
@@ -293,7 +293,6 @@
         $("#timeline-create-form")[0].reset();
         $("#is_retry_score_group").show();
         $("#is_retry_needed_group").show();
-        $(".form-group").find("span").remove();
         $('input[name="present_status"][value="True"]').prop('checked', true);
         $("#id_score").removeAttr('disabled');
         $("#id_comment").removeAttr('disabled');
@@ -325,7 +324,6 @@
         } else {
             $("#assessment_name").text(extension_name);
         }
-        $(".form-group").find("span").remove();
         $.ajax({
             type: "GET",
             url: "{% url 'task.show_score' %}",
@@ -443,9 +441,11 @@
             $("#id_score").prop('disabled', true);
             $("#id_comment").prop('disabled', true);
             $("#id_is_retry_needed").prop('disabled', true);
+            $(".form-group").find("span").hide();
             $("#id_is_retry_needed").prop('checked', false);
         }
         else {
+            $(".form-group").find("span").show();
             $("#id_score").removeAttr('disabled');
             $("#id_comment").removeAttr('disabled');
             $("#id_is_retry_needed").removeAttr('disabled');
