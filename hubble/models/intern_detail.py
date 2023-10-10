@@ -65,6 +65,7 @@ class PerformanceManager(db.SoftDeleteManager):
                         user__assessments__task__deleted_at__isnull=True,
                         user__assessments__sub_batch_id=sub_batch_id,
                         user__assessments__deleted_at__isnull=True,
+                        user__assessments__present_status=True,
                     ),
                     distinct=True,
                 )

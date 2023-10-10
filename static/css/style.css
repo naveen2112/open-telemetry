@@ -230,9 +230,9 @@
 }
 
 .assessment-card {
-    width: 90%;
-    background-color: white;
-    height: fit-content;
+    width: 90% !important;
+    background-color: white !important;
+    height: fit-content !important;
 }
 
 .user_journey_page_score_modal {

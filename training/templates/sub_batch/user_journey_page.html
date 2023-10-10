@@ -130,7 +130,7 @@
         {% get_constant "INFINITE_RETEST_EDIT" as INFINITE_RETEST_EDIT %}
         {% for task in assessment_scores %}
             <div id="assessment-reports"
-                class="{% if task.inactive_tasks %}disabled-container{% else %}enabled-container{% endif %} rounded-xl flex justify-between items-center flex-col p-4 mt-5">
+                class="{% if task.inactive_tasks %}disabled-container{% else %}enabled-container{% endif %} rounded-xl flex justify-between items-center flex-col p-4 mt-5 assessment-card">
                 <div class="w-full flex justify-between items-center mb-5">
                     <h4>{{ task.name }}</h4>
                     <div class="flex">
@@ -221,8 +221,10 @@
                 </div>
                 <div class="w-full flex flex-col justify-start bg-dark-blue-10 rounded-md p-2">
                     <h3 class="font-semibold">Comments</h3>
-                    <p class="truncate">{% if task.inactive_tasks %} - {% else %} {{ task.comment|default_if_none:"-"|truncatechars:10 }} {% endif %}</p>
-                    <a class="text-sm text-dark-blue cursor-pointer show-more-btn">Show more</a>
+                    <p class="truncate">{% if task.inactive_tasks %} - {% else %} {{ task.comment|default_if_none:"-" }} {% endif %}</p>
+                    {% if task.comment|default_if_none:'-'|length > 40 %}
+                        <a class="text-sm text-dark-blue cursor-pointer show-more-btn">Show more</a>
+                    {% endif %}
                 </div>
                 <div class="w-full flex flex-col justify-start">
                     <p class="text-xs">Completion Date: {{ task.end_date|date:"M d, Y" }}</p>
@@ -232,7 +234,7 @@
         {% endfor %}
         {% for assessment in extension_tasks %}
         <div id="assessment-reports"
-        class="{% if task.inactive_tasks %}disabled-container{% else %}enabled-container{% endif %} rounded-xl flex justify-between items-center flex-col p-4 mt-5">
+        class="{% if task.inactive_tasks %}disabled-container{% else %}enabled-container{% endif %} rounded-xl flex justify-between items-center flex-col p-4 mt-5 mb-10 assessment-card">
             <div class="w-full flex justify-between items-center mb-5">
                 <h4>{{ assessment.name }}</h4>
                 <div class="flex">
@@ -270,8 +272,10 @@
             </div>
             <div class="w-full flex flex-col justify-start bg-dark-blue-10 rounded-md p-2">
                 <h3 class="font-semibold">Comments</h3>
-                <p class="truncate">{{ assessment.comment|default_if_none:"-"|truncatechars:10 }}</p>
-                <a class="text-sm text-dark-blue cursor-pointer show-more-btn">Show more</a>
+                <p class="truncate">{{ assessment.comment|default_if_none:"-" }}</p>
+                {% if assessment.comment|default_if_none:'-'|length > 42 %}
+                    <a class="text-sm text-dark-blue cursor-pointer show-more-btn">Show more</a>
+                {% endif %}
             </div>
         </div>
         {% endfor %}

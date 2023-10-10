@@ -153,7 +153,7 @@ class TimelineTaskForm(forms.ModelForm):
                     "class": "w-full block border border-primary-dark-30 \
                         rounded-md focus:outline-none focus:ring-transparent \
                             focus:ring-offset-0 h-9 p-2",
-                    "placeholder": "Task name...",
+                    "placeholder": "Task Name...",
                 }
             ),
         }
@@ -382,7 +382,7 @@ class AddInternForm(forms.ModelForm):
                 intern_details__isnull=False, intern_details__deleted_at__isnull=True
             ).filter(is_employed=False, status=USER_STATUS_INTERN)
         ),
-        label="User",
+        label="Trainee",
     )
 
     class Meta:
@@ -488,7 +488,7 @@ class SubBatchTimelineForm(forms.ModelForm):
                 "class": "w-full block border border-primary-dark-30 \
                     rounded-md focus:outline-none focus:ring-transparent \
                         focus:ring-offset-0 h-9 p-2",
-                "placeholder": "Days...",
+                "placeholder": "No of days...",
             }
         ),
         validators=[validate_days],
