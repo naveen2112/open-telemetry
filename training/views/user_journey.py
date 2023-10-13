@@ -49,8 +49,11 @@ class TraineeJourneyView(LoginRequiredMixin, DetailView):
         The `get_context_data` function retrieves data related to assessments, task timelines
         and performance statistics for a given user.
         """
-        sub_batch_id = SubBatch.objects.filter(intern_details__user=self.object.id).last()
-
+        sub_batch_id = (
+            SubBatch.objects.filter(intern_details__user=self.object.id)
+            .order_by("intern_details__id")
+            .last()
+        )
         latest_task_report = Assessment.objects.filter(
             task=OuterRef("id"), user_id=self.object.id, sub_batch=sub_batch_id
         ).order_by("-created_at")[:1]
@@ -195,7 +198,9 @@ def create_assessment(request, report, pk):
             report.is_retry_needed = False
             report.is_retry = True
     report.user_id = pk
-    report.sub_batch = SubBatch.objects.filter(intern_details__user=pk).last()
+    report.sub_batch = (
+        SubBatch.objects.filter(intern_details__user=pk).order_by("intern_details__id").last()
+    )
     report.save()
 
 
@@ -251,11 +256,16 @@ def add_extension(request, pk):
     """
     try:
         extension_name = Extension.objects.filter(
-            sub_batch=SubBatch.objects.filter(intern_details__user=pk).last(), user_id=pk
+            sub_batch=SubBatch.objects.filter(intern_details__user=pk)
+            .order_by("intern_details__id")
+            .last(),
+            user_id=pk,
         ).count()
         Extension.objects.create(
             name=f"Extension Week {extension_name+1}",
-            sub_batch=SubBatch.objects.filter(intern_details__user=pk).last(),
+            sub_batch=SubBatch.objects.filter(intern_details__user=pk)
+            .order_by("intern_details__id")
+            .last(),
             user_id=pk,
             created_by=request.user,
         )

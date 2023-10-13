@@ -224,7 +224,7 @@
                     <p id="comment-{{ forloop.counter }}">{% if task.inactive_tasks %} - {% else %} {{ task.comment|default_if_none:"-"|truncatechars:10 }} {% endif %}</p>
                     {% if task.comment|default_if_none:'-'|length > 10 %}
                         <a 
-                        onclick='show_more("{{ forloop.counter }}", "{{ task.comment}}", "{{ task.comment|truncatechars:10 }}")'>
+                        onclick='show_more("{{ forloop.counter }}", `{{ task.comment}}`, `{{ task.comment|truncatechars:10 }}`)'>
                             <p id="comment-show-{{ forloop.counter }}" class="text-sm text-dark-blue cursor-pointer">
                                 Show more
                             </p>
@@ -280,7 +280,7 @@
                     <p id="comment-extension-{{ forloop.counter }}">{% if assessment.inactive_assessments %} - {% else %} {{ assessment.comment|default_if_none:"-"|truncatechars:10 }} {% endif %}</p>
                     {% if assessment.comment|default_if_none:'-'|length > 10 %}
                         <a 
-                        onclick='show_extension_more("{{ forloop.counter }}", "{{ assessment.comment}}", "{{ assessment.comment|truncatechars:10 }}")'>
+                        onclick='show_extension_more("{{ forloop.counter }}", `{{ assessment.comment}}`, `{{ assessment.comment|truncatechars:10 }}`)'>
                             <p id="comment-extension-show-{{ forloop.counter }}" class="text-sm text-dark-blue cursor-pointer">
                                 Show more
                             </p>
@@ -300,8 +300,6 @@
     });
 
     function show_more(comment_no, original_comment, truncated_comment) {
-        console.log("show_more");
-        console.log(comment_no);
         if (original_comment == $("#comment-"+comment_no).text()) {
             $("#comment-"+comment_no).text(truncated_comment);
             $("#comment-show-"+comment_no).text("Show more");
@@ -482,12 +480,14 @@
             $("#id_is_retry_needed").prop('disabled', true);
             $(".form-group").find("span").hide();
             $("#id_is_retry_needed").prop('checked', false);
+            $("#id_comment").css("height", "5rem");
         }
         else {
             $(".form-group").find("span").show();
             $("#id_score").removeAttr('disabled');
             $("#id_comment").removeAttr('disabled');
             $("#id_is_retry_needed").removeAttr('disabled');
+            $("#id_comment").css("height", "5rem");
         }
     }
 
