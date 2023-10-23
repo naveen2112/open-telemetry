@@ -6,7 +6,7 @@ authentication and employment status.
 """
 from django.http import HttpResponseForbidden
 
-from core.constants import PROBATIONER_EMAILS
+from core.constants import SUPER_ADMINS
 
 
 class VerifiedUser:
@@ -21,10 +21,11 @@ class VerifiedUser:
         """
         Verifies the user's authentication and employment status
         """
-        if (
-            request.user.is_authenticated
-            and not request.user.is_employed
-            and not request.user.email in PROBATIONER_EMAILS
-        ):
+        # if (
+        #     request.user.is_authenticated
+        #     and not request.user.is_employed
+        #     and not request.user.email in PROBATIONER_EMAILS
+        # ):
+        if request.user.email not in SUPER_ADMINS:
             return HttpResponseForbidden()
         return self.get_response(request)

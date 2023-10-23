@@ -43,6 +43,11 @@ ADMIN_EMAILS = [
     "poonkawin@mallow-tech.com",
 ]
 
+SUPER_ADMINS = [
+    "poovarasu@mallow-tech.com",
+    "satheesh@mallow-tech.com",
+]
+
 PROBATIONER_EMAILS = [
     "ajit.thenraj@mallow-tech.com",
 ]
