@@ -6,7 +6,7 @@ authentication and employment status.
 """
 from django.http import HttpResponseForbidden
 
-from core.constants import SUPER_ADMINS
+from core.constants import PROBATIONER_EMAILS  # pylint: disable=unused-import
 
 
 class VerifiedUser:
@@ -26,6 +26,9 @@ class VerifiedUser:
         #     and not request.user.is_employed
         #     and not request.user.email in PROBATIONER_EMAILS
         # ):
-        if request.user.email not in SUPER_ADMINS:
+        if request.user.email not in [
+            "poovarasu@mallow-tech.com",
+            "satheesh@mallow-tech.com",
+        ]:
             return HttpResponseForbidden()
         return self.get_response(request)
