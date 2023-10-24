@@ -92,7 +92,6 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
             ],
             "builtins": ["core.custom_tags"],
-            "libraries": {"custom_tags": "core.custom_tags"},
         },
     },
 ]

@@ -62,3 +62,21 @@ USER_STATUS_NOTICE_PERIOD = "in-notice-period"
 USER_STATUS_RELIEVED = "relieved"
 
 BATCH_DURATION_IN_MONTHS = 5
+
+TEST_CREATE = "Test Create"
+TEST_EDIT = "Test Edit"
+
+RETEST_CREATE = "Retest Create"
+RETEST_EDIT = "Retest Edit"
+
+INFINITE_TEST_CREATE = "Infinite Test Create"
+INFINITE_TEST_EDIT = "Infinite Test Edit"
+INFINITE_RETEST_CREATE = "Infinite Retest Create"
+INFINITE_RETEST_EDIT = "Infinite Retest Edit"
+
+TEST_COMPLETED = "Test Completed"
+
+NO_START_DATE = datetime(1, 1, 1, 1, 0, 0)
+NO_END_DATE = datetime(1, 1, 1, 1, 0, 0)
+
+REQUIRED = ["Score", "Comment"]

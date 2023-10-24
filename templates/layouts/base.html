@@ -1,7 +1,5 @@
 {% load static %}
-{% load custom_tags %}
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
     <head>
         <meta charset="utf-8">
@@ -188,9 +186,9 @@
                     document.getElementById(name).classList.add("hidden");
                 }
 
-                function openBaseModal() {
-                    document.getElementById("modal").classList.remove("hidden");
-                    document.getElementById("modal").classList.add("blocker");
+                function openBaseModal(modal = "modal") {
+                    document.getElementById(modal).classList.remove("hidden");
+                    document.getElementById(modal).classList.add("blocker");
                     removeErrors();
                 }
 

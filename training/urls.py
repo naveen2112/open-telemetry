@@ -249,7 +249,12 @@ urlpatterns = [
         name="user_reports",
     ),
     path(
-        "user/<int:pk>/update-score",
+        "task/show-score",
+        user_journey.show_task_score,
+        name="task.show_score",
+    ),
+    path(
+        "user/<int:pk>/update-score",  # TODO :: Change to task_id
         user_journey.update_task_score,
         name="user.update-score",
     ),
@@ -263,4 +268,5 @@ urlpatterns = [
         user_journey.delete_extension,
         name="extension.delete",
     ),
+    path("show-score-history", user_journey.get_mark_history, name="score_history"),
 ]

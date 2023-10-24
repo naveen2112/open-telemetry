@@ -198,9 +198,9 @@
                         $('.page-loader').hide();
                         $('#timeline-table').DataTable().ajax.reload();
                     },
-                    error: function() {
+                    error: function(data) {
                         $('.page-loader').hide();
-                        alert("Something went wrong");
+                        alert(data.responseJSON.message);
                     },
                 });
             }

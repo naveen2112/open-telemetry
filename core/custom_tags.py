@@ -88,7 +88,9 @@ def show_label(field):
     Returns an HTML representation of the label with custom styling
     """
     required = ""
-    if field.field.required:  # Check the field is required or not
+    if (field.label in constants.REQUIRED) or (
+        field.field.required
+    ):  # Check the field is required or not
         required = '<span class="text-red-600">*</span>'
     else:
         required = ""
@@ -102,3 +104,11 @@ def show_label(field):
         f'<label for="{field.label.lower().replace(" ", "_")}" \
             class="mb-3.6 text-sm text-dark-black-50">{field.label} {required}</label>'
     )
+
+
+@register.filter()
+def convert_to_id(field):
+    """
+    Replaces the space in between the field names
+    """
+    return field.replace(" ", "_").lower()
