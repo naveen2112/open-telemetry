@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Avg, Case, Count, F, OuterRef, Q, Subquery, Value, When
+from django.db.models import Case, Count, Q, Value, When
 from django.db.models.functions import Coalesce
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -33,7 +33,9 @@ from core.utils import (
     validate_authorization,
 )
 from hubble.models import (
+    Assessment,
     Batch,
+    Extension,
     InternDetail,
     SubBatch,
     SubBatchTaskTimeline,
@@ -298,6 +300,8 @@ def delete_sub_batch(request, pk):  # pylint: disable=unused-argument
         sub_batch = get_object_or_404(SubBatch, id=pk)
         InternDetail.bulk_delete({"sub_batch_id": pk})
         SubBatchTaskTimeline.bulk_delete({"sub_batch_id": pk})
+        Assessment.bulk_delete({"sub_batch_id": pk})
+        Extension.bulk_delete({"sub_batch_id": pk})
         sub_batch.delete()
         return JsonResponse({"message": "Sub-Batch deleted succcessfully"})
     except Exception as exception:
@@ -349,7 +353,7 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
         },
         {
             "name": "average_marks",
-            "title": "Average Score (%)",
+            "title": "Average Score",
             "visible": True,
             "searchable": False,
         },
@@ -388,52 +392,18 @@ class SubBatchTraineesDataTable(LoginRequiredMixin, CustomDatatable):
             .values("id")
             .count()
         )
-        if task_count == 0:
-            task_count = 1
-        last_attempt_score = SubBatchTaskTimeline.objects.filter(
-            id=OuterRef("sub_batch__task_timelines__id"),
-            assessments__user_id=OuterRef("user_id"),
-            sub_batch_id=OuterRef("sub_batch_id"),
-        ).order_by("-assessments__id")[:1]
-        query = (
-            self.model.objects.filter(sub_batch__id=request.POST.get("sub_batch"))
-            .select_related("user")
-            .prefetch_related("user__assessments")
-            .annotate(
-                average_marks=Avg(
-                    Subquery(last_attempt_score.values("assessments__score")),
-                ),
-                no_of_retries=Count(
-                    "user__assessments__id",
-                    filter=Q(
-                        user__assessments__is_retry=True,
-                        user__assessments__task_id__deleted_at__isnull=True,
-                        user__assessments__sub_batch_id=request.POST.get("sub_batch"),
-                    ),
-                    distinct=True,
-                ),
-                completion=Count(
-                    "user__assessments__task_id",
-                    filter=Q(
-                        user__assessments__user_id=F("user_id"),
-                        user__assessments__task_id__deleted_at__isnull=True,
-                        user__assessments__sub_batch_id=request.POST.get("sub_batch"),
-                    ),
-                    distinct=True,
-                )
-                * 100.0
-                / task_count,
-                performance=Case(
-                    When(average_marks__gte=90, then=Value(GOOD)),
-                    When(
-                        average_marks__lt=90, average_marks__gte=75, then=Value(MEET_EXPECTATION)
-                    ),
-                    When(average_marks__lt=75, average_marks__gte=65, then=Value(ABOVE_AVERAGE)),
-                    When(average_marks__lt=65, average_marks__gte=50, then=Value(AVERAGE)),
-                    When(average_marks__lt=50, then=Value(POOR)),
-                    default=Value(NOT_YET_STARTED),
-                ),
-            )
+        task_count = max(task_count, 1)
+        query = self.model.objects.get_performance_summary(
+            request.POST.get("sub_batch"), task_count
+        ).annotate(
+            performance=Case(
+                When(average_marks__gte=90, then=Value(GOOD)),
+                When(average_marks__lt=90, average_marks__gte=75, then=Value(MEET_EXPECTATION)),
+                When(average_marks__lt=75, average_marks__gte=65, then=Value(ABOVE_AVERAGE)),
+                When(average_marks__lt=65, average_marks__gte=50, then=Value(AVERAGE)),
+                When(average_marks__lt=50, then=Value(POOR)),
+                default=Value(NOT_YET_STARTED),
+            ),
         )
         request.trainee_performance = query
         return query
@@ -537,11 +507,11 @@ def add_trainee(request):
         form = AddInternForm(request.POST)
         if form.is_valid():  # Check if form is valid or not
             try:
-                sub_batch = SubBatch.objects.get(id=request.POST.get("sub_batch_id"))
-                timeline_data = SubBatchTaskTimeline.objects.filter(sub_batch=sub_batch).last()
+                sub_batch = request.POST.get("sub_batch_id")
+                timeline_data = SubBatchTaskTimeline.objects.filter(sub_batch_id=sub_batch).last()
                 trainee = form.save(commit=False)
                 trainee.user_id = request.POST.get("user_id")
-                trainee.sub_batch = sub_batch
+                trainee.sub_batch_id = sub_batch
                 trainee.expected_completion = timeline_data.end_date
                 trainee.created_by = request.user
                 trainee.save()
@@ -573,6 +543,8 @@ def remove_trainee(request, pk):  # pylint: disable=unused-argument
     """
     try:
         intern_detail = get_object_or_404(InternDetail, id=pk)
+        Assessment.bulk_delete({"user_id": intern_detail.user_id})
+        Extension.bulk_delete({"user_id": intern_detail.user_id})
         intern_detail.delete()
         return JsonResponse({"message": "Intern has been deleted succssfully"})
     except Exception as exception:

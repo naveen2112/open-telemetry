@@ -276,6 +276,31 @@ class SubBatchTimelineTaskCreateTest(BaseTestCase):
         )
         self.assertEqual(response.status_code, 200)
 
+        last_task = (
+            SubBatchTaskTimeline.objects.filter(sub_batch_id=self.sub_batch.id)
+            .order_by("-order")
+            .first()
+        )
+        last_task.start_date = timezone.now() + timezone.timedelta(-1)
+        last_task.save()
+        response = self.make_post_request(
+            reverse(self.create_route_name, args=[self.sub_batch.id]),
+            data=self.get_valid_inputs({"order": 999}),
+        )
+        field_errors = {
+            "order": {"invalid_order"},
+        }
+        error_message = {"invalid_order": f"The order value must be {last_task.order + 1}"}
+
+        self.assertEqual(
+            self.bytes_cleaner(response.content),
+            self.get_ajax_response(
+                field_errors=field_errors,
+                custom_validation_error_message=error_message,
+            ),
+        )
+        self.assertEqual(response.status_code, 200)
+
 
 class SubBatchTaskTimelineShowTest(BaseTestCase):
     """
