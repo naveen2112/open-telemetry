@@ -8,7 +8,7 @@ from django.utils import timezone
 
 from core.constants import PRESENT_TYPES, TASK_TYPES, USER_STATUS_INTERN
 from hubble import models
-from hubble.models import Assessment
+from hubble.models import Assessment, TraineeHoliday
 
 
 class TimelineForm(forms.ModelForm):
@@ -168,13 +168,28 @@ class BatchForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["name"].validators.append(MinLengthValidator(3))
 
+    def clean_start_date(self):
+        """
+        The function checks if a selected start date is valid
+        and raises a validation error if it doesn't.
+        """
+        if (
+            models.Holiday.objects.filter(date_of_holiday=self.cleaned_data["start_date"]).exists()
+            or self.cleaned_data["start_date"].weekday() == 6
+        ):
+            raise ValidationError(
+                "The Selected date falls on a holiday, please reconsider the start date",
+                code="invalid_date",
+            )
+        return self.cleaned_data["start_date"]
+
     class Meta:
         """
         Meta class for defining class behavior and properties.
         """
 
         model = models.Batch
-        fields = ("name",)
+        fields = ("name", "start_date")
 
         widgets = {
             "name": forms.TextInput(
@@ -184,8 +199,114 @@ class BatchForm(forms.ModelForm):
                             focus:ring-offset-0 h-9 p-2",
                     "placeholder": "Batch Name...",
                 }
-            )
+            ),
+            "start_date": forms.DateInput(
+                attrs={
+                    "class": " w-full block border border-primary-dark-30 rounded-md \
+                        focus:outline-none focus:ring-transparent focus:ring-offset-0 \
+                            h-9 p-2 start_date_input",
+                    "placeholder": "Start Date",
+                }
+            ),
         }
+
+
+class TraineeHolidayForm(forms.ModelForm):
+    """
+    Trainee holiday form is used to create and update the trainee holiday with custom validations
+    """
+
+    def clean_date_of_holiday(self):
+        """
+        This function checks if a holiday already exists for the given date and batch
+        Raises a validation error.
+        """
+        id = self.data.get("id", None)  # pylint: disable=W0622
+        if (
+            TraineeHoliday.objects.filter(
+                date_of_holiday=self.cleaned_data["date_of_holiday"],
+                batch_id=self.data.get("batch_id"),
+            )
+            .exclude(id=id)
+            .exists()
+        ):
+            raise ValidationError(
+                "The date of holiday has already been taken.",
+                code="invalid_date",
+            )
+        if id:
+            holiday = TraineeHoliday.objects.get(id=id)
+            if (
+                holiday.date_of_holiday != self.cleaned_data["date_of_holiday"]
+                and self.cleaned_data["date_of_holiday"] < timezone.now().date()
+            ):
+                raise ValidationError(
+                    "The date of holiday cannot be in the past.",
+                    code="invalid_date",
+                )
+        else:
+            if self.cleaned_data["date_of_holiday"] < timezone.now().date():
+                raise ValidationError(
+                    "The date of holiday cannot be in the past.",
+                    code="invalid_date",
+                )
+        return self.cleaned_data["date_of_holiday"]
+
+    date_of_holiday = forms.DateField(
+        label="Choose Date",
+        widget=forms.DateInput(
+            attrs={
+                "class": "block border border-primary-dark-30 rounded-md mt-2.5 \
+                    w-64 focus:outline-none focus:ring-transparent focus:ring-offset-0 \
+                        h-9 p-2 bg-transparent w-250 start_date_input",
+                "placeholder": "Choose Date",
+            }
+        ),
+    )
+
+    reason = forms.CharField(
+        widget=forms.TextInput(
+            attrs={
+                "class": "w-full block border border-primary-dark-30 mt-2.5 rounded-md \
+                    focus:outline-none focus:ring-transparent focus:ring-offset-0 h-9 p-2 \
+                        bg-transparent w-250 ",
+                "placeholder": "Reason For Holiday",
+            }
+        ),
+    )
+
+    national_holiday = forms.BooleanField(
+        required=False,
+        label="National Holiday",
+        widget=forms.CheckboxInput(
+            attrs={
+                "class": "checkbox_active cursor-pointer block border border-primary-dark-30 \
+                    rounded-md w-4 mr-3 focus:outline-none focus:ring-transparent focus:ring-offset-0 \
+                        h-9 p-2",
+            }
+        ),
+    )
+
+    allow_check_in = forms.BooleanField(
+        required=False,
+        label="Allow Checkin",
+        widget=forms.CheckboxInput(
+            attrs={
+                "class": "checkbox_active cursor-pointer block border border-primary-dark-30 \
+                    rounded-md w-4 mr-3 focus:outline-none focus:ring-transparent focus:ring-offset-0 \
+                        h-9 p-2",
+                "id": "id_allow_checkin",
+            }
+        ),
+    )
+
+    class Meta:
+        """
+        Meta class for defining class behavior and properties.
+        """
+
+        model = models.TraineeHoliday
+        fields = ("date_of_holiday", "reason", "national_holiday", "allow_check_in")
 
 
 class SubBatchForm(forms.ModelForm):
@@ -229,6 +350,8 @@ class SubBatchForm(forms.ModelForm):
         self.fields["secondary_mentor_ids"].label = "Secondary Mentors"
         self.fields["secondary_mentor_ids"].widget.attrs["subtitle"] = "Secondary Mentors"
 
+        self.batch_id = None
+
         if kwargs.get("instance"):
             instance = kwargs.get("instance")
             self.fields["team"].widget.attrs["initialValue"] = instance.team.id
@@ -238,6 +361,11 @@ class SubBatchForm(forms.ModelForm):
             self.fields["secondary_mentor_ids"].widget.attrs[
                 "initialValue"
             ] = instance.secondary_mentors.all().values_list("id", flat=True)
+            self.batch_id = instance.batch_id
+
+        if kwargs.get("initial"):
+            initial = kwargs.get("initial")
+            self.batch_id = initial.get("batch")
 
     def clean_timeline(self):
         """
@@ -263,12 +391,20 @@ class SubBatchForm(forms.ModelForm):
         The function checks if a selected start date is valid
         and raises a validation error if it doesn't.
         """
+        batch_start_date = models.Batch.objects.get(id=self.batch_id).start_date
         if (
-            models.Holiday.objects.filter(date_of_holiday=self.cleaned_data["start_date"]).exists()
+            models.TraineeHoliday.objects.filter(
+                batch_id=self.batch_id, date_of_holiday=self.cleaned_data["start_date"]
+            ).exists()
             or self.cleaned_data["start_date"].weekday() == 6
         ):
             raise ValidationError(
                 "The Selected date falls on a holiday, please reconsider the start date",
+                code="invalid_date",
+            )
+        if self.cleaned_data["start_date"] < batch_start_date:
+            raise ValidationError(
+                "The Selected date is before the batch start date",
                 code="invalid_date",
             )
         return self.cleaned_data["start_date"]

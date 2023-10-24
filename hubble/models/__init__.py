@@ -21,4 +21,5 @@ from .team import Team
 from .timeline import Timeline
 from .timeline_task import TimelineTask
 from .timesheet_entry import TimesheetEntry
+from .trainee_holiday import TraineeHoliday
 from .user import User

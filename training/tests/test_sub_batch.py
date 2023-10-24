@@ -40,7 +40,7 @@ class SubBatchCreateTest(BaseTestCase):
         This function is responsible for updating the valid inputs and creating
         data in databases as reqiured
         """
-        self.batch_id = baker.make("hubble.Batch").id
+        self.batch_id = baker.make("hubble.Batch", start_date=timezone.now().date).id
         baker.make(
             "hubble.User",
             is_employed=True,
@@ -177,7 +177,10 @@ class SubBatchCreateTest(BaseTestCase):
             "primary_mentor_id": {"required"},
             "secondary_mentor_ids": {"required"},
         }
-        self.validate_form_errors(field_errors=field_errors, form=SubBatchForm(data=data))
+        self.validate_form_errors(
+            field_errors=field_errors,
+            form=SubBatchForm(data=data, initial={"batch": self.batch_id}),
+        )
 
     def test_invalid_choice_validation(self):
         """
@@ -209,7 +212,10 @@ class SubBatchCreateTest(BaseTestCase):
             "primary_mentor_id": {"invalid_choice"},
             "secondary_mentor_ids": {"invalid_choice"},
         }
-        self.validate_form_errors(field_errors=field_errors, form=SubBatchForm(data=data))
+        self.validate_form_errors(
+            field_errors=field_errors,
+            form=SubBatchForm(data=data, initial={"batch": self.batch_id}),
+        )
 
     def test_minimum_length_validation(self):
         """
@@ -235,7 +241,7 @@ class SubBatchCreateTest(BaseTestCase):
             field_errors=field_errors,
             current_value=data,
             validation_parameter={"name": 3},
-            form=SubBatchForm(data=data),
+            form=SubBatchForm(data=data, initial={"batch": self.batch_id}),
         )
 
     def test_invalid_start_date(self):
@@ -246,19 +252,41 @@ class SubBatchCreateTest(BaseTestCase):
             "employee_id": [self.users[1].employee_id, self.users[2].employee_id],
             "college": [self.faker.name(), self.faker.name()],
         }
-
+        # Check what happens when start_date is empty
         valid_file = self.create_memory_file(file_values)
-
+        data = self.get_valid_inputs({"users_list_file": valid_file, "start_date": ""})
+        self.assertFormError(
+            SubBatchForm(data=data, initial={"batch": self.batch_id}),
+            "start_date",
+            "This field is required.",
+        )
+        # Check what happens when start_date is on Holiday
+        valid_file = self.create_memory_file(file_values)
+        baker.make(
+            "hubble.TraineeHoliday", batch_id=self.batch_id, date_of_holiday=timezone.now().date()
+        )
         data = self.get_valid_inputs(
             {
                 "users_list_file": valid_file,
-                "start_date": timezone.now().date() + timezone.timedelta(2),
             }
         )
         self.assertFormError(
-            SubBatchForm(data=data),
+            SubBatchForm(data=data, initial={"batch": self.batch_id}),
             "start_date",
             "The Selected date falls on a holiday, please reconsider the start date",
+        )
+        # Check what happens when start_date is before the batch start date
+        valid_file = self.create_memory_file(file_values)
+        data = self.get_valid_inputs(
+            {
+                "users_list_file": valid_file,
+                "start_date": timezone.now().date() - timezone.timedelta(days=1),
+            }
+        )
+        self.assertFormError(
+            SubBatchForm(data=data, initial={"batch": self.batch_id}),
+            "start_date",
+            "The Selected date is before the batch start date",
         )
 
     def test_validate_no_timeline_task(self):
@@ -286,7 +314,10 @@ class SubBatchCreateTest(BaseTestCase):
         field_errors = {
             "timeline": {"timeline_has_no_tasks"},
         }
-        self.validate_form_errors(field_errors=field_errors, form=SubBatchForm(data=data))
+        self.validate_form_errors(
+            field_errors=field_errors,
+            form=SubBatchForm(data=data, initial={"batch": self.batch_id}),
+        )
 
     def test_inactive_timeline_has_no_tasks(self):
         """
@@ -321,7 +352,7 @@ class SubBatchCreateTest(BaseTestCase):
         self.validate_form_errors(
             field_errors=field_errors,
             custom_validation_error_message=custom_validation_error_message,
-            form=SubBatchForm(data=data),
+            form=SubBatchForm(data=data, initial={"batch": self.batch_id}),
         )
 
     def test_file_validation(self):
@@ -433,7 +464,7 @@ class SubBatchUpdateTest(BaseTestCase):
         This function is responsible for updating the valid inputs and creating
         data in databases as reqiured
         """
-        self.batch_id = baker.make("hubble.Batch").id
+        self.batch_id = baker.make("hubble.Batch", start_date=timezone.now().date).id
         self.sub_batch_id = baker.make("hubble.SubBatch", batch_id=self.batch_id).id
         baker.make(
             "hubble.User",
@@ -563,7 +594,10 @@ class SubBatchUpdateTest(BaseTestCase):
             "primary_mentor_id": {"required"},
             "secondary_mentor_ids": {"required"},
         }
-        self.validate_form_errors(field_errors=field_errors, form=SubBatchForm(data=data))
+        self.validate_form_errors(
+            field_errors=field_errors,
+            form=SubBatchForm(data=data, instance=SubBatch.objects.get(id=self.sub_batch_id)),
+        )
 
     def test_invalid_choice_validation(self):
         """
@@ -587,7 +621,10 @@ class SubBatchUpdateTest(BaseTestCase):
             "primary_mentor_id": {"invalid_choice"},
             "secondary_mentor_ids": {"invalid_choice"},
         }
-        self.validate_form_errors(field_errors=field_errors, form=SubBatchForm(data=data))
+        self.validate_form_errors(
+            field_errors=field_errors,
+            form=SubBatchForm(data=data, instance=SubBatch.objects.get(id=self.sub_batch_id)),
+        )
 
     def test_minimum_length_validation(self):
         """
@@ -603,20 +640,40 @@ class SubBatchUpdateTest(BaseTestCase):
             field_errors=field_errors,
             current_value=data,
             validation_parameter={"name": 3},
-            form=SubBatchForm(data=data),
+            form=SubBatchForm(data=data, instance=SubBatch.objects.get(id=self.sub_batch_id)),
         )
 
     def test_invalid_start_date(self):
         """
         To check what happens when start_date is invalid
         """
-        data = self.get_valid_inputs(
-            {"start_date": timezone.now().date() + timezone.timedelta(days=2)}
+        # Check what happens when start_date is empty
+        data = self.get_valid_inputs({"start_date": ""})
+        self.assertFormError(
+            SubBatchForm(data=data, instance=SubBatch.objects.get(id=self.sub_batch_id)),
+            "start_date",
+            "This field is required.",
+        )
+        # Check what happens when start_date is on Holiday
+        data = self.get_valid_inputs()
+        baker.make(
+            "hubble.TraineeHoliday", batch_id=self.batch_id, date_of_holiday=timezone.now().date()
         )
         self.assertFormError(
-            SubBatchForm(data=data),
+            SubBatchForm(data=data, instance=SubBatch.objects.get(id=self.sub_batch_id)),
             "start_date",
             "The Selected date falls on a holiday, please reconsider the start date",
+        )
+        # Check what happens when start_date is before the batch start date
+        data = self.get_valid_inputs(
+            {
+                "start_date": timezone.now().date() - timezone.timedelta(days=1),
+            }
+        )
+        self.assertFormError(
+            SubBatchForm(data=data, instance=SubBatch.objects.get(id=self.sub_batch_id)),
+            "start_date",
+            "The Selected date is before the batch start date",
         )
 
     def test_active_timeline_has_no_tasks(self):
@@ -633,7 +690,10 @@ class SubBatchUpdateTest(BaseTestCase):
         field_errors = {
             "timeline": {"timeline_has_no_tasks"},
         }
-        self.validate_form_errors(field_errors=field_errors, form=SubBatchForm(data=data))
+        self.validate_form_errors(
+            field_errors=field_errors,
+            form=SubBatchForm(data=data, instance=SubBatch.objects.get(id=self.sub_batch_id)),
+        )
 
     def test_inactive_timeline_has_no_tasks(self):
         """
@@ -657,7 +717,7 @@ class SubBatchUpdateTest(BaseTestCase):
         self.validate_form_errors(
             field_errors=field_errors,
             custom_validation_error_message=custom_validation_error_message,
-            form=SubBatchForm(data=data),
+            form=SubBatchForm(data=data, instance=SubBatch.objects.get(id=self.sub_batch_id)),
         )
 
 

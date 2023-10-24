@@ -159,7 +159,7 @@ def create_sub_batch(request, pk):
     """
     sub_batch_form = SubBatchForm()
     if request.method == "POST":
-        sub_batch_form = SubBatchForm(request.POST)
+        sub_batch_form = SubBatchForm(request.POST, initial={"batch": pk})
         # Checking the trainee is already added in the other batch or not
         if "users_list_file" in request.FILES:
             excel_file = request.FILES["users_list_file"]
@@ -228,6 +228,7 @@ def create_sub_batch(request, pk):
     context = {
         "form": sub_batch_form,
         "sub_batch_id": pk,
+        "batch_start_date": Batch.objects.get(id=pk).start_date,
     }
     return render(request, "sub_batch/create_sub_batch.html", context)
 

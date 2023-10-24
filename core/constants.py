@@ -61,6 +61,8 @@ USER_STATUS_WORKING = "working"
 USER_STATUS_NOTICE_PERIOD = "in-notice-period"
 USER_STATUS_RELIEVED = "relieved"
 
+BATCH_DURATION_IN_MONTHS = 5
+
 TEST_CREATE = "Test Create"
 TEST_EDIT = "Test Edit"
 

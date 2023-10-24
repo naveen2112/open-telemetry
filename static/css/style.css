@@ -249,3 +249,8 @@
     align-items: start !important;
     margin: 0 !important;
 }
+
+.checkbox-size input[type=checkbox] {
+    width: auto;
+    cursor: pointer;
+}

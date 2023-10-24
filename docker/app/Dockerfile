@@ -36,7 +36,6 @@ RUN mkdir -p /var/app/session_files
 RUN mkdir -p /var/app/staticfiles
 RUN mkdir -p /var/app/copystaticfiles
 RUN python manage.py collectstatic --noinput --clear
-RUN cp -r /var/app/staticfiles/* /var/app/copystaticfiles/
 
 RUN cp -r /var/app/staticfiles/* /var/app/copystaticfiles/
 

@@ -2,6 +2,7 @@
 Django application basic testcase configuration and test runner for
 the unmanaged models
 """
+import datetime
 import json
 
 from django.apps import apps
@@ -10,12 +11,15 @@ from django.db.models import Q
 from django.http import QueryDict
 from django.test import Client, TestCase
 from django.test.runner import DiscoverRunner
+from django.utils import timezone
 from django.utils.translation import ngettext_lazy
 from faker import Faker
 from model_bakery import baker
+from model_bakery.recipe import seq
 
 from core.constants import ADMIN_EMAILS
-from hubble.models import User
+from core.utils import calculate_duration_for_task, schedule_timeline_for_sub_batch
+from hubble.models import TraineeHoliday, User
 from hubble_report.settings import env
 
 
@@ -81,6 +85,88 @@ class BaseTestCase(TestCase):  # pylint:disable=R0902,R0904
         Creates and returns an instance of the 'hubble.Team' model
         """
         return baker.make("hubble.Team")
+
+    def create_holidays(self):
+        """
+        This function is responsible for create Holidays for the next 12 weeks
+        """
+        current_date = datetime.datetime.now().date()
+        end_date = current_date + datetime.timedelta(weeks=12)
+        while current_date <= end_date:
+            if current_date.weekday() == 5:
+                holiday = baker.make(
+                    "hubble.Holiday",
+                    date_of_holiday=current_date,
+                    reason=self.faker.sentence(),
+                )
+            current_date += datetime.timedelta(1)
+
+        return holiday
+
+    def create_trinee_holidays(self, batch_id):
+        """
+        This function is responsible for create Trinee Holidays for the next 12 weeks
+        """
+        current_date = datetime.datetime.now().date()
+        end_date = current_date + datetime.timedelta(weeks=12)
+        while current_date <= end_date:
+            if current_date.weekday() == 5:
+                holiday = baker.make(
+                    "hubble.TraineeHoliday",
+                    date_of_holiday=current_date,
+                    reason=self.faker.sentence(),
+                    batch_id=batch_id,
+                )
+            current_date += datetime.timedelta(1)
+        return holiday
+
+    def setup_timline_tasks(self):
+        """
+        This function is responsible for creating the timeline tasks
+        """
+        self.batch_id = baker.make(  # pylint:disable=W0201
+            "hubble.Batch", start_date=(timezone.now() + timezone.timedelta(1)).date()
+        ).id
+        self.create_trinee_holidays(self.batch_id)
+        self.timeline = baker.make(  # pylint:disable=W0201
+            "hubble.Timeline",
+            is_active=True,
+        )
+        self.days_list = [  # pylint:disable=W0201
+            self.faker.random_number(1, 20) / 2 for _ in range(4)
+        ]
+        self.timeline_task = baker.make(  # pylint:disable=W0201
+            "hubble.TimelineTask",
+            timeline=self.timeline,
+            days=self.days_list.__iter__(),  # pylint:disable=C2801
+            order=seq(0),
+            _quantity=4,
+        )
+        self.sub_batch = baker.make(  # pylint:disable=W0201
+            "hubble.SubBatch",
+            start_date=(timezone.now().date() + timezone.timedelta(1)),
+            batch_id=self.batch_id,
+            timeline=self.timeline,
+        )
+        schedule_timeline_for_sub_batch(sub_batch=self.sub_batch, user=self.user)
+
+    def check_start_end_date(self):
+        """
+        This function is responsible for checking the start and end date
+        """
+        self.holidays = TraineeHoliday.objects.filter(  # pylint:disable=W0201
+            batch_id=self.batch_id
+        ).values_list("date_of_holiday", flat=True)
+        cur_date = timezone.now() + timezone.timedelta(1)
+        is_half_day = False
+        for task in self.timeline_task:
+            data = calculate_duration_for_task(self.holidays, cur_date, is_half_day, task.days)
+            cur_date = end_date = data["end_date_time"]
+            is_half_day = data["ends_afternoon"]
+        timeline_task_end_date = schedule_timeline_for_sub_batch(
+            sub_batch=self.sub_batch, user=self.user
+        )
+        self.assertEqual(end_date, timeline_task_end_date)
 
     def authenticate(self, user=None):
         """

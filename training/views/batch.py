@@ -4,6 +4,7 @@ deleting batches, as well as displaying batch details
 """
 import logging
 
+from dateutil.relativedelta import relativedelta
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Count, OuterRef, Q, Subquery
@@ -16,8 +17,9 @@ from django.views.decorators.http import require_http_methods
 from django.views.generic import DetailView, FormView
 
 from core import template_utils
+from core.constants import BATCH_DURATION_IN_MONTHS
 from core.utils import CustomDatatable, validate_authorization
-from hubble.models import Batch, InternDetail, SubBatch
+from hubble.models import Batch, Holiday, InternDetail, SubBatch, TraineeHoliday
 from training.forms import BatchForm
 
 
@@ -48,6 +50,12 @@ class BatchDataTable(LoginRequiredMixin, CustomDatatable):
         {
             "name": "total_trainee",
             "title": "No. of Trainees",
+            "visible": True,
+            "searchable": False,
+        },
+        {
+            "name": "start_date",
+            "title": "Start Date",
             "visible": True,
             "searchable": False,
         },
@@ -99,6 +107,7 @@ class BatchDataTable(LoginRequiredMixin, CustomDatatable):
                 "deleteBatch('" + reverse("batch.delete", args=[obj.id]) + "')"
             )
         row["action"] = f'<div class="form-inline justify-content-center">{buttons}</div>'
+        row["start_date"] = obj.start_date.strftime("%d %b %Y")
         return row
 
 
@@ -115,15 +124,30 @@ def create_batch(request):
             batch = form.save(commit=False)
             batch.created_by = request.user
             batch.save()
-            response_data["status"] = "success"
-        else:
-            field_errors = form.errors.as_json()
-            non_field_errors = form.non_field_errors().as_json()
-            response_data = {
-                "status": "error",
-                "field_errors": field_errors,
-                "non_field_errors": non_field_errors,
-            }
+            start_date = batch.start_date
+            end_date = start_date + relativedelta(months=BATCH_DURATION_IN_MONTHS)
+            holidays = Holiday.objects.filter(date_of_holiday__range=(start_date, end_date))
+            trainee_holidays = [
+                TraineeHoliday(
+                    batch_id=batch.id,
+                    date_of_holiday=holiday.date_of_holiday,
+                    month_year=holiday.month_year,
+                    updated_by=request.user,
+                    reason=holiday.reason,
+                    allow_check_in=holiday.allow_check_in,
+                    national_holiday=holiday.national_holiday,
+                )
+                for holiday in holidays
+            ]
+            TraineeHoliday.objects.bulk_create(trainee_holidays)
+            return JsonResponse({"status": "success"})
+        field_errors = form.errors.as_json()
+        non_field_errors = form.non_field_errors().as_json()
+        response_data = {
+            "status": "error",
+            "field_errors": field_errors,
+            "non_field_errors": non_field_errors,
+        }
     return JsonResponse(response_data)
 
 
@@ -183,6 +207,7 @@ def delete_batch(request, pk):  # pylint: disable=unused-argument
     try:
         batch = get_object_or_404(Batch, id=pk)
         intern_details = list(batch.sub_batches.all().values_list("id", flat=True))
+        TraineeHoliday.bulk_delete({"batch_id": pk})
         SubBatch.bulk_delete({"batch_id": pk})
         InternDetail.bulk_delete({"sub_batch_id__in": intern_details})
         batch.delete()

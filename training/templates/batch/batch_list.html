@@ -22,7 +22,7 @@
 
 {% block body %}
     <div class="jquery-modal current hidden batch-model" id="modal">
-        <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white jquery-modal-body">
+        <div class="modal py-5 rounded-xl mr-5 mt-9 bg-white  jquery-modal-body">
             <p class="font-semibold text-lg mb-10" id="open_modal">Create Batch</p>
             <form method="post" class="timeline-form" id="timeline-create-form">
                 <div class="modal-body">
@@ -30,6 +30,11 @@
                     <div class="form-group mb-7" id="{{ form.name.label|lower }}_group">
                         {{ form.name|show_label }}
                         {{ form.name }}
+                    </div>
+                    <div class="form-group mb-7"
+                         id="{{ form.start_date.label|lower|replace_spaces }}_group">
+                        {{ form.start_date|show_label }}
+                        {{ form.start_date }}
                     </div>
                 </div>
                 <div id="non_field_error"></div>
@@ -79,6 +84,7 @@
         });
 
         function openModal() {
+            start_date_picker();
             openBaseModal();
             $("#open_modal").text("Create Batch");
             $('#id_name').val('');
@@ -92,6 +98,7 @@
                 url: "{% url 'batch.create' %}",
                 data: {
                     name: $('#id_name').val(),
+                    start_date: $('#id_start_date').val(),
                 },
                 success: function(data) {
                     $('.page-loader').hide();
@@ -121,6 +128,7 @@
                     $('.page-loader').hide();
                     $('#id_name').val(data.batch.name);
                     $('#batch_id').val(data.batch.id);
+                    start_date_picker(data.batch.start_date);
                     $('#submit-btn').attr("onclick", "updateBatch(" + data.batch.id + ")");
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
@@ -139,6 +147,7 @@
                 url: "batch/" + id + "/edit", //TODO
                 data: {
                     name: $('#id_name').val(),
+                    start_date: $('#id_start_date').val(),
                 },
                 success: function(data) {
                     $('.page-loader').hide();
@@ -175,5 +184,23 @@
                 });
             }
         }
+
+        function start_date_picker(date = null) {
+            if (date == null) {
+                date = moment();
+            }
+            $('input[name="start_date"]').daterangepicker({
+                singleDatePicker: true,
+                autoApply: true,
+                startDate: new Date(date),
+                locale: {
+                    format: 'DD MMM YYYY',
+                }
+            });
+        }
+
+        $(function() {
+            start_date_picker();
+        });
     </script>
 {% endblock %}

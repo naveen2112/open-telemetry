@@ -211,8 +211,10 @@
             $('input[name="start_date"]').daterangepicker({
                 singleDatePicker: true,
                 showDropdowns: true,
+                autoApply: true,
+                minDate: new Date("{{ batch_start_date }}"),
                 locale: {
-                    format: 'YYYY-MM-DD',
+                    format: 'DD MMM YYYY',
                 }
             });
         });

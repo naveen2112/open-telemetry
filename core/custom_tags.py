@@ -44,6 +44,14 @@ def get_constant(name):
 
 
 @register.filter()
+def replace_spaces(value):
+    """
+    Replaces spaces in a string with underscores
+    """
+    return value.replace(" ", "_")
+
+
+@register.filter()
 def show_field_errors(field):
     """
     Returns an HTML representation of the error message for a
