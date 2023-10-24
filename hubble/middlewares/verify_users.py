@@ -26,7 +26,7 @@ class VerifiedUser:
         #     and not request.user.is_employed
         #     and not request.user.email in PROBATIONER_EMAILS
         # ):
-        if request.user.email not in [
+        if request.user.is_authenticated and request.user.email not in [
             "poovarasu@mallow-tech.com",
             "satheesh@mallow-tech.com",
         ]:
